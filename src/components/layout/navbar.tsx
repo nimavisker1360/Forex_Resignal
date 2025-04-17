@@ -2,48 +2,100 @@
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Sun, Moon, Menu } from "lucide-react";
+import { Menu, ArrowUpRight } from "lucide-react";
 import { useState } from "react";
+import Image from "next/image";
 
 export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
-    <nav className="bg-custom sticky top-0 w-full z-30 border-b">
-      <div className="container flex h-16 items-center justify-between">
-        <div className="flex items-center">
-          <Link href="/" className="flex items-center">
-            <span className="text-2xl font-bold text-primary">SignalForex</span>
-          </Link>
-        </div>
-
-        {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center space-x-6">
-          <Link href="/signals" className="hover:text-primary transition">
-            Signals
-          </Link>
-          <Link href="/premium" className="hover:text-primary transition">
-            Premium
-          </Link>
-          <Link href="/about" className="hover:text-primary transition">
-            About Us
-          </Link>
-          <Link href="/contact" className="hover:text-primary transition">
-            Contact Us
-          </Link>
-        </div>
-
+    <nav className="relative bg-gradient-to-r from-black to-black/95 w-full z-30 border-b border-gray-800/30">
+      <div className="absolute inset-0 bg-blue-900/10 mix-blend-overlay"></div>
+      <div className="container flex h-16 items-center justify-between px-12 md:px-16 lg:px-24 mx-auto max-w-[1400px] relative z-10">
         <div className="hidden md:flex items-center space-x-4">
-          <Button variant="ghost" size="icon">
-            <Sun className="h-5 w-5" />
-            <span className="sr-only">Toggle theme</span>
+          <Button
+            variant="outline"
+            asChild
+            className="bg-blue-700/40 text-white border-blue-700/30 hover:bg-blue-700/50 rounded-lg"
+          >
+            <Link href="/login" className="flex items-center gap-1">
+              Login <ArrowUpRight className="h-4 w-4" />
+            </Link>
           </Button>
-          <Button variant="outline" asChild>
-            <Link href="/sign-in">Sign In</Link>
+          <Button
+            asChild
+            className="bg-blue-600/80 text-white hover:bg-blue-700 rounded-lg"
+          >
+            <Link href="/register" className="flex items-center gap-1">
+              Register <ArrowUpRight className="h-4 w-4" />
+            </Link>
           </Button>
-          <Button asChild>
-            <Link href="/sign-up">Sign Up</Link>
+          <Button
+            variant="outline"
+            size="sm"
+            className="border border-gray-600 text-white rounded-full px-4"
+          >
+            <span className="flex items-center gap-1">
+              <Image
+                src="/images/uk-flag.svg"
+                alt="English"
+                width={20}
+                height={20}
+                className="rounded-full"
+                onError={(e) => {
+                  e.currentTarget.src = "https://flagcdn.com/w20/gb.png";
+                }}
+              />
+              en
+            </span>
           </Button>
+        </div>
+
+        {/* Desktop Navigation - Centered */}
+        <div className="hidden md:flex items-center justify-center absolute left-1/2 transform -translate-x-1/2">
+          <div className="flex items-center space-x-16">
+            <Link
+              href="/contact"
+              className="text-white hover:text-blue-300 transition"
+            >
+              Contact
+            </Link>
+            <Link
+              href="/plans"
+              className="text-white hover:text-blue-300 transition"
+            >
+              Plans
+            </Link>
+            <Link
+              href="/about"
+              className="text-white hover:text-blue-300 transition"
+            >
+              About Us
+            </Link>
+            <Link
+              href="/blogs"
+              className="text-white hover:text-blue-300 transition"
+            >
+              Blogs
+            </Link>
+            <Link
+              href="/"
+              className="text-white hover:text-blue-300 transition"
+            >
+              Home
+            </Link>
+          </div>
+        </div>
+
+        <div className="flex items-center">
+          <Link href="/" className="flex items-center gap-2">
+            <div>
+              <span className="text-2xl font-bold text-white">
+                Signal<span className="text-blue-400">Max</span>
+              </span>
+            </div>
+          </Link>
         </div>
 
         {/* Mobile Menu Button */}
@@ -52,6 +104,7 @@ export function Navbar() {
             variant="ghost"
             size="icon"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className="text-white"
           >
             <Menu className="h-5 w-5" />
             <span className="sr-only">Toggle menu</span>
@@ -61,42 +114,63 @@ export function Navbar() {
 
       {/* Mobile Navigation */}
       {isMenuOpen && (
-        <div className="md:hidden bg-custom border-t p-4">
+        <div className="md:hidden bg-black/95 backdrop-blur-sm border-t border-gray-800/50 p-4 relative z-10">
           <div className="flex flex-col space-y-4">
             <Link
-              href="/signals"
-              className="hover:text-primary px-4 py-2 rounded-md hover:bg-gray-100 transition"
+              href="/"
+              className="text-white hover:text-blue-300 px-4 py-2 rounded-md hover:bg-gray-900/50 transition"
               onClick={() => setIsMenuOpen(false)}
             >
-              Signals
+              Home
             </Link>
             <Link
-              href="/premium"
-              className="hover:text-primary px-4 py-2 rounded-md hover:bg-gray-100 transition"
+              href="/plans"
+              className="text-white hover:text-blue-300 px-4 py-2 rounded-md hover:bg-gray-900/50 transition"
               onClick={() => setIsMenuOpen(false)}
             >
-              Premium
+              Plans
             </Link>
             <Link
               href="/about"
-              className="hover:text-primary px-4 py-2 rounded-md hover:bg-gray-100 transition"
+              className="text-white hover:text-blue-300 px-4 py-2 rounded-md hover:bg-gray-900/50 transition"
               onClick={() => setIsMenuOpen(false)}
             >
               About Us
             </Link>
             <Link
-              href="/contact"
-              className="hover:text-primary px-4 py-2 rounded-md hover:bg-gray-100 transition"
+              href="/blogs"
+              className="text-white hover:text-blue-300 px-4 py-2 rounded-md hover:bg-gray-900/50 transition"
               onClick={() => setIsMenuOpen(false)}
             >
-              Contact Us
+              Blogs
+            </Link>
+            <Link
+              href="/contact"
+              className="text-white hover:text-blue-300 px-4 py-2 rounded-md hover:bg-gray-900/50 transition"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Contact
             </Link>
             <div className="pt-2 flex flex-col space-y-2">
-              <Button variant="outline" asChild className="w-full">
-                <Link href="/sign-in">Sign In</Link>
+              <Button
+                variant="outline"
+                asChild
+                className="bg-blue-700/40 text-white border-blue-700/30 w-full"
+              >
+                <Link
+                  href="/login"
+                  className="flex items-center justify-center gap-1"
+                >
+                  Login <ArrowUpRight className="h-4 w-4" />
+                </Link>
               </Button>
-              <Button asChild className="w-full">
-                <Link href="/sign-up">Sign Up</Link>
+              <Button asChild className="bg-blue-600/80 text-white w-full">
+                <Link
+                  href="/register"
+                  className="flex items-center justify-center gap-1"
+                >
+                  Register <ArrowUpRight className="h-4 w-4" />
+                </Link>
               </Button>
             </div>
           </div>
