@@ -2,7 +2,17 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { SignalCard } from "@/components/ui/signal-card";
 import Image from "next/image";
-import { ArrowRight, CheckCircle2, BarChart4, Zap, Users } from "lucide-react";
+import {
+  ArrowRight,
+  CheckCircle2,
+  Users,
+  Diamond,
+  Coins,
+  LineChart,
+  Info,
+  MessageSquare,
+  Trophy,
+} from "lucide-react";
 import {
   MotionDiv,
   MotionStaggerContainer,
@@ -130,55 +140,119 @@ export default function Home() {
       </section>
 
       {/* Features */}
-      <section className="py-16 bg-accent/50 border-none">
-        <div className="container mx-auto px-4">
-          <MotionStaggerContainer className="text-center mb-12">
-            <MotionHeading className="text-3xl font-bold">
-              Why Choose Our Signals
-            </MotionHeading>
-            <MotionParagraph className="text-muted-foreground mt-4 max-w-2xl mx-auto">
-              We provide the best signals with high accuracy using advanced
-              market analysis techniques
-            </MotionParagraph>
-          </MotionStaggerContainer>
+      <section className="py-20 bg-black text-white border-none relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b  to-black/20 z-0"></div>
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="flex flex-col items-center mb-16">
+            <div className="bg-purple-900/60 text-white px-4 py-2 rounded-lg mb-4 backdrop-blur-sm">
+              <span>Why Choose Us</span>
+            </div>
+            <h2 className="text-4xl font-bold text-center mb-4">
+              Why Traders Trust Us
+            </h2>
+            {/* <p className="text-gray-400 text-center max-w-2xl">
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Dolor
+              quam repudiandae beatae repellendus necessitatibus, quis officia
+              perferendis quia
+            </p> */}
+          </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
-            <MotionDiv className="bg-card border-0 shadow-lg rounded-lg p-6 text-center">
-              <div className="mx-auto bg-primary/10 p-3 rounded-full w-16 h-16 flex items-center justify-center mb-4">
-                <CheckCircle2 className="h-8 w-8 text-primary" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Feature 1 */}
+            <div className="bg-gray-900/80 rounded-xl p-6 backdrop-blur-sm border border-purple-500/20 hover:border-purple-500/40 transition-all">
+              <div className="flex justify-center">
+                <div className="bg-purple-600 p-3 rounded-lg w-14 h-14 flex items-center justify-center mb-5">
+                  <Diamond className="h-8 w-8 text-white" />
+                </div>
               </div>
-              <h3 className="text-xl font-bold mb-2">High Accuracy</h3>
-              <p className="text-muted-foreground">
-                Over 85% of our signals successfully reach the specified targets
+              <h3 className="text-xl font-semibold text-center mb-3">
+                Quality Over Quantity
+              </h3>
+              <p className="text-gray-400 text-center">
+                Lorem ipsum dolor sit amet consectetur adipiscing elit baborum
+                nesciunt.
               </p>
-            </MotionDiv>
+            </div>
 
-            <MotionDiv
-              className="bg-card border-0 shadow-lg rounded-lg p-6 text-center"
-              delay={0.2}
-            >
-              <div className="mx-auto bg-primary/10 p-3 rounded-full w-16 h-16 flex items-center justify-center mb-4">
-                <BarChart4 className="h-8 w-8 text-primary" />
+            {/* Feature 2 */}
+            <div className="bg-gray-900/80 rounded-xl p-6 backdrop-blur-sm border border-purple-500/20 hover:border-purple-500/40 transition-all">
+              <div className="flex justify-center">
+                <div className="bg-purple-600 p-3 rounded-lg w-14 h-14 flex items-center justify-center mb-5">
+                  <Coins className="h-8 w-8 text-white" />
+                </div>
               </div>
-              <h3 className="text-xl font-bold mb-2">Professional Analysis</h3>
-              <p className="text-muted-foreground">
-                Each signal includes technical and fundamental analysis by
-                experts
+              <h3 className="text-xl font-semibold text-center mb-3">
+                Low Cost Service
+              </h3>
+              <p className="text-gray-400 text-center">
+                Lorem ipsum dolor sit amet consectetur adipiscing elit baborum
+                nesciunt.
               </p>
-            </MotionDiv>
+            </div>
 
-            <MotionDiv
-              className="bg-card border-0 shadow-lg rounded-lg p-6 text-center"
-              delay={0.4}
-            >
-              <div className="mx-auto bg-primary/10 p-3 rounded-full w-16 h-16 flex items-center justify-center mb-4">
-                <Zap className="h-8 w-8 text-primary" />
+            {/* Feature 3 */}
+            <div className="bg-gray-900/80 rounded-xl p-6 backdrop-blur-sm border border-purple-500/20 hover:border-purple-500/40 transition-all">
+              <div className="flex justify-center">
+                <div className="bg-purple-600 p-3 rounded-lg w-14 h-14 flex items-center justify-center mb-5">
+                  <LineChart className="h-8 w-8 text-white" />
+                </div>
               </div>
-              <h3 className="text-xl font-bold mb-2">Fast Delivery</h3>
-              <p className="text-muted-foreground">
-                Quick signal delivery at the perfect moment to enter the market
+              <h3 className="text-xl font-semibold text-center mb-3">
+                Strong Technical Analysis
+              </h3>
+              <p className="text-gray-400 text-center">
+                Lorem ipsum dolor sit amet consectetur adipiscing elit baborum
+                nesciunt.
               </p>
-            </MotionDiv>
+            </div>
+
+            {/* Feature 4 */}
+            <div className="bg-gray-900/80 rounded-xl p-6 backdrop-blur-sm border border-purple-500/20 hover:border-purple-500/40 transition-all">
+              <div className="flex justify-center">
+                <div className="bg-purple-600 p-3 rounded-lg w-14 h-14 flex items-center justify-center mb-5">
+                  <Info className="h-8 w-8 text-white" />
+                </div>
+              </div>
+              <h3 className="text-xl font-semibold text-center mb-3">
+                In-depth Information
+              </h3>
+              <p className="text-gray-400 text-center">
+                Lorem ipsum dolor sit amet consectetur adipiscing elit baborum
+                nesciunt.
+              </p>
+            </div>
+
+            {/* Feature 5 */}
+            <div className="bg-gray-900/80 rounded-xl p-6 backdrop-blur-sm border border-purple-500/20 hover:border-purple-500/40 transition-all">
+              <div className="flex justify-center">
+                <div className="bg-purple-600 p-3 rounded-lg w-14 h-14 flex items-center justify-center mb-5">
+                  <MessageSquare className="h-8 w-8 text-white" />
+                </div>
+              </div>
+              <h3 className="text-xl font-semibold text-center mb-3">
+                WhatsApp, Telegram Signals
+              </h3>
+              <p className="text-gray-400 text-center">
+                Lorem ipsum dolor sit amet consectetur adipiscing elit baborum
+                nesciunt.
+              </p>
+            </div>
+
+            {/* Feature 6 */}
+            <div className="bg-gray-900/80 rounded-xl p-6 backdrop-blur-sm border border-purple-500/20 hover:border-purple-500/40 transition-all">
+              <div className="flex justify-center">
+                <div className="bg-purple-600 p-3 rounded-lg w-14 h-14 flex items-center justify-center mb-5">
+                  <Trophy className="h-8 w-8 text-white" />
+                </div>
+              </div>
+              <h3 className="text-xl font-semibold text-center mb-3">
+                Success Ratio Is 80-90%
+              </h3>
+              <p className="text-gray-400 text-center">
+                Lorem ipsum dolor sit amet consectetur adipiscing elit baborum
+                nesciunt.
+              </p>
+            </div>
           </div>
         </div>
       </section>
