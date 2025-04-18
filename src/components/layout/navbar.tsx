@@ -12,7 +12,7 @@ export function Navbar() {
   return (
     <nav className="relative bg-gradient-to-r from-black to-black/95 w-full z-30 border-b border-gray-800/30">
       <div className="absolute inset-0 bg-blue-900/10 mix-blend-overlay"></div>
-      <div className="container flex h-16 items-center justify-between px-12 md:px-16 lg:px-24 mx-auto max-w-[1400px] relative z-10">
+      <div className="container flex h-16 items-center justify-between px-4 sm:px-6 md:px-16 lg:px-24 mx-auto max-w-[1400px] relative z-10">
         <div className="hidden md:flex items-center space-x-4">
           <Button
             variant="outline"
@@ -114,8 +114,8 @@ export function Navbar() {
 
       {/* Mobile Navigation */}
       {isMenuOpen && (
-        <div className="md:hidden bg-black/95 backdrop-blur-sm border-t border-gray-800/50 p-4 relative z-10">
-          <div className="flex flex-col space-y-4">
+        <div className="md:hidden bg-black/95 backdrop-blur-sm border-t border-gray-800/50 p-4 relative z-10 w-full">
+          <div className="flex flex-col space-y-4 w-full">
             <Link
               href="/"
               className="text-white hover:text-blue-300 px-4 py-2 rounded-md hover:bg-gray-900/50 transition"

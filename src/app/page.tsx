@@ -240,7 +240,7 @@ export default function Home() {
       <Testimonials />
 
       {/* CTA */}
-      <section className="py-16 bg-primary/10 border-none">
+      <section className="py-16 bg-black border-none text-white">
         <div className="container mx-auto px-4 text-center">
           <MotionDiv className="text-3xl font-bold mb-6">
             Join Us Today
