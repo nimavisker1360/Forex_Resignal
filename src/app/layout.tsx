@@ -15,8 +15,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fa" dir="rtl">
-      <body className="min-h-screen flex flex-col overflow-x-hidden">
+    <html lang="fa" dir="rtl" className="bg-black">
+      <body className="min-h-screen flex flex-col overflow-x-hidden bg-black text-white">
         <Navbar />
         <main className="flex-1">{children}</main>
         <Footer />

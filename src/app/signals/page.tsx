@@ -1,6 +1,21 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import { SignalCard } from "@/components/ui/signal-card";
-import { SearchIcon, Filter, ArrowUpDown } from "lucide-react";
+import {
+  SearchIcon,
+  Filter,
+  ArrowUpDown,
+  Check,
+  ChevronDown,
+} from "lucide-react";
+import { useState } from "react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 // Sample data for signals
 const signals = [
@@ -93,40 +108,173 @@ const signals = [
 ];
 
 export default function SignalsPage() {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [signalTypeFilter, setSignalTypeFilter] = useState<
+    "all" | "buy" | "sell"
+  >("all");
+  const [sortOrder, setSortOrder] = useState<"newest" | "oldest" | "pair">(
+    "newest"
+  );
+
+  // Filter signals based on search query and type filter
+  let filteredSignals = signals.filter(
+    (signal) =>
+      signal.pair.toLowerCase().includes(searchQuery.toLowerCase()) &&
+      (signalTypeFilter === "all" || signal.type === signalTypeFilter)
+  );
+
+  // Sort signals based on the selected sort order
+  filteredSignals = [...filteredSignals].sort((a, b) => {
+    if (sortOrder === "pair") {
+      return a.pair.localeCompare(b.pair);
+    } else if (sortOrder === "newest") {
+      // For simplicity, we'll sort by ID in reverse (assuming higher ID = newer)
+      return parseInt(b.id) - parseInt(a.id);
+    } else {
+      // oldest first
+      return parseInt(a.id) - parseInt(b.id);
+    }
+  });
+
   return (
-    <div className="bg-black min-h-screen text-white">
-      <div className="max-w-screen-xl mx-auto px-4 py-6">
+    <div className="bg-black text-white relative">
+      <div
+        className="absolute inset-0 mx-auto bg-[url('/images/back.jpg')] bg-no-repeat bg-center opacity-20 z-0"
+        style={{
+          width: "100%",
+          height: "100%",
+          backgroundSize: "cover",
+        }}
+      ></div>
+      <div className="max-w-screen-xl mx-auto px-4 py-6 relative z-10">
         <div className="flex justify-center items-center mb-4">
           <h1 className="text-2xl font-bold">Forex Signals</h1>
         </div>
 
         {/* Filters and Search */}
         <div className="flex flex-col sm:flex-row gap-3 mb-6">
-          <div className="relative flex-1">
+          <div className="order-2 sm:order-1 relative flex-1">
             <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <input
               type="text"
-              placeholder="Search signals..."
-              className="w-full h-9 pr-3 pl-10 rounded-md border border-gray-800 bg-gray-900 text-sm text-white ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              placeholder="...Signal Search"
+              className="w-full h-9 pr-3 pl-10 rounded-md border border-gray-800 bg-gray-900 text-sm text-white ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring text-left"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-          <div className="flex gap-2 justify-start">
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex items-center gap-1 border-gray-800 text-gray-300 hover:text-white"
-            >
-              <Filter className="h-4 w-4" />
-              Filter
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex items-center gap-1 border-gray-800 text-gray-300 hover:text-white"
-            >
-              <ArrowUpDown className="h-4 w-4" />
-              Sort
-            </Button>
+          <div className="order-1 sm:order-2 flex gap-2 justify-end">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-1 border-gray-800 text-gray-300 hover:text-white"
+                >
+                  <Filter className="h-4 w-4" />
+                  {signalTypeFilter === "all"
+                    ? "All Signals"
+                    : signalTypeFilter === "buy"
+                    ? "Buy Signals"
+                    : "Sell Signals"}
+                  <ChevronDown className="h-3 w-3 ml-1" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="bg-gray-900 border-gray-800 text-white">
+                <DropdownMenuItem
+                  className={`flex items-center gap-2 ${
+                    signalTypeFilter === "all" ? "text-primary" : ""
+                  }`}
+                  onClick={() => setSignalTypeFilter("all")}
+                >
+                  {signalTypeFilter === "all" && <Check className="h-4 w-4" />}
+                  <span
+                    className={signalTypeFilter === "all" ? "ml-0" : "ml-6"}
+                  >
+                    All Signals
+                  </span>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  className={`flex items-center gap-2 ${
+                    signalTypeFilter === "buy" ? "text-primary" : ""
+                  }`}
+                  onClick={() => setSignalTypeFilter("buy")}
+                >
+                  {signalTypeFilter === "buy" && <Check className="h-4 w-4" />}
+                  <span
+                    className={signalTypeFilter === "buy" ? "ml-0" : "ml-6"}
+                  >
+                    Buy Signals
+                  </span>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  className={`flex items-center gap-2 ${
+                    signalTypeFilter === "sell" ? "text-primary" : ""
+                  }`}
+                  onClick={() => setSignalTypeFilter("sell")}
+                >
+                  {signalTypeFilter === "sell" && <Check className="h-4 w-4" />}
+                  <span
+                    className={signalTypeFilter === "sell" ? "ml-0" : "ml-6"}
+                  >
+                    Sell Signals
+                  </span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-1 border-gray-800 text-gray-300 hover:text-white"
+                >
+                  <ArrowUpDown className="h-4 w-4" />
+                  {sortOrder === "newest"
+                    ? "Newest"
+                    : sortOrder === "oldest"
+                    ? "Oldest"
+                    : "Symbol A-Z"}
+                  <ChevronDown className="h-3 w-3 ml-1" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="bg-gray-900 border-gray-800 text-white">
+                <DropdownMenuItem
+                  className={`flex items-center gap-2 ${
+                    sortOrder === "newest" ? "text-primary" : ""
+                  }`}
+                  onClick={() => setSortOrder("newest")}
+                >
+                  {sortOrder === "newest" && <Check className="h-4 w-4" />}
+                  <span className={sortOrder === "newest" ? "ml-0" : "ml-6"}>
+                    Newest First
+                  </span>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  className={`flex items-center gap-2 ${
+                    sortOrder === "oldest" ? "text-primary" : ""
+                  }`}
+                  onClick={() => setSortOrder("oldest")}
+                >
+                  {sortOrder === "oldest" && <Check className="h-4 w-4" />}
+                  <span className={sortOrder === "oldest" ? "ml-0" : "ml-6"}>
+                    Oldest First
+                  </span>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  className={`flex items-center gap-2 ${
+                    sortOrder === "pair" ? "text-primary" : ""
+                  }`}
+                  onClick={() => setSortOrder("pair")}
+                >
+                  {sortOrder === "pair" && <Check className="h-4 w-4" />}
+                  <span className={sortOrder === "pair" ? "ml-0" : "ml-6"}>
+                    Symbol A-Z
+                  </span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
 
@@ -140,10 +288,22 @@ export default function SignalsPage() {
         </div> */}
 
         {/* Signals Grid */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {signals.map((signal) => (
-            <SignalCard key={signal.id} {...signal} />
-          ))}
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-6">
+          {filteredSignals.length > 0 ? (
+            filteredSignals.map((signal) => (
+              <SignalCard key={signal.id} {...signal} />
+            ))
+          ) : (
+            <div className="col-span-full min-h-[300px] flex items-center justify-center text-center p-8 text-gray-400 bg-gray-900/80 backdrop-blur-sm rounded-lg border border-gray-800 w-full">
+              <div>
+                <SearchIcon className="h-12 w-12 mx-auto mb-4 opacity-30" />
+                <p className="text-lg">No signals found with this symbol</p>
+                <p className="text-sm mt-2 text-gray-500">
+                  Try searching for a different currency pair
+                </p>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Pagination */}
