@@ -21,6 +21,7 @@ const recentSignals = [
     timestamp: "Yesterday - 15:45",
     success: true,
     pairColor: "text-white", // Changed from orange to white
+    isOpen: false, // Position is closed
   },
   {
     id: "2",
@@ -32,6 +33,7 @@ const recentSignals = [
     timestamp: "Today - 08:15",
     success: false,
     pairColor: "text-white", // Changed from orange to white
+    isOpen: false, // Position is closed
   },
   {
     id: "3",
@@ -42,6 +44,7 @@ const recentSignals = [
     stopLoss: 1.0805,
     timestamp: "Today - 10:30",
     pairColor: "text-white", // Changed from orange to white
+    isOpen: true, // Position is open
   },
 ];
 
