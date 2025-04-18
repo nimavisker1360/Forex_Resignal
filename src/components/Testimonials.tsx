@@ -88,8 +88,18 @@ export function Testimonials() {
   }, [emblaApi, onSelect]);
 
   return (
-    <section dir="ltr" className="py-16 bg-black border-none">
-      <div className="container mx-auto px-4">
+    <section dir="ltr" className="py-16 bg-black border-none relative">
+      <div
+        className="absolute inset-0 mx-auto my-auto bg-[url('/images/back.jpg')] bg-contain bg-center opacity-20 z-0"
+        style={{
+          width: "170%",
+          height: "120%",
+          top: "0%",
+          left: "0%",
+          transform: "rotate(-8deg) scale(1.3)",
+        }}
+      ></div>
+      <div className="container mx-auto px-4 relative z-10">
         <MotionStaggerContainer className="text-center mb-12">
           <MotionHeading className="text-3xl font-bold text-white text-center">
             User Testimonials

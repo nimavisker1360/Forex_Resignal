@@ -28,7 +28,7 @@ export function PricingCard({
   return (
     <div
       className={`
-        relative rounded-lg border bg-custom shadow-sm
+        relative rounded-lg border bg-custom/80 backdrop-blur-sm shadow-sm
         ${isPopular ? "border-primary shadow-md" : ""}
       `}
     >

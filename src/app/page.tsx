@@ -104,7 +104,17 @@ export default function Home() {
 
       {/* Features */}
       <section className="py-20 bg-black text-white border-none relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b  to-black/30 z-0"></div>
+        <div className="absolute inset-0 bg-gradient-to-b to-black/30 z-0"></div>
+        <div
+          className="absolute inset-0 mx-auto my-auto bg-[url('/images/back.jpg')] bg-contain bg-center opacity-20 z-0"
+          style={{
+            width: "120%",
+            height: "120%",
+            top: "0%",
+            left: "0%",
+            transform: "rotate(10deg) scale(1.4)",
+          }}
+        ></div>
         <div className="container mx-auto px-10 relative z-10">
           <div className="flex flex-col items-center mb-10">
             <div className="bg-blue-600/60 text-white px-3 py-1.5 rounded-lg mb-3 backdrop-blur-sm">

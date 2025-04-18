@@ -33,6 +33,12 @@ body {
   color: var(--muted-text-color);
 }
 
+/* Card background with transparency */
+.bg-card {
+  background-color: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(4px);
+}
+
 /* Keep existing Tailwind utilities */
 @layer base {
   * {

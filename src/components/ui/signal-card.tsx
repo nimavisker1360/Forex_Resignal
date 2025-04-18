@@ -32,7 +32,7 @@ export function SignalCard({
 
   return (
     <div
-      className={`bg-gray-900 rounded-lg overflow-hidden h-full flex flex-col`}
+      className={`bg-gray-900/80 backdrop-blur-sm rounded-lg overflow-hidden h-full flex flex-col`}
     >
       <div className="border-b border-gray-800 py-3 px-4 flex flex-row-reverse justify-between items-center">
         <div className={`text-xl font-bold ${pairColor}`}>{pair}</div>
