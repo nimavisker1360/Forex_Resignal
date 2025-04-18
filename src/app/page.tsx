@@ -1,10 +1,10 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { RecentSignals } from "@/components/RecentSignals";
+import { Testimonials } from "@/components/Testimonials";
 import Image from "next/image";
 import {
   CheckCircle2,
-  Users,
   Diamond,
   Coins,
   LineChart,
@@ -224,80 +224,7 @@ export default function Home() {
       <RecentSignals />
 
       {/* Testimonials */}
-      <section className="py-16 bg-muted/30 border-none">
-        <div className="container mx-auto px-4">
-          <MotionStaggerContainer className="text-center mb-12">
-            <MotionHeading className="text-3xl font-bold">
-              User Testimonials
-            </MotionHeading>
-            <MotionParagraph className="text-muted-foreground mt-4 max-w-2xl mx-auto">
-              What our users say about our signals
-            </MotionParagraph>
-          </MotionStaggerContainer>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            <MotionDiv className="bg-card border-0 shadow-lg rounded-lg p-6">
-              <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center text-primary font-bold">
-                  <Users className="h-6 w-6" />
-                </div>
-                <div className="ml-4">
-                  <h4 className="font-bold">Ali Mohammadi</h4>
-                  <p className="text-sm text-muted-foreground">Forex Trader</p>
-                </div>
-              </div>
-              <p className="text-muted-foreground">
-                &ldquo;After using the signals from this site, my trading
-                profits increased significantly. I&apos;m really
-                satisfied!&rdquo;
-              </p>
-            </MotionDiv>
-
-            <MotionDiv
-              className="bg-card border-0 shadow-lg rounded-lg p-6"
-              delay={0.2}
-            >
-              <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center text-primary font-bold">
-                  <Users className="h-6 w-6" />
-                </div>
-                <div className="ml-4">
-                  <h4 className="font-bold">Sara Ahmadi</h4>
-                  <p className="text-sm text-muted-foreground">
-                    Beginner in Currency Market
-                  </p>
-                </div>
-              </div>
-              <p className="text-muted-foreground">
-                &ldquo;As a beginner, these signals helped me enter trades with
-                more confidence. Great support and accurate analysis!&rdquo;
-              </p>
-            </MotionDiv>
-
-            <MotionDiv
-              className="bg-card border-0 shadow-lg rounded-lg p-6"
-              delay={0.4}
-            >
-              <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center text-primary font-bold">
-                  <Users className="h-6 w-6" />
-                </div>
-                <div className="ml-4">
-                  <h4 className="font-bold">Reza Karimi</h4>
-                  <p className="text-sm text-muted-foreground">
-                    Professional Trader
-                  </p>
-                </div>
-              </div>
-              <p className="text-muted-foreground">
-                &ldquo;The accuracy of the signals is exceptional. I&apos;ve
-                used various sites, but none have been as successful as this
-                one.&rdquo;
-              </p>
-            </MotionDiv>
-          </div>
-        </div>
-      </section>
+      <Testimonials />
 
       {/* CTA */}
       <section className="py-16 bg-primary/10 border-none">
