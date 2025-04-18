@@ -74,7 +74,7 @@ export function Navbar() {
               About Us
             </Link>
             <Link
-              href="/blogs"
+              href="/blog"
               className="text-white hover:text-blue-300 transition"
             >
               Blogs
@@ -138,7 +138,7 @@ export function Navbar() {
               About Us
             </Link>
             <Link
-              href="/blogs"
+              href="/blog"
               className="text-white hover:text-blue-300 px-4 py-2 rounded-md hover:bg-gray-900/50 transition"
               onClick={() => setIsMenuOpen(false)}
             >
