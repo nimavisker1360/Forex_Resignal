@@ -31,9 +31,7 @@ export function SignalCard({
   const textColor = type === "buy" ? "text-green-500" : "text-red-500";
 
   return (
-    <div
-      className={`bg-gray-900/80 backdrop-blur-sm rounded-lg overflow-hidden h-full flex flex-col`}
-    >
+    <div className="bg-gray-900/80 backdrop-blur-sm rounded-lg overflow-hidden h-full flex flex-col text-right">
       <div className="border-b border-gray-800 py-3 px-4 flex flex-row-reverse justify-between items-center">
         <div className={`text-xl font-bold ${pairColor}`}>{pair}</div>
         <div className={`font-medium ${textColor} flex items-center gap-1`}>
@@ -51,15 +49,15 @@ export function SignalCard({
         </div>
       </div>
 
-      <div className="p-5 text-right flex-grow flex flex-col">
+      <div className="p-5 flex-grow flex flex-col">
         <div className="grid grid-cols-2 gap-4 mb-6">
-          <div className="flex flex-col">
-            <span className="text-gray-400 text-sm mb-2">Stop Loss</span>
-            <span className="font-medium text-lg text-red-400">{stopLoss}</span>
-          </div>
-          <div className="flex flex-col">
+          <div className="flex flex-col items-end">
             <span className="text-gray-400 text-sm mb-2">Entry Price</span>
             <span className="font-medium text-lg text-white">{price}</span>
+          </div>
+          <div className="flex flex-col items-end">
+            <span className="text-gray-400 text-sm mb-2">Stop Loss</span>
+            <span className="font-medium text-lg text-red-400">{stopLoss}</span>
           </div>
         </div>
 
@@ -77,13 +75,13 @@ export function SignalCard({
 
         <div className="flex flex-row-reverse justify-between items-center">
           <div className="flex items-center gap-2 text-xs text-gray-400">
-            <span>{timestamp}</span>
             <Clock className="h-3.5 w-3.5" />
+            <span>{timestamp}</span>
           </div>
 
           {isCompleted && (
             <div
-              className={`text-sm flex flex-row-reverse items-center gap-1.5
+              className={`text-sm flex items-center gap-1.5
                 ${success ? "text-green-500" : "text-red-500"}
               `}
             >
