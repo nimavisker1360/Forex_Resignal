@@ -102,6 +102,9 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Gradient divider to hide the line between sections */}
+      <div className="h-24 bg-gradient-to-b from-black via-blue-200/5 to-black/10 relative z-20 -mt-16 -mb-10 backdrop-blur-md"></div>
+
       {/* Features */}
       <section className="py-20 bg-black text-white border-none relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b to-black/30 z-0"></div>
