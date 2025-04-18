@@ -5,9 +5,10 @@ import { LineChart, Link2, Info, Phone } from "lucide-react";
 
 export function Footer() {
   return (
-    <footer className="bg-black border-t py-8 text-white" dir="ltr">
+    <footer className="bg-black py-8 text-white" dir="ltr">
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="w-4/4 mx-auto border-t"></div>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-8">
           <div className="text-center md:text-left">
             <h3 className="text-lg font-bold mb-4 flex items-center gap-2 justify-center md:justify-start">
               <LineChart className="h-5 w-5 text-blue-400 mr-2" />
