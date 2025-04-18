@@ -16,6 +16,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  MotionDiv,
+  MotionStaggerContainer,
+  MotionStaggerItem,
+} from "@/components/ui/motion-content";
 
 // Sample data for signals
 const signals = [
@@ -147,12 +152,12 @@ export default function SignalsPage() {
         }}
       ></div>
       <div className="max-w-screen-xl mx-auto px-4 py-6 relative z-10">
-        <div className="flex justify-center items-center mb-4">
+        <MotionDiv className="flex justify-center items-center mb-4">
           <h1 className="text-2xl font-bold">Forex Signals</h1>
-        </div>
+        </MotionDiv>
 
         {/* Filters and Search */}
-        <div className="flex flex-col sm:flex-row gap-3 mb-6">
+        <MotionDiv className="flex flex-col sm:flex-row gap-3 mb-6" delay={0.1}>
           <div className="order-2 sm:order-1 relative flex-1">
             <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <input
@@ -276,7 +281,7 @@ export default function SignalsPage() {
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
-        </div>
+        </MotionDiv>
 
         {/* Info Banner */}
         {/* <div className="bg-gray-900/50 rounded-lg p-4 mb-8 text-sm text-left border border-gray-800">
@@ -288,13 +293,15 @@ export default function SignalsPage() {
         </div> */}
 
         {/* Signals Grid */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-6">
+        <MotionStaggerContainer className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-6">
           {filteredSignals.length > 0 ? (
             filteredSignals.map((signal) => (
-              <SignalCard key={signal.id} {...signal} />
+              <MotionStaggerItem key={signal.id}>
+                <SignalCard {...signal} />
+              </MotionStaggerItem>
             ))
           ) : (
-            <div className="col-span-full min-h-[300px] flex items-center justify-center text-center p-8 text-gray-400 bg-gray-900/80 backdrop-blur-sm rounded-lg border border-gray-800 w-full">
+            <MotionDiv className="col-span-full min-h-[300px] flex items-center justify-center text-center p-8 text-gray-400 bg-gray-900/80 backdrop-blur-sm rounded-lg border border-gray-800 w-full">
               <div>
                 <SearchIcon className="h-12 w-12 mx-auto mb-4 opacity-30" />
                 <p className="text-lg">No signals found with this symbol</p>
@@ -302,9 +309,9 @@ export default function SignalsPage() {
                   Try searching for a different currency pair
                 </p>
               </div>
-            </div>
+            </MotionDiv>
           )}
-        </div>
+        </MotionStaggerContainer>
 
         {/* Pagination */}
         {/* <div className="flex justify-center mt-12">

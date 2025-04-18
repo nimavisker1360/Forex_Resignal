@@ -119,23 +119,18 @@ export default function Home() {
           }}
         ></div>
         <div className="container mx-auto px-10 relative z-10">
-          <div className="flex flex-col items-center mb-10">
-            <div className="bg-blue-600/60 text-white px-3 py-1.5 rounded-lg mb-3 backdrop-blur-sm">
+          <MotionStaggerContainer className="flex flex-col items-center mb-10">
+            <MotionStaggerItem className="bg-blue-600/60 text-white px-3 py-1.5 rounded-lg mb-3 backdrop-blur-sm">
               <span>Why Choose Us</span>
-            </div>
-            <h2 className="text-3xl font-bold text-center mb-4">
+            </MotionStaggerItem>
+            <MotionHeading className="text-3xl font-bold text-center mb-4">
               Why Traders Trust Us
-            </h2>
-            {/* <p className="text-gray-400 text-center max-w-2xl">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Dolor
-              quam repudiandae beatae repellendus necessitatibus, quis officia
-              perferendis quia
-            </p> */}
-          </div>
+            </MotionHeading>
+          </MotionStaggerContainer>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto my-2">
+          <MotionStaggerContainer className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto my-2">
             {/* Feature 1 */}
-            <div className="bg-gray-900/80 rounded-xl p-6 backdrop-blur-sm border border-blue-500/20 hover:border-blue-500/40 transition-all">
+            <MotionStaggerItem className="bg-gray-900/80 rounded-xl p-6 backdrop-blur-sm border border-blue-500/20 hover:border-blue-500/40 transition-all">
               <div className="flex justify-center">
                 <div className="bg-blue-600 p-3 rounded-lg w-14 h-14 flex items-center justify-center mb-5">
                   <Diamond className="h-8 w-8 text-white" />
@@ -148,10 +143,10 @@ export default function Home() {
                 Lorem ipsum dolor sit amet consectetur adipiscing elit baborum
                 nesciunt.
               </p> */}
-            </div>
+            </MotionStaggerItem>
 
             {/* Feature 2 */}
-            <div className="bg-gray-900/80 rounded-xl p-6 backdrop-blur-sm border border-blue-500/20 hover:border-blue-500/40 transition-all">
+            <MotionStaggerItem className="bg-gray-900/80 rounded-xl p-6 backdrop-blur-sm border border-blue-500/20 hover:border-blue-500/40 transition-all">
               <div className="flex justify-center">
                 <div className="bg-blue-600 p-3 rounded-lg w-14 h-14 flex items-center justify-center mb-5">
                   <Coins className="h-8 w-8 text-white" />
@@ -164,10 +159,10 @@ export default function Home() {
                 Lorem ipsum dolor sit amet consectetur adipiscing elit baborum
                 nesciunt.
               </p> */}
-            </div>
+            </MotionStaggerItem>
 
             {/* Feature 3 */}
-            <div className="bg-gray-900/80 rounded-xl p-6 backdrop-blur-sm border border-blue-500/20 hover:border-blue-500/40 transition-all">
+            <MotionStaggerItem className="bg-gray-900/80 rounded-xl p-6 backdrop-blur-sm border border-blue-500/20 hover:border-blue-500/40 transition-all">
               <div className="flex justify-center">
                 <div className="bg-blue-600 p-3 rounded-lg w-14 h-14 flex items-center justify-center mb-5">
                   <LineChart className="h-8 w-8 text-white" />
@@ -180,10 +175,10 @@ export default function Home() {
                 Lorem ipsum dolor sit amet consectetur adipiscing elit baborum
                 nesciunt.
               </p> */}
-            </div>
+            </MotionStaggerItem>
 
             {/* Feature 4 */}
-            <div className="bg-gray-900/80 rounded-xl p-6 backdrop-blur-sm border border-blue-500/20 hover:border-blue-500/40 transition-all">
+            <MotionStaggerItem className="bg-gray-900/80 rounded-xl p-6 backdrop-blur-sm border border-blue-500/20 hover:border-blue-500/40 transition-all">
               <div className="flex justify-center">
                 <div className="bg-blue-600 p-3 rounded-lg w-14 h-14 flex items-center justify-center mb-5">
                   <Info className="h-8 w-8 text-white" />
@@ -196,10 +191,10 @@ export default function Home() {
                 Lorem ipsum dolor sit amet consectetur adipiscing elit baborum
                 nesciunt.
               </p> */}
-            </div>
+            </MotionStaggerItem>
 
             {/* Feature 5 */}
-            <div className="bg-gray-900/80 rounded-xl p-6 backdrop-blur-sm border border-blue-500/20 hover:border-blue-500/40 transition-all">
+            <MotionStaggerItem className="bg-gray-900/80 rounded-xl p-6 backdrop-blur-sm border border-blue-500/20 hover:border-blue-500/40 transition-all">
               <div className="flex justify-center">
                 <div className="bg-blue-600 p-3 rounded-lg w-14 h-14 flex items-center justify-center mb-5">
                   <MessageSquare className="h-8 w-8 text-white" />
@@ -212,10 +207,10 @@ export default function Home() {
                 Lorem ipsum dolor sit amet consectetur adipiscing elit baborum
                 nesciunt.
               </p> */}
-            </div>
+            </MotionStaggerItem>
 
             {/* Feature 6 */}
-            <div className="bg-gray-900/80 rounded-xl p-6 backdrop-blur-sm border border-blue-500/20 hover:border-blue-500/40 transition-all">
+            <MotionStaggerItem className="bg-gray-900/80 rounded-xl p-6 backdrop-blur-sm border border-blue-500/20 hover:border-blue-500/40 transition-all">
               <div className="flex justify-center">
                 <div className="bg-blue-600 p-3 rounded-lg w-14 h-14 flex items-center justify-center mb-5">
                   <Trophy className="h-8 w-8 text-white" />
@@ -228,8 +223,8 @@ export default function Home() {
                 Lorem ipsum dolor sit amet consectetur adipiscing elit baborum
                 nesciunt.
               </p> */}
-            </div>
-          </div>
+            </MotionStaggerItem>
+          </MotionStaggerContainer>
         </div>
       </section>
 

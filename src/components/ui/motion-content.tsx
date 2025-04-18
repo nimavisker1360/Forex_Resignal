@@ -9,6 +9,17 @@ export const fadeInFromLeft = {
   visible: { opacity: 1, x: 0, transition: { duration: 0.6 } },
 };
 
+// Simple fade in animation variant without horizontal movement
+export const justFadeIn = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      duration: 0.6,
+    },
+  },
+};
+
 export const fadeIn = {
   hidden: { opacity: 0 },
   visible: {
@@ -105,7 +116,7 @@ export const MotionStaggerItem = ({
   style,
 }: MotionProps) => {
   return (
-    <motion.div className={className} style={style} variants={fadeInFromLeft}>
+    <motion.div className={className} style={style} variants={justFadeIn}>
       {children}
     </motion.div>
   );
