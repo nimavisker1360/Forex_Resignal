@@ -19,10 +19,10 @@ export interface SignalCardProps {
   timestamp: string;
   success?: boolean;
   isPremium?: boolean;
+  pairColor?: string;
 }
 
 export function SignalCard({
-  id,
   pair,
   type,
   price,
@@ -30,97 +30,83 @@ export function SignalCard({
   stopLoss,
   timestamp,
   success,
-  isPremium = false,
+  pairColor = "text-white",
 }: SignalCardProps) {
   const isCompleted = success !== undefined;
+  const textColor = type === "buy" ? "text-green-500" : "text-red-500";
 
   return (
-    <div
-      className={`bg-custom border rounded-lg overflow-hidden 
-      ${
-        isCompleted
-          ? success
-            ? "border-green-500/20 bg-green-500/5"
-            : "border-red-500/20 bg-red-500/5"
-          : ""
-      }
-      ${isPremium ? "border-amber-500/30" : ""}
-    `}
-    >
-      {isPremium && (
-        <div className="bg-amber-500 text-xs font-medium py-1 text-center text-black">
-          Premium Signal
-        </div>
-      )}
-
-      <div className="p-4">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-bold">{pair}</h3>
-          <div
-            className={`flex items-center gap-1 
-            ${type === "buy" ? "text-green-500" : "text-red-500"}
-          `}
-          >
-            {type === "buy" ? (
+    <div className={`bg-gray-900 rounded-lg overflow-hidden h-full`}>
+      <div className="border-b border-gray-800 py-3 px-4 flex flex-row-reverse justify-between items-center">
+        <div className={`text-xl font-bold ${pairColor}`}>{pair}</div>
+        <div className={`font-medium ${textColor} flex items-center gap-1`}>
+          {type === "buy" ? (
+            <>
               <ArrowUpCircle className="h-5 w-5" />
-            ) : (
+              <span>Buy</span>
+            </>
+          ) : (
+            <>
               <ArrowDownCircle className="h-5 w-5" />
-            )}
-            <span className="font-semibold">
-              {type === "buy" ? "Buy" : "Sell"}
-            </span>
+              <span>Sell</span>
+            </>
+          )}
+        </div>
+      </div>
+
+      <div className="p-5 text-right">
+        <div className="grid grid-cols-2 gap-4 mb-6">
+          <div className="flex flex-col">
+            <span className="text-gray-400 text-sm mb-2">Stop Loss</span>
+            <span className="font-medium text-lg text-red-400">{stopLoss}</span>
+          </div>
+          <div className="flex flex-col">
+            <span className="text-gray-400 text-sm mb-2">Entry Price</span>
+            <span className="font-medium text-lg text-white">{price}</span>
           </div>
         </div>
 
-        <div className="flex justify-between items-center">
-          <span className="text-muted">Entry Price:</span>
-          <span className="font-medium">{price}</span>
+        <div className="mb-6">
+          {takeProfit.map((tp, i) => (
+            <div
+              key={i}
+              className="flex flex-row-reverse justify-between items-center mb-3"
+            >
+              <span className="text-gray-400 text-sm">Target {i + 1}</span>
+              <span className="font-medium text-green-400">{tp}</span>
+            </div>
+          ))}
         </div>
 
-        <div className="flex justify-between items-center">
-          <span className="text-muted">Stop Loss:</span>
-          <span className="font-medium text-red-400">{stopLoss}</span>
-        </div>
-
-        {takeProfit.map((tp, i) => (
-          <div key={i} className="flex justify-between items-center">
-            <span className="text-muted">Target {i + 1}:</span>
-            <span className="font-medium text-green-400">{tp}</span>
+        <div className="flex flex-row-reverse justify-between items-center mb-5">
+          <div className="flex items-center gap-2 text-xs text-gray-400">
+            <span>{timestamp}</span>
+            <Clock className="h-3.5 w-3.5" />
           </div>
-        ))}
 
-        <div className="flex items-center gap-2 text-xs text-muted mt-4">
-          <Clock className="h-3.5 w-3.5" />
-          <span>{timestamp}</span>
+          {isCompleted && (
+            <div
+              className={`text-sm flex flex-row-reverse items-center gap-1.5
+                ${success ? "text-green-500" : "text-red-500"}
+              `}
+            >
+              <span className="font-medium">
+                {success ? "Successful" : "Unsuccessful"}
+              </span>
+              <Percent className="h-4 w-4" />
+            </div>
+          )}
         </div>
-
-        {isCompleted && (
-          <div
-            className={`mt-3 text-sm flex items-center gap-1.5 
-            ${success ? "text-green-500" : "text-red-500"}
-          `}
-          >
-            {success ? (
-              <>
-                <span className="font-medium">Successful</span>
-                <Percent className="h-4 w-4" />
-              </>
-            ) : (
-              <>
-                <span className="font-medium">Unsuccessful</span>
-                <Percent className="h-4 w-4" />
-              </>
-            )}
-          </div>
-        )}
 
         {!isCompleted && (
-          <div className="mt-3">
-            <Button variant="outline" size="sm" className="w-full">
-              <BarChart3 className="mr-2 h-4 w-4" />
-              Show Analysis
-            </Button>
-          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full bg-gray-800 border-gray-700 hover:bg-gray-700"
+          >
+            <BarChart3 className="mr-2 h-4 w-4" />
+            Show Analysis
+          </Button>
         )}
       </div>
     </div>

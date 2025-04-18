@@ -1,9 +1,8 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { SignalCard } from "@/components/ui/signal-card";
+import { RecentSignals } from "@/components/RecentSignals";
 import Image from "next/image";
 import {
-  ArrowRight,
   CheckCircle2,
   Users,
   Diamond,
@@ -21,42 +20,6 @@ import {
   MotionParagraph,
   MotionImage,
 } from "@/components/ui/motion-content";
-
-// Sample data for signals
-const recentSignals = [
-  {
-    id: "1",
-    pair: "EUR/USD",
-    type: "buy" as const,
-    price: 1.0825,
-    takeProfit: [1.0845, 1.0865, 1.0885],
-    stopLoss: 1.0805,
-    timestamp: "Today - 10:30",
-    success: true,
-    isPremium: false,
-  },
-  {
-    id: "2",
-    pair: "GBP/JPY",
-    type: "sell" as const,
-    price: 168.45,
-    takeProfit: [168.25, 168.05],
-    stopLoss: 168.65,
-    timestamp: "Today - 08:15",
-    success: false,
-    isPremium: false,
-  },
-  {
-    id: "3",
-    pair: "XAU/USD",
-    type: "buy" as const,
-    price: 2352.0,
-    takeProfit: [2360.0, 2370.0, 2380.0],
-    stopLoss: 2340.0,
-    timestamp: "Yesterday - 15:45",
-    isPremium: true,
-  },
-];
 
 export default function Home() {
   return (
@@ -258,31 +221,7 @@ export default function Home() {
       </section>
 
       {/* Recent Signals */}
-      <section className="py-16 border-none">
-        <div className="container mx-auto px-4">
-          <MotionStaggerContainer className="flex justify-between items-center mb-8">
-            <MotionHeading className="text-3xl font-bold">
-              Latest Signals
-            </MotionHeading>
-            <MotionStaggerItem>
-              <Button variant="outline" asChild className="border-0 shadow">
-                <Link href="/signals">
-                  View All
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
-              </Button>
-            </MotionStaggerItem>
-          </MotionStaggerContainer>
-
-          <div className="grid md:grid-cols-3 gap-6">
-            {recentSignals.map((signal, index) => (
-              <MotionDiv key={signal.id} className="" delay={index * 0.1}>
-                <SignalCard {...signal} />
-              </MotionDiv>
-            ))}
-          </div>
-        </div>
-      </section>
+      <RecentSignals />
 
       {/* Testimonials */}
       <section className="py-16 bg-muted/30 border-none">
