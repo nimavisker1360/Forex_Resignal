@@ -141,13 +141,13 @@ export default function Home() {
 
       {/* Features */}
       <section className="py-20 bg-black text-white border-none relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b  to-black/20 z-0"></div>
-        <div className="container mx-auto px-4 relative z-10">
-          <div className="flex flex-col items-center mb-16">
-            <div className="bg-purple-900/60 text-white px-4 py-2 rounded-lg mb-4 backdrop-blur-sm">
+        <div className="absolute inset-0 bg-gradient-to-b  to-black/30 z-0"></div>
+        <div className="container mx-auto px-10 relative z-10">
+          <div className="flex flex-col items-center mb-10">
+            <div className="bg-blue-600/60 text-white px-3 py-1.5 rounded-lg mb-3 backdrop-blur-sm">
               <span>Why Choose Us</span>
             </div>
-            <h2 className="text-4xl font-bold text-center mb-4">
+            <h2 className="text-3xl font-bold text-center mb-4">
               Why Traders Trust Us
             </h2>
             {/* <p className="text-gray-400 text-center max-w-2xl">
@@ -157,101 +157,101 @@ export default function Home() {
             </p> */}
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto my-2">
             {/* Feature 1 */}
-            <div className="bg-gray-900/80 rounded-xl p-6 backdrop-blur-sm border border-purple-500/20 hover:border-purple-500/40 transition-all">
+            <div className="bg-gray-900/80 rounded-xl p-6 backdrop-blur-sm border border-blue-500/20 hover:border-blue-500/40 transition-all">
               <div className="flex justify-center">
-                <div className="bg-purple-600 p-3 rounded-lg w-14 h-14 flex items-center justify-center mb-5">
+                <div className="bg-blue-600 p-3 rounded-lg w-14 h-14 flex items-center justify-center mb-5">
                   <Diamond className="h-8 w-8 text-white" />
                 </div>
               </div>
               <h3 className="text-xl font-semibold text-center mb-3">
                 Quality Over Quantity
               </h3>
-              <p className="text-gray-400 text-center">
+              {/* <p className="text-gray-400 text-center">
                 Lorem ipsum dolor sit amet consectetur adipiscing elit baborum
                 nesciunt.
-              </p>
+              </p> */}
             </div>
 
             {/* Feature 2 */}
-            <div className="bg-gray-900/80 rounded-xl p-6 backdrop-blur-sm border border-purple-500/20 hover:border-purple-500/40 transition-all">
+            <div className="bg-gray-900/80 rounded-xl p-6 backdrop-blur-sm border border-blue-500/20 hover:border-blue-500/40 transition-all">
               <div className="flex justify-center">
-                <div className="bg-purple-600 p-3 rounded-lg w-14 h-14 flex items-center justify-center mb-5">
+                <div className="bg-blue-600 p-3 rounded-lg w-14 h-14 flex items-center justify-center mb-5">
                   <Coins className="h-8 w-8 text-white" />
                 </div>
               </div>
               <h3 className="text-xl font-semibold text-center mb-3">
                 Low Cost Service
               </h3>
-              <p className="text-gray-400 text-center">
+              {/* <p className="text-gray-400 text-center">
                 Lorem ipsum dolor sit amet consectetur adipiscing elit baborum
                 nesciunt.
-              </p>
+              </p> */}
             </div>
 
             {/* Feature 3 */}
-            <div className="bg-gray-900/80 rounded-xl p-6 backdrop-blur-sm border border-purple-500/20 hover:border-purple-500/40 transition-all">
+            <div className="bg-gray-900/80 rounded-xl p-6 backdrop-blur-sm border border-blue-500/20 hover:border-blue-500/40 transition-all">
               <div className="flex justify-center">
-                <div className="bg-purple-600 p-3 rounded-lg w-14 h-14 flex items-center justify-center mb-5">
+                <div className="bg-blue-600 p-3 rounded-lg w-14 h-14 flex items-center justify-center mb-5">
                   <LineChart className="h-8 w-8 text-white" />
                 </div>
               </div>
               <h3 className="text-xl font-semibold text-center mb-3">
                 Strong Technical Analysis
               </h3>
-              <p className="text-gray-400 text-center">
+              {/* <p className="text-gray-400 text-center">
                 Lorem ipsum dolor sit amet consectetur adipiscing elit baborum
                 nesciunt.
-              </p>
+              </p> */}
             </div>
 
             {/* Feature 4 */}
-            <div className="bg-gray-900/80 rounded-xl p-6 backdrop-blur-sm border border-purple-500/20 hover:border-purple-500/40 transition-all">
+            <div className="bg-gray-900/80 rounded-xl p-6 backdrop-blur-sm border border-blue-500/20 hover:border-blue-500/40 transition-all">
               <div className="flex justify-center">
-                <div className="bg-purple-600 p-3 rounded-lg w-14 h-14 flex items-center justify-center mb-5">
+                <div className="bg-blue-600 p-3 rounded-lg w-14 h-14 flex items-center justify-center mb-5">
                   <Info className="h-8 w-8 text-white" />
                 </div>
               </div>
               <h3 className="text-xl font-semibold text-center mb-3">
                 In-depth Information
               </h3>
-              <p className="text-gray-400 text-center">
+              {/* <p className="text-gray-400 text-center">
                 Lorem ipsum dolor sit amet consectetur adipiscing elit baborum
                 nesciunt.
-              </p>
+              </p> */}
             </div>
 
             {/* Feature 5 */}
-            <div className="bg-gray-900/80 rounded-xl p-6 backdrop-blur-sm border border-purple-500/20 hover:border-purple-500/40 transition-all">
+            <div className="bg-gray-900/80 rounded-xl p-6 backdrop-blur-sm border border-blue-500/20 hover:border-blue-500/40 transition-all">
               <div className="flex justify-center">
-                <div className="bg-purple-600 p-3 rounded-lg w-14 h-14 flex items-center justify-center mb-5">
+                <div className="bg-blue-600 p-3 rounded-lg w-14 h-14 flex items-center justify-center mb-5">
                   <MessageSquare className="h-8 w-8 text-white" />
                 </div>
               </div>
               <h3 className="text-xl font-semibold text-center mb-3">
-                WhatsApp, Telegram Signals
+                Telegram Signals
               </h3>
-              <p className="text-gray-400 text-center">
+              {/* <p className="text-gray-400 text-center">
                 Lorem ipsum dolor sit amet consectetur adipiscing elit baborum
                 nesciunt.
-              </p>
+              </p> */}
             </div>
 
             {/* Feature 6 */}
-            <div className="bg-gray-900/80 rounded-xl p-6 backdrop-blur-sm border border-purple-500/20 hover:border-purple-500/40 transition-all">
+            <div className="bg-gray-900/80 rounded-xl p-6 backdrop-blur-sm border border-blue-500/20 hover:border-blue-500/40 transition-all">
               <div className="flex justify-center">
-                <div className="bg-purple-600 p-3 rounded-lg w-14 h-14 flex items-center justify-center mb-5">
+                <div className="bg-blue-600 p-3 rounded-lg w-14 h-14 flex items-center justify-center mb-5">
                   <Trophy className="h-8 w-8 text-white" />
                 </div>
               </div>
               <h3 className="text-xl font-semibold text-center mb-3">
                 Success Ratio Is 80-90%
               </h3>
-              <p className="text-gray-400 text-center">
+              {/* <p className="text-gray-400 text-center">
                 Lorem ipsum dolor sit amet consectetur adipiscing elit baborum
                 nesciunt.
-              </p>
+              </p> */}
             </div>
           </div>
         </div>
