@@ -1,28 +1,5 @@
 import { PricingCard } from "@/components/ui/pricing-card";
 import { CheckCircle2 } from "lucide-react";
-import {
-  MotionDiv,
-  MotionStaggerContainer,
-  MotionStaggerItem,
-  justFadeIn,
-} from "@/components/ui/motion-content";
-import { motion } from "framer-motion";
-import { ReactNode, CSSProperties } from "react";
-
-// Custom motion component for feature items with just fade in effect
-interface FeatureItemProps {
-  children: ReactNode;
-  className?: string;
-  style?: CSSProperties;
-}
-
-const FeatureItem = ({ children, className, style }: FeatureItemProps) => {
-  return (
-    <motion.div className={className} style={style} variants={justFadeIn}>
-      {children}
-    </motion.div>
-  );
-};
 
 const pricingPlans = [
   {
@@ -113,7 +90,7 @@ export default function PremiumPage() {
             key={index}
             title={plan.title}
             price={plan.price}
-            period={plan.period as any}
+            period={plan.period as "monthly" | "quarterly" | "yearly"}
             features={plan.features}
             isPopular={plan.isPopular}
           />
@@ -174,13 +151,13 @@ export default function PremiumPage() {
 
       {/* Features */}
       <div className="mb-16">
-        <MotionDiv className="text-2xl font-bold mb-8 text-center">
+        <div className="text-2xl font-bold mb-8 text-center">
           Premium Membership Benefits
-        </MotionDiv>
+        </div>
 
-        <MotionStaggerContainer className="grid md:grid-cols-3 gap-8">
+        <div className="grid md:grid-cols-3 gap-8">
           {premiumFeatures.map((feature, index) => (
-            <FeatureItem key={index} className="flex space-x-4">
+            <div key={index} className="flex space-x-4">
               <div className="flex-shrink-0">
                 <div className="bg-primary/10 p-2 rounded-full">
                   <CheckCircle2 className="h-6 w-6 text-primary" />
@@ -192,16 +169,13 @@ export default function PremiumPage() {
                   {feature.description}
                 </p>
               </div>
-            </FeatureItem>
+            </div>
           ))}
-        </MotionStaggerContainer>
+        </div>
       </div>
 
       {/* Testimonial */}
-      <MotionDiv
-        className="bg-primary/5 rounded-lg p-8 text-center"
-        delay={0.4}
-      >
+      <div className="bg-primary/5 rounded-lg p-8 text-center">
         <blockquote className="max-w-2xl mx-auto">
           <p className="text-xl font-medium mb-6">
             "Since becoming a premium member, my trading profit has more than
@@ -211,7 +185,7 @@ export default function PremiumPage() {
             Masoud Rezaei - Forex Trader
           </footer>
         </blockquote>
-      </MotionDiv>
+      </div>
     </div>
   );
 }

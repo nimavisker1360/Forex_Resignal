@@ -50,6 +50,17 @@ const nextConfig = {
       },
     ],
   },
+  webpack: (config, { isServer }) => {
+    // Add resolver for @radix-ui/react-use-effect-event
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      "@radix-ui/react-use-effect-event": require.resolve(
+        "./src/lib/use-effect-event-patch.js"
+      ),
+    };
+
+    return config;
+  },
 };
 
 module.exports = nextConfig;

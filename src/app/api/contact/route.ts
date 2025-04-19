@@ -90,7 +90,7 @@ export async function POST(request: Request) {
         from: "Contact Form <onboarding@resend.dev>",
         to: ["nimabaghery@gmail.com"],
         subject: `Contact Form: ${subject}`,
-        reply_to: email,
+        replyTo: email,
         text: `
           Name: ${name}
           Email: ${email}

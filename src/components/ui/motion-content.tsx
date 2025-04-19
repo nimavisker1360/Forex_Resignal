@@ -55,16 +55,16 @@ export const MotionDiv = ({
   style,
 }: MotionProps) => {
   return (
-    <motion.div
-      className={className}
-      style={style}
-      initial={{ opacity: 0, x: -50 }}
-      whileInView={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.5, delay }}
-      viewport={{ once: true }}
-    >
-      {children}
-    </motion.div>
+    <div className={className} style={style}>
+      <motion.div
+        initial={{ opacity: 0, x: -50 }}
+        whileInView={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.5, delay }}
+        viewport={{ once: true }}
+      >
+        {children}
+      </motion.div>
+    </div>
   );
 };
 
@@ -75,19 +75,19 @@ export const MotionImage = ({
   style,
 }: MotionProps) => {
   return (
-    <motion.div
-      className={className}
-      style={style}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 0.1 }}
-      transition={{
-        duration: 1.5,
-        delay,
-        ease: "easeInOut",
-      }}
-    >
-      {children}
-    </motion.div>
+    <div className={className} style={style}>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 0.1 }}
+        transition={{
+          duration: 1.5,
+          delay,
+          ease: "easeInOut",
+        }}
+      >
+        {children}
+      </motion.div>
+    </div>
   );
 };
 
@@ -97,16 +97,16 @@ export const MotionStaggerContainer = ({
   style,
 }: MotionProps) => {
   return (
-    <motion.div
-      className={className}
-      style={style}
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true }}
-      variants={staggerContainer}
-    >
-      {children}
-    </motion.div>
+    <div className={className} style={style}>
+      <motion.div
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true }}
+        variants={staggerContainer}
+      >
+        {children}
+      </motion.div>
+    </div>
   );
 };
 
@@ -116,17 +116,17 @@ export const MotionStaggerItem = ({
   style,
 }: MotionProps) => {
   return (
-    <motion.div className={className} style={style} variants={justFadeIn}>
-      {children}
-    </motion.div>
+    <div className={className} style={style}>
+      <motion.div variants={justFadeIn}>{children}</motion.div>
+    </div>
   );
 };
 
 export const MotionHeading = ({ children, className, style }: MotionProps) => {
   return (
-    <motion.h2 className={className} style={style} variants={fadeInFromLeft}>
-      {children}
-    </motion.h2>
+    <div className={className} style={style}>
+      <motion.h2 variants={fadeInFromLeft}>{children}</motion.h2>
+    </div>
   );
 };
 
@@ -136,8 +136,8 @@ export const MotionParagraph = ({
   style,
 }: MotionProps) => {
   return (
-    <motion.p className={className} style={style} variants={fadeInFromLeft}>
-      {children}
-    </motion.p>
+    <div className={className} style={style}>
+      <motion.p variants={fadeInFromLeft}>{children}</motion.p>
+    </div>
   );
 };

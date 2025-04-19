@@ -51,41 +51,41 @@ export default function Home() {
 
             {/* Right Column - Text Content */}
             <MotionStaggerContainer className="space-y-8 text-left order-2 md:order-2 max-w-xl">
-              <MotionStaggerItem className="inline-flex items-center bg-gradient-to-r from-blue-700/40 to-blue-500/30 backdrop-blur-sm px-6 py-2.5 rounded-full border border-blue-400/30">
+              <MotionStaggerItem className="inline-flex items-center bg-gradient-to-r from-blue-700/40 to-blue-500/30 backdrop-blur-sm px-6 py-2.5 rounded-full border border-blue-400/30 mb-4">
                 <span className="text-blue-200 font-medium">
                   Forex Signal Platform
                 </span>
               </MotionStaggerItem>
 
-              <MotionHeading className="text-5xl font-extrabold tracking-tight leading-none text-white/90">
+              <MotionHeading className="text-5xl font-extrabold tracking-tight leading-none text-white/90 mb-6 mt-4">
                 Trading Alerts From Expert Analysts
               </MotionHeading>
 
-              <MotionParagraph className="text-lg md:text-xl text-white/70">
+              <MotionParagraph className="text-lg md:text-xl text-white/70 mt-4">
                 Get accurate Forex signals straight from expert analysts. Stay
-                ahead in the market with real-time updates.
+                ahead in the market with real-time updates
               </MotionParagraph>
 
-              <MotionStaggerItem className="flex flex-wrap justify-center md:justify-end gap-8 mt-6 mb-8">
-                <div className="flex items-center gap-3">
-                  <span className="text-base">Add stop loss points</span>
-                  <div className="bg-primary/20 p-1 rounded-full">
-                    <CheckCircle2 className="h-5 w-5 text-primary" />
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
+              <div className="flex flex-col items-end sm:flex-row sm:justify-end sm:flex-wrap sm:gap-8 gap-4 mt-6 mb-8">
+                <div className="flex items-center gap-2">
                   <span className="text-base">When to Sell</span>
-                  <div className="bg-primary/20 p-1 rounded-full">
-                    <CheckCircle2 className="h-5 w-5 text-primary" />
+                  <div className="bg-blue-600 p-1 rounded-full flex-shrink-0">
+                    <CheckCircle2 className="h-5 w-5 text-white" />
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
                   <span className="text-base">When to Buy</span>
-                  <div className="bg-primary/20 p-1 rounded-full">
-                    <CheckCircle2 className="h-5 w-5 text-primary" />
+                  <div className="bg-blue-600 p-1 rounded-full flex-shrink-0">
+                    <CheckCircle2 className="h-5 w-5 text-white" />
                   </div>
                 </div>
-              </MotionStaggerItem>
+                <div className="flex items-center gap-2">
+                  <span className="text-base">Add stop loss points</span>
+                  <div className="bg-blue-600 p-1 rounded-full flex-shrink-0">
+                    <CheckCircle2 className="h-5 w-5 text-white" />
+                  </div>
+                </div>
+              </div>
 
               <MotionStaggerItem className="pt-2">
                 <Button
@@ -124,113 +124,97 @@ export default function Home() {
             transform: "rotate(10deg) scale(1.4)",
           }}
         ></div>
-        <div className="container mx-auto px-10 relative z-10">
-          <MotionStaggerContainer className="flex flex-col items-center mb-10">
-            <MotionStaggerItem className="bg-blue-600/60 text-white px-3 py-1.5 rounded-lg mb-3 backdrop-blur-sm">
-              <span>Why Choose Us</span>
-            </MotionStaggerItem>
-            <MotionHeading className="text-3xl font-bold text-center mb-4">
+        <div className="container mx-auto px-6 sm:px-10 relative z-10">
+          <div className="flex flex-col items-center mb-12">
+            <div className="relative mb-6">
+              <div className="bg-blue-600 text-white px-7 py-2.5 rounded-lg border-2 border-blue-400/70 mx-auto relative z-10">
+                <span className="text-center font-medium text-sm">
+                  Why Choose Us
+                </span>
+              </div>
+            </div>
+            <MotionHeading className="text-3xl font-bold text-center mb-8">
               Why Traders Trust Us
             </MotionHeading>
-          </MotionStaggerContainer>
+          </div>
 
-          <MotionStaggerContainer className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto my-2">
-            {/* Feature 1 */}
-            <MotionStaggerItem className="bg-gray-900/80 rounded-xl p-6 backdrop-blur-sm border border-blue-500/20 hover:border-blue-500/40 transition-all">
-              <div className="flex justify-center">
-                <div className="bg-blue-600 p-3 rounded-lg w-14 h-14 flex items-center justify-center mb-5">
-                  <Diamond className="h-8 w-8 text-white" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 max-w-5xl mx-auto my-2">
+            <div className="space-y-6">
+              {/* Feature 1 */}
+              <MotionStaggerItem className="bg-gray-900/80 rounded-xl p-6 backdrop-blur-sm border border-blue-500/20 hover:border-blue-500/40 transition-all">
+                <div className="flex justify-center">
+                  <div className="bg-blue-600 p-3 rounded-lg w-14 h-14 flex items-center justify-center mb-5">
+                    <Diamond className="h-8 w-8 text-white" />
+                  </div>
                 </div>
-              </div>
-              <h3 className="text-xl font-semibold text-center mb-3">
-                Quality Over Quantity
-              </h3>
-              {/* <p className="text-gray-400 text-center">
-                Lorem ipsum dolor sit amet consectetur adipiscing elit baborum
-                nesciunt.
-              </p> */}
-            </MotionStaggerItem>
+                <h3 className="text-xl font-semibold text-center mb-3">
+                  Quality Over Quantity
+                </h3>
+              </MotionStaggerItem>
 
-            {/* Feature 2 */}
-            <MotionStaggerItem className="bg-gray-900/80 rounded-xl p-6 backdrop-blur-sm border border-blue-500/20 hover:border-blue-500/40 transition-all">
-              <div className="flex justify-center">
-                <div className="bg-blue-600 p-3 rounded-lg w-14 h-14 flex items-center justify-center mb-5">
-                  <Coins className="h-8 w-8 text-white" />
+              {/* Feature 3 */}
+              <MotionStaggerItem className="bg-gray-900/80 rounded-xl p-6 backdrop-blur-sm border border-blue-500/20 hover:border-blue-500/40 transition-all">
+                <div className="flex justify-center">
+                  <div className="bg-blue-600 p-3 rounded-lg w-14 h-14 flex items-center justify-center mb-5">
+                    <LineChart className="h-8 w-8 text-white" />
+                  </div>
                 </div>
-              </div>
-              <h3 className="text-xl font-semibold text-center mb-3">
-                Low Cost Service
-              </h3>
-              {/* <p className="text-gray-400 text-center">
-                Lorem ipsum dolor sit amet consectetur adipiscing elit baborum
-                nesciunt.
-              </p> */}
-            </MotionStaggerItem>
+                <h3 className="text-xl font-semibold text-center mb-3">
+                  Strong Technical Analysis
+                </h3>
+              </MotionStaggerItem>
 
-            {/* Feature 3 */}
-            <MotionStaggerItem className="bg-gray-900/80 rounded-xl p-6 backdrop-blur-sm border border-blue-500/20 hover:border-blue-500/40 transition-all">
-              <div className="flex justify-center">
-                <div className="bg-blue-600 p-3 rounded-lg w-14 h-14 flex items-center justify-center mb-5">
-                  <LineChart className="h-8 w-8 text-white" />
+              {/* Feature 5 */}
+              <MotionStaggerItem className="bg-gray-900/80 rounded-xl p-6 backdrop-blur-sm border border-blue-500/20 hover:border-blue-500/40 transition-all">
+                <div className="flex justify-center">
+                  <div className="bg-blue-600 p-3 rounded-lg w-14 h-14 flex items-center justify-center mb-5">
+                    <MessageSquare className="h-8 w-8 text-white" />
+                  </div>
                 </div>
-              </div>
-              <h3 className="text-xl font-semibold text-center mb-3">
-                Strong Technical Analysis
-              </h3>
-              {/* <p className="text-gray-400 text-center">
-                Lorem ipsum dolor sit amet consectetur adipiscing elit baborum
-                nesciunt.
-              </p> */}
-            </MotionStaggerItem>
+                <h3 className="text-xl font-semibold text-center mb-3">
+                  Telegram Signals
+                </h3>
+              </MotionStaggerItem>
+            </div>
 
-            {/* Feature 4 */}
-            <MotionStaggerItem className="bg-gray-900/80 rounded-xl p-6 backdrop-blur-sm border border-blue-500/20 hover:border-blue-500/40 transition-all">
-              <div className="flex justify-center">
-                <div className="bg-blue-600 p-3 rounded-lg w-14 h-14 flex items-center justify-center mb-5">
-                  <Info className="h-8 w-8 text-white" />
+            <div className="space-y-6">
+              {/* Feature 2 */}
+              <MotionStaggerItem className="bg-gray-900/80 rounded-xl p-6 backdrop-blur-sm border border-blue-500/20 hover:border-blue-500/40 transition-all">
+                <div className="flex justify-center">
+                  <div className="bg-blue-600 p-3 rounded-lg w-14 h-14 flex items-center justify-center mb-5">
+                    <Coins className="h-8 w-8 text-white" />
+                  </div>
                 </div>
-              </div>
-              <h3 className="text-xl font-semibold text-center mb-3">
-                In-depth Information
-              </h3>
-              {/* <p className="text-gray-400 text-center">
-                Lorem ipsum dolor sit amet consectetur adipiscing elit baborum
-                nesciunt.
-              </p> */}
-            </MotionStaggerItem>
+                <h3 className="text-xl font-semibold text-center mb-3">
+                  Low Cost Service
+                </h3>
+              </MotionStaggerItem>
 
-            {/* Feature 5 */}
-            <MotionStaggerItem className="bg-gray-900/80 rounded-xl p-6 backdrop-blur-sm border border-blue-500/20 hover:border-blue-500/40 transition-all">
-              <div className="flex justify-center">
-                <div className="bg-blue-600 p-3 rounded-lg w-14 h-14 flex items-center justify-center mb-5">
-                  <MessageSquare className="h-8 w-8 text-white" />
+              {/* Feature 4 */}
+              <MotionStaggerItem className="bg-gray-900/80 rounded-xl p-6 backdrop-blur-sm border border-blue-500/20 hover:border-blue-500/40 transition-all">
+                <div className="flex justify-center">
+                  <div className="bg-blue-600 p-3 rounded-lg w-14 h-14 flex items-center justify-center mb-5">
+                    <Info className="h-8 w-8 text-white" />
+                  </div>
                 </div>
-              </div>
-              <h3 className="text-xl font-semibold text-center mb-3">
-                Telegram Signals
-              </h3>
-              {/* <p className="text-gray-400 text-center">
-                Lorem ipsum dolor sit amet consectetur adipiscing elit baborum
-                nesciunt.
-              </p> */}
-            </MotionStaggerItem>
+                <h3 className="text-xl font-semibold text-center mb-3">
+                  In-depth Information
+                </h3>
+              </MotionStaggerItem>
 
-            {/* Feature 6 */}
-            <MotionStaggerItem className="bg-gray-900/80 rounded-xl p-6 backdrop-blur-sm border border-blue-500/20 hover:border-blue-500/40 transition-all">
-              <div className="flex justify-center">
-                <div className="bg-blue-600 p-3 rounded-lg w-14 h-14 flex items-center justify-center mb-5">
-                  <Trophy className="h-8 w-8 text-white" />
+              {/* Feature 6 */}
+              <MotionStaggerItem className="bg-gray-900/80 rounded-xl p-6 backdrop-blur-sm border border-blue-500/20 hover:border-blue-500/40 transition-all">
+                <div className="flex justify-center">
+                  <div className="bg-blue-600 p-3 rounded-lg w-14 h-14 flex items-center justify-center mb-5">
+                    <Trophy className="h-8 w-8 text-white" />
+                  </div>
                 </div>
-              </div>
-              <h3 className="text-xl font-semibold text-center mb-3">
-                Success Ratio Is 80-90%
-              </h3>
-              {/* <p className="text-gray-400 text-center">
-                Lorem ipsum dolor sit amet consectetur adipiscing elit baborum
-                nesciunt.
-              </p> */}
-            </MotionStaggerItem>
-          </MotionStaggerContainer>
+                <h3 className="text-xl font-semibold text-center mb-3">
+                  Success Ratio Is 80-90%
+                </h3>
+              </MotionStaggerItem>
+            </div>
+          </div>
         </div>
       </section>
 
