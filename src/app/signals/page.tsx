@@ -8,6 +8,7 @@ import {
   ArrowUpDown,
   Check,
   ChevronDown,
+  ArrowDownUp,
 } from "lucide-react";
 import { useState } from "react";
 import {
@@ -110,6 +111,49 @@ const signals = [
     success: true,
     isPremium: false,
   },
+  {
+    id: "9",
+    pair: "GBP/USD",
+    type: "sell" as const,
+    price: 1.2485,
+    takeProfit: [1.2465, 1.2445, 1.2425],
+    stopLoss: 1.2505,
+    timestamp: "3 days ago - 13:20",
+    success: true,
+    isPremium: false,
+  },
+  {
+    id: "10",
+    pair: "USD/CHF",
+    type: "buy" as const,
+    price: 0.9045,
+    takeProfit: [0.9065, 0.9085],
+    stopLoss: 0.9025,
+    timestamp: "4 days ago - 09:15",
+    success: true,
+    isPremium: false,
+  },
+  {
+    id: "11",
+    pair: "EUR/JPY",
+    type: "sell" as const,
+    price: 164.75,
+    takeProfit: [164.55, 164.35, 164.15],
+    stopLoss: 164.95,
+    timestamp: "4 days ago - 14:50",
+    success: false,
+    isPremium: false,
+  },
+  {
+    id: "12",
+    pair: "CAD/JPY",
+    type: "buy" as const,
+    price: 113.25,
+    takeProfit: [113.45, 113.65],
+    stopLoss: 113.05,
+    timestamp: "5 days ago - 11:30",
+    isPremium: true,
+  },
 ];
 
 export default function SignalsPage() {
@@ -151,157 +195,123 @@ export default function SignalsPage() {
           backgroundSize: "cover",
         }}
       ></div>
-      <div className="max-w-screen-xl mx-auto px-4 py-6 relative z-10">
-        <MotionDiv className="flex justify-center items-center mb-4">
-          <h1 className="text-2xl font-bold">Forex Signals</h1>
+      <div className="max-w-screen-xl mx-auto px-4 py-16 relative z-10">
+        <MotionDiv className="flex justify-center items-center mb-8">
+          <h1 className="text-4xl font-bold">Forex Signals</h1>
         </MotionDiv>
 
-        {/* Filters and Search */}
-        <MotionDiv className="flex flex-col sm:flex-row gap-3 mb-6" delay={0.1}>
-          <div className="order-2 sm:order-1 relative flex-1">
-            <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <input
-              type="text"
-              placeholder="...Signal Search"
-              className="w-full h-9 pr-3 pl-10 rounded-md border border-gray-800 bg-gray-900 text-sm text-white ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring text-left"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
+        {/* Search and filters */}
+        <div className="flex flex-col mb-10 mx-auto max-w-5xl">
+          {/* Search Row */}
+          <div className="flex flex-col sm:flex-row gap-3 mb-4">
+            <div className="relative flex-1 w-full">
+              <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <input
+                type="text"
+                placeholder="...Signal Search"
+                className="w-full h-10 pr-3 pl-10 rounded-md border border-gray-800 bg-gray-900 text-sm text-white ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring text-left"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
           </div>
-          <div className="order-1 sm:order-2 flex gap-2 justify-end">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="flex items-center gap-1 border-gray-800 text-gray-300 hover:text-white"
-                >
-                  <Filter className="h-4 w-4" />
-                  {signalTypeFilter === "all"
-                    ? "All Signals"
-                    : signalTypeFilter === "buy"
-                    ? "Buy Signals"
-                    : "Sell Signals"}
-                  <ChevronDown className="h-3 w-3 ml-1" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="bg-gray-900 border-gray-800 text-white">
-                <DropdownMenuItem
-                  className={`flex items-center gap-2 ${
-                    signalTypeFilter === "all" ? "text-primary" : ""
-                  }`}
-                  onClick={() => setSignalTypeFilter("all")}
-                >
-                  {signalTypeFilter === "all" && <Check className="h-4 w-4" />}
-                  <span
-                    className={signalTypeFilter === "all" ? "ml-0" : "ml-6"}
-                  >
-                    All Signals
-                  </span>
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  className={`flex items-center gap-2 ${
-                    signalTypeFilter === "buy" ? "text-primary" : ""
-                  }`}
-                  onClick={() => setSignalTypeFilter("buy")}
-                >
-                  {signalTypeFilter === "buy" && <Check className="h-4 w-4" />}
-                  <span
-                    className={signalTypeFilter === "buy" ? "ml-0" : "ml-6"}
-                  >
-                    Buy Signals
-                  </span>
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  className={`flex items-center gap-2 ${
-                    signalTypeFilter === "sell" ? "text-primary" : ""
-                  }`}
-                  onClick={() => setSignalTypeFilter("sell")}
-                >
-                  {signalTypeFilter === "sell" && <Check className="h-4 w-4" />}
-                  <span
-                    className={signalTypeFilter === "sell" ? "ml-0" : "ml-6"}
-                  >
-                    Sell Signals
-                  </span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
 
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="flex items-center gap-1 border-gray-800 text-gray-300 hover:text-white"
-                >
-                  <ArrowUpDown className="h-4 w-4" />
-                  {sortOrder === "newest"
-                    ? "Newest"
-                    : sortOrder === "oldest"
-                    ? "Oldest"
-                    : "Symbol A-Z"}
-                  <ChevronDown className="h-3 w-3 ml-1" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="bg-gray-900 border-gray-800 text-white">
-                <DropdownMenuItem
-                  className={`flex items-center gap-2 ${
-                    sortOrder === "newest" ? "text-primary" : ""
-                  }`}
-                  onClick={() => setSortOrder("newest")}
-                >
-                  {sortOrder === "newest" && <Check className="h-4 w-4" />}
-                  <span className={sortOrder === "newest" ? "ml-0" : "ml-6"}>
-                    Newest First
-                  </span>
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  className={`flex items-center gap-2 ${
-                    sortOrder === "oldest" ? "text-primary" : ""
-                  }`}
-                  onClick={() => setSortOrder("oldest")}
-                >
-                  {sortOrder === "oldest" && <Check className="h-4 w-4" />}
-                  <span className={sortOrder === "oldest" ? "ml-0" : "ml-6"}>
-                    Oldest First
-                  </span>
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  className={`flex items-center gap-2 ${
-                    sortOrder === "pair" ? "text-primary" : ""
-                  }`}
-                  onClick={() => setSortOrder("pair")}
-                >
-                  {sortOrder === "pair" && <Check className="h-4 w-4" />}
-                  <span className={sortOrder === "pair" ? "ml-0" : "ml-6"}>
-                    Symbol A-Z
-                  </span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+          {/* Filter buttons row */}
+          <div className="flex flex-row gap-2 overflow-x-auto pb-1">
+            <Button
+              variant="outline"
+              size="sm"
+              className={`flex items-center gap-1 px-4 ${
+                sortOrder === "newest"
+                  ? "bg-gray-800 border-gray-700"
+                  : "border-gray-800 text-gray-300 hover:text-white"
+              }`}
+              onClick={() => setSortOrder("newest")}
+            >
+              <ArrowDownUp className="h-4 w-4" />
+              Newest
+            </Button>
+
+            <Button
+              variant="outline"
+              size="sm"
+              className={`flex items-center gap-1 px-4 ${
+                signalTypeFilter === "all"
+                  ? "bg-gray-800 border-gray-700"
+                  : "border-gray-800 text-gray-300 hover:text-white"
+              }`}
+              onClick={() => setSignalTypeFilter("all")}
+            >
+              <Filter className="h-4 w-4" />
+              All Signals
+            </Button>
+
+            <Button
+              variant="outline"
+              size="sm"
+              className={`flex items-center gap-1 px-4 ${
+                signalTypeFilter === "buy"
+                  ? "bg-gray-800 border-gray-700"
+                  : "border-gray-800 text-gray-300 hover:text-white"
+              }`}
+              onClick={() => setSignalTypeFilter("buy")}
+            >
+              Buy Signals
+            </Button>
+
+            <Button
+              variant="outline"
+              size="sm"
+              className={`flex items-center gap-1 px-4 ${
+                signalTypeFilter === "sell"
+                  ? "bg-gray-800 border-gray-700"
+                  : "border-gray-800 text-gray-300 hover:text-white"
+              }`}
+              onClick={() => setSignalTypeFilter("sell")}
+            >
+              Sell Signals
+            </Button>
+
+            <Button
+              variant="outline"
+              size="sm"
+              className={`flex items-center gap-1 px-4 ${
+                sortOrder === "oldest"
+                  ? "bg-gray-800 border-gray-700"
+                  : "border-gray-800 text-gray-300 hover:text-white"
+              }`}
+              onClick={() => setSortOrder("oldest")}
+            >
+              Oldest
+            </Button>
+
+            <Button
+              variant="outline"
+              size="sm"
+              className={`flex items-center gap-1 px-4 ${
+                sortOrder === "pair"
+                  ? "bg-gray-800 border-gray-700"
+                  : "border-gray-800 text-gray-300 hover:text-white"
+              }`}
+              onClick={() => setSortOrder("pair")}
+            >
+              Symbol A-Z
+            </Button>
           </div>
-        </MotionDiv>
-
-        {/* Info Banner */}
-        {/* <div className="bg-gray-900/50 rounded-lg p-4 mb-8 text-sm text-left border border-gray-800">
-          For access to all premium signals and professional analysis,{" "}
-          <a href="/premium" className="text-primary font-bold hover:underline">
-            get Premium Membership
-          </a>{" "}
-          now.
-        </div> */}
+        </div>
 
         {/* Signals Grid */}
-        <MotionStaggerContainer className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-6">
+        <div className="max-w-6xl mx-auto mb-12">
           {filteredSignals.length > 0 ? (
-            filteredSignals.map((signal) => (
-              <MotionStaggerItem key={signal.id}>
-                <SignalCard {...signal} />
-              </MotionStaggerItem>
-            ))
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredSignals.map((signal) => (
+                <div key={signal.id} className="h-full">
+                  <SignalCard {...signal} />
+                </div>
+              ))}
+            </div>
           ) : (
-            <MotionDiv className="col-span-full min-h-[300px] flex items-center justify-center text-center p-8 text-gray-400 bg-gray-900/80 backdrop-blur-sm rounded-lg border border-gray-800 w-full">
+            <div className="min-h-[300px] flex items-center justify-center text-center p-8 text-gray-400 bg-gray-900/80 backdrop-blur-sm rounded-lg border border-gray-800 w-full">
               <div>
                 <SearchIcon className="h-12 w-12 mx-auto mb-4 opacity-30" />
                 <p className="text-lg">No signals found with this symbol</p>
@@ -309,59 +319,9 @@ export default function SignalsPage() {
                   Try searching for a different currency pair
                 </p>
               </div>
-            </MotionDiv>
+            </div>
           )}
-        </MotionStaggerContainer>
-
-        {/* Pagination */}
-        {/* <div className="flex justify-center mt-12">
-          <nav className="flex items-center gap-1">
-            <Button
-              variant="outline"
-              size="sm"
-              className="border-gray-800 text-gray-300 hover:text-white"
-            >
-              Next
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="border-gray-800 text-gray-300 hover:text-white"
-            >
-              8
-            </Button>
-            <span className="px-2 text-gray-400">...</span>
-            <Button
-              variant="outline"
-              size="sm"
-              className="border-gray-800 text-gray-300 hover:text-white"
-            >
-              3
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="border-gray-800 text-gray-300 hover:text-white"
-            >
-              2
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="bg-primary text-primary-foreground hover:bg-primary/90"
-            >
-              1
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              disabled
-              className="text-gray-600 border-gray-800"
-            >
-              Previous
-            </Button>
-          </nav>
-        </div> */}
+        </div>
       </div>
     </div>
   );

@@ -62,23 +62,21 @@ export function RecentSignals() {
         }}
       ></div>
       <div className="container mx-auto px-4 relative z-10">
-        <MotionStaggerContainer className="flex flex-col justify-center items-center mb-12 border-b border-gray-800 pb-6">
-          <MotionHeading className="text-5xl font-bold text-white mb-6 ">
+        <div className="flex flex-col items-center justify-center mb-12 border-b border-gray-800 pb-6">
+          <MotionHeading className="text-5xl font-bold text-white mb-6 text-center">
             Latest Signals
           </MotionHeading>
-          <MotionStaggerItem>
-            <Button
-              variant="outline"
-              asChild
-              className="border border-gray-700 shadow-md text-gray-300 hover:text-white hover:bg-gray-800 px-6 py-2 mb-8"
-            >
-              <Link href="/signals" className="flex flex-row-reverse">
-                View All
-                <ArrowRight className="mr-2 h-4 w-4 " />
-              </Link>
-            </Button>
-          </MotionStaggerItem>
-        </MotionStaggerContainer>
+          <Button
+            variant="outline"
+            asChild
+            className="border border-gray-700 shadow-md text-gray-300 hover:text-white hover:bg-gray-800 px-6 py-2 mb-8 mx-auto"
+          >
+            <Link href="/signals" className="flex items-center justify-center">
+              View All
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Link>
+          </Button>
+        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
           {recentSignals.map((signal, index) => (
