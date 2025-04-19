@@ -17,7 +17,7 @@ export function Navbar() {
           <Button
             variant="outline"
             asChild
-            className="bg-blue-700/40 text-white border-blue-700/30 hover:bg-blue-700/50 rounded-lg"
+            className="bg-blue-600/80 text-white border-blue-700/30 hover:bg-blue-700/50 rounded-lg"
           >
             <Link href="https://t.me/+uRJNzAveahQ0NjM0" className="flex items-center gap-1">
               Telegram Bot <ArrowUpRight className="h-4 w-4" />
