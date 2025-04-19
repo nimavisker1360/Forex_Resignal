@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { RecentSignals } from "@/components/RecentSignals";
 import { Testimonials } from "@/components/Testimonials";
 import Image from "next/image";
+import { TradingViewTicker } from "@/components/TradingViewTicker";
 import {
   CheckCircle2,
   Diamond,
@@ -99,11 +100,16 @@ export default function Home() {
               </MotionStaggerItem>
             </MotionStaggerContainer>
           </div>
+
+          {/* TradingView Ticker Tape Widget */}
+          <div className="mt-10 relative z-30">
+            <TradingViewTicker />
+          </div>
         </div>
       </section>
 
       {/* Gradient divider to hide the line between sections */}
-      <div className="h-24 bg-gradient-to-b from-black via-blue-200/5 to-black/10 relative z-20 -mt-16 -mb-10 backdrop-blur-md"></div>
+      <div className="h-24 bg-gradient-to-b from-black via-blue-200/5 to-black/10 relative z-10 -mt-16 -mb-10 backdrop-blur-md"></div>
 
       {/* Features */}
       <section className="py-20 bg-black text-white border-none relative overflow-hidden">
