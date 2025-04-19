@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "tw-animate-css";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
+import { ToastProvider } from "@/components/ui/toast-provider";
 
 export const metadata: Metadata = {
   title: "Signal Forex - Provider of the Best Trading Signals",
@@ -20,6 +22,7 @@ export default function RootLayout({
         <Navbar />
         <main className="flex-1">{children}</main>
         <Footer />
+        <ToastProvider />
       </body>
     </html>
   );

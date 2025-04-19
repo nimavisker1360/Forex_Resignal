@@ -12,28 +12,28 @@ import { useCallback, useEffect, useState } from "react";
 // Additional testimonials data
 const testimonialsData = [
   {
-    name: "Ali Mohammadi",
+    name: "Nasrin Mohammadi",
     title: "Forex Trader",
     quote:
       "After using the signals from this site, my trading profits increased significantly. I'm really satisfied!",
     rating: 4,
   },
   {
-    name: "Sara Ahmadi",
+    name: "Vahid Ahmadi",
     title: "Beginner in Currency Market",
     quote:
       "As a beginner, these signals helped me enter trades with more confidence. Great support and accurate analysis!",
     rating: 5,
   },
   {
-    name: "Reza Karimi",
+    name: "Michale Tomson",
     title: "Professional Trader",
     quote:
       "The accuracy of the signals is exceptional. I've used various sites, but none have been as successful as this one.",
     rating: 5,
   },
   {
-    name: "Mina Taheri",
+    name: "Reza Taheri",
     title: "Day Trader",
     quote:
       "These signals have transformed my trading strategy. The precision and timing are impressive!",
@@ -54,7 +54,7 @@ const testimonialsData = [
     rating: 4,
   },
   {
-    name: "Mohammad Javad",
+    name: "Negar Taslimi",
     title: "Financial Advisor",
     quote:
       "I recommend this service to my clients who are interested in forex trading. The results speak for themselves.",

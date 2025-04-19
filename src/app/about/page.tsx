@@ -5,22 +5,20 @@ import { ArrowRight, Award, Users, TrendingUp, Zap } from "lucide-react";
 
 export default function AboutPage() {
   return (
-    <div className="container mx-auto px-4 sm:px-6 md:px-16 lg:px-24 py-12 relative max-w-[1400px]">
+    <div className="container mx-auto px-4 sm:px-6 md:px-16 lg:px-24 py-12 relative max-w-[1400px] overflow-hidden">
       <div
-        className="absolute inset-0 mx-auto my-auto bg-[url('/images/back.jpg')] bg-contain bg-center opacity-20 z-0"
+        className="absolute inset-0 bg-[url('/images/back.jpg')] bg-contain bg-center opacity-20 z-0"
         style={{
-          width: "170%",
-          height: "120%",
-          top: "0%",
-          left: "0%",
+          width: "100%",
+          height: "100%",
           transform: "rotate(-8deg) scale(1.3)",
         }}
       ></div>
 
       <div className="relative z-10">
         <div className="max-w-3xl mx-auto mb-16 text-center bg-black/50 p-6 rounded-lg">
-          <h1 className="text-4xl font-bold mb-6">About Us</h1>
-          <p className="text-lg text-muted-foreground">
+          <h1 className="text-4xl font-bold mb-6 text-blue-500">About Us</h1>
+          <p className="text-lg">
             Signal Forex was established with the goal of providing the best
             trading signals and accurate analysis of financial markets
           </p>
@@ -40,14 +38,14 @@ export default function AboutPage() {
             </div>
           </div>
           <div className="text-left  p-6 rounded-lg">
-            <h2 className="text-3xl font-bold mb-6">Who We Are</h2>
-            <p className="text-muted-foreground mb-4">
+            <h2 className="text-3xl font-bold mb-6 text-blue-500">Who We Are</h2>
+            <p className="mb-4">
               Signal Forex is a team of professional analysts and experienced
               traders in financial markets that started its activities in 2016.
               Our goal is to provide the best trading signals with high accuracy
               for currency, gold, stock, and other financial markets.
             </p>
-            <p className="text-muted-foreground mb-4">
+            <p className="mb-4">
               We provide the best entry and exit points for traders using
               advanced technical and fundamental analysis techniques. Our team
               consists of specialists in various areas of financial markets who
@@ -67,8 +65,8 @@ export default function AboutPage() {
         {/* Our Mission */}
         <div className="bg-card border border-zinc-800 rounded-lg p-8 mb-20">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-6">Our Mission</h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            <h2 className="text-3xl font-bold mb-6 text-blue-500">Our Mission</h2>
+            <p className="text-lg max-w-2xl mx-auto">
               Our mission is to help traders achieve sustainable profitability
               in financial markets by providing accurate signals and
               professional training
@@ -81,7 +79,7 @@ export default function AboutPage() {
                 <Award className="h-10 w-10 text-primary" />
               </div>
               <h3 className="text-xl font-bold mb-2">Quality</h3>
-              <p className="text-muted-foreground">
+              <p>
                 Providing high-quality and accurate signals to ensure customer
                 profitability
               </p>
@@ -92,7 +90,7 @@ export default function AboutPage() {
                 <Users className="h-10 w-10 text-primary" />
               </div>
               <h3 className="text-xl font-bold mb-2">Education</h3>
-              <p className="text-muted-foreground">
+              <p>
                 Continuous training of traders to increase their skills and
                 knowledge in financial markets
               </p>
@@ -103,7 +101,7 @@ export default function AboutPage() {
                 <TrendingUp className="h-10 w-10 text-primary" />
               </div>
               <h3 className="text-xl font-bold mb-2">Innovation</h3>
-              <p className="text-muted-foreground">
+              <p>
                 Continuous updating of analysis methods and providing the latest
                 trading techniques
               </p>
@@ -114,7 +112,7 @@ export default function AboutPage() {
                 <Zap className="h-10 w-10 text-primary" />
               </div>
               <h3 className="text-xl font-bold mb-2">Support</h3>
-              <p className="text-muted-foreground">
+              <p>
                 Providing 24-hour support to customers to answer questions and
                 guide them
               </p>
@@ -126,29 +124,29 @@ export default function AboutPage() {
         <div className="grid md:grid-cols-4 gap-8 mb-20">
           <div className="bg-card border border-zinc-800 rounded-lg p-6 text-center">
             <div className="text-4xl font-bold text-primary mb-2">+8</div>
-            <p className="text-muted-foreground">Years Active</p>
+            <p>Years Active</p>
           </div>
 
           <div className="bg-card border border-zinc-800 rounded-lg p-6 text-center">
             <div className="text-4xl font-bold text-primary mb-2">+5000</div>
-            <p className="text-muted-foreground">Active Users</p>
+            <p>Active Users</p>
           </div>
 
           <div className="bg-card border border-zinc-800 rounded-lg p-6 text-center">
             <div className="text-4xl font-bold text-primary mb-2">+85%</div>
-            <p className="text-muted-foreground">Signal Success Rate</p>
+            <p>Signal Success Rate</p>
           </div>
 
           <div className="bg-card border border-zinc-800 rounded-lg p-6 text-center">
             <div className="text-4xl font-bold text-primary mb-2">24/7</div>
-            <p className="text-muted-foreground">Support</p>
+            <p>Support</p>
           </div>
         </div>
 
         {/* CTA */}
         {/* <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-8 text-center">
           <h2 className="text-2xl font-bold mb-4">Join Us</h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto mb-6">
+          <p className="text-lg max-w-2xl mx-auto mb-6">
             By signing up on the Signal Forex site, benefit from the best
             trading signals and specialized analysis to increase your
             profitability.
