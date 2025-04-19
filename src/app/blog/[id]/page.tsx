@@ -3,10 +3,9 @@
 import { useEffect, useState } from "react";
 import { ArrowLeft, Calendar, User, Link as LinkIcon } from "lucide-react";
 import Link from "next/link";
-import Image from "next/image";
 import { useParams } from "next/navigation";
 
-// TradingView news item interface
+// NewsAPI news item interface
 interface NewsItem {
   id: string;
   title: string;
@@ -30,7 +29,7 @@ export default function NewsDetailPage() {
       try {
         setLoading(true);
         // Fetch all news from our API endpoint
-        const response = await fetch("/api/tradingview-news");
+        const response = await fetch("/api/news-api");
 
         if (!response.ok) {
           throw new Error("Failed to fetch news data");
@@ -92,15 +91,14 @@ export default function NewsDetailPage() {
           <div className="bg-gray-900 rounded-xl overflow-hidden border border-gray-800 max-w-4xl mx-auto text-left">
             <div className="relative h-64 md:h-96 w-full">
               {newsItem.imageUrl ? (
-                <Image
+                <img
                   src={newsItem.imageUrl}
                   alt={newsItem.title}
-                  fill
-                  className="object-cover"
+                  className="w-full h-full object-cover absolute"
                 />
               ) : (
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-teal-600 flex items-center justify-center">
-                  <span className="text-2xl font-bold">Trading News</span>
+                  <span className="text-2xl font-bold">Financial News</span>
                 </div>
               )}
             </div>

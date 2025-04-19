@@ -3,9 +3,8 @@
 import { useEffect, useState } from "react";
 import { ArrowRight, Calendar, User } from "lucide-react";
 import Link from "next/link";
-import Image from "next/image";
 
-// TradingView news item interface
+// NewsAPI news item interface
 interface NewsItem {
   id: string;
   title: string;
@@ -26,7 +25,7 @@ export default function BlogPage() {
       try {
         setLoading(true);
         // Fetch news from our API endpoint
-        const response = await fetch("/api/tradingview-news");
+        const response = await fetch("/api/news-api");
 
         if (!response.ok) {
           throw new Error("Failed to fetch news data");
@@ -55,15 +54,23 @@ export default function BlogPage() {
   };
 
   return (
-    <main className="min-h-screen bg-black text-white pt-20 pb-16">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+    <main className="min-h-screen bg-black text-white pt-20 pb-16 relative">
+      <div
+        className="absolute inset-0 mx-auto my-auto bg-[url('/images/back.jpg')] bg-cover bg-no-repeat bg-center opacity-20 z-0"
+        style={{
+          width: "100%",
+          height: "100%",
+          backgroundImage: "url('/images/back.jpg')",
+        }}
+      ></div>
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="mb-12 text-center">
           <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-blue-500 to-teal-400 bg-clip-text text-transparent">
-            Latest Trading News
+            Financial News & Market Updates
           </h1>
           <p className="text-gray-400 max-w-2xl mx-auto">
-            Stay updated with the latest news and insights from the forex and
-            financial markets
+            Stay updated with the latest financial news and market insights from
+            around the world via NewsAPI.org
           </p>
         </div>
 
@@ -77,7 +84,7 @@ export default function BlogPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {news.map((item) => (
+            {news.slice(0, 9).map((item) => (
               <div
                 key={item.id}
                 className="bg-gray-900 rounded-xl overflow-hidden hover:shadow-[0_0_15px_rgba(59,130,246,0.5)] transition-all duration-300 border border-gray-800"
@@ -85,15 +92,16 @@ export default function BlogPage() {
                 <Link href={`/blog/${item.id}`} className="block">
                   <div className="relative h-48 w-full">
                     {item.imageUrl ? (
-                      <Image
+                      <img
                         src={item.imageUrl}
                         alt={item.title}
-                        fill
-                        className="object-cover"
+                        className="w-full h-full object-cover absolute"
                       />
                     ) : (
                       <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-teal-600 flex items-center justify-center">
-                        <span className="text-xl font-bold">Trading News</span>
+                        <span className="text-xl font-bold">
+                          Financial News
+                        </span>
                       </div>
                     )}
                   </div>
