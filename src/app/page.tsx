@@ -249,7 +249,9 @@ export default function Home() {
           </MotionDiv>
           <MotionDiv delay={0.4}>
             <Button size="lg" asChild>
-              <Link href="/sign-up">Free Registration</Link>
+              <Link href="https://t.me/+uRJNzAveahQ0NjM0">
+                Free Registration
+              </Link>
             </Button>
           </MotionDiv>
         </div>

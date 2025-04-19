@@ -93,7 +93,7 @@ export function Footer() {
             </h3>
             <ul className="space-y-2 text-white text-sm">
               <li>Address: Turkey</li>
-              <li>Phone: +90 552-6078900</li>
+              {/* <li>Phone: +90 552-6078900</li> */}
               <li>Email: nimabaghery@gmail.com</li>
             </ul>
           </div>

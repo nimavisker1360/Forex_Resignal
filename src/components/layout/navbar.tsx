@@ -19,18 +19,18 @@ export function Navbar() {
             asChild
             className="bg-blue-700/40 text-white border-blue-700/30 hover:bg-blue-700/50 rounded-lg"
           >
-            <Link href="/login" className="flex items-center gap-1">
-              Login <ArrowUpRight className="h-4 w-4" />
+            <Link href="https://t.me/+uRJNzAveahQ0NjM0" className="flex items-center gap-1">
+              Telegram Bot <ArrowUpRight className="h-4 w-4" />
             </Link>
           </Button>
-          <Button
+          {/* <Button
             asChild
             className="bg-blue-600/80 text-white hover:bg-blue-700 rounded-lg"
           >
             <Link href="/register" className="flex items-center gap-1">
               Register <ArrowUpRight className="h-4 w-4" />
             </Link>
-          </Button>
+          </Button> */}
           <Button
             variant="outline"
             size="sm"
@@ -61,12 +61,12 @@ export function Navbar() {
             >
               Contact
             </Link>
-            <Link
+            {/* <Link
               href="/plans"
               className="text-white hover:text-blue-300 transition"
             >
               Plans
-            </Link>
+            </Link> */}
             <Link
               href="/about"
               className="text-white hover:text-blue-300 transition"
@@ -114,7 +114,7 @@ export function Navbar() {
 
       {/* Mobile Navigation */}
       {isMenuOpen && (
-        <div className="md:hidden bg-black/95 backdrop-blur-sm border-t border-gray-800/50 p-4 relative z-10 w-full">
+        <div className="md:hidden bg-black/95 backdrop-blur-sm border-t border-gray-800/50 p-4 relative z-10 w-full text-left">
           <div className="flex flex-col space-y-4 w-full">
             <Link
               href="/"
@@ -123,13 +123,13 @@ export function Navbar() {
             >
               Home
             </Link>
-            <Link
+            {/* <Link
               href="/plans"
               className="text-white hover:text-blue-300 px-4 py-2 rounded-md hover:bg-gray-900/50 transition"
               onClick={() => setIsMenuOpen(false)}
             >
               Plans
-            </Link>
+            </Link> */}
             <Link
               href="/about"
               className="text-white hover:text-blue-300 px-4 py-2 rounded-md hover:bg-gray-900/50 transition"
@@ -152,7 +152,7 @@ export function Navbar() {
               Contact
             </Link>
             <div className="pt-2 flex flex-col space-y-2">
-              <Button
+              {/* <Button
                 variant="outline"
                 asChild
                 className="bg-blue-700/40 text-white border-blue-700/30 w-full"
@@ -163,13 +163,13 @@ export function Navbar() {
                 >
                   Login <ArrowUpRight className="h-4 w-4" />
                 </Link>
-              </Button>
+              </Button> */}
               <Button asChild className="bg-blue-600/80 text-white w-full">
                 <Link
-                  href="/register"
+                  href="https://t.me/+uRJNzAveahQ0NjM0"
                   className="flex items-center justify-center gap-1"
                 >
-                  Register <ArrowUpRight className="h-4 w-4" />
+                  Telegram Bot <ArrowUpRight className="h-4 w-4" />
                 </Link>
               </Button>
             </div>
