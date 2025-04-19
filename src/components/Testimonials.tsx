@@ -4,7 +4,7 @@ import {
   MotionDiv,
   MotionStaggerContainer,
   MotionHeading,
-  MotionParagraph,
+
 } from "@/components/ui/motion-content";
 import useEmblaCarousel from "embla-carousel-react";
 import { useCallback, useEffect, useState } from "react";
@@ -114,16 +114,13 @@ export function Testimonials() {
           transform: "rotate(-8deg) scale(1.3)",
         }}
       ></div>
-      <div className="container mx-auto px-4 relative z-10">
+      <div className="container mx-auto px-4 max-w-3xl relative z-10">
         <MotionStaggerContainer className="text-center mb-12">
           <MotionHeading className="text-3xl font-bold text-white text-center">
             What They&apos;re Saying About Us
           </MotionHeading>
-          <MotionParagraph className="text-gray-400 mt-4 max-w-2xl mx-auto text-center">
-            The heartfelt words of those we&apos;ve touched speak volumes about
-            the impact we&apos;ve made together. From empowering individuals to
-            transforming
-          </MotionParagraph>
+          
+          
         </MotionStaggerContainer>
 
         <div className="relative">

@@ -6,7 +6,7 @@ import { LineChart, Link2, Info, Phone } from "lucide-react";
 export function Footer() {
   return (
     <footer className="bg-black py-8 text-white" dir="ltr">
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-4 max-w-screen-xl">
         <div className="w-4/4 mx-auto border-t"></div>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-8">
           <div className="text-center md:text-left">
@@ -100,7 +100,9 @@ export function Footer() {
         </div>
 
         <div className="mt-8 pt-6 border-t text-white text-center">
-          <p>© {new Date().getFullYear()} Signal Forex. All rights reserved.</p>
+          <p>
+            © {new Date().getFullYear()} Signal Forex. All rights reserved.
+          </p>
         </div>
       </div>
     </footer>
