@@ -8,6 +8,7 @@ import {
   MotionStaggerItem,
   MotionHeading,
 } from "@/components/ui/motion-content";
+import { useLanguage } from "@/lib/language-context";
 
 // Sample data for signals with orange color styling for pairs
 const recentSignals = [
@@ -49,6 +50,8 @@ const recentSignals = [
 ];
 
 export function RecentSignals() {
+  const { t } = useLanguage();
+
   return (
     <section className="py-16 bg-black relative">
       <div
@@ -64,7 +67,7 @@ export function RecentSignals() {
       <div className="container mx-auto px-4 relative z-10">
         <div className="flex flex-col items-center justify-center mb-12 border-b border-gray-800 pb-6">
           <MotionHeading className="text-5xl font-bold text-white mb-6 text-center">
-            Latest Signals
+            {t("latestSignals")}
           </MotionHeading>
           <Button
             variant="outline"
@@ -72,7 +75,7 @@ export function RecentSignals() {
             className="border border-gray-700 shadow-md text-gray-300 hover:text-white hover:bg-gray-800 px-6 py-2 mb-8 mx-auto"
           >
             <Link href="/signals" className="flex items-center justify-center">
-              View All
+              {t("viewAll")}
               <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </Button>

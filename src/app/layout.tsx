@@ -4,6 +4,7 @@ import "tw-animate-css";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { ToastProvider } from "@/components/ui/toast-provider";
+import { LanguageProvider } from "@/lib/language-context";
 
 export const metadata: Metadata = {
   title: "Signal Forex - Provider of the Best Trading Signals",
@@ -17,13 +18,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fa" dir="rtl" className="bg-black">
-      <body className="min-h-screen flex flex-col overflow-x-hidden bg-black text-white">
-        <Navbar />
-        <main className="flex-1">{children}</main>
-        <Footer />
-        <ToastProvider />
-      </body>
+    <html className="bg-black">
+      <LanguageProvider>
+        <body className="min-h-screen flex flex-col overflow-x-hidden bg-black text-white">
+          <Navbar />
+          <main className="flex-1">{children}</main>
+          <Footer />
+          <ToastProvider />
+        </body>
+      </LanguageProvider>
     </html>
   );
 }

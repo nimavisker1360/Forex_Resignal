@@ -4,8 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Mail, MapPin, MessageSquare } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useLanguage } from "@/lib/language-context";
 
 export default function ContactPage() {
+  const { t, language } = useLanguage();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -37,9 +39,7 @@ export default function ContactPage() {
       const data = await response.json();
 
       if (response.ok) {
-        toast.success(
-          data.message || "Your message has been sent successfully!"
-        );
+        toast.success(data.message || t("contactPage.successMessage"));
         // Reset form
         setFormData({
           name: "",
@@ -48,11 +48,11 @@ export default function ContactPage() {
           message: "",
         });
       } else {
-        throw new Error(data.error || "Something went wrong");
+        throw new Error(data.error || t("contactPage.errorMessage"));
       }
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : "Failed to send message"
+        error instanceof Error ? error.message : t("contactPage.errorMessage")
       );
     } finally {
       setIsSubmitting(false);
@@ -62,9 +62,9 @@ export default function ContactPage() {
   return (
     <div className="container mx-auto px-4 py-12 text-left">
       <div className="max-w-3xl mx-auto mb-12 text-center ">
-        <h1 className="text-4xl font-bold mb-4">Contact Us</h1>
+        <h1 className="text-4xl font-bold mb-4">{t("contactPage.title")}</h1>
         <p className="text-lg text-muted-foreground">
-          Contact us for any questions, suggestions, or collaboration requests
+          {t("contactPage.subtitle")}
         </p>
       </div>
 
@@ -72,19 +72,24 @@ export default function ContactPage() {
         {/* Contact Info */}
         <div>
           <div className="bg-card border rounded-lg p-8 mb-8 text-left">
-            <h2 className="text-2xl font-bold mb-6">Contact Information</h2>
+            <h2 className="text-2xl font-bold mb-6">
+              {t("contactPage.contactInfo")}
+            </h2>
 
             <div className="space-y-6">
-              <div className="flex items-start justify-start gap-4 flex-row-reverse">
+              <div
+                className={`flex items-start justify-start gap-4 ${language === "fa" ? "flex-row-reverse" : ""}`}
+              >
                 <div className="mt-1 bg-primary/10 p-2 rounded-full">
                   <Mail className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <h3 className="font-semibold mb-1 text-left">Email</h3>
+                  <h3 className="font-semibold mb-1 text-left">
+                    {t("contactPage.email")}
+                  </h3>
                   <p className="text-muted-foreground text-left">
                     nimabaghery@gmail.com
                   </p>
-                
                 </div>
               </div>
 
@@ -103,29 +108,34 @@ export default function ContactPage() {
                 </div>
               </div> */}
 
-              <div className="flex items-start justify-start gap-4 flex-row-reverse">
+              <div
+                className={`flex items-start justify-start gap-4 ${language === "fa" ? "flex-row-reverse" : ""}`}
+              >
                 <div className="mt-1 bg-primary/10 p-2 rounded-full">
                   <MapPin className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <h3 className="font-semibold mb-1 text-left">Address</h3>
+                  <h3 className="font-semibold mb-1 text-left">
+                    {t("contactPage.address")}
+                  </h3>
                   <p className="text-muted-foreground text-left">
-                   Turkey
+                    {t("footer.address").replace("Address: ", "")}
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-start justify-start gap-4 flex-row-reverse">
+              <div
+                className={`flex items-start justify-start gap-4 ${language === "fa" ? "flex-row-reverse" : ""}`}
+              >
                 <div className="mt-1 bg-primary/10 p-2 rounded-full">
                   <MessageSquare className="h-5 w-5 text-primary" />
                 </div>
                 <div>
                   <h3 className="font-semibold mb-1 text-left">
-                    Online Support
+                    {t("contactPage.onlineSupport")}
                   </h3>
                   <p className="text-blue-500 text-left">
-                    Our online support is available every day of the week from 8
-                    AM to 8 PM to answer your questions
+                    {t("contactPage.onlineSupportText")}
                   </p>
                 </div>
               </div>
@@ -133,19 +143,27 @@ export default function ContactPage() {
           </div>
 
           <div className="bg-card border rounded-lg p-8 text-left">
-            <h2 className="text-2xl font-bold mb-6">Business Hours</h2>
+            <h2 className="text-2xl font-bold mb-6">
+              {t("contactPage.businessHours")}
+            </h2>
             <div className="space-y-2">
               <div className="flex justify-between">
-                <span className=" text-white">8 AM - 8 PM</span>
-                <span className="text-white">Monday - Friday</span>
+                <span className=" text-white">
+                  {t("contactPage.weekdayHours")}
+                </span>
+                <span className="text-white">{t("contactPage.weekdays")}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Closed</span>
-                <span>Saturday</span>
+                <span className="text-muted-foreground">
+                  {t("contactPage.closed")}
+                </span>
+                <span>{t("contactPage.saturday")}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Closed</span>
-                <span>Sunday</span>
+                <span className="text-muted-foreground">
+                  {t("contactPage.closed")}
+                </span>
+                <span>{t("contactPage.sunday")}</span>
               </div>
             </div>
           </div>
@@ -153,7 +171,9 @@ export default function ContactPage() {
 
         {/* Contact Form */}
         <div className="bg-card border rounded-lg p-8 text-left">
-          <h2 className="text-2xl font-bold mb-6">Contact Form</h2>
+          <h2 className="text-2xl font-bold mb-6">
+            {t("contactPage.contactForm")}
+          </h2>
 
           <form
             className="space-y-6 text-left"
@@ -166,7 +186,7 @@ export default function ContactPage() {
                   htmlFor="name"
                   className="block text-sm font-medium mb-2"
                 >
-                  Full Name
+                  {t("contactPage.fullName")}
                 </label>
                 <input
                   id="name"
@@ -175,7 +195,7 @@ export default function ContactPage() {
                   dir="ltr"
                   value={formData.name}
                   onChange={handleChange}
-                  placeholder="Enter your full name"
+                  placeholder={t("contactPage.fullNamePlaceholder")}
                   required
                 />
               </div>
@@ -184,7 +204,7 @@ export default function ContactPage() {
                   htmlFor="email"
                   className="block text-sm font-medium mb-2"
                 >
-                  Email
+                  {t("contactPage.email")}
                 </label>
                 <input
                   id="email"
@@ -193,7 +213,7 @@ export default function ContactPage() {
                   dir="ltr"
                   value={formData.email}
                   onChange={handleChange}
-                  placeholder="Enter your email address"
+                  placeholder={t("contactPage.emailPlaceholder")}
                   required
                 />
               </div>
@@ -204,7 +224,7 @@ export default function ContactPage() {
                 htmlFor="subject"
                 className="block text-sm font-medium mb-2"
               >
-                Subject
+                {t("contactPage.subject")}
               </label>
               <input
                 id="subject"
@@ -213,7 +233,7 @@ export default function ContactPage() {
                 dir="ltr"
                 value={formData.subject}
                 onChange={handleChange}
-                placeholder="Enter subject"
+                placeholder={t("contactPage.subjectPlaceholder")}
                 required
               />
             </div>
@@ -223,7 +243,7 @@ export default function ContactPage() {
                 htmlFor="message"
                 className="block text-sm font-medium mb-2"
               >
-                Message
+                {t("contactPage.message")}
               </label>
               <textarea
                 id="message"
@@ -232,7 +252,7 @@ export default function ContactPage() {
                 dir="ltr"
                 value={formData.message}
                 onChange={handleChange}
-                placeholder="Type your message here..."
+                placeholder={t("contactPage.messagePlaceholder")}
                 required
               />
             </div>
@@ -260,10 +280,10 @@ export default function ContactPage() {
                       d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                     ></path>
                   </svg>
-                  Sending...
+                  {t("contactPage.submitting")}
                 </>
               ) : (
-                "Send Message"
+                t("contactPage.submit")
               )}
             </Button>
           </form>

@@ -1,6 +1,7 @@
 "use client";
 
 import { ArrowUpCircle, ArrowDownCircle, Clock, Percent } from "lucide-react";
+import { useLanguage } from "@/lib/language-context";
 
 export interface SignalCardProps {
   id: string;
@@ -29,6 +30,7 @@ export function SignalCard({
 }: SignalCardProps) {
   const isCompleted = success !== undefined;
   const textColor = type === "buy" ? "text-green-500" : "text-red-500";
+  const { t } = useLanguage();
 
   return (
     <div className="bg-gray-900/80 backdrop-blur-sm rounded-lg overflow-hidden h-full flex flex-col text-right">
@@ -38,12 +40,12 @@ export function SignalCard({
           {type === "buy" ? (
             <>
               <ArrowUpCircle className="h-5 w-5" />
-              <span>Buy</span>
+              <span>{t("buy")}</span>
             </>
           ) : (
             <>
               <ArrowDownCircle className="h-5 w-5" />
-              <span>Sell</span>
+              <span>{t("sell")}</span>
             </>
           )}
         </div>
@@ -52,11 +54,13 @@ export function SignalCard({
       <div className="p-5 flex-grow flex flex-col">
         <div className="grid grid-cols-2 gap-4 mb-6">
           <div className="flex flex-col items-end">
-            <span className="text-gray-400 text-sm mb-2">Entry Price</span>
+            <span className="text-gray-400 text-sm mb-2">
+              {t("entryPrice")}
+            </span>
             <span className="font-medium text-lg text-white">{price}</span>
           </div>
           <div className="flex flex-col items-end">
-            <span className="text-gray-400 text-sm mb-2">Stop Loss</span>
+            <span className="text-gray-400 text-sm mb-2">{t("stopLoss")}</span>
             <span className="font-medium text-lg text-red-400">{stopLoss}</span>
           </div>
         </div>
@@ -67,7 +71,9 @@ export function SignalCard({
               key={i}
               className="flex flex-row-reverse justify-between items-center mb-3"
             >
-              <span className="text-gray-400 text-sm">Target {i + 1}</span>
+              <span className="text-gray-400 text-sm">
+                {t("target")} {i + 1}
+              </span>
               <span className="font-medium text-green-400">{tp}</span>
             </div>
           ))}
@@ -86,7 +92,7 @@ export function SignalCard({
               `}
             >
               <span className="font-medium">
-                {success ? "Successful" : "Unsuccessful"}
+                {success ? t("successful") : t("unsuccessful")}
               </span>
               <Percent className="h-4 w-4" />
             </div>
@@ -103,7 +109,7 @@ export function SignalCard({
               : "bg-red-600/20 text-red-400"
           } mt-6`}
         >
-          {isOpen ? "OPEN" : "CLOSED"}
+          {isOpen ? t("open") : t("closed")}
         </div>
       </div>
     </div>

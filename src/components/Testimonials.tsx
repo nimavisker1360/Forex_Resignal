@@ -4,13 +4,21 @@ import {
   MotionDiv,
   MotionStaggerContainer,
   MotionHeading,
-
 } from "@/components/ui/motion-content";
 import useEmblaCarousel from "embla-carousel-react";
 import { useCallback, useEffect, useState } from "react";
+import { useLanguage } from "@/lib/language-context";
 
-// Additional testimonials data
-const testimonialsData = [
+// Define the testimonial type
+interface Testimonial {
+  name: string;
+  title: string;
+  quote: string;
+  rating?: number;
+}
+
+// Fallback testimonials data in case translations are not loaded
+const fallbackTestimonials: Testimonial[] = [
   {
     name: "Nasrin Mohammadi",
     title: "Forex Trader",
@@ -32,42 +40,21 @@ const testimonialsData = [
       "The accuracy of the signals is exceptional. I've used various sites, but none have been as successful as this one.",
     rating: 5,
   },
-  {
-    name: "Reza Taheri",
-    title: "Day Trader",
-    quote:
-      "These signals have transformed my trading strategy. The precision and timing are impressive!",
-    rating: 4,
-  },
-  {
-    name: "Amir Hosseini",
-    title: "Expert Analyst",
-    quote:
-      "As someone who analyzes markets daily, I can confirm these signals are based on solid technical analysis.",
-    rating: 5,
-  },
-  {
-    name: "Leila Rahimi",
-    title: "Part-time Trader",
-    quote:
-      "Even with my busy schedule, I've been able to make consistent profits following these signals.",
-    rating: 4,
-  },
-  {
-    name: "Negar Taslimi",
-    title: "Financial Advisor",
-    quote:
-      "I recommend this service to my clients who are interested in forex trading. The results speak for themselves.",
-    rating: 5,
-  },
 ];
 
 export function Testimonials() {
+  const { t, language } = useLanguage();
+
+  // Configure the carousel with RTL support
   const [emblaRef, emblaApi] = useEmblaCarousel({
-    align: "center",
-    loop: false,
-    slidesToScroll: 2,
+    align: "start",
+    loop: true,
+    containScroll: "trimSnaps",
+    slidesToScroll: 1,
+    direction: language === "fa" ? "rtl" : "ltr",
+    skipSnaps: false,
   });
+
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [scrollSnaps, setScrollSnaps] = useState<number[]>([]);
 
@@ -93,6 +80,13 @@ export function Testimonials() {
     };
   }, [emblaApi, onSelect]);
 
+  // Reinitialize the carousel when language changes
+  useEffect(() => {
+    if (emblaApi) {
+      emblaApi.reInit();
+    }
+  }, [language, emblaApi]);
+
   // Function to render stars based on rating
   const renderStars = (rating: number) => {
     return Array.from({ length: 5 }).map((_, i) => (
@@ -102,8 +96,20 @@ export function Testimonials() {
     ));
   };
 
+  // Get testimonials data from translations with proper type checking
+  const translatedTestimonials = t("testimonials");
+  const testimonialsData = Array.isArray(translatedTestimonials)
+    ? (translatedTestimonials as Testimonial[])
+    : fallbackTestimonials;
+
+  // Ensure we don't show too many testimonials - limit to 4 to avoid overflow
+  const displayTestimonials = testimonialsData.slice(0, 4);
+
   return (
-    <section dir="ltr" className="py-16 bg-black border-none relative">
+    <section
+      dir={language === "fa" ? "rtl" : "ltr"}
+      className="py-16 bg-black border-none relative overflow-hidden"
+    >
       <div
         className="absolute inset-0 mx-auto my-auto bg-[url('/images/back.jpg')] bg-contain bg-center opacity-20 z-0"
         style={{
@@ -114,77 +120,89 @@ export function Testimonials() {
           transform: "rotate(-8deg) scale(1.3)",
         }}
       ></div>
-      <div className="container mx-auto px-4 max-w-3xl relative z-10">
+      <div className="container mx-auto px-4 relative z-10">
         <MotionStaggerContainer className="text-center mb-12">
           <MotionHeading className="text-3xl font-bold text-white text-center">
-            What They&apos;re Saying About Us
+            {t("testimonialHeading")}
           </MotionHeading>
-          
-          
         </MotionStaggerContainer>
 
-        <div className="relative">
-          <div className="overflow-hidden" ref={emblaRef}>
-            <div className="flex gap-5 px-2">
-              {testimonialsData.map((testimonial, index) => (
-                <div
-                  className="min-w-[45%] max-w-[45%] flex-grow-0 flex-shrink-0"
-                  key={index}
-                >
-                  <MotionDiv
-                    className="bg-[#1a1a3a] border border-[#2c2c50] shadow-lg rounded-lg p-6 text-left h-full flex flex-col"
-                    delay={index * 0.1}
+        <div className="relative mx-auto max-w-5xl">
+          <div className="overflow-hidden w-full px-4" ref={emblaRef}>
+            <div className="flex py-4">
+              {displayTestimonials.map(
+                (testimonial: Testimonial, index: number) => (
+                  <div
+                    className="min-w-[300px] md:min-w-[320px] max-w-[400px] flex-shrink-0 mx-4"
+                    key={index}
                   >
-                    <div className="flex items-center mb-3 justify-between">
-                      <div className="flex flex-col">
-                        <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 rounded-full overflow-hidden">
-                            <img
-                              src={`https://i.pravatar.cc/150?img=${
-                                index + 10
-                              }`}
-                              alt={testimonial.name}
-                              className="w-full h-full object-cover"
-                            />
+                    <MotionDiv
+                      className="bg-[#1a1a3a] border border-[#2c2c50] shadow-lg rounded-lg p-6 h-full flex flex-col"
+                      delay={index * 0.1}
+                    >
+                      <div className="flex items-center mb-5">
+                        <div className="flex flex-col w-full">
+                          <div
+                            className={`flex items-center gap-3 ${language === "fa" ? "flex-row-reverse" : "flex-row"}`}
+                          >
+                            <div className="w-12 h-12 rounded-full overflow-hidden">
+                              <img
+                                src={`https://i.pravatar.cc/150?img=${
+                                  index + 10
+                                }`}
+                                alt={testimonial.name}
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                            <div
+                              className={
+                                language === "fa" ? "text-right" : "text-left"
+                              }
+                            >
+                              <h4 className="font-bold text-white">
+                                {testimonial.name}
+                              </h4>
+                              <p className="text-xs text-gray-400">
+                                {testimonial.title}
+                              </p>
+                            </div>
                           </div>
-                          <div>
-                            <h4 className="font-bold text-white text-left">
-                              {testimonial.name}
-                            </h4>
-                            <p className="text-xs text-gray-400 text-left">
-                              {testimonial.title}
-                            </p>
+                          <div
+                            className={`flex mt-3 ${language === "fa" ? "justify-end" : "justify-start"}`}
+                          >
+                            {renderStars(testimonial.rating || 5)}
                           </div>
-                        </div>
-                        <div className="flex mt-3">
-                          {renderStars(testimonial.rating)}
                         </div>
                       </div>
-                    </div>
-                    <div className="flex-grow">
-                      <p className="text-gray-300 text-left">
-                        &ldquo;{testimonial.quote}&rdquo;
-                      </p>
-                    </div>
-                  </MotionDiv>
-                </div>
-              ))}
+                      <div className="flex-grow">
+                        <p
+                          className={`text-gray-300 ${language === "fa" ? "text-right" : "text-left"}`}
+                        >
+                          &ldquo;{testimonial.quote}&rdquo;
+                        </p>
+                      </div>
+                    </MotionDiv>
+                  </div>
+                )
+              )}
             </div>
           </div>
 
           <div className="flex justify-center mt-8 gap-2">
-            {scrollSnaps.map((_, index) => (
-              <button
-                key={index}
-                className={`w-3 h-3 rounded-full transition-all ${
-                  index === selectedIndex
-                    ? "bg-primary scale-110"
-                    : "bg-white hover:bg-gray-300"
-                }`}
-                onClick={() => scrollTo(index)}
-                aria-label={`Go to slide ${index + 1}`}
-              />
-            ))}
+            {Array.from({ length: displayTestimonials.length }).map(
+              (_, index) => (
+                <button
+                  key={index}
+                  className={`w-3 h-3 rounded-full transition-all ${
+                    index === selectedIndex
+                      ? "bg-primary scale-110"
+                      : "bg-white hover:bg-gray-300"
+                  }`}
+                  onClick={() => scrollTo(index)}
+                  aria-label={`Go to slide ${index + 1}`}
+                />
+              )
+            )}
           </div>
         </div>
       </div>

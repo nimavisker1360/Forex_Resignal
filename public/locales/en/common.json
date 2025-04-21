@@ -1,0 +1,162 @@
+{
+  "home": "Home",
+  "about": "About Us",
+  "signals": "Signals",
+  "premium": "Premium",
+  "blog": "Blog",
+  "contact": "Contact",
+  "welcome": "Welcome to Signal Forex",
+  "description": "Get accurate forex signals with professional analysis and 24/7 support",
+  "getStarted": "Get Started",
+  "learnMore": "Learn More",
+  "direction": "ltr",
+
+  "forexSignalPlatform": "Forex Signal Platform",
+  "heroTitle": "Trading Alerts From Expert Analysts",
+  "heroDescription": "Get accurate Forex signals straight from expert analysts. Stay ahead in the market with real-time updates",
+  "whenToSell": "When to Sell",
+  "whenToBuy": "When to Buy",
+  "stopLossPoints": "Add stop loss points",
+  "exploreNow": "Explore Now",
+
+  "latestSignals": "Latest Signals",
+  "viewAll": "View All",
+  "forexSignals": "Forex Signals",
+
+  "buy": "Buy",
+  "sell": "Sell",
+  "entryPrice": "Entry Price",
+  "stopLoss": "Stop Loss",
+  "target": "Target",
+  "successful": "Successful",
+  "unsuccessful": "Unsuccessful",
+  "open": "OPEN",
+  "closed": "CLOSED",
+  "newest": "Newest",
+  "oldest": "Oldest",
+  "symbolAZ": "Symbol A-Z",
+  "allSignals": "All Signals",
+  "buySignals": "Buy Signals",
+  "sellSignals": "Sell Signals",
+  "signalSearch": "Signal Search...",
+  "noSignalsFound": "No signals found with this symbol",
+  "tryDifferentPair": "Try searching for a different currency pair",
+
+  "whyChooseUs": "Why Choose Us",
+  "whyTradersTrustUs": "Why Traders Trust Us",
+  "lowCostService": "Low Cost Service",
+  "inDepthInformation": "In-depth Information",
+  "successRatio": "Success Ratio Is 80-90%",
+  "qualityOverQuantity": "Quality Over Quantity",
+  "strongTechnicalAnalysis": "Strong Technical Analysis",
+  "telegramSignals": "Telegram Signals",
+
+  "joinUsToday": "Join Us Today",
+  "signUpText": "Sign up on our site to access the best forex signals and take your trading to the next level.",
+  "freeRegistration": "join Telegram Channel",
+
+  "testimonialHeading": "What They're Saying About Us",
+  "testimonials": [
+    {
+      "name": "Nasrin Mohammadi",
+      "title": "Forex Trader",
+      "quote": "After using the signals from this site, my trading profits increased significantly. I'm really satisfied!"
+    },
+    {
+      "name": "Vahid Ahmadi",
+      "title": "Beginner in Currency Market",
+      "quote": "As a beginner, these signals helped me enter trades with more confidence. Great support and accurate analysis!"
+    },
+    {
+      "name": "Michale Tomson",
+      "title": "Professional Trader",
+      "quote": "The accuracy of the signals is exceptional. I've used various sites, but none have been as successful as this one."
+    },
+    {
+      "name": "Reza Taheri",
+      "title": "Day Trader",
+      "quote": "These signals have transformed my trading strategy. The precision and timing are impressive!"
+    },
+    {
+      "name": "Amir Hosseini",
+      "title": "Expert Analyst",
+      "quote": "As someone who analyzes markets daily, I can confirm these signals are based on solid technical analysis."
+    },
+    {
+      "name": "Leila Rahimi",
+      "title": "Part-time Trader",
+      "quote": "Even with my busy schedule, I've been able to make consistent profits following these signals."
+    },
+    {
+      "name": "Negar Taslimi",
+      "title": "Financial Advisor",
+      "quote": "I recommend this service to my clients who are interested in forex trading. The results speak for themselves."
+    }
+  ],
+
+  "footer": {
+    "signalForex": "Signal Forex",
+    "providerDescription": "Provider of the best forex signals with high accuracy and professional analysis",
+    "quickLinks": "Quick Links",
+    "information": "Information",
+    "contactUs": "Contact Us",
+    "address": "Address: Turkey",
+    "email": "Email: nimabaghery@gmail.com",
+    "copyright": "© {year} Signal Forex. All rights reserved."
+  },
+
+  "contactPage": {
+    "title": "Contact Us",
+    "subtitle": "Contact us for any questions, suggestions, or collaboration requests",
+    "contactInfo": "Contact Information",
+    "email": "Email",
+    "address": "Address",
+    "onlineSupport": "Online Support",
+    "onlineSupportText": "Our online support is available every day of the week from 8 AM to 8 PM to answer your questions",
+    "businessHours": "Business Hours",
+    "weekdays": "Monday - Friday",
+    "weekdayHours": "8 AM - 8 PM",
+    "saturday": "Saturday",
+    "sunday": "Sunday",
+    "closed": "Closed",
+    "contactForm": "Contact Form",
+    "fullName": "Full Name",
+    "fullNamePlaceholder": "Enter your full name",
+    "emailPlaceholder": "Enter your email address",
+    "subject": "Subject",
+    "subjectPlaceholder": "Enter subject",
+    "message": "Message",
+    "messagePlaceholder": "Type your message here...",
+    "submit": "Submit",
+    "submitting": "Submitting...",
+    "successMessage": "Your message has been sent successfully!",
+    "errorMessage": "Failed to send message"
+  },
+
+  "aboutPage": {
+    "title": "About Us",
+    "introduction": "Signal Forex was established with the goal of providing the best trading signals and accurate analysis of financial markets",
+    "teamImageAlt": "Signal Forex Team",
+    "whoWeAreTitle": "Who We Are",
+    "whoWeAreText1": "Signal Forex is a team of professional analysts and experienced traders in financial markets that started its activities in 2016. Our goal is to provide the best trading signals with high accuracy for currency, gold, stock, and other financial markets.",
+    "whoWeAreText2": "We provide the best entry and exit points for traders using advanced technical and fundamental analysis techniques. Our team consists of specialists in various areas of financial markets who monitor markets around the clock.",
+    "viewSignalsButton": "View Signals",
+    "ourMissionTitle": "Our Mission",
+    "ourMissionText": "Our mission is to help traders achieve sustainable profitability in financial markets by providing accurate signals and professional training",
+    "qualityTitle": "Quality",
+    "qualityText": "Providing high-quality and accurate signals to ensure customer profitability",
+    "educationTitle": "Education",
+    "educationText": "Continuous training of traders to increase their skills and knowledge in financial markets",
+    "innovationTitle": "Innovation",
+    "innovationText": "Continuous updating of analysis methods and providing the latest trading techniques",
+    "supportTitle": "Support",
+    "supportText": "Providing 24-hour support to customers to answer questions and guide them",
+    "yearsActive": "Years Active",
+    "activeUsers": "Active Users",
+    "successRate": "Signal Success Rate",
+    "support": "Support",
+    "joinUsTitle": "Join Us",
+    "joinUsText": "By signing up on the Signal Forex site, benefit from the best trading signals and specialized analysis to increase your profitability.",
+    "getStartedButton": "Get Started"
+  }
+}

@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { RecentSignals } from "@/components/RecentSignals";
@@ -21,88 +23,133 @@ import {
   MotionParagraph,
   MotionImage,
 } from "@/components/ui/motion-content";
+import { useLanguage } from "@/lib/language-context";
 
 export default function Home() {
+  const { t, language } = useLanguage();
+
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
       <section className="relative py-10 md:py-20 bg-black text-white overflow-hidden">
         <MotionImage
           className="absolute inset-0 z-0"
-          style={{ transform: "translateX(30%)", width: "80%" }}
+          style={{
+            transform:
+              language === "fa" ? "translateX(-30%)" : "translateX(30%)",
+            width: "80%",
+          }}
         >
           <Image
             src="/images/bg-home03.png"
             alt="Forex Trading Background"
             fill
-            className="object-cover object-right"
+            className={`object-cover ${language === "fa" ? "object-left" : "object-right"}`}
             priority
           />
         </MotionImage>
 
-        <div className="container relative z-10 mx-auto px-6 md:px-8 lg:px-12">
-          <div className="grid md:grid-cols-2 gap-10 items-center">
-            {/* Left Column - Image */}
-            <div className="flex justify-center items-center order-1 md:order-1">
-              <div className="relative w-full max-w-md mx-auto">
-                <div className="absolute -bottom-6 -right-6 w-24 h-24 bg-primary/20 backdrop-blur-sm rounded-full flex items-center justify-center z-10"></div>
-              </div>
-            </div>
-
-            {/* Right Column - Text Content */}
-            <MotionStaggerContainer className="space-y-8 text-left order-2 md:order-2 max-w-xl">
-              <MotionStaggerItem className="inline-flex items-center bg-gradient-to-r from-blue-600/80 to-blue-500/30 backdrop-blur-sm px-6 py-2.5 rounded-full border border-blue-400/30 mb-4">
+        <div className="container relative z-10 mx-auto">
+          <div className="grid md:grid-cols-2 gap-10 items-center px-4 sm:px-6 md:px-16 lg:px-24 max-w-[1400px] mx-auto">
+            {/* Text Content - Now on Left */}
+            <MotionStaggerContainer
+              className={`space-y-8 ${language === "fa" ? "text-right" : "text-left"} order-1 md:order-1 max-w-xl`}
+            >
+              <MotionStaggerItem
+                className={`inline-flex items-center bg-gradient-to-r from-blue-600/80 to-blue-500/30 backdrop-blur-sm px-6 py-2.5 rounded-full border border-blue-400/30 mb-4 ${language === "fa" ? "self-end" : "self-start"}`}
+              >
                 <span className="text-blue-200 font-medium">
-                  Forex Signal Platform
+                  {t("forexSignalPlatform")}
                 </span>
               </MotionStaggerItem>
 
               <MotionHeading className="text-5xl font-extrabold tracking-tight leading-none text-white/90 mb-6 mt-4">
-                Trading Alerts From Expert Analysts
+                {t("heroTitle")}
               </MotionHeading>
 
               <MotionParagraph className="text-lg md:text-xl text-white/70 mt-4">
-                Get accurate Forex signals straight from expert analysts. Stay
-                ahead in the market with real-time updates
+                {t("heroDescription")}
               </MotionParagraph>
 
-              <div className="flex flex-col items-end sm:flex-row sm:justify-end sm:flex-wrap sm:gap-8 gap-4 mt-6 mb-8">
+              <div
+                className={`flex flex-col ${language === "fa" ? "items-end" : "items-start"} sm:flex-row ${language === "fa" ? "sm:justify-end" : "sm:justify-start"} sm:flex-wrap sm:gap-8 gap-4 mt-6 mb-8`}
+              >
                 <div className="flex items-center gap-2">
-                  <span className="text-base">When to Sell</span>
-                  <div className="bg-blue-600 p-1 rounded-full flex-shrink-0">
-                    <CheckCircle2 className="h-5 w-5 text-white" />
-                  </div>
+                  {language === "en" && (
+                    <div className="bg-blue-600 p-1 rounded-full flex-shrink-0">
+                      <CheckCircle2 className="h-5 w-5 text-white" />
+                    </div>
+                  )}
+                  <span className="text-base">{t("whenToSell")}</span>
+                  {language === "fa" && (
+                    <div className="bg-blue-600 p-1 rounded-full flex-shrink-0">
+                      <CheckCircle2 className="h-5 w-5 text-white" />
+                    </div>
+                  )}
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-base">When to Buy</span>
-                  <div className="bg-blue-600 p-1 rounded-full flex-shrink-0">
-                    <CheckCircle2 className="h-5 w-5 text-white" />
-                  </div>
+                  {language === "en" && (
+                    <div className="bg-blue-600 p-1 rounded-full flex-shrink-0">
+                      <CheckCircle2 className="h-5 w-5 text-white" />
+                    </div>
+                  )}
+                  <span className="text-base">{t("whenToBuy")}</span>
+                  {language === "fa" && (
+                    <div className="bg-blue-600 p-1 rounded-full flex-shrink-0">
+                      <CheckCircle2 className="h-5 w-5 text-white" />
+                    </div>
+                  )}
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-base">Add stop loss points</span>
-                  <div className="bg-blue-600 p-1 rounded-full flex-shrink-0">
-                    <CheckCircle2 className="h-5 w-5 text-white" />
-                  </div>
+                  {language === "en" && (
+                    <div className="bg-blue-600 p-1 rounded-full flex-shrink-0">
+                      <CheckCircle2 className="h-5 w-5 text-white" />
+                    </div>
+                  )}
+                  <span className="text-base">{t("stopLossPoints")}</span>
+                  {language === "fa" && (
+                    <div className="bg-blue-600 p-1 rounded-full flex-shrink-0">
+                      <CheckCircle2 className="h-5 w-5 text-white" />
+                    </div>
+                  )}
                 </div>
               </div>
 
-              <MotionStaggerItem className="pt-2">
+              <MotionStaggerItem
+                className={`pt-2 ${language === "fa" ? "self-end" : "self-start"}`}
+              >
                 <Button
                   size="lg"
                   className="px-8 from-blue-600/80 to-blue-500/30 hover:bg-primary/90"
                   asChild
                 >
                   <Link href="/signals" className="flex items-center">
-                    <span className="mr-1">→</span> Explore Now
+                    {language === "fa" ? (
+                      <>
+                        {t("exploreNow")} <span className="ml-1">←</span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="mr-1">→</span> {t("exploreNow")}
+                      </>
+                    )}
                   </Link>
                 </Button>
               </MotionStaggerItem>
             </MotionStaggerContainer>
+
+            {/* Right Column - Image or empty area */}
+            <div
+              className={`flex justify-center items-center order-2 md:order-2`}
+            >
+              <div className="relative w-full max-w-md mx-auto">
+                <div className="absolute -bottom-6 -right-6 w-24 h-24 bg-primary/20 backdrop-blur-sm rounded-full flex items-center justify-center z-10"></div>
+              </div>
+            </div>
           </div>
 
           {/* TradingView Ticker Tape Widget */}
-          <div className="mt-10 relative z-30">
+          <div className="mt-10 relative z-30 px-4 sm:px-6 md:px-16 lg:px-24 max-w-[1400px] mx-auto">
             <TradingViewTicker />
           </div>
         </div>
@@ -131,16 +178,18 @@ export default function Home() {
             <div className="relative mb-6">
               <MotionDiv className="bg-blue-600 text-white px-7 py-2.5 rounded-lg border-2 border-blue-400/70 mx-auto relative z-10">
                 <span className="text-center font-medium text-sm">
-                  Why Choose Us
+                  {t("whyChooseUs")}
                 </span>
               </MotionDiv>
             </div>
             <MotionHeading className="text-3xl font-bold text-center mb-8">
-              Why Traders Trust Us
+              {t("whyTradersTrustUs")}
             </MotionHeading>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-10 max-w-5xl mx-auto my-2">
+          <div
+            className={`grid grid-cols-1 sm:grid-cols-2 gap-10 max-w-5xl mx-auto my-2 ${language === "fa" ? "text-right" : "text-left"}`}
+          >
             <MotionStaggerContainer>
               {/* Feature 2 */}
               <MotionStaggerItem className="bg-gray-900/80 rounded-xl p-8 mb-10 backdrop-blur-sm border border-blue-500/20 hover:border-blue-500/40 transition-all">
@@ -150,7 +199,7 @@ export default function Home() {
                   </div>
                 </div>
                 <h3 className="text-xl font-semibold text-center mb-3">
-                  Low Cost Service
+                  {t("lowCostService")}
                 </h3>
               </MotionStaggerItem>
 
@@ -162,7 +211,7 @@ export default function Home() {
                   </div>
                 </div>
                 <h3 className="text-xl font-semibold text-center mb-3">
-                  In-depth Information
+                  {t("inDepthInformation")}
                 </h3>
               </MotionStaggerItem>
 
@@ -174,7 +223,7 @@ export default function Home() {
                   </div>
                 </div>
                 <h3 className="text-xl font-semibold text-center mb-3">
-                  Success Ratio Is 80-90%
+                  {t("successRatio")}
                 </h3>
               </MotionStaggerItem>
             </MotionStaggerContainer>
@@ -188,7 +237,7 @@ export default function Home() {
                   </div>
                 </div>
                 <h3 className="text-xl font-semibold text-center mb-3">
-                  Quality Over Quantity
+                  {t("qualityOverQuantity")}
                 </h3>
               </MotionStaggerItem>
 
@@ -200,7 +249,7 @@ export default function Home() {
                   </div>
                 </div>
                 <h3 className="text-xl font-semibold text-center mb-3">
-                  Strong Technical Analysis
+                  {t("strongTechnicalAnalysis")}
                 </h3>
               </MotionStaggerItem>
 
@@ -212,7 +261,7 @@ export default function Home() {
                   </div>
                 </div>
                 <h3 className="text-xl font-semibold text-center mb-3">
-                  Telegram Signals
+                  {t("telegramSignals")}
                 </h3>
               </MotionStaggerItem>
             </MotionStaggerContainer>
@@ -227,19 +276,18 @@ export default function Home() {
       <section className="py-16 bg-black border-none text-white">
         <div className="container mx-auto px-4 text-center">
           <MotionDiv className="text-3xl font-bold mb-6">
-            Join Us Today
+            {t("joinUsToday")}
           </MotionDiv>
           <MotionDiv
             className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8"
             delay={0.2}
           >
-            Sign up on our site to access the best forex signals and take your
-            trading to the next level.
+            {t("signUpText")}
           </MotionDiv>
           <MotionDiv delay={0.4}>
             <Button size="lg" asChild>
               <Link href="https://t.me/+uRJNzAveahQ0NjM0">
-                Free Registration
+                {t("freeRegistration")}
               </Link>
             </Button>
           </MotionDiv>

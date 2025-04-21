@@ -22,6 +22,7 @@ import {
   MotionStaggerContainer,
   MotionStaggerItem,
 } from "@/components/ui/motion-content";
+import { useLanguage } from "@/lib/language-context";
 
 // Sample data for signals
 const signals = [
@@ -164,6 +165,7 @@ export default function SignalsPage() {
   const [sortOrder, setSortOrder] = useState<"newest" | "oldest" | "pair">(
     "newest"
   );
+  const { t } = useLanguage();
 
   // Filter signals based on search query and type filter
   let filteredSignals = signals.filter(
@@ -197,7 +199,7 @@ export default function SignalsPage() {
       ></div>
       <div className="max-w-screen-xl mx-auto px-4 py-16 relative z-10">
         <MotionDiv className="flex justify-center items-center mb-8">
-          <h1 className="text-4xl font-bold">Forex Signals</h1>
+          <h1 className="text-4xl font-bold">{t("forexSignals")}</h1>
         </MotionDiv>
 
         {/* Search and filters */}
@@ -208,7 +210,7 @@ export default function SignalsPage() {
               <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <input
                 type="text"
-                placeholder="...Signal Search"
+                placeholder={t("signalSearch")}
                 className="w-full h-10 pr-3 pl-10 rounded-md border border-gray-800 bg-gray-900 text-sm text-white ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring text-left"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -229,7 +231,7 @@ export default function SignalsPage() {
               onClick={() => setSortOrder("newest")}
             >
               <ArrowDownUp className="h-4 w-4" />
-              Newest
+              {t("newest")}
             </Button>
 
             <Button
@@ -243,7 +245,7 @@ export default function SignalsPage() {
               onClick={() => setSignalTypeFilter("all")}
             >
               <Filter className="h-4 w-4" />
-              All Signals
+              {t("allSignals")}
             </Button>
 
             <Button
@@ -256,7 +258,7 @@ export default function SignalsPage() {
               }`}
               onClick={() => setSignalTypeFilter("buy")}
             >
-              Buy Signals
+              {t("buySignals")}
             </Button>
 
             <Button
@@ -269,7 +271,7 @@ export default function SignalsPage() {
               }`}
               onClick={() => setSignalTypeFilter("sell")}
             >
-              Sell Signals
+              {t("sellSignals")}
             </Button>
 
             <Button
@@ -282,7 +284,7 @@ export default function SignalsPage() {
               }`}
               onClick={() => setSortOrder("oldest")}
             >
-              Oldest
+              {t("oldest")}
             </Button>
 
             <Button
@@ -295,7 +297,7 @@ export default function SignalsPage() {
               }`}
               onClick={() => setSortOrder("pair")}
             >
-              Symbol A-Z
+              {t("symbolAZ")}
             </Button>
           </div>
         </div>
@@ -314,9 +316,9 @@ export default function SignalsPage() {
             <div className="min-h-[300px] flex items-center justify-center text-center p-8 text-gray-400 bg-gray-900/80 backdrop-blur-sm rounded-lg border border-gray-800 w-full">
               <div>
                 <SearchIcon className="h-12 w-12 mx-auto mb-4 opacity-30" />
-                <p className="text-lg">No signals found with this symbol</p>
+                <p className="text-lg">{t("noSignalsFound")}</p>
                 <p className="text-sm mt-2 text-gray-500">
-                  Try searching for a different currency pair
+                  {t("tryDifferentPair")}
                 </p>
               </div>
             </div>
