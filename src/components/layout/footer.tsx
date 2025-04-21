@@ -157,14 +157,14 @@ export function Footer() {
                   {t("contact")}
                 </Link>
               </li>
-              <li>
+              {/* <li>
                 <Link
                   href="/faq"
                   className="text-white hover:text-blue-400 transition text-sm"
                 >
                   FAQ
                 </Link>
-              </li>
+              </li> */}
             </ul>
           </div>
 

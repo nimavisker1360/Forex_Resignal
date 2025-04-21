@@ -60,37 +60,44 @@
     {
       "name": "Nasrin Mohammadi",
       "title": "Forex Trader",
-      "quote": "After using the signals from this site, my trading profits increased significantly. I'm really satisfied!"
+      "quote": "After using the signals from this site, my trading profits increased significantly. I'm really satisfied!",
+      "rating": 4
     },
     {
       "name": "Vahid Ahmadi",
       "title": "Beginner in Currency Market",
-      "quote": "As a beginner, these signals helped me enter trades with more confidence. Great support and accurate analysis!"
+      "quote": "As a beginner, these signals helped me enter trades with more confidence. Great support and accurate analysis!",
+      "rating": 5
     },
     {
       "name": "Michale Tomson",
       "title": "Professional Trader",
-      "quote": "The accuracy of the signals is exceptional. I've used various sites, but none have been as successful as this one."
+      "quote": "The accuracy of the signals is exceptional. I've used various sites, but none have been as successful as this one.",
+      "rating": 5
     },
     {
       "name": "Reza Taheri",
       "title": "Day Trader",
-      "quote": "These signals have transformed my trading strategy. The precision and timing are impressive!"
+      "quote": "These signals have transformed my trading strategy. The precision and timing are impressive!",
+      "rating": 4
     },
     {
       "name": "Amir Hosseini",
       "title": "Expert Analyst",
-      "quote": "As someone who analyzes markets daily, I can confirm these signals are based on solid technical analysis."
+      "quote": "As someone who analyzes markets daily, I can confirm these signals are based on solid technical analysis.",
+      "rating": 5
     },
     {
       "name": "Leila Rahimi",
       "title": "Part-time Trader",
-      "quote": "Even with my busy schedule, I've been able to make consistent profits following these signals."
+      "quote": "Even with my busy schedule, I've been able to make consistent profits following these signals.",
+      "rating": 4
     },
     {
       "name": "Negar Taslimi",
       "title": "Financial Advisor",
-      "quote": "I recommend this service to my clients who are interested in forex trading. The results speak for themselves."
+      "quote": "I recommend this service to my clients who are interested in forex trading. The results speak for themselves.",
+      "rating": 5
     }
   ],
 
