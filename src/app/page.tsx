@@ -74,7 +74,9 @@ export default function Home() {
               <div
                 className={`flex flex-col ${language === "fa" ? "items-end" : "items-start"} sm:flex-row ${language === "fa" ? "sm:justify-end" : "sm:justify-start"} sm:flex-wrap sm:gap-8 gap-4 mt-6 mb-8`}
               >
-                <div className="flex items-center gap-2">
+                <div
+                  className={`flex items-center gap-2 ${language === "fa" ? "flex-row-reverse" : ""}`}
+                >
                   {language === "en" && (
                     <div className="bg-blue-600 p-1 rounded-full flex-shrink-0">
                       <CheckCircle2 className="h-5 w-5 text-white" />
@@ -87,7 +89,9 @@ export default function Home() {
                     </div>
                   )}
                 </div>
-                <div className="flex items-center gap-2">
+                <div
+                  className={`flex items-center gap-2 ${language === "fa" ? "flex-row-reverse" : ""}`}
+                >
                   {language === "en" && (
                     <div className="bg-blue-600 p-1 rounded-full flex-shrink-0">
                       <CheckCircle2 className="h-5 w-5 text-white" />
@@ -100,7 +104,9 @@ export default function Home() {
                     </div>
                   )}
                 </div>
-                <div className="flex items-center gap-2">
+                <div
+                  className={`flex items-center gap-2 ${language === "fa" ? "flex-row-reverse" : ""}`}
+                >
                   {language === "en" && (
                     <div className="bg-blue-600 p-1 rounded-full flex-shrink-0">
                       <CheckCircle2 className="h-5 w-5 text-white" />
