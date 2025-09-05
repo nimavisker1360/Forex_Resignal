@@ -1,8 +1,4 @@
 import { NextResponse } from "next/server";
-import { Resend } from "resend";
-
-// Create a new Resend instance using the API key
-const resend = new Resend(process.env.RESEND_API_KEY);
 
 // Simple validation helper
 function isValidEmail(email: string) {

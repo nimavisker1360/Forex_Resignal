@@ -149,60 +149,113 @@ export function Navbar() {
       </div>
 
       {/* Mobile Navigation */}
-      {isMenuOpen && (
+      <div
+        className={`md:hidden bg-black/95 backdrop-blur-sm border-t border-gray-800/50 p-4 relative z-10 w-full transition-all duration-300 ease-in-out overflow-hidden ${
+          isMenuOpen
+            ? "max-h-screen opacity-100 translate-y-0"
+            : "max-h-0 opacity-0 -translate-y-4"
+        } ${language === "fa" ? "text-right" : "text-left"}`}
+      >
         <div
-          className={`md:hidden bg-black/95 backdrop-blur-sm border-t border-gray-800/50 p-4 relative z-10 w-full ${language === "fa" ? "text-right" : "text-left"}`}
+          className={`flex flex-col space-y-4 w-full ${language === "fa" ? "items-end" : "items-start"}`}
         >
-          <div
-            className={`flex flex-col space-y-4 w-full ${language === "fa" ? "items-end" : "items-start"}`}
-          >
-            <Link
-              href="/"
-              className={`text-white hover:text-blue-300 px-4 py-2 rounded-md hover:bg-gray-900/50 transition w-full ${language === "fa" ? "text-right" : "text-left"}`}
-              onClick={() => setIsMenuOpen(false)}
-            >
-              {t("home")}
-            </Link>
-            <Link
-              href="/blog"
-              className={`text-white hover:text-blue-300 px-4 py-2 rounded-md hover:bg-gray-900/50 transition w-full ${language === "fa" ? "text-right" : "text-left"}`}
-              onClick={() => setIsMenuOpen(false)}
-            >
-              {t("blog")}
-            </Link>
-            <Link
-              href="/about"
-              className={`text-white hover:text-blue-300 px-4 py-2 rounded-md hover:bg-gray-900/50 transition w-full ${language === "fa" ? "text-right" : "text-left"}`}
-              onClick={() => setIsMenuOpen(false)}
-            >
-              {t("about")}
-            </Link>
-            <Link
-              href="/contact"
-              className={`text-white hover:text-blue-300 px-4 py-2 rounded-md hover:bg-gray-900/50 transition w-full ${language === "fa" ? "text-right" : "text-left"}`}
-              onClick={() => setIsMenuOpen(false)}
-            >
-              {t("contact")}
-            </Link>
-            <div className="flex justify-center w-full py-2">
-              <LanguageSwitcher />
-            </div>
-            <div
-              className={`pt-2 flex flex-col space-y-2 w-full ${language === "fa" ? "items-end" : "items-start"}`}
-            >
-              <Button asChild className="bg-blue-600/80 text-white w-full">
-                <Link
-                  href="https://t.me/+uRJNzAveahQ0NjM0"
-                  className="flex items-center justify-center gap-1"
-                >
-                  {language === "fa" ? "ربات تلگرام" : "Telegram Bot"}{" "}
-                  <ArrowUpRight className="h-4 w-4" />
-                </Link>
-              </Button>
+          {/* Home Link with Language Switcher */}
+          <div className="w-full">
+            <div className="flex items-center justify-between w-full">
+              <Link
+                href="/"
+                className={`text-white hover:text-blue-300 px-4 py-2 rounded-md hover:bg-gray-900/50 transition-all duration-300 ease-out transform ${
+                  isMenuOpen
+                    ? "translate-y-0 opacity-100"
+                    : "-translate-y-4 opacity-0"
+                } ${language === "fa" ? "text-right" : "text-left"} flex-1`}
+                style={{
+                  transitionDelay: isMenuOpen ? "100ms" : "0ms",
+                }}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                {t("home")}
+              </Link>
+
+              {/* Language Switcher - Top Right */}
+              <div
+                className={`transition-all duration-300 ease-out transform ${
+                  isMenuOpen
+                    ? "translate-y-0 opacity-100"
+                    : "translate-y-4 opacity-0"
+                }`}
+                style={{
+                  transitionDelay: isMenuOpen ? "100ms" : "0ms",
+                }}
+              >
+                <LanguageSwitcher />
+              </div>
             </div>
           </div>
+          <Link
+            href="/blog"
+            className={`text-white hover:text-blue-300 px-4 py-2 rounded-md hover:bg-gray-900/50 transition-all duration-300 ease-out transform ${
+              isMenuOpen
+                ? "translate-y-0 opacity-100"
+                : "-translate-y-4 opacity-0"
+            } ${language === "fa" ? "text-right" : "text-left"} w-full`}
+            style={{
+              transitionDelay: isMenuOpen ? "150ms" : "0ms",
+            }}
+            onClick={() => setIsMenuOpen(false)}
+          >
+            {t("blog")}
+          </Link>
+          <Link
+            href="/about"
+            className={`text-white hover:text-blue-300 px-4 py-2 rounded-md hover:bg-gray-900/50 transition-all duration-300 ease-out transform ${
+              isMenuOpen
+                ? "translate-y-0 opacity-100"
+                : "-translate-y-4 opacity-0"
+            } ${language === "fa" ? "text-right" : "text-left"} w-full`}
+            style={{
+              transitionDelay: isMenuOpen ? "200ms" : "0ms",
+            }}
+            onClick={() => setIsMenuOpen(false)}
+          >
+            {t("about")}
+          </Link>
+          <Link
+            href="/contact"
+            className={`text-white hover:text-blue-300 px-4 py-2 rounded-md hover:bg-gray-900/50 transition-all duration-300 ease-out transform ${
+              isMenuOpen
+                ? "translate-y-0 opacity-100"
+                : "-translate-y-4 opacity-0"
+            } ${language === "fa" ? "text-right" : "text-left"} w-full`}
+            style={{
+              transitionDelay: isMenuOpen ? "250ms" : "0ms",
+            }}
+            onClick={() => setIsMenuOpen(false)}
+          >
+            {t("contact")}
+          </Link>
+          <div
+            className={`pt-2 flex flex-col space-y-2 w-full transition-all duration-300 ease-out transform ${
+              isMenuOpen
+                ? "translate-y-0 opacity-100"
+                : "translate-y-4 opacity-0"
+            } ${language === "fa" ? "items-end" : "items-start"}`}
+            style={{
+              transitionDelay: isMenuOpen ? "300ms" : "0ms",
+            }}
+          >
+            <Button asChild className="bg-blue-600/80 text-white w-full">
+              <Link
+                href="https://t.me/+uRJNzAveahQ0NjM0"
+                className="flex items-center justify-center gap-1"
+              >
+                {language === "fa" ? "ربات تلگرام" : "Telegram Bot"}{" "}
+                <ArrowUpRight className="h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
         </div>
-      )}
+      </div>
     </nav>
   );
 }
