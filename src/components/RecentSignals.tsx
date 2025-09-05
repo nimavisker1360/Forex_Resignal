@@ -1,7 +1,9 @@
+"use client";
+
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { SignalCard } from "@/components/ui/signal-card";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Loader2 } from "lucide-react";
 import {
   MotionDiv,
   MotionStaggerContainer,
@@ -9,48 +11,47 @@ import {
   MotionHeading,
 } from "@/components/ui/motion-content";
 import { useLanguage } from "@/lib/language-context";
+import { useState, useEffect } from "react";
 
-// Sample data for signals with orange color styling for pairs
-const recentSignals = [
-  {
-    id: "1",
-    pair: "XAU/USD",
-    type: "buy" as const,
-    price: 2352.0,
-    takeProfit: [2360.0, 2370.0, 2380.0],
-    stopLoss: 2340.0,
-    timestamp: "Yesterday - 15:45",
-    success: true,
-    pairColor: "text-white", // Changed from orange to white
-    isOpen: false, // Position is closed
-  },
-  {
-    id: "2",
-    pair: "GBP/JPY",
-    type: "sell" as const,
-    price: 168.45,
-    takeProfit: [168.25, 168.05],
-    stopLoss: 168.65,
-    timestamp: "Today - 08:15",
-    success: false,
-    pairColor: "text-white", // Changed from orange to white
-    isOpen: false, // Position is closed
-  },
-  {
-    id: "3",
-    pair: "EUR/USD",
-    type: "buy" as const,
-    price: 1.0825,
-    takeProfit: [1.0845, 1.0865, 1.0885],
-    stopLoss: 1.0805,
-    timestamp: "Today - 10:30",
-    pairColor: "text-white", // Changed from orange to white
-    isOpen: true, // Position is open
-  },
-];
+// Define types for signal data
+interface Signal {
+  id: string;
+  pair: string;
+  type: "buy" | "sell";
+  price: number;
+  takeProfit: number[];
+  stopLoss: number;
+  timestamp: string;
+  success?: boolean;
+  isPremium: boolean;
+}
 
 export function RecentSignals() {
+  const [signals, setSignals] = useState<Signal[]>([]);
+  const [loading, setLoading] = useState(true);
   const { t } = useLanguage();
+
+  // Fetch recent signals from API
+  useEffect(() => {
+    const fetchRecentSignals = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch("/api/signals/data?limit=3&sort=newest");
+
+        if (response.ok) {
+          const data = await response.json();
+          setSignals(data.signals || []);
+        }
+      } catch (err) {
+        console.error("Error fetching recent signals:", err);
+        // Keep empty array on error
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRecentSignals();
+  }, []);
 
   return (
     <section className="py-16 bg-black relative">
@@ -81,17 +82,23 @@ export function RecentSignals() {
           </Button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-          {recentSignals.map((signal, index) => (
-            <MotionDiv
-              key={signal.id}
-              className="rounded-lg overflow-hidden shadow-lg"
-              delay={index * 0.1}
-            >
-              <SignalCard {...signal} />
-            </MotionDiv>
-          ))}
-        </div>
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            {signals.map((signal, index) => (
+              <MotionDiv
+                key={signal.id}
+                className="rounded-lg overflow-hidden shadow-lg"
+                delay={index * 0.1}
+              >
+                <SignalCard {...signal} />
+              </MotionDiv>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );

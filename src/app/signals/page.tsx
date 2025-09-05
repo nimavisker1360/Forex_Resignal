@@ -2,162 +2,28 @@
 
 import { Button } from "@/components/ui/button";
 import { SignalCard } from "@/components/ui/signal-card";
-import {
-  SearchIcon,
-  Filter,
-  ArrowUpDown,
-  Check,
-  ChevronDown,
-  ArrowDownUp,
-} from "lucide-react";
-import { useState } from "react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  MotionDiv,
-  MotionStaggerContainer,
-  MotionStaggerItem,
-} from "@/components/ui/motion-content";
+import { SearchIcon, Filter, ArrowDownUp, Loader2 } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import { MotionDiv } from "@/components/ui/motion-content";
 import { useLanguage } from "@/lib/language-context";
 
-// Sample data for signals
-const signals = [
-  {
-    id: "1",
-    pair: "EUR/USD",
-    type: "buy" as const,
-    price: 1.0825,
-    takeProfit: [1.0845, 1.0865, 1.0885],
-    stopLoss: 1.0805,
-    timestamp: "Today - 10:30",
-    success: true,
-    isPremium: false,
-  },
-  {
-    id: "2",
-    pair: "GBP/JPY",
-    type: "sell" as const,
-    price: 168.45,
-    takeProfit: [168.25, 168.05],
-    stopLoss: 168.65,
-    timestamp: "Today - 08:15",
-    success: false,
-    isPremium: false,
-  },
-  {
-    id: "3",
-    pair: "XAU/USD",
-    type: "buy" as const,
-    price: 2352.0,
-    takeProfit: [2360.0, 2370.0, 2380.0],
-    stopLoss: 2340.0,
-    timestamp: "Yesterday - 15:45",
-    isPremium: true,
-  },
-  {
-    id: "4",
-    pair: "USD/JPY",
-    type: "buy" as const,
-    price: 154.5,
-    takeProfit: [154.8, 155.1],
-    stopLoss: 154.2,
-    timestamp: "Yesterday - 12:20",
-    success: true,
-    isPremium: false,
-  },
-  {
-    id: "5",
-    pair: "EUR/GBP",
-    type: "sell" as const,
-    price: 0.855,
-    takeProfit: [0.853, 0.851],
-    stopLoss: 0.857,
-    timestamp: "Yesterday - 09:45",
-    success: true,
-    isPremium: false,
-  },
-  {
-    id: "6",
-    pair: "AUD/USD",
-    type: "buy" as const,
-    price: 0.6625,
-    takeProfit: [0.6645, 0.6665],
-    stopLoss: 0.6605,
-    timestamp: "2 days ago - 14:30",
-    isPremium: true,
-  },
-  {
-    id: "7",
-    pair: "USD/CAD",
-    type: "sell" as const,
-    price: 1.365,
-    takeProfit: [1.363, 1.361, 1.359],
-    stopLoss: 1.367,
-    timestamp: "2 days ago - 11:15",
-    success: false,
-    isPremium: false,
-  },
-  {
-    id: "8",
-    pair: "NZD/USD",
-    type: "buy" as const,
-    price: 0.5985,
-    takeProfit: [0.6005, 0.6025],
-    stopLoss: 0.5965,
-    timestamp: "3 days ago - 16:40",
-    success: true,
-    isPremium: false,
-  },
-  {
-    id: "9",
-    pair: "GBP/USD",
-    type: "sell" as const,
-    price: 1.2485,
-    takeProfit: [1.2465, 1.2445, 1.2425],
-    stopLoss: 1.2505,
-    timestamp: "3 days ago - 13:20",
-    success: true,
-    isPremium: false,
-  },
-  {
-    id: "10",
-    pair: "USD/CHF",
-    type: "buy" as const,
-    price: 0.9045,
-    takeProfit: [0.9065, 0.9085],
-    stopLoss: 0.9025,
-    timestamp: "4 days ago - 09:15",
-    success: true,
-    isPremium: false,
-  },
-  {
-    id: "11",
-    pair: "EUR/JPY",
-    type: "sell" as const,
-    price: 164.75,
-    takeProfit: [164.55, 164.35, 164.15],
-    stopLoss: 164.95,
-    timestamp: "4 days ago - 14:50",
-    success: false,
-    isPremium: false,
-  },
-  {
-    id: "12",
-    pair: "CAD/JPY",
-    type: "buy" as const,
-    price: 113.25,
-    takeProfit: [113.45, 113.65],
-    stopLoss: 113.05,
-    timestamp: "5 days ago - 11:30",
-    isPremium: true,
-  },
-];
+// Define types for signal data
+interface Signal {
+  id: string;
+  pair: string;
+  type: "buy" | "sell";
+  price: number;
+  takeProfit: number[];
+  stopLoss: number;
+  timestamp: string;
+  success?: boolean;
+  isPremium: boolean;
+}
 
 export default function SignalsPage() {
+  const [signals, setSignals] = useState<Signal[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [signalTypeFilter, setSignalTypeFilter] = useState<
     "all" | "buy" | "sell"
@@ -167,25 +33,42 @@ export default function SignalsPage() {
   );
   const { t } = useLanguage();
 
-  // Filter signals based on search query and type filter
-  let filteredSignals = signals.filter(
-    (signal) =>
-      signal.pair.toLowerCase().includes(searchQuery.toLowerCase()) &&
-      (signalTypeFilter === "all" || signal.type === signalTypeFilter)
-  );
+  // Fetch signals from API
+  const fetchSignals = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
 
-  // Sort signals based on the selected sort order
-  filteredSignals = [...filteredSignals].sort((a, b) => {
-    if (sortOrder === "pair") {
-      return a.pair.localeCompare(b.pair);
-    } else if (sortOrder === "newest") {
-      // For simplicity, we'll sort by ID in reverse (assuming higher ID = newer)
-      return parseInt(b.id) - parseInt(a.id);
-    } else {
-      // oldest first
-      return parseInt(a.id) - parseInt(b.id);
+      const params = new URLSearchParams({
+        search: searchQuery,
+        type: signalTypeFilter,
+        sort: sortOrder,
+        limit: "50", // Fetch more signals for client-side filtering
+      });
+
+      const response = await fetch(`/api/signals/data?${params}`);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      setSignals(data.signals || []);
+    } catch (err) {
+      console.error("Error fetching signals:", err);
+      setError(t("failedToLoadSignals") || "Failed to load signals");
+    } finally {
+      setLoading(false);
     }
-  });
+  }, [searchQuery, signalTypeFilter, sortOrder, t]);
+
+  // Fetch signals on component mount and when filters change
+  useEffect(() => {
+    fetchSignals();
+  }, [fetchSignals]);
+
+  // Filter signals for display (additional client-side filtering if needed)
+  const filteredSignals = signals;
 
   return (
     <div className="bg-black text-white relative">
@@ -304,7 +187,29 @@ export default function SignalsPage() {
 
         {/* Signals Grid */}
         <div className="max-w-6xl mx-auto mb-12">
-          {filteredSignals.length > 0 ? (
+          {loading ? (
+            <div className="min-h-[400px] flex items-center justify-center text-center p-8">
+              <div>
+                <Loader2 className="h-12 w-12 mx-auto mb-4 animate-spin text-blue-500" />
+                <p className="text-lg text-gray-300">
+                  {t("loadingSignals") || "Loading signals..."}
+                </p>
+              </div>
+            </div>
+          ) : error ? (
+            <div className="min-h-[300px] flex items-center justify-center text-center p-8 text-red-400 bg-red-900/20 backdrop-blur-sm rounded-lg border border-red-800 w-full">
+              <div>
+                <p className="text-lg mb-4">{error}</p>
+                <Button
+                  onClick={fetchSignals}
+                  variant="outline"
+                  className="border-red-600 text-red-400 hover:bg-red-600 hover:text-white"
+                >
+                  {t("tryAgain") || "Try Again"}
+                </Button>
+              </div>
+            </div>
+          ) : filteredSignals.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredSignals.map((signal) => (
                 <div key={signal.id} className="h-full">

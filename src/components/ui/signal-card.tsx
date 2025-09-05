@@ -31,9 +31,13 @@ export function SignalCard({
   const isCompleted = success !== undefined;
   const textColor = type === "buy" ? "text-green-500" : "text-red-500";
   const { t } = useLanguage();
+  // If success === true, consider position closed regardless of passed prop
+  const positionOpen = isOpen && success !== true;
 
   return (
-    <div className="bg-gray-900/80 backdrop-blur-sm rounded-lg overflow-hidden h-full flex flex-col text-right">
+    <div
+      className={`${success === true ? "bg-red-900/60 border border-red-800" : "bg-gray-900/80"} backdrop-blur-sm rounded-lg overflow-hidden h-full flex flex-col text-right`}
+    >
       <div className="border-b border-gray-800 py-3 px-4 flex flex-row-reverse justify-between items-center">
         <div className={`text-xl font-bold ${pairColor}`}>{pair}</div>
         <div className={`font-medium ${textColor} flex items-center gap-1`}>
@@ -104,12 +108,12 @@ export function SignalCard({
         {/* Position Status Box - Positioned consistently across all cards */}
         <div
           className={`w-full py-2 text-center font-bold rounded-md ${
-            isOpen
+            positionOpen
               ? "bg-green-600/20 text-green-400"
               : "bg-red-600/20 text-red-400"
           } mt-6`}
         >
-          {isOpen ? t("open") : t("closed")}
+          {positionOpen ? t("open") : t("closed")}
         </div>
       </div>
     </div>
