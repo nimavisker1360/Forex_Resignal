@@ -51,9 +51,9 @@ export default function Home() {
 
         <div className="container relative z-10 mx-auto">
           <div className="grid md:grid-cols-2 gap-10 items-center px-4 sm:px-6 md:px-16 lg:px-24 max-w-[1400px] mx-auto">
-            {/* Text Content - Now on Left */}
+            {/* Left Column - Title and Description */}
             <MotionStaggerContainer
-              className={`space-y-8 ${language === "fa" ? "text-right" : "text-left"} order-1 md:order-1 max-w-xl`}
+              className={`space-y-8 ${language === "fa" ? "text-right" : "text-left"} order-1 md:order-1`}
             >
               <MotionStaggerItem
                 className={`inline-flex items-center bg-gradient-to-r from-blue-600/80 to-blue-500/30 backdrop-blur-sm px-6 py-2.5 rounded-full border border-blue-400/30 mb-4 ${language === "fa" ? "self-end" : "self-start"}`}
@@ -70,56 +70,6 @@ export default function Home() {
               <MotionParagraph className="text-lg md:text-xl text-white/70 mt-4">
                 {t("heroDescription")}
               </MotionParagraph>
-
-              <div
-                className={`flex flex-col ${language === "fa" ? "items-end" : "items-start"} sm:flex-row ${language === "fa" ? "sm:justify-end" : "sm:justify-start"} sm:flex-wrap sm:gap-8 gap-4 mt-6 mb-8`}
-              >
-                <div
-                  className={`flex items-center gap-2 ${language === "fa" ? "flex-row-reverse" : ""}`}
-                >
-                  {language === "en" && (
-                    <div className="bg-blue-600 p-1 rounded-full flex-shrink-0">
-                      <CheckCircle2 className="h-5 w-5 text-white" />
-                    </div>
-                  )}
-                  <span className="text-base">{t("whenToSell")}</span>
-                  {language === "fa" && (
-                    <div className="bg-blue-600 p-1 rounded-full flex-shrink-0">
-                      <CheckCircle2 className="h-5 w-5 text-white" />
-                    </div>
-                  )}
-                </div>
-                <div
-                  className={`flex items-center gap-2 ${language === "fa" ? "flex-row-reverse" : ""}`}
-                >
-                  {language === "en" && (
-                    <div className="bg-blue-600 p-1 rounded-full flex-shrink-0">
-                      <CheckCircle2 className="h-5 w-5 text-white" />
-                    </div>
-                  )}
-                  <span className="text-base">{t("whenToBuy")}</span>
-                  {language === "fa" && (
-                    <div className="bg-blue-600 p-1 rounded-full flex-shrink-0">
-                      <CheckCircle2 className="h-5 w-5 text-white" />
-                    </div>
-                  )}
-                </div>
-                <div
-                  className={`flex items-center gap-2 ${language === "fa" ? "flex-row-reverse" : ""}`}
-                >
-                  {language === "en" && (
-                    <div className="bg-blue-600 p-1 rounded-full flex-shrink-0">
-                      <CheckCircle2 className="h-5 w-5 text-white" />
-                    </div>
-                  )}
-                  <span className="text-base">{t("stopLossPoints")}</span>
-                  {language === "fa" && (
-                    <div className="bg-blue-600 p-1 rounded-full flex-shrink-0">
-                      <CheckCircle2 className="h-5 w-5 text-white" />
-                    </div>
-                  )}
-                </div>
-              </div>
 
               <MotionStaggerItem
                 className={`pt-2 ${language === "fa" ? "self-end" : "self-start"}`}
@@ -144,14 +94,60 @@ export default function Home() {
               </MotionStaggerItem>
             </MotionStaggerContainer>
 
-            {/* Right Column - Image or empty area */}
-            <div
-              className={`flex justify-center items-center order-2 md:order-2`}
+            {/* Right Column - Key Features */}
+            <MotionStaggerContainer
+              className={`${language === "fa" ? "text-right" : "text-left"} order-2 md:order-2`}
             >
-              <div className="relative w-full max-w-md mx-auto">
-                <div className="absolute -bottom-6 -right-6 w-24 h-24 bg-primary/20 backdrop-blur-sm rounded-full flex items-center justify-center z-10"></div>
+              <div
+                className={`flex items-center gap-3 mb-12 ${language === "fa" ? "flex-row-reverse" : ""}`}
+              >
+                {language === "en" && (
+                  <div className="bg-blue-600 p-2 rounded-full flex-shrink-0">
+                    <CheckCircle2 className="h-6 w-6 text-white" />
+                  </div>
+                )}
+                <span className="text-sm text-white/90">{t("whenToSell")}</span>
+                {language === "fa" && (
+                  <div className="bg-blue-600 p-2 rounded-full flex-shrink-0">
+                    <CheckCircle2 className="h-6 w-6 text-white" />
+                  </div>
+                )}
               </div>
-            </div>
+
+              <div
+                className={`flex items-center gap-3 mb-12 ${language === "fa" ? "flex-row-reverse" : ""}`}
+              >
+                {language === "en" && (
+                  <div className="bg-blue-600 p-2 rounded-full flex-shrink-0">
+                    <CheckCircle2 className="h-6 w-6 text-white" />
+                  </div>
+                )}
+                <span className="text-sm text-white/90">{t("whenToBuy")}</span>
+                {language === "fa" && (
+                  <div className="bg-blue-600 p-2 rounded-full flex-shrink-0">
+                    <CheckCircle2 className="h-6 w-6 text-white" />
+                  </div>
+                )}
+              </div>
+
+              <div
+                className={`flex items-center gap-3 ${language === "fa" ? "flex-row-reverse" : ""}`}
+              >
+                {language === "en" && (
+                  <div className="bg-blue-600 p-2 rounded-full flex-shrink-0">
+                    <CheckCircle2 className="h-6 w-6 text-white" />
+                  </div>
+                )}
+                <span className="text-sm text-white/90">
+                  {t("stopLossPoints")}
+                </span>
+                {language === "fa" && (
+                  <div className="bg-blue-600 p-2 rounded-full flex-shrink-0">
+                    <CheckCircle2 className="h-6 w-6 text-white" />
+                  </div>
+                )}
+              </div>
+            </MotionStaggerContainer>
           </div>
 
           {/* TradingView Ticker Tape Widget */}
