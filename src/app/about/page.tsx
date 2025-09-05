@@ -41,16 +41,14 @@ export default function AboutPage() {
               />
             </div>
           </div>
-          <div
-            className={`${language === "fa" ? "text-right" : "text-left"} p-6 rounded-lg`}
-          >
+          <div className="text-center md:text-left p-6 rounded-lg">
             <h2 className="text-3xl font-bold mb-6 text-blue-500">
               {t("aboutPage.whoWeAreTitle")}
             </h2>
             <p className="mb-4">{t("aboutPage.whoWeAreText1")}</p>
             <p className="mb-4">{t("aboutPage.whoWeAreText2")}</p>
-            <div className="mt-8 flex justify-end ">
-              <Button asChild className="bg-primary hover:bg-primary/80 ">
+            <div className="mt-8 flex justify-center md:justify-end">
+              <Button asChild className="bg-primary hover:bg-primary/80">
                 <Link href="/signals">
                   {t("aboutPage.viewSignalsButton")}
                   <ArrowRight className="ml-2 h-4 w-4" />
@@ -62,26 +60,18 @@ export default function AboutPage() {
 
         {/* Our Mission */}
         <div className="bg-card border border-zinc-800 rounded-lg p-8 mb-20">
-          <div
-            className={`${language === "fa" ? "text-right" : "text-center"} mb-12`}
-          >
+          <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-6 text-blue-500">
               {t("aboutPage.ourMissionTitle")}
             </h2>
-            <p
-              className={`text-lg max-w-2xl ${language === "fa" ? "ml-auto" : "mx-auto"}`}
-            >
+            <p className="text-lg max-w-2xl mx-auto">
               {t("aboutPage.ourMissionText")}
             </p>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <div
-              className={`${language === "fa" ? "text-right" : "text-center"}`}
-            >
-              <div
-                className={`${language === "fa" ? "ml-auto" : "mx-auto"} bg-primary/10 p-4 rounded-full w-20 h-20 flex items-center justify-center mb-4`}
-              >
+            <div className="text-center">
+              <div className="mx-auto bg-primary/10 p-4 rounded-full w-20 h-20 flex items-center justify-center mb-4">
                 <Award className="h-10 w-10 text-primary" />
               </div>
               <h3 className="text-xl font-bold mb-2">
@@ -90,12 +80,8 @@ export default function AboutPage() {
               <p>{t("aboutPage.qualityText")}</p>
             </div>
 
-            <div
-              className={`${language === "fa" ? "text-right" : "text-center"}`}
-            >
-              <div
-                className={`${language === "fa" ? "ml-auto" : "mx-auto"} bg-primary/10 p-4 rounded-full w-20 h-20 flex items-center justify-center mb-4`}
-              >
+            <div className="text-center">
+              <div className="mx-auto bg-primary/10 p-4 rounded-full w-20 h-20 flex items-center justify-center mb-4">
                 <Users className="h-10 w-10 text-primary" />
               </div>
               <h3 className="text-xl font-bold mb-2">
@@ -104,12 +90,8 @@ export default function AboutPage() {
               <p>{t("aboutPage.educationText")}</p>
             </div>
 
-            <div
-              className={`${language === "fa" ? "text-right" : "text-center"}`}
-            >
-              <div
-                className={`${language === "fa" ? "ml-auto" : "mx-auto"} bg-primary/10 p-4 rounded-full w-20 h-20 flex items-center justify-center mb-4`}
-              >
+            <div className="text-center">
+              <div className="mx-auto bg-primary/10 p-4 rounded-full w-20 h-20 flex items-center justify-center mb-4">
                 <TrendingUp className="h-10 w-10 text-primary" />
               </div>
               <h3 className="text-xl font-bold mb-2">
@@ -118,12 +100,8 @@ export default function AboutPage() {
               <p>{t("aboutPage.innovationText")}</p>
             </div>
 
-            <div
-              className={`${language === "fa" ? "text-right" : "text-center"}`}
-            >
-              <div
-                className={`${language === "fa" ? "ml-auto" : "mx-auto"} bg-primary/10 p-4 rounded-full w-20 h-20 flex items-center justify-center mb-4`}
-              >
+            <div className="text-center">
+              <div className="mx-auto bg-primary/10 p-4 rounded-full w-20 h-20 flex items-center justify-center mb-4">
                 <Zap className="h-10 w-10 text-primary" />
               </div>
               <h3 className="text-xl font-bold mb-2">
@@ -136,30 +114,22 @@ export default function AboutPage() {
 
         {/* Statistics */}
         <div className="grid md:grid-cols-4 gap-8 mb-20">
-          <div
-            className={`bg-card border border-zinc-800 rounded-lg p-6 ${language === "fa" ? "text-right" : "text-center"}`}
-          >
+          <div className="bg-card border border-zinc-800 rounded-lg p-6 text-center">
             <div className="text-4xl font-bold text-primary mb-2">+8</div>
             <p>{t("aboutPage.yearsActive")}</p>
           </div>
 
-          <div
-            className={`bg-card border border-zinc-800 rounded-lg p-6 ${language === "fa" ? "text-right" : "text-center"}`}
-          >
+          <div className="bg-card border border-zinc-800 rounded-lg p-6 text-center">
             <div className="text-4xl font-bold text-primary mb-2">+5000</div>
             <p>{t("aboutPage.activeUsers")}</p>
           </div>
 
-          <div
-            className={`bg-card border border-zinc-800 rounded-lg p-6 ${language === "fa" ? "text-right" : "text-center"}`}
-          >
+          <div className="bg-card border border-zinc-800 rounded-lg p-6 text-center">
             <div className="text-4xl font-bold text-primary mb-2">+85%</div>
             <p>{t("aboutPage.successRate")}</p>
           </div>
 
-          <div
-            className={`bg-card border border-zinc-800 rounded-lg p-6 ${language === "fa" ? "text-right" : "text-center"}`}
-          >
+          <div className="bg-card border border-zinc-800 rounded-lg p-6 text-center">
             <div className="text-4xl font-bold text-primary mb-2">24/7</div>
             <p>{t("aboutPage.support")}</p>
           </div>
