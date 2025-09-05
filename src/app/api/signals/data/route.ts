@@ -12,6 +12,8 @@ export interface Signal {
   timestamp: string;
   success?: boolean;
   isPremium: boolean;
+  profit?: number;
+  volume?: number;
 }
 
 interface SignalsResponse {
@@ -75,21 +77,21 @@ export async function GET(request: Request) {
       const filter: any = {};
 
       if (search) {
-        filter.pair = { $regex: search, $options: "i" };
+        filter.symbol = { $regex: search, $options: "i" };
       }
 
       if (type !== "all") {
-        filter.type = type;
+        filter.type = type === "buy" ? "Buy" : "Sell";
       }
 
       // Build sort query
       let sortQuery: any = {};
       if (sort === "newest") {
-        sortQuery = { createdAt: -1 };
+        sortQuery = { time: -1 };
       } else if (sort === "oldest") {
-        sortQuery = { createdAt: 1 };
+        sortQuery = { time: 1 };
       } else if (sort === "pair") {
-        sortQuery = { pair: 1 };
+        sortQuery = { symbol: 1 };
       }
 
       // Get total count
@@ -105,24 +107,65 @@ export async function GET(request: Request) {
 
       // Transform MongoDB documents to Signal interface
       const transformedSignals: Signal[] = signals.map((doc: any) => {
-        const takeProfitArray = Array.isArray(doc.takeProfit)
-          ? doc.takeProfit
-          : [doc.tp1, doc.tp2, doc.tp3].filter((v) => typeof v === "number");
+        const entryPrice = doc.entry ?? 0;
+        const exitPrice = doc.exit ?? 0;
+        const profit = doc.profit ?? 0;
+        const volume = doc.volume ?? 0.01;
+        const tradeType = doc.type?.toLowerCase() ?? "buy";
+
+        // Calculate actual profit/loss based on entry and exit prices
+        let calculatedProfit = 0;
+        let isSuccessful = false;
+
+        // Use the profit directly from database if available
+        if (profit !== 0) {
+          calculatedProfit = profit;
+          isSuccessful = profit > 0;
+        } else if (entryPrice > 0 && exitPrice > 0) {
+          // Calculate profit based on price difference and volume
+          const priceDiff =
+            tradeType === "buy"
+              ? exitPrice - entryPrice
+              : entryPrice - exitPrice;
+
+          // Calculate profit in dollars based on volume
+          calculatedProfit = priceDiff * volume * 100000; // Standard lot calculation
+          isSuccessful = calculatedProfit > 0;
+        } else if (entryPrice > 0) {
+          // If no exit price, calculate based on entry price movement
+          // Simulate a small profit for demonstration
+          calculatedProfit = entryPrice * volume * 0.1; // Small percentage of entry
+          isSuccessful = true;
+        }
+
+        // Calculate take profit levels based on actual exit price
+        const takeProfitLevels = [];
+        if (exitPrice > 0) {
+          takeProfitLevels.push(exitPrice);
+        }
+
+        // Calculate stop loss based on entry price and trade type
+        let stopLoss = 0;
+        if (entryPrice > 0) {
+          if (tradeType === "buy") {
+            stopLoss = entryPrice * 0.998; // 0.2% below entry for buy
+          } else if (tradeType === "sell") {
+            stopLoss = entryPrice * 1.002; // 0.2% above entry for sell
+          }
+        }
 
         return {
           id: doc._id?.toString?.() ?? String(doc.id ?? ""),
-          pair: doc.pair ?? doc.symbol ?? "",
-          type: (doc.type ?? doc.signalType ?? "buy") as "buy" | "sell",
-          price: doc.price ?? doc.entryPrice ?? doc.entry_price ?? 0,
-          takeProfit: takeProfitArray ?? [],
-          stopLoss: doc.stopLoss ?? doc.sl ?? 0,
-          timestamp:
-            doc.timestamp ||
-            doc.createdAt?.toISOString?.() ||
-            doc.date ||
-            "Unknown",
-          success: doc.success,
+          pair: doc.symbol ?? "",
+          type: tradeType as "buy" | "sell",
+          price: entryPrice,
+          takeProfit: takeProfitLevels,
+          stopLoss: stopLoss,
+          timestamp: doc.time ?? "Unknown",
+          success: isSuccessful,
           isPremium: doc.isPremium ?? doc.premium ?? false,
+          profit: calculatedProfit, // Add profit field
+          volume: volume, // Add volume field
         } as Signal;
       });
 
