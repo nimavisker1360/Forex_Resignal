@@ -3,236 +3,185 @@
 import {
   MotionDiv,
   MotionStaggerContainer,
-  MotionHeading,
+  MotionStaggerItem,
 } from "@/components/ui/motion-content";
-import useEmblaCarousel from "embla-carousel-react";
-import { useCallback, useEffect, useState } from "react";
+import Image from "next/image";
 import { useLanguage } from "@/lib/language-context";
 
 export function Testimonials() {
-  const { t, language } = useLanguage();
-  const [emblaRef, emblaApi] = useEmblaCarousel({
-    align: "center",
-    loop: true,
-    slidesToScroll: 1,
-    direction: language === "fa" ? "rtl" : "ltr",
-  });
-  const [selectedIndex, setSelectedIndex] = useState(0);
-  const [scrollSnaps, setScrollSnaps] = useState<number[]>([]);
-  const [testimonials, setTestimonials] = useState<any[]>([]);
-
-  // Load testimonials directly from common.json
-  useEffect(() => {
-    async function loadTestimonials() {
-      try {
-        const response = await fetch(`/locales/${language}/common.json`);
-        const data = await response.json();
-        console.log("Loaded translations:", data);
-
-        if (data && data.testimonials && Array.isArray(data.testimonials)) {
-          console.log("Found testimonials:", data.testimonials);
-          setTestimonials(data.testimonials);
-        } else {
-          console.error("Testimonials not found or not an array");
-          setTestimonials([]);
-        }
-      } catch (error) {
-        console.error("Error loading testimonials:", error);
-        setTestimonials([]);
-      }
-    }
-
-    loadTestimonials();
-  }, [language]);
-
-  const scrollTo = useCallback(
-    (index: number) => {
-      if (!emblaApi) return;
-      emblaApi.scrollTo(index);
-    },
-    [emblaApi]
-  );
-
-  const onSelect = useCallback(() => {
-    if (!emblaApi) return;
-    setSelectedIndex(emblaApi.selectedScrollSnap());
-  }, [emblaApi]);
-
-  // Initialize or reinitialize carousel when testimonials change or emblaApi is available
-  useEffect(() => {
-    if (!emblaApi || testimonials.length === 0) return;
-
-    // Reset carousel when testimonials change
-    emblaApi.reInit();
-    setScrollSnaps(emblaApi.scrollSnapList());
-    emblaApi.on("select", onSelect);
-    onSelect();
-
-    return () => {
-      emblaApi.off("select", onSelect);
-    };
-  }, [emblaApi, onSelect, testimonials]);
-
-  // Function to render stars based on rating
-  const renderStars = (rating: number) => {
-    return Array.from({ length: 5 }).map((_, i) => (
-      <span key={i} className="text-yellow-400 text-xl">
-        {i < rating ? "★" : "☆"}
-      </span>
-    ));
-  };
-
-  // Use these functions for navigation buttons
-  const scrollPrev = useCallback(() => {
-    if (emblaApi) emblaApi.scrollPrev();
-  }, [emblaApi]);
-
-  const scrollNext = useCallback(() => {
-    if (emblaApi) emblaApi.scrollNext();
-  }, [emblaApi]);
+  const { language } = useLanguage();
 
   return (
     <section
       dir={language === "fa" ? "rtl" : "ltr"}
-      className="py-16 bg-black border-none relative"
+      className="py-20 bg-transparent relative border border-blue-500/20 rounded-3xl mx-4 my-8"
     >
+      {/* Background Pattern */}
       <div
-        className="absolute inset-0 mx-auto my-auto bg-[url('/images/back.jpg')] bg-contain bg-center opacity-20 z-0"
+        className="absolute inset-0 mx-auto my-auto bg-[url('/images/back.jpg')] bg-contain bg-center opacity-5 z-0"
         style={{
-          width: "170%",
+          width: "120%",
           height: "120%",
           top: "0%",
           left: "0%",
-          transform: "rotate(-8deg) scale(1.3)",
+          transform: "rotate(10deg) scale(1.4)",
         }}
       ></div>
-      <div className="container mx-auto px-4 max-w-3xl relative z-10">
-        <MotionStaggerContainer className="text-center mb-12">
-          <MotionHeading className="text-3xl font-bold text-white text-center">
-            {t("testimonialHeading")}
-          </MotionHeading>
-        </MotionStaggerContainer>
 
-        <div className="relative">
-          <div className="overflow-hidden" ref={emblaRef}>
-            <div className="flex gap-5 px-2">
-              {testimonials && testimonials.length > 0 ? (
-                testimonials.map((testimonial, index) => (
-                  <div
-                    className="min-w-[85%] sm:min-w-[45%] sm:max-w-[45%] flex-grow-0 flex-shrink-0"
-                    key={index}
-                  >
-                    <MotionDiv
-                      className="bg-[#1a1a3a] border border-[#2c2c50] shadow-lg rounded-lg p-6 h-full flex flex-col"
-                      delay={index * 0.1}
-                    >
-                      <div className="flex items-center mb-3 justify-between">
-                        <div className="flex flex-col w-full">
-                          <div className="flex items-center gap-3">
-                            <div className="w-12 h-12 rounded-full overflow-hidden">
-                              <img
-                                src={`https://i.pravatar.cc/150?img=${
-                                  index + 10
-                                }`}
-                                alt={testimonial.name}
-                                className="w-full h-full object-cover"
-                              />
-                            </div>
-                            <div>
-                              <h4 className="font-bold text-white">
-                                {testimonial.name}
-                              </h4>
-                              <p className="text-xs text-gray-400">
-                                {testimonial.title}
-                              </p>
-                            </div>
-                          </div>
-                          <div className="flex mt-3">
-                            {renderStars(testimonial.rating || 5)}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex-grow">
-                        <p className="text-gray-300">
-                          &ldquo;{testimonial.quote}&rdquo;
-                        </p>
-                      </div>
-                    </MotionDiv>
-                  </div>
-                ))
-              ) : (
-                <div className="text-white text-center w-full py-8">
-                  Loading testimonials...
-                </div>
-              )}
-            </div>
+      <div className="container mx-auto px-6 sm:px-10 relative z-10">
+        {/* Section Header */}
+        <MotionDiv className="text-center mb-16">
+          <div className="relative inline-block mb-6">
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-blue-400/20 rounded-full blur-xl"></div>
+            <h2
+              className={`relative text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-400 via-blue-300 to-blue-500 bg-clip-text text-transparent ${language === "fa" ? "font-[BYekan]" : ""}`}
+            >
+              {language === "fa" ? "مزایای بروکر CPT" : "CPT Broker Advantages"}
+            </h2>
           </div>
+          <div className="w-24 h-1 bg-gradient-to-r from-blue-500 to-blue-300 mx-auto rounded-full"></div>
+        </MotionDiv>
 
-          {scrollSnaps.length > 1 && (
-            <div className="flex justify-center mt-8 gap-2">
-              {scrollSnaps.map((_, index) => (
-                <button
-                  key={index}
-                  className={`w-3 h-3 rounded-full transition-all ${
-                    index === selectedIndex
-                      ? "bg-primary scale-110"
-                      : "bg-white hover:bg-gray-300"
-                  }`}
-                  onClick={() => scrollTo(index)}
-                  aria-label={`Go to slide ${index + 1}`}
-                />
-              ))}
+        {/* Main Content Grid */}
+        <div className="grid lg:grid-cols-2 gap-12 items-center max-w-7xl mx-auto">
+          {/* Left Side - CPT Image */}
+          <MotionStaggerContainer className="order-2 lg:order-1">
+            <MotionStaggerItem>
+              <CptImageCard />
+            </MotionStaggerItem>
+          </MotionStaggerContainer>
+
+          {/* Right Side - Key Benefits */}
+          <MotionStaggerContainer
+            className={`order-1 lg:order-2 ${language === "fa" ? "text-right" : "text-left"}`}
+          >
+            <div className="space-y-6">
+              <div className="grid gap-8">
+                <MotionStaggerItem className="border border-blue-500/30 rounded-xl p-6 hover:border-blue-400/50 transition-all duration-300">
+                  <div
+                    className={`flex items-start gap-4 ${language === "fa" ? "flex-row-reverse" : ""}`}
+                  >
+                    <div className="w-3 h-3 bg-blue-400 rounded-full mt-2 flex-shrink-0"></div>
+                    <div>
+                      <h4
+                        className={`text-lg font-semibold text-white mb-2 ${language === "fa" ? "font-[BYekan]" : ""}`}
+                      >
+                        {language === "fa"
+                          ? "پلتفرم‌های معاملاتی قدرتمند"
+                          : "Powerful Trading Platforms"}
+                      </h4>
+                      <p
+                        className={`text-gray-300 text-sm leading-relaxed ${language === "fa" ? "font-[BYekan]" : ""}`}
+                      >
+                        {language === "fa"
+                          ? "MT4 و MT5 با تمام امکانات پیشرفته"
+                          : "MT4 & MT5 with all advanced features"}
+                      </p>
+                    </div>
+                  </div>
+                </MotionStaggerItem>
+
+                <MotionStaggerItem className="border border-blue-500/30 rounded-xl p-6 hover:border-blue-400/50 transition-all duration-300">
+                  <div
+                    className={`flex items-start gap-4 ${language === "fa" ? "flex-row-reverse" : ""}`}
+                  >
+                    <div className="w-3 h-3 bg-green-400 rounded-full mt-2 flex-shrink-0"></div>
+                    <div>
+                      <h4
+                        className={`text-lg font-semibold text-white mb-2 ${language === "fa" ? "font-[BYekan]" : ""}`}
+                      >
+                        {language === "fa"
+                          ? "کپی تریدینگ حرفه‌ای"
+                          : "Professional Copy Trading"}
+                      </h4>
+                      <p
+                        className={`text-gray-300 text-sm leading-relaxed ${language === "fa" ? "font-[BYekan]" : ""}`}
+                      >
+                        {language === "fa"
+                          ? "دنبال کردن بهترین معامله‌گران جهان"
+                          : "Follow the world's best traders"}
+                      </p>
+                    </div>
+                  </div>
+                </MotionStaggerItem>
+
+                <MotionStaggerItem className="border border-blue-500/30 rounded-xl p-6 hover:border-blue-400/50 transition-all duration-300">
+                  <div
+                    className={`flex items-start gap-4 ${language === "fa" ? "flex-row-reverse" : ""}`}
+                  >
+                    <div className="w-3 h-3 bg-purple-400 rounded-full mt-2 flex-shrink-0"></div>
+                    <div>
+                      <h4
+                        className={`text-lg font-semibold text-white mb-2 ${language === "fa" ? "font-[BYekan]" : ""}`}
+                      >
+                        {language === "fa"
+                          ? "رگولاتوری معتبر"
+                          : "Trusted Regulation"}
+                      </h4>
+                      <p
+                        className={`text-gray-300 text-sm leading-relaxed ${language === "fa" ? "font-[BYekan]" : ""}`}
+                      >
+                        {language === "fa"
+                          ? "FCA، FSCA، FSC، SCA"
+                          : "FCA, FSCA, FSC, SCA"}
+                      </p>
+                    </div>
+                  </div>
+                </MotionStaggerItem>
+
+                <MotionStaggerItem className="border border-blue-500/30 rounded-xl p-6 hover:border-blue-400/50 transition-all duration-300">
+                  <div
+                    className={`flex items-start gap-4 ${language === "fa" ? "flex-row-reverse" : ""}`}
+                  >
+                    <div className="w-3 h-3 bg-yellow-400 rounded-full mt-2 flex-shrink-0"></div>
+                    <div>
+                      <h4
+                        className={`text-lg font-semibold text-white mb-2 ${language === "fa" ? "font-[BYekan]" : ""}`}
+                      >
+                        {language === "fa"
+                          ? "اسپرد کم و کمیسیون صفر"
+                          : "Low Spread & Zero Commission"}
+                      </h4>
+                      <p
+                        className={`text-gray-300 text-sm leading-relaxed ${language === "fa" ? "font-[BYekan]" : ""}`}
+                      >
+                        {language === "fa"
+                          ? "بهترین شرایط معاملاتی در بازار"
+                          : "Best trading conditions in the market"}
+                      </p>
+                    </div>
+                  </div>
+                </MotionStaggerItem>
+              </div>
             </div>
-          )}
-
-          {/* Navigation buttons */}
-          {testimonials.length > 1 && (
-            <div className="flex justify-center items-center mt-8 gap-16">
-              <button
-                onClick={scrollPrev}
-                className="text-white hover:text-blue-500 transition-colors"
-                aria-label="Previous testimonial"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="32"
-                  height="32"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className={`${language === "fa" ? "rotate-180" : ""}`}
-                >
-                  <polyline points="15 18 9 12 15 6"></polyline>
-                </svg>
-              </button>
-
-              <button
-                onClick={scrollNext}
-                className="text-white hover:text-blue-500 transition-colors"
-                aria-label="Next testimonial"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="32"
-                  height="32"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className={`${language === "fa" ? "rotate-180" : ""}`}
-                >
-                  <polyline points="9 18 15 12 9 6"></polyline>
-                </svg>
-              </button>
-            </div>
-          )}
+          </MotionStaggerContainer>
         </div>
       </div>
     </section>
+  );
+}
+
+// Reusable CPT image block
+export function CptImageCard() {
+  return (
+    <div className="relative">
+      <MotionDiv>
+        <div className="relative max-w-lg mx-auto">
+          <div className="bg-gradient-to-br from-gray-900/80 to-gray-800/60 backdrop-blur-sm rounded-2xl p-6 border border-blue-500/30 shadow-2xl hover:shadow-blue-500/20 transition-all duration-500 hover:scale-105">
+            <Image
+              src="/images/cpt.jpg"
+              alt="Copy Trading Performance"
+              width={500}
+              height={500}
+              className="w-full h-auto rounded-xl shadow-2xl border-2 border-blue-500/40 hover:border-blue-400/60 transition-all duration-300"
+              priority
+            />
+            <div className="absolute -top-3 -right-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-full text-sm font-semibold shadow-lg">
+              CPT
+            </div>
+          </div>
+        </div>
+      </MotionDiv>
+    </div>
   );
 }

@@ -83,17 +83,7 @@ export function RecentSignals() {
   }, []);
 
   return (
-    <section className="py-16 bg-black relative">
-      <div
-        className="absolute inset-0 mx-auto my-auto bg-[url('/images/back.jpg')] bg-contain bg-center opacity-20 z-0"
-        style={{
-          width: "100%",
-          height: "100%",
-          top: "0%",
-          left: "0%",
-          transform: "rotate(8deg) scale(1.2)",
-        }}
-      ></div>
+    <section className="py-16 bg-transparent relative border border-blue-500/20 rounded-3xl mx-4 my-8">
       <div className="container mx-auto px-4 relative z-10">
         <div className="flex flex-col items-center justify-center mb-12 border-b border-gray-800 pb-6">
           <MotionHeading className="text-5xl font-bold text-white mb-6 text-center">

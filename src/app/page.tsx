@@ -6,15 +6,7 @@ import { RecentSignals } from "@/components/RecentSignals";
 import { Testimonials } from "@/components/Testimonials";
 import Image from "next/image";
 import { TradingViewTicker } from "@/components/TradingViewTicker";
-import {
-  CheckCircle2,
-  Diamond,
-  Coins,
-  LineChart,
-  Info,
-  MessageSquare,
-  Trophy,
-} from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 import {
   MotionDiv,
   MotionStaggerContainer,
@@ -31,62 +23,73 @@ export default function Home() {
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
-      <section className="relative py-10 md:py-20 bg-black text-white overflow-hidden">
+      <section className="relative min-h-screen py-16 md:py-24 bg-gradient-to-br from-gray-900 via-black to-gray-900 text-white overflow-hidden border border-blue-500/20 rounded-3xl mx-4 my-8">
+        {/* Background Image */}
         <MotionImage
           className="absolute inset-0 z-0"
           style={{
             transform:
-              language === "fa" ? "translateX(-30%)" : "translateX(30%)",
+              language === "fa" ? "translateX(-10%)" : "translateX(30%)",
             width: "80%",
+            height: "80%",
           }}
         >
           <Image
             src="/images/bg-home03.png"
             alt="Forex Trading Background"
             fill
-            className={`object-cover ${language === "fa" ? "object-left" : "object-right"}`}
+            className={`object-cover ${language === "fa" ? "object-left" : "object-right"} opacity-60`}
             priority
           />
         </MotionImage>
 
-        <div className="container relative z-10 mx-auto">
-          <div className="grid md:grid-cols-2 gap-10 items-center px-4 sm:px-6 md:px-16 lg:px-24 max-w-[1400px] mx-auto">
+        {/* Gradient Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-transparent to-black/30 z-5"></div>
+
+        <div className="container relative z-10 mx-auto h-full flex items-center">
+          <div className="grid md:grid-cols-2 gap-12 items-center px-4 sm:px-6 md:px-16 lg:px-24 max-w-[1400px] mx-auto w-full">
             {/* Left Column - Title and Description */}
             <MotionStaggerContainer
-              className={`space-y-8 ${language === "fa" ? "text-right" : "text-left"} order-1 md:order-1`}
+              className={`space-y-10 ${language === "fa" ? "text-right" : "text-left"} order-1 md:order-1`}
             >
               <MotionStaggerItem
-                className={`inline-flex items-center bg-gradient-to-r from-blue-600/80 to-blue-500/30 backdrop-blur-sm px-6 py-2.5 rounded-full border border-blue-400/30 mb-4 ${language === "fa" ? "self-end" : "self-start"}`}
+                className={`inline-flex items-center bg-gradient-to-r from-blue-600/90 to-purple-600/60 backdrop-blur-md px-8 py-3 rounded-full border border-blue-400/40 shadow-xl ${language === "fa" ? "self-end" : "self-start"}`}
               >
-                <span className="text-blue-200 font-medium">
+                <span className="text-blue-100 font-semibold text-sm tracking-wide">
                   {t("forexSignalPlatform")}
                 </span>
               </MotionStaggerItem>
 
-              <MotionHeading className="text-5xl font-extrabold tracking-tight leading-none text-white/90 mb-6 mt-4">
+              <MotionHeading
+                className={`text-6xl md:text-7xl font-black tracking-tight leading-tight bg-gradient-to-r from-white via-blue-100 to-blue-200 bg-clip-text text-transparent mb-8 ${language === "fa" ? "font-[BYekan]" : ""}`}
+              >
                 {t("heroTitle")}
               </MotionHeading>
 
-              <MotionParagraph className="text-lg md:text-xl text-white/70 mt-4">
+              <MotionParagraph
+                className={`text-xl md:text-2xl text-gray-300 leading-relaxed max-w-lg ${language === "fa" ? "font-[BYekan]" : ""}`}
+              >
                 {t("heroDescription")}
               </MotionParagraph>
 
               <MotionStaggerItem
-                className={`pt-2 ${language === "fa" ? "self-end" : "self-start"}`}
+                className={`pt-4 ${language === "fa" ? "self-end" : "self-start"}`}
               >
                 <Button
                   size="lg"
-                  className="px-8 from-blue-600/80 to-blue-500/30 hover:bg-primary/90"
+                  className="px-10 py-4 text-lg bg-gradient-to-r from-blue-600 via-blue-500 to-purple-600 hover:from-blue-700 hover:via-blue-600 hover:to-purple-700 shadow-2xl border-0 rounded-xl transition-all duration-300 transform hover:scale-105"
                   asChild
                 >
-                  <Link href="/signals" className="flex items-center">
+                  <Link href="/signals" className="flex items-center gap-2">
                     {language === "fa" ? (
                       <>
-                        {t("exploreNow")} <span className="ml-1">←</span>
+                        <span className="font-bold">{t("exploreNow")}</span>
+                        <span className="text-xl">←</span>
                       </>
                     ) : (
                       <>
-                        <span className="mr-1">→</span> {t("exploreNow")}
+                        <span className="text-xl">→</span>
+                        <span className="font-bold">{t("exploreNow")}</span>
                       </>
                     )}
                   </Link>
@@ -98,60 +101,56 @@ export default function Home() {
             <MotionStaggerContainer
               className={`${language === "fa" ? "text-right" : "text-left"} order-2 md:order-2`}
             >
-              <div
-                className={`flex items-center gap-3 mb-12 ${language === "fa" ? "flex-row-reverse" : ""}`}
-              >
-                {language === "en" && (
-                  <div className="bg-blue-600 p-2 rounded-full flex-shrink-0">
-                    <CheckCircle2 className="h-6 w-6 text-white" />
+              <div className="">
+                <div className="space-y-6">
+                  <div
+                    className={`flex items-center gap-4 p-4 rounded-xl border border-blue-500/30 ${language === "fa" ? "flex-row-reverse" : ""}`}
+                  >
+                    <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-3 rounded-full flex-shrink-0 shadow-lg">
+                      <CheckCircle2 className="h-6 w-6 text-white" />
+                    </div>
+                    <span
+                      className={`text-base text-white font-medium ${language === "fa" ? "font-[BYekan]" : ""}`}
+                    >
+                      {t("whenToSell")}
+                    </span>
                   </div>
-                )}
-                <span className="text-sm text-white/90">{t("whenToSell")}</span>
-                {language === "fa" && (
-                  <div className="bg-blue-600 p-2 rounded-full flex-shrink-0">
-                    <CheckCircle2 className="h-6 w-6 text-white" />
-                  </div>
-                )}
-              </div>
 
-              <div
-                className={`flex items-center gap-3 mb-12 ${language === "fa" ? "flex-row-reverse" : ""}`}
-              >
-                {language === "en" && (
-                  <div className="bg-blue-600 p-2 rounded-full flex-shrink-0">
-                    <CheckCircle2 className="h-6 w-6 text-white" />
+                  <div
+                    className={`flex items-center gap-4 p-4 rounded-xl border border-blue-500/30 ${language === "fa" ? "flex-row-reverse" : ""}`}
+                  >
+                    <div className="bg-gradient-to-r from-green-500 to-blue-600 p-3 rounded-full flex-shrink-0 shadow-lg">
+                      <CheckCircle2 className="h-6 w-6 text-white" />
+                    </div>
+                    <span
+                      className={`text-base text-white font-medium ${language === "fa" ? "font-[BYekan]" : ""}`}
+                    >
+                      {t("whenToBuy")}
+                    </span>
                   </div>
-                )}
-                <span className="text-sm text-white/90">{t("whenToBuy")}</span>
-                {language === "fa" && (
-                  <div className="bg-blue-600 p-2 rounded-full flex-shrink-0">
-                    <CheckCircle2 className="h-6 w-6 text-white" />
-                  </div>
-                )}
-              </div>
 
-              <div
-                className={`flex items-center gap-3 ${language === "fa" ? "flex-row-reverse" : ""}`}
-              >
-                {language === "en" && (
-                  <div className="bg-blue-600 p-2 rounded-full flex-shrink-0">
-                    <CheckCircle2 className="h-6 w-6 text-white" />
+                  <div
+                    className={`flex items-center gap-4 p-4 rounded-xl border border-blue-500/30 ${language === "fa" ? "flex-row-reverse" : ""}`}
+                  >
+                    <div className="bg-gradient-to-r from-purple-500 to-pink-600 p-3 rounded-full flex-shrink-0 shadow-lg">
+                      <CheckCircle2 className="h-6 w-6 text-white" />
+                    </div>
+                    <span
+                      className={`text-base text-white font-medium ${language === "fa" ? "font-[BYekan]" : ""}`}
+                    >
+                      {t("stopLossPoints")}
+                    </span>
                   </div>
-                )}
-                <span className="text-sm text-white/90">
-                  {t("stopLossPoints")}
-                </span>
-                {language === "fa" && (
-                  <div className="bg-blue-600 p-2 rounded-full flex-shrink-0">
-                    <CheckCircle2 className="h-6 w-6 text-white" />
-                  </div>
-                )}
+                </div>
               </div>
             </MotionStaggerContainer>
           </div>
 
           {/* TradingView Ticker Tape Widget */}
-          <div className="mt-10 relative z-30 px-4 sm:px-6 md:px-16 lg:px-24 max-w-[1400px] mx-auto">
+        </div>
+        {/* Full-width Ticker below Explore button */}
+        <div className="mt-10 md:mt-14 relative z-30 px-4 sm:px-6 md:px-16 lg:px-24 max-w-[1400px] mx-auto">
+          <div className="bg-gray-900/40 backdrop-blur-sm  ">
             <TradingViewTicker />
           </div>
         </div>
@@ -160,138 +159,124 @@ export default function Home() {
       <RecentSignals />
 
       {/* Gradient divider to hide the line between sections */}
-      <div className="h-24 bg-gradient-to-b from-black via-blue-200/5 to-black/10 relative z-10 -mt-16 -mb-10 backdrop-blur-md"></div>
+      <div className="h-24 bg-gradient-to-b from-transparent via-transparent to-transparent relative z-10 -mt-16 -mb-10"></div>
 
-      {/* Features */}
-      <section className="py-20 bg-black text-white border-none relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b to-black/30 z-0"></div>
-        <div
-          className="absolute inset-0 mx-auto my-auto bg-[url('/images/back.jpg')] bg-contain bg-center opacity-20 z-0"
-          style={{
-            width: "120%",
-            height: "120%",
-            top: "0%",
-            left: "0%",
-            transform: "rotate(10deg) scale(1.4)",
-          }}
-        ></div>
-        <div className="container mx-auto px-6 sm:px-10 relative z-10">
-          <div className="flex flex-col items-center mb-12">
-            <div className="relative mb-6">
-              <MotionDiv className="bg-blue-600 text-white px-7 py-2.5 rounded-lg border-2 border-blue-400/70 mx-auto relative z-10">
-                <span className="text-center font-medium text-sm">
-                  {t("whyChooseUs")}
-                </span>
-              </MotionDiv>
-            </div>
-            <MotionHeading className="text-3xl font-bold text-center mb-8">
-              {t("whyTradersTrustUs")}
-            </MotionHeading>
-          </div>
-
-          <div
-            className={`grid grid-cols-1 sm:grid-cols-2 gap-10 max-w-5xl mx-auto my-2 ${language === "fa" ? "text-right" : "text-left"}`}
-          >
-            <MotionStaggerContainer>
-              {/* Feature 2 */}
-              <MotionStaggerItem className="bg-gray-900/80 rounded-xl p-8 mb-10 backdrop-blur-sm border border-blue-500/20 hover:border-blue-500/40 transition-all">
-                <div className="flex justify-center">
-                  <div className="bg-blue-600 p-3 rounded-lg w-14 h-14 flex items-center justify-center mb-5">
-                    <Coins className="h-8 w-8 text-white" />
-                  </div>
-                </div>
-                <h3 className="text-xl font-semibold text-center mb-3">
-                  {t("lowCostService")}
-                </h3>
-              </MotionStaggerItem>
-
-              {/* Feature 4 */}
-              <MotionStaggerItem className="bg-gray-900/80 rounded-xl p-8 mb-10 backdrop-blur-sm border border-blue-500/20 hover:border-blue-500/40 transition-all">
-                <div className="flex justify-center">
-                  <div className="bg-blue-600 p-3 rounded-lg w-14 h-14 flex items-center justify-center mb-5">
-                    <Info className="h-8 w-8 text-white" />
-                  </div>
-                </div>
-                <h3 className="text-xl font-semibold text-center mb-3">
-                  {t("inDepthInformation")}
-                </h3>
-              </MotionStaggerItem>
-
-              {/* Feature 6 */}
-              <MotionStaggerItem className="bg-gray-900/80 rounded-xl p-8 backdrop-blur-sm border border-blue-500/20 hover:border-blue-500/40 transition-all">
-                <div className="flex justify-center">
-                  <div className="bg-blue-600 p-3 rounded-lg w-14 h-14 flex items-center justify-center mb-5">
-                    <Trophy className="h-8 w-8 text-white" />
-                  </div>
-                </div>
-                <h3 className="text-xl font-semibold text-center mb-3">
-                  {t("successRatio")}
-                </h3>
-              </MotionStaggerItem>
-            </MotionStaggerContainer>
-
-            <MotionStaggerContainer>
-              {/* Feature 1 */}
-              <MotionStaggerItem className="bg-gray-900/80 rounded-xl p-8 mb-10 backdrop-blur-sm border border-blue-500/20 hover:border-blue-500/40 transition-all">
-                <div className="flex justify-center">
-                  <div className="bg-blue-600 p-3 rounded-lg w-14 h-14 flex items-center justify-center mb-5">
-                    <Diamond className="h-8 w-8 text-white" />
-                  </div>
-                </div>
-                <h3 className="text-xl font-semibold text-center mb-3">
-                  {t("qualityOverQuantity")}
-                </h3>
-              </MotionStaggerItem>
-
-              {/* Feature 3 */}
-              <MotionStaggerItem className="bg-gray-900/80 rounded-xl p-8 mb-10 backdrop-blur-sm border border-blue-500/20 hover:border-blue-500/40 transition-all">
-                <div className="flex justify-center">
-                  <div className="bg-blue-600 p-3 rounded-lg w-14 h-14 flex items-center justify-center mb-5">
-                    <LineChart className="h-8 w-8 text-white" />
-                  </div>
-                </div>
-                <h3 className="text-xl font-semibold text-center mb-3">
-                  {t("strongTechnicalAnalysis")}
-                </h3>
-              </MotionStaggerItem>
-
-              {/* Feature 5 */}
-              <MotionStaggerItem className="bg-gray-900/80 rounded-xl p-8 backdrop-blur-sm border border-blue-500/20 hover:border-blue-500/40 transition-all">
-                <div className="flex justify-center">
-                  <div className="bg-blue-600 p-3 rounded-lg w-14 h-14 flex items-center justify-center mb-5">
-                    <MessageSquare className="h-8 w-8 text-white" />
-                  </div>
-                </div>
-                <h3 className="text-xl font-semibold text-center mb-3">
-                  {t("telegramSignals")}
-                </h3>
-              </MotionStaggerItem>
-            </MotionStaggerContainer>
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials */}
+      {/* CPT Image Section */}
       <Testimonials />
+      <section className="py-16 bg-transparent border-none relative overflow-hidden border border-blue-500/20 rounded-3xl mx-4 my-8">
+        <div className="container mx-auto px-4 text-center relative z-10">
+          {/* Second Row: Benefits Details */}
+          <MotionDiv className="max-w-6xl mx-auto">
+            <div className="bg-gradient-to-br from-gray-900/80 to-gray-800/60 backdrop-blur-sm rounded-2xl p-8 border border-blue-500/30 shadow-2xl">
+              <h3 className="text-2xl font-bold text-center text-white mb-8">
+                {language === "fa"
+                  ? "دلیل انتخاب این بروکر برای کپی ترید"
+                  : "Why We Chose This Broker for Copy Trading"}
+              </h3>
 
-      {/* CTA */}
-      <section className="py-16 bg-black border-none text-white">
-        <div className="container mx-auto px-4 text-center">
-          <MotionDiv className="text-3xl font-bold mb-6">
-            {t("joinUsToday")}
-          </MotionDiv>
-          <MotionDiv
-            className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8"
-            delay={0.2}
-          >
-            {t("signUpText")}
-          </MotionDiv>
-          <MotionDiv delay={0.4}>
-            <Button size="lg" asChild>
-              <Link href="https://t.me/+uRJNzAveahQ0NjM0">
-                {t("freeRegistration")}
-              </Link>
-            </Button>
+              <div className="space-y-6">
+                {/* First Row */}
+                <div className="grid md:grid-cols-4 grid-cols-2 gap-4">
+                  <div className="rounded-lg p-4 border border-blue-500/30 hover:border-blue-400/50 transition-all">
+                    <div className="flex items-start gap-3">
+                      <div className="w-3 h-3 bg-blue-400 rounded-full mt-1 flex-shrink-0"></div>
+                      <p className="text-gray-300 text-sm leading-relaxed">
+                        {language === "fa"
+                          ? "پلتفرم معاملاتی MT4 و MT5"
+                          : "Trading Platforms MT4 & MT5"}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="rounded-lg p-4 border border-blue-500/30 hover:border-blue-400/50 transition-all">
+                    <div className="flex items-start gap-3">
+                      <div className="w-3 h-3 bg-blue-400 rounded-full mt-1 flex-shrink-0"></div>
+                      <p className="text-gray-300 text-sm leading-relaxed">
+                        {language === "fa"
+                          ? "دارا بودن کپی تریدینگ"
+                          : "Copy Trading Available"}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="rounded-lg p-4 border border-blue-500/30 hover:border-blue-400/50 transition-all">
+                    <div className="flex items-start gap-3">
+                      <div className="w-3 h-3 bg-blue-400 rounded-full mt-1 flex-shrink-0"></div>
+                      <p className="text-gray-300 text-sm leading-relaxed">
+                        {language === "fa"
+                          ? "حساب اسلامی دارد"
+                          : "Islamic Account Available"}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="rounded-lg p-4 border border-blue-500/30 hover:border-blue-400/50 transition-all">
+                    <div className="flex items-start gap-3">
+                      <div className="w-3 h-3 bg-blue-400 rounded-full mt-1 flex-shrink-0"></div>
+                      <p className="text-gray-300 text-sm leading-relaxed">
+                        {language === "fa"
+                          ? "رگولاتوری قوی: FCA، FSCA، FSC، SCA"
+                          : "Strong Regulation: FCA, FSCA, FSC, SCA"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Second Row */}
+                <div className="grid md:grid-cols-4 grid-cols-2 gap-4">
+                  <div className="rounded-lg p-4 border border-blue-500/30 hover:border-blue-400/50 transition-all">
+                    <div className="flex items-start gap-3">
+                      <div className="w-3 h-3 bg-green-400 rounded-full mt-1 flex-shrink-0"></div>
+                      <p className="text-gray-300 text-sm leading-relaxed">
+                        {language === "fa"
+                          ? "اسپرد کم و بدون کامیشن"
+                          : "Low Spread, No Commission"}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="rounded-lg p-4 border border-blue-500/30 hover:border-blue-400/50 transition-all">
+                    <div className="flex items-start gap-3">
+                      <div className="w-3 h-3 bg-green-400 rounded-full mt-1 flex-shrink-0"></div>
+                      <p className="text-gray-300 text-sm leading-relaxed">
+                        {language === "fa"
+                          ? "واید نشدن اسپرد در خبر"
+                          : "No Spread Widening in News"}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="rounded-lg p-4 border border-blue-500/30 hover:border-blue-400/50 transition-all">
+                    <div className="flex items-start gap-3">
+                      <div className="w-3 h-3 bg-green-400 rounded-full mt-1 flex-shrink-0"></div>
+                      <p className="text-gray-300 text-sm leading-relaxed">
+                        {language === "fa"
+                          ? "بدون کمیسیون و سوآپ"
+                          : "No Commission & Swap"}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="rounded-lg p-4 border border-blue-500/30 hover:border-blue-400/50 transition-all">
+                    <div className="flex items-start gap-3">
+                      <div className="w-3 h-3 bg-green-400 rounded-full mt-1 flex-shrink-0"></div>
+                      <p className="text-gray-300 text-sm leading-relaxed">
+                        {language === "fa"
+                          ? "واریز/برداشت سریع USDT"
+                          : "Fast USDT Deposit/Withdrawal"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-8 pt-6 border-t border-blue-500/20">
+                <div className="rounded-lg p-4 border border-blue-500/30">
+                  <div className="flex items-center justify-center gap-3">
+                    <div className="w-3 h-3 bg-yellow-400 rounded-full"></div>
+                    <p className="text-gray-300 text-sm text-center">
+                      {language === "fa"
+                        ? "درگاه‌های بین‌المللی (ویزا، مسترکارت، سوییفت) - برداشت بدون کارمزد یا کمیسیون"
+                        : "International Gateways (Visa, Mastercard, SWIFT) - No Fee Withdrawals"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </MotionDiv>
         </div>
       </section>

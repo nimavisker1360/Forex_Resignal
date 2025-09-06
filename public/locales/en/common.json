@@ -56,6 +56,17 @@
   "freeRegistration": "join Telegram Channel",
 
   "testimonialHeading": "What They're Saying About Us",
+
+  "cptBrokerTitle": "Why We Chose CPT Broker?",
+  "cptBrokerDescription": "After careful evaluation and thorough research, we have chosen CPT Broker as our trading partner. This broker provides professional services and advanced features, offering the best platform for copy trading.",
+  "cptBenefit1": "High Credibility & Security",
+  "cptBenefit1Desc": "CPT Broker holds valid international licenses and advanced security systems",
+  "cptBenefit2": "Competitive Spreads",
+  "cptBenefit2Desc": "Low spreads and favorable trading conditions for maximum profitability",
+  "cptBenefit3": "24/7 Support",
+  "cptBenefit3Desc": "Professional support team always available to assist you",
+  "cptBenefit4": "Advanced Platform",
+  "cptBenefit4Desc": "Modern analytical and trading tools for the best trading experience",
   "testimonials": [
     {
       "name": "Nasrin Mohammadi",
