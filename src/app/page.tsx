@@ -183,7 +183,7 @@ export default function Home() {
               <h3 className="text-2xl font-bold text-center text-white mb-8">
                 {language === "fa"
                   ? "دلیل انتخاب این بروکر برای کپی ترید"
-                  : "Why We Chose This Broker for Copy Trading"}
+                  : "Why We Choose This Broker for Copy Trading"}
               </h3>
 
               <div className="space-y-6">

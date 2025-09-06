@@ -17,6 +17,11 @@ const config: Config = {
       },
     },
     extend: {
+      fontFamily: {
+        iransans: ["IRANSans", "system-ui", "-apple-system", "sans-serif"],
+        inter: ["Inter", "system-ui", "-apple-system", "sans-serif"],
+        sans: ["Inter", "IRANSans", "system-ui", "-apple-system", "sans-serif"],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
