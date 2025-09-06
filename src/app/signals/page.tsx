@@ -28,15 +28,17 @@ export default function SignalsPage() {
   const [signals, setSignals] = useState<Signal[]>([]);
   const [monthlySignals, setMonthlySignals] = useState<MonthlySignal[]>([]);
   const [dailySignals, setDailySignals] = useState<DailySignal[]>([]);
+  const [weeklySignals, setWeeklySignals] = useState<MonthlySignal[]>([]);
   const [totalProfit, setTotalProfit] = useState<number>(0);
   const [dailyTotalProfit, setDailyTotalProfit] = useState<number>(0);
+  const [weeklyTotalProfit, setWeeklyTotalProfit] = useState<number>(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [timeFilter, setTimeFilter] = useState<
     "daily" | "weekly" | "monthly" | "all"
   >("all");
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   // Fetch signals from API
   const fetchSignals = useCallback(async () => {
@@ -67,6 +69,8 @@ export default function SignalsPage() {
         setTotalProfit(data.totalProfit || 0);
         setSignals([]); // Clear regular signals when showing monthly
         setDailySignals([]); // Clear daily signals
+        setWeeklySignals([]);
+        setWeeklyTotalProfit(0);
         setDailyTotalProfit(0);
       } else if (timeFilter === "daily") {
         // Fetch daily signals
@@ -91,6 +95,8 @@ export default function SignalsPage() {
         setDailyTotalProfit(data.totalProfit || 0);
         setSignals([]); // Clear regular signals
         setMonthlySignals([]); // Clear monthly signals
+        setWeeklySignals([]);
+        setWeeklyTotalProfit(0);
         setTotalProfit(0);
       } else if (timeFilter === "all") {
         // Fetch regular signals only for "all" filter
@@ -115,6 +121,34 @@ export default function SignalsPage() {
         setSignals(data.signals || []);
         setMonthlySignals([]); // Clear monthly signals when showing regular
         setDailySignals([]); // Clear daily signals
+        setWeeklySignals([]);
+        setTotalProfit(0);
+        setDailyTotalProfit(0);
+        setWeeklyTotalProfit(0);
+      } else if (timeFilter === "weekly") {
+        // Fetch weekly signals
+        const params = new URLSearchParams({
+          search: searchQuery,
+          limit: "50",
+        });
+
+        const response = await fetch(`/api/signals/weekly?${params}`);
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          const errorMessage =
+            errorData.error ||
+            errorData.details ||
+            `HTTP error! status: ${response.status}`;
+          throw new Error(errorMessage);
+        }
+
+        const data = await response.json();
+        setWeeklySignals(data.signals || []);
+        setWeeklyTotalProfit(data.totalProfit || 0);
+        setSignals([]);
+        setMonthlySignals([]);
+        setDailySignals([]);
         setTotalProfit(0);
         setDailyTotalProfit(0);
       } else {
@@ -122,8 +156,10 @@ export default function SignalsPage() {
         setSignals([]);
         setMonthlySignals([]);
         setDailySignals([]);
+        setWeeklySignals([]);
         setTotalProfit(0);
         setDailyTotalProfit(0);
+        setWeeklyTotalProfit(0);
       }
     } catch (err) {
       console.error("Error fetching signals:", err);
@@ -299,8 +335,18 @@ export default function SignalsPage() {
                 </p>
               </div>
             </div>
-          ) : isWeeklyView ? (
-            // Show empty state for weekly view
+          ) : isWeeklyView && weeklySignals.length > 0 ? (
+            <MonthlySignalsTable
+              signals={weeklySignals}
+              loading={loading}
+              totalProfit={weeklyTotalProfit}
+              summaryTitle={
+                language === "fa" ? "سود کل هفتگی" : "Total Weekly Profit"
+              }
+              summaryCountTextFa={`از ${weeklySignals.length} سیگنال در هفته جاری`}
+              summaryCountTextEn={`From ${weeklySignals.length} signals this week`}
+            />
+          ) : isWeeklyView && weeklySignals.length === 0 ? (
             <div className="min-h-[300px] flex items-center justify-center text-center p-8 text-gray-400 bg-gray-900/80 backdrop-blur-sm rounded-lg border border-gray-800 w-full">
               <div>
                 <SearchIcon className="h-12 w-12 mx-auto mb-4 opacity-30" />

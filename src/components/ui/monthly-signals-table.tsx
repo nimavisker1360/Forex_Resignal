@@ -27,6 +27,9 @@ interface MonthlySignalsTableProps {
   onSort?: (field: string, direction: "asc" | "desc") => void;
   sortField?: string;
   sortDirection?: "asc" | "desc";
+  summaryTitle?: string;
+  summaryCountTextFa?: string; // e.g., "از X سیگنال در هفته جاری"
+  summaryCountTextEn?: string; // e.g., "From X signals this week"
 }
 
 export function MonthlySignalsTable({
@@ -36,6 +39,9 @@ export function MonthlySignalsTable({
   onSort,
   sortField,
   sortDirection,
+  summaryTitle,
+  summaryCountTextFa,
+  summaryCountTextEn,
 }: MonthlySignalsTableProps) {
   const { t, language } = useLanguage();
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
@@ -349,7 +355,11 @@ export function MonthlySignalsTable({
         <div className="bg-gradient-to-r from-gray-800/90 to-gray-700/90 rounded-lg p-6 border border-gray-600 shadow-lg">
           <div className="text-center">
             <h3 className="text-lg font-semibold text-white mb-2">
-              {language === "fa" ? "سود کل ماهیانه" : "Total Monthly Profit"}
+              {summaryTitle
+                ? summaryTitle
+                : language === "fa"
+                  ? "سود کل ماهیانه"
+                  : "Total Monthly Profit"}
             </h3>
             <div className="text-3xl font-bold">
               <span className={`${getProfitColor(totalProfit)} font-mono`}>
@@ -359,8 +369,10 @@ export function MonthlySignalsTable({
             </div>
             <p className="text-gray-400 text-sm mt-1">
               {language === "fa"
-                ? `از ${signals.length} سیگنال در ماه جاری`
-                : `From ${signals.length} signals this month`}
+                ? summaryCountTextFa ||
+                  `از ${signals.length} سیگنال در ماه جاری`
+                : summaryCountTextEn ||
+                  `From ${signals.length} signals this month`}
             </p>
           </div>
         </div>
