@@ -46,8 +46,10 @@
   "monthly": "Monthly",
   "noDailySignalsFound": "No daily signals found",
   "noWeeklySignalsFound": "No weekly signals found",
+  "noAllSignalsFound": "No signals found",
   "dailySignalsNotAvailable": "Daily signals are not available yet",
   "weeklySignalsNotAvailable": "Weekly signals are not available yet",
+  "allSignalsNotAvailable": "All signals are not available yet",
 
   "whyChooseUs": "Why Choose Us",
   "whyTradersTrustUs": "Why Traders Trust Us",

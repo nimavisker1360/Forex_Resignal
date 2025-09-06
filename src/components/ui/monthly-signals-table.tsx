@@ -123,9 +123,6 @@ export function MonthlySignalsTable({
           <table className="w-full border-collapse rounded-lg overflow-hidden min-w-[1200px]">
             <thead>
               <tr className="bg-gradient-to-r from-gray-800/90 to-gray-700/90 border-b border-gray-600">
-                <th className="px-4 py-3 text-center text-sm font-medium text-gray-300">
-                  #
-                </th>
                 <th
                   className="px-4 py-3 text-center text-sm font-medium text-gray-300 cursor-pointer hover:text-white transition-colors hover:bg-gray-700/50 rounded"
                   onClick={() => handleSort("pair")}
@@ -189,9 +186,6 @@ export function MonthlySignalsTable({
               {signals.map((signal, index) => (
                 <React.Fragment key={signal.id}>
                   <tr className="border-b border-gray-700/50 hover:bg-gray-800/30 transition-all duration-200 hover:shadow-lg">
-                    <td className="px-4 py-3 text-sm text-gray-300 text-center">
-                      {signal.id}
-                    </td>
                     <td className="px-4 py-3 text-sm font-medium text-white text-center">
                       {signal.pair}
                     </td>
@@ -259,7 +253,7 @@ export function MonthlySignalsTable({
                   </tr>
                   {expandedRows.has(signal.id) && (
                     <tr className="bg-gray-800/20 border-b border-gray-700/30">
-                      <td colSpan={12} className="px-4 py-3">
+                      <td colSpan={11} className="px-4 py-3">
                         <div className="bg-gradient-to-r from-gray-800/60 to-gray-700/60 rounded-lg p-4 space-y-3 border border-gray-600/30 shadow-lg">
                           <h4 className="text-sm font-medium text-white mb-2">
                             {t("signalDetails") || "Signal Details"}

@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { SignalCard } from "@/components/ui/signal-card";
 import { MonthlySignalsTable } from "@/components/ui/monthly-signals-table";
 import type { MonthlySignal } from "@/components/ui/monthly-signals-table";
+import { DailySignalsTable } from "@/components/ui/daily-signals-table";
+import type { DailySignal } from "@/components/ui/daily-signals-table";
 import { SearchIcon, Filter, ArrowDownUp, Loader2 } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import { MotionDiv } from "@/components/ui/motion-content";
@@ -25,7 +27,9 @@ interface Signal {
 export default function SignalsPage() {
   const [signals, setSignals] = useState<Signal[]>([]);
   const [monthlySignals, setMonthlySignals] = useState<MonthlySignal[]>([]);
+  const [dailySignals, setDailySignals] = useState<DailySignal[]>([]);
   const [totalProfit, setTotalProfit] = useState<number>(0);
+  const [dailyTotalProfit, setDailyTotalProfit] = useState<number>(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -50,13 +54,44 @@ export default function SignalsPage() {
         const response = await fetch(`/api/signals/monthly?${params}`);
 
         if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+          const errorData = await response.json().catch(() => ({}));
+          const errorMessage =
+            errorData.error ||
+            errorData.details ||
+            `HTTP error! status: ${response.status}`;
+          throw new Error(errorMessage);
         }
 
         const data = await response.json();
         setMonthlySignals(data.signals || []);
         setTotalProfit(data.totalProfit || 0);
         setSignals([]); // Clear regular signals when showing monthly
+        setDailySignals([]); // Clear daily signals
+        setDailyTotalProfit(0);
+      } else if (timeFilter === "daily") {
+        // Fetch daily signals
+        const params = new URLSearchParams({
+          search: searchQuery,
+          limit: "50",
+        });
+
+        const response = await fetch(`/api/signals/daily?${params}`);
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          const errorMessage =
+            errorData.error ||
+            errorData.details ||
+            `HTTP error! status: ${response.status}`;
+          throw new Error(errorMessage);
+        }
+
+        const data = await response.json();
+        setDailySignals(data.signals || []);
+        setDailyTotalProfit(data.totalProfit || 0);
+        setSignals([]); // Clear regular signals
+        setMonthlySignals([]); // Clear monthly signals
+        setTotalProfit(0);
       } else if (timeFilter === "all") {
         // Fetch regular signals only for "all" filter
         const params = new URLSearchParams({
@@ -68,18 +103,27 @@ export default function SignalsPage() {
         const response = await fetch(`/api/signals/data?${params}`);
 
         if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+          const errorData = await response.json().catch(() => ({}));
+          const errorMessage =
+            errorData.error ||
+            errorData.details ||
+            `HTTP error! status: ${response.status}`;
+          throw new Error(errorMessage);
         }
 
         const data = await response.json();
         setSignals(data.signals || []);
         setMonthlySignals([]); // Clear monthly signals when showing regular
+        setDailySignals([]); // Clear daily signals
         setTotalProfit(0);
+        setDailyTotalProfit(0);
       } else {
-        // For daily and weekly filters, clear all signals
+        // For weekly filter, clear all signals
         setSignals([]);
         setMonthlySignals([]);
+        setDailySignals([]);
         setTotalProfit(0);
+        setDailyTotalProfit(0);
       }
     } catch (err) {
       console.error("Error fetching signals:", err);
@@ -102,7 +146,7 @@ export default function SignalsPage() {
   const isAllView = timeFilter === "all";
 
   // Only show cards for "all" filter, hide cards for daily, weekly, monthly
-  const shouldShowCards = isAllView;
+  const shouldShowCards = false; // Disabled cards for all views
 
   return (
     <div className="bg-black text-white relative">
@@ -237,33 +281,51 @@ export default function SignalsPage() {
                 </p>
               </div>
             </div>
-          ) : isDailyView || isWeeklyView ? (
-            // Show empty state for daily and weekly views
+          ) : isDailyView && dailySignals.length > 0 ? (
+            // Show daily signals table
+            <DailySignalsTable
+              signals={dailySignals}
+              loading={loading}
+              totalProfit={dailyTotalProfit}
+            />
+          ) : isDailyView && dailySignals.length === 0 ? (
+            // Show empty state for daily view
+            <div className="min-h-[300px] flex items-center justify-center text-center p-8 text-gray-400 bg-gray-900/80 backdrop-blur-sm rounded-lg border border-gray-800 w-full">
+              <div>
+                <SearchIcon className="h-12 w-12 mx-auto mb-4 opacity-30" />
+                <p className="text-lg">No daily signals found</p>
+                <p className="text-sm mt-2 text-gray-500">
+                  Loading daily data...
+                </p>
+              </div>
+            </div>
+          ) : isWeeklyView ? (
+            // Show empty state for weekly view
             <div className="min-h-[300px] flex items-center justify-center text-center p-8 text-gray-400 bg-gray-900/80 backdrop-blur-sm rounded-lg border border-gray-800 w-full">
               <div>
                 <SearchIcon className="h-12 w-12 mx-auto mb-4 opacity-30" />
                 <p className="text-lg">
-                  {isDailyView
-                    ? t("noDailySignalsFound") || "No daily signals found"
-                    : t("noWeeklySignalsFound") || "No weekly signals found"}
+                  {t("noWeeklySignalsFound") || "No weekly signals found"}
                 </p>
                 <p className="text-sm mt-2 text-gray-500">
-                  {isDailyView
-                    ? t("dailySignalsNotAvailable") ||
-                      "Daily signals are not available yet"
-                    : t("weeklySignalsNotAvailable") ||
-                      "Weekly signals are not available yet"}
+                  {t("weeklySignalsNotAvailable") ||
+                    "Weekly signals are not available yet"}
                 </p>
               </div>
             </div>
-          ) : shouldShowCards && filteredSignals.length > 0 ? (
-            // Show regular signals as cards (only for "all" filter)
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredSignals.map((signal) => (
-                <div key={signal.id} className="h-full">
-                  <SignalCard {...signal} />
-                </div>
-              ))}
+          ) : isAllView ? (
+            // Show empty state for all signals view
+            <div className="min-h-[300px] flex items-center justify-center text-center p-8 text-gray-400 bg-gray-900/80 backdrop-blur-sm rounded-lg border border-gray-800 w-full">
+              <div>
+                <SearchIcon className="h-12 w-12 mx-auto mb-4 opacity-30" />
+                <p className="text-lg">
+                  {t("noAllSignalsFound") || "No signals found"}
+                </p>
+                <p className="text-sm mt-2 text-gray-500">
+                  {t("allSignalsNotAvailable") ||
+                    "All signals are not available yet"}
+                </p>
+              </div>
             </div>
           ) : (
             <div className="min-h-[300px] flex items-center justify-center text-center p-8 text-gray-400 bg-gray-900/80 backdrop-blur-sm rounded-lg border border-gray-800 w-full">
