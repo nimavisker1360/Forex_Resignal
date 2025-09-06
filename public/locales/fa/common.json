@@ -41,6 +41,13 @@
   "signalSearch": "جستجوی سیگنال...",
   "noSignalsFound": "هیچ سیگنالی با این نماد یافت نشد",
   "tryDifferentPair": "جفت ارز دیگری را جستجو کنید",
+  "daily": "روزانه",
+  "weekly": "هفتگی",
+  "monthly": "ماهیانه",
+  "noDailySignalsFound": "هیچ سیگنال روزانه‌ای یافت نشد",
+  "noWeeklySignalsFound": "هیچ سیگنال هفتگی‌ای یافت نشد",
+  "dailySignalsNotAvailable": "سیگنال‌های روزانه هنوز در دسترس نیستند",
+  "weeklySignalsNotAvailable": "سیگنال‌های هفتگی هنوز در دسترس نیستند",
 
   "pair": "جفت ارز",
   "type": "نوع",

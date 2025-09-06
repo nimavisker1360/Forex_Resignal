@@ -16,9 +16,21 @@ import {
   MotionImage,
 } from "@/components/ui/motion-content";
 import { useLanguage } from "@/lib/language-context";
+import { LoadingScreen } from "@/components/ui/loading-screen";
+import { useState } from "react";
 
 export default function Home() {
   const { t, language } = useLanguage();
+  const [isLoading, setIsLoading] = useState(true);
+
+  const handleLoadingComplete = () => {
+    setIsLoading(false);
+  };
+
+  // Show loading screen for the first time visiting the page
+  if (isLoading) {
+    return <LoadingScreen onLoadingComplete={handleLoadingComplete} />;
+  }
 
   return (
     <div className="flex flex-col">

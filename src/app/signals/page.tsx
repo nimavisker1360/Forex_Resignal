@@ -2,6 +2,8 @@
 
 import { Button } from "@/components/ui/button";
 import { SignalCard } from "@/components/ui/signal-card";
+import { MonthlySignalsTable } from "@/components/ui/monthly-signals-table";
+import type { MonthlySignal } from "@/components/ui/monthly-signals-table";
 import { SearchIcon, Filter, ArrowDownUp, Loader2 } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import { MotionDiv } from "@/components/ui/motion-content";
@@ -22,15 +24,14 @@ interface Signal {
 
 export default function SignalsPage() {
   const [signals, setSignals] = useState<Signal[]>([]);
+  const [monthlySignals, setMonthlySignals] = useState<MonthlySignal[]>([]);
+  const [totalProfit, setTotalProfit] = useState<number>(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [signalTypeFilter, setSignalTypeFilter] = useState<
-    "all" | "buy" | "sell"
+  const [timeFilter, setTimeFilter] = useState<
+    "daily" | "weekly" | "monthly" | "all"
   >("all");
-  const [sortOrder, setSortOrder] = useState<"newest" | "oldest" | "pair">(
-    "newest"
-  );
   const { t } = useLanguage();
 
   // Fetch signals from API
@@ -39,28 +40,54 @@ export default function SignalsPage() {
       setLoading(true);
       setError(null);
 
-      const params = new URLSearchParams({
-        search: searchQuery,
-        type: signalTypeFilter,
-        sort: sortOrder,
-        limit: "50", // Fetch more signals for client-side filtering
-      });
+      if (timeFilter === "monthly") {
+        // Fetch monthly signals
+        const params = new URLSearchParams({
+          search: searchQuery,
+          limit: "50",
+        });
 
-      const response = await fetch(`/api/signals/data?${params}`);
+        const response = await fetch(`/api/signals/monthly?${params}`);
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        setMonthlySignals(data.signals || []);
+        setTotalProfit(data.totalProfit || 0);
+        setSignals([]); // Clear regular signals when showing monthly
+      } else if (timeFilter === "all") {
+        // Fetch regular signals only for "all" filter
+        const params = new URLSearchParams({
+          search: searchQuery,
+          timeFilter: timeFilter,
+          limit: "50",
+        });
+
+        const response = await fetch(`/api/signals/data?${params}`);
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        setSignals(data.signals || []);
+        setMonthlySignals([]); // Clear monthly signals when showing regular
+        setTotalProfit(0);
+      } else {
+        // For daily and weekly filters, clear all signals
+        setSignals([]);
+        setMonthlySignals([]);
+        setTotalProfit(0);
       }
-
-      const data = await response.json();
-      setSignals(data.signals || []);
     } catch (err) {
       console.error("Error fetching signals:", err);
       setError(t("failedToLoadSignals") || "Failed to load signals");
     } finally {
       setLoading(false);
     }
-  }, [searchQuery, signalTypeFilter, sortOrder, t]);
+  }, [searchQuery, timeFilter, t]);
 
   // Fetch signals on component mount and when filters change
   useEffect(() => {
@@ -69,6 +96,13 @@ export default function SignalsPage() {
 
   // Filter signals for display (additional client-side filtering if needed)
   const filteredSignals = signals;
+  const isMonthlyView = timeFilter === "monthly";
+  const isDailyView = timeFilter === "daily";
+  const isWeeklyView = timeFilter === "weekly";
+  const isAllView = timeFilter === "all";
+
+  // Only show cards for "all" filter, hide cards for daily, weekly, monthly
+  const shouldShowCards = isAllView;
 
   return (
     <div className="bg-black text-white relative">
@@ -107,86 +141,62 @@ export default function SignalsPage() {
               variant="outline"
               size="sm"
               className={`flex items-center gap-1 px-4 ${
-                sortOrder === "newest"
+                timeFilter === "daily"
                   ? "bg-gray-800 border-gray-700"
                   : "border-gray-800 text-gray-300 hover:text-white"
               }`}
-              onClick={() => setSortOrder("newest")}
+              onClick={() => setTimeFilter("daily")}
             >
-              <ArrowDownUp className="h-4 w-4" />
-              {t("newest")}
+              <Filter className="h-4 w-4" />
+              {t("daily")}
             </Button>
 
             <Button
               variant="outline"
               size="sm"
               className={`flex items-center gap-1 px-4 ${
-                signalTypeFilter === "all"
+                timeFilter === "weekly"
                   ? "bg-gray-800 border-gray-700"
                   : "border-gray-800 text-gray-300 hover:text-white"
               }`}
-              onClick={() => setSignalTypeFilter("all")}
+              onClick={() => setTimeFilter("weekly")}
+            >
+              <Filter className="h-4 w-4" />
+              {t("weekly")}
+            </Button>
+
+            <Button
+              variant="outline"
+              size="sm"
+              className={`flex items-center gap-1 px-4 ${
+                timeFilter === "monthly"
+                  ? "bg-gray-800 border-gray-700"
+                  : "border-gray-800 text-gray-300 hover:text-white"
+              }`}
+              onClick={() => setTimeFilter("monthly")}
+            >
+              <Filter className="h-4 w-4" />
+              {t("monthly")}
+            </Button>
+
+            <Button
+              variant="outline"
+              size="sm"
+              className={`flex items-center gap-1 px-4 ${
+                timeFilter === "all"
+                  ? "bg-gray-800 border-gray-700"
+                  : "border-gray-800 text-gray-300 hover:text-white"
+              }`}
+              onClick={() => setTimeFilter("all")}
             >
               <Filter className="h-4 w-4" />
               {t("allSignals")}
             </Button>
-
-            <Button
-              variant="outline"
-              size="sm"
-              className={`flex items-center gap-1 px-4 ${
-                signalTypeFilter === "buy"
-                  ? "bg-gray-800 border-gray-700"
-                  : "border-gray-800 text-gray-300 hover:text-white"
-              }`}
-              onClick={() => setSignalTypeFilter("buy")}
-            >
-              {t("buySignals")}
-            </Button>
-
-            <Button
-              variant="outline"
-              size="sm"
-              className={`flex items-center gap-1 px-4 ${
-                signalTypeFilter === "sell"
-                  ? "bg-gray-800 border-gray-700"
-                  : "border-gray-800 text-gray-300 hover:text-white"
-              }`}
-              onClick={() => setSignalTypeFilter("sell")}
-            >
-              {t("sellSignals")}
-            </Button>
-
-            <Button
-              variant="outline"
-              size="sm"
-              className={`flex items-center gap-1 px-4 ${
-                sortOrder === "oldest"
-                  ? "bg-gray-800 border-gray-700"
-                  : "border-gray-800 text-gray-300 hover:text-white"
-              }`}
-              onClick={() => setSortOrder("oldest")}
-            >
-              {t("oldest")}
-            </Button>
-
-            <Button
-              variant="outline"
-              size="sm"
-              className={`flex items-center gap-1 px-4 ${
-                sortOrder === "pair"
-                  ? "bg-gray-800 border-gray-700"
-                  : "border-gray-800 text-gray-300 hover:text-white"
-              }`}
-              onClick={() => setSortOrder("pair")}
-            >
-              {t("symbolAZ")}
-            </Button>
           </div>
         </div>
 
-        {/* Signals Grid */}
-        <div className="max-w-6xl mx-auto mb-12">
+        {/* Signals Display */}
+        <div className="max-w-7xl mx-auto mb-12">
           {loading ? (
             <div className="min-h-[400px] flex items-center justify-center text-center p-8">
               <div>
@@ -209,7 +219,45 @@ export default function SignalsPage() {
                 </Button>
               </div>
             </div>
-          ) : filteredSignals.length > 0 ? (
+          ) : isMonthlyView && monthlySignals.length > 0 ? (
+            // Show monthly signals table
+            <MonthlySignalsTable
+              signals={monthlySignals}
+              loading={loading}
+              totalProfit={totalProfit}
+            />
+          ) : isMonthlyView && monthlySignals.length === 0 ? (
+            // Show empty state for monthly view
+            <div className="min-h-[300px] flex items-center justify-center text-center p-8 text-gray-400 bg-gray-900/80 backdrop-blur-sm rounded-lg border border-gray-800 w-full">
+              <div>
+                <SearchIcon className="h-12 w-12 mx-auto mb-4 opacity-30" />
+                <p className="text-lg">No monthly signals found</p>
+                <p className="text-sm mt-2 text-gray-500">
+                  Loading monthly data...
+                </p>
+              </div>
+            </div>
+          ) : isDailyView || isWeeklyView ? (
+            // Show empty state for daily and weekly views
+            <div className="min-h-[300px] flex items-center justify-center text-center p-8 text-gray-400 bg-gray-900/80 backdrop-blur-sm rounded-lg border border-gray-800 w-full">
+              <div>
+                <SearchIcon className="h-12 w-12 mx-auto mb-4 opacity-30" />
+                <p className="text-lg">
+                  {isDailyView
+                    ? t("noDailySignalsFound") || "No daily signals found"
+                    : t("noWeeklySignalsFound") || "No weekly signals found"}
+                </p>
+                <p className="text-sm mt-2 text-gray-500">
+                  {isDailyView
+                    ? t("dailySignalsNotAvailable") ||
+                      "Daily signals are not available yet"
+                    : t("weeklySignalsNotAvailable") ||
+                      "Weekly signals are not available yet"}
+                </p>
+              </div>
+            </div>
+          ) : shouldShowCards && filteredSignals.length > 0 ? (
+            // Show regular signals as cards (only for "all" filter)
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredSignals.map((signal) => (
                 <div key={signal.id} className="h-full">

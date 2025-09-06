@@ -41,6 +41,13 @@
   "signalSearch": "Signal Search...",
   "noSignalsFound": "No signals found with this symbol",
   "tryDifferentPair": "Try searching for a different currency pair",
+  "daily": "Daily",
+  "weekly": "Weekly",
+  "monthly": "Monthly",
+  "noDailySignalsFound": "No daily signals found",
+  "noWeeklySignalsFound": "No weekly signals found",
+  "dailySignalsNotAvailable": "Daily signals are not available yet",
+  "weeklySignalsNotAvailable": "Weekly signals are not available yet",
 
   "whyChooseUs": "Why Choose Us",
   "whyTradersTrustUs": "Why Traders Trust Us",
