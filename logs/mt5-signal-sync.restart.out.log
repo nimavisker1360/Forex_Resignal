@@ -1,0 +1,1 @@
+{'event': 'mt5_signal_sync_started', 'interval': 5, 'mt5OffsetHours': 3, 'timeframe': 'M1', 'terminalPath': 'C:\\Program Files\\Opo group MetaTrader 5\\terminal64.exe'}

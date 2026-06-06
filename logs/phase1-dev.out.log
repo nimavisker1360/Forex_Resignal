@@ -1,0 +1,17 @@
+
+> signal-forex@0.1.0 dev
+> next dev
+
+[32m✔[0m [33mConsole Ninja[0m extension is connected to [33mNext.js[0m, see [36mhttps://tinyurl.com/2vt8jxzw[0m
+   ▲ Next.js 15.3.0
+   - Local:        http://localhost:3000
+   - Network:      http://192.168.1.106:3000
+   - Environments: .env
+
+ ✓ Starting...
+ ✓ Ready in 3.7s
+ ○ Compiling /api/test-db ...
+ ✓ Compiled /api/test-db in 1521ms (366 modules)
+prisma:query SELECT COUNT(*) AS "_count$_all" FROM (SELECT "public"."TradingAccount"."id" FROM "public"."TradingAccount" WHERE 1=1 OFFSET $1) AS "sub"
+prisma:query SELECT COUNT(*) AS "_count$_all" FROM (SELECT "public"."Trade"."id" FROM "public"."Trade" WHERE 1=1 OFFSET $1) AS "sub"
+ GET /api/test-db 200 in 2467ms

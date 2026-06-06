@@ -9,11 +9,16 @@ import { TradingViewTicker } from "@/components/TradingViewTicker";
 import {
   CheckCircle2,
   Diamond,
-  Coins,
   LineChart,
   Info,
   MessageSquare,
   Trophy,
+  ArrowRight,
+  ClipboardCheck,
+  Bell,
+  ShieldCheck,
+  BarChart3,
+  FileCheck2,
 } from "lucide-react";
 import {
   MotionDiv,
@@ -27,6 +32,121 @@ import { useLanguage } from "@/lib/language-context";
 
 export default function Home() {
   const { t, language } = useLanguage();
+  const translate = (key: string, fallback: string) => {
+    const value = t(key);
+    return value === key ? fallback : value;
+  };
+
+  const trustCards = [
+    {
+      icon: Diamond,
+      title: translate("qualityOverQuantity", "Quality Over Quantity"),
+      description: translate(
+        "trustQualityDescription",
+        "Signals are filtered for clear setups instead of filling the feed with low-conviction ideas."
+      ),
+    },
+    {
+      icon: LineChart,
+      title: translate("strongTechnicalAnalysis", "Strong Technical Analysis"),
+      description: translate(
+        "trustAnalysisDescription",
+        "Each setup is reviewed with price action, market structure, and key support or resistance levels."
+      ),
+    },
+    {
+      icon: ShieldCheck,
+      title: translate("riskFirstApproach", "Risk-first approach"),
+      description: translate(
+        "trustRiskDescription",
+        "Every signal includes stop loss and take profit levels so risk is visible before entry."
+      ),
+    },
+    {
+      icon: MessageSquare,
+      title: translate("telegramSignals", "Telegram Signals"),
+      description: translate(
+        "trustTelegramDescription",
+        "Trade alerts are delivered through Telegram with compact entry, exit, and status information."
+      ),
+    },
+    {
+      icon: Info,
+      title: translate("inDepthInformation", "In-depth Information"),
+      description: translate(
+        "trustDetailsDescription",
+        "Details pages show status, result, timing, and analysis context for easier review."
+      ),
+    },
+    {
+      icon: Trophy,
+      title: translate(
+        "transparentPerformanceTracking",
+        "Transparent performance tracking"
+      ),
+      description: translate(
+        "trustTrackingDescription",
+        "Closed signals are tracked by result without promising guaranteed profit or fixed win rates."
+      ),
+    },
+  ];
+
+  const workflowSteps = [
+    { icon: BarChart3, title: translate("marketAnalyzed", "Market analyzed") },
+    {
+      icon: ClipboardCheck,
+      title: translate("signalPrepared", "Signal prepared"),
+    },
+    {
+      icon: ShieldCheck,
+      title: translate("riskLevelsDefined", "Risk levels defined"),
+    },
+    {
+      icon: Bell,
+      title: translate("telegramAlertSent", "Telegram alert sent"),
+    },
+    { icon: FileCheck2, title: translate("resultTracked", "Result tracked") },
+  ];
+
+  const faqs = [
+    {
+      question: translate("faqProfitQuestion", "Are profits guaranteed?"),
+      answer: translate(
+        "faqProfitAnswer",
+        "No. Forex and gold trading carry risk. Signals provide structured trade ideas, but every trader is responsible for position sizing and execution."
+      ),
+    },
+    {
+      question: translate(
+        "faqSignalIncludesQuestion",
+        "What does each signal include?"
+      ),
+      answer: translate(
+        "faqSignalIncludesAnswer",
+        "Each signal includes symbol, direction, entry, stop loss, take profit, timing, and tracked result where available."
+      ),
+    },
+    {
+      question: translate(
+        "faqHomepageSignalsQuestion",
+        "How many signals are shown on the homepage?"
+      ),
+      answer: translate(
+        "faqHomepageSignalsAnswer",
+        "The homepage only shows the latest three signals. The full paginated list is available on the Signals page."
+      ),
+    },
+    {
+      question: translate(
+        "faqRiskQuestion",
+        "Why is risk management emphasized?"
+      ),
+      answer: translate(
+        "faqRiskAnswer",
+        "A clear stop loss and position size help keep one losing trade from damaging the entire account."
+      ),
+    },
+  ];
 
   return (
     <div className="flex flex-col">
@@ -126,11 +246,13 @@ export default function Home() {
                   <Link href="/signals" className="flex items-center">
                     {language === "fa" ? (
                       <>
-                        {t("exploreNow")} <span className="ml-1">←</span>
+                        {t("exploreNow")}{" "}
+                        <ArrowRight className="ml-2 h-4 w-4 rotate-180" />
                       </>
                     ) : (
                       <>
-                        <span className="mr-1">→</span> {t("exploreNow")}
+                        {t("exploreNow")}{" "}
+                        <ArrowRight className="ml-2 h-4 w-4" />
                       </>
                     )}
                   </Link>
@@ -187,90 +309,127 @@ export default function Home() {
             </MotionHeading>
           </div>
 
-          <div
-            className={`grid grid-cols-1 sm:grid-cols-2 gap-10 max-w-5xl mx-auto my-2 ${language === "fa" ? "text-right" : "text-left"}`}
+          <MotionStaggerContainer
+            className={`mx-auto flex max-w-3xl flex-col gap-4 ${language === "fa" ? "text-right" : "text-left"}`}
           >
-            <MotionStaggerContainer>
-              {/* Feature 2 */}
-              <MotionStaggerItem className="bg-gray-900/80 rounded-xl p-8 mb-10 backdrop-blur-sm border border-blue-500/20 hover:border-blue-500/40 transition-all">
-                <div className="flex justify-center">
-                  <div className="bg-blue-600 p-3 rounded-lg w-14 h-14 flex items-center justify-center mb-5">
-                    <Coins className="h-8 w-8 text-white" />
-                  </div>
-                </div>
-                <h3 className="text-xl font-semibold text-center mb-3">
-                  {t("lowCostService")}
-                </h3>
-              </MotionStaggerItem>
+            {trustCards.map((card) => {
+              const Icon = card.icon;
 
-              {/* Feature 4 */}
-              <MotionStaggerItem className="bg-gray-900/80 rounded-xl p-8 mb-10 backdrop-blur-sm border border-blue-500/20 hover:border-blue-500/40 transition-all">
-                <div className="flex justify-center">
-                  <div className="bg-blue-600 p-3 rounded-lg w-14 h-14 flex items-center justify-center mb-5">
-                    <Info className="h-8 w-8 text-white" />
+              return (
+                <MotionStaggerItem
+                  key={card.title}
+                  className="w-full rounded-lg border border-blue-500/20 bg-gray-950/90 p-5 backdrop-blur-sm transition-all hover:border-blue-500/40 sm:p-6"
+                >
+                  <div
+                    className={`flex flex-col gap-4 sm:flex-row sm:items-start ${language === "fa" ? "sm:flex-row-reverse" : ""}`}
+                  >
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-md bg-blue-600">
+                      <Icon className="h-6 w-6 text-white" />
+                    </div>
+                    <div className="min-w-0">
+                      <h3 className="text-lg font-semibold text-white">
+                        {card.title}
+                      </h3>
+                      <p className="mt-2 text-sm leading-6 text-gray-400">
+                        {card.description}
+                      </p>
+                    </div>
                   </div>
-                </div>
-                <h3 className="text-xl font-semibold text-center mb-3">
-                  {t("inDepthInformation")}
-                </h3>
-              </MotionStaggerItem>
+                </MotionStaggerItem>
+              );
+            })}
+          </MotionStaggerContainer>
+        </div>
+      </section>
 
-              {/* Feature 6 */}
-              <MotionStaggerItem className="bg-gray-900/80 rounded-xl p-8 backdrop-blur-sm border border-blue-500/20 hover:border-blue-500/40 transition-all">
-                <div className="flex justify-center">
-                  <div className="bg-blue-600 p-3 rounded-lg w-14 h-14 flex items-center justify-center mb-5">
-                    <Trophy className="h-8 w-8 text-white" />
-                  </div>
-                </div>
-                <h3 className="text-xl font-semibold text-center mb-3">
-                  {t("successRatio")}
-                </h3>
-              </MotionStaggerItem>
-            </MotionStaggerContainer>
+      {/* How It Works */}
+      <section className="bg-black py-16 text-white">
+        <div className="container mx-auto max-w-6xl px-4">
+          <div className="mb-10 text-center">
+            <MotionHeading className="text-3xl font-bold">
+              {translate("howItWorks", "How It Works")}
+            </MotionHeading>
+            <MotionParagraph className="mx-auto mt-3 max-w-2xl text-gray-400">
+              {translate(
+                "howItWorksDescription",
+                "A simple workflow keeps each trade idea structured from analysis to result tracking."
+              )}
+            </MotionParagraph>
+          </div>
 
-            <MotionStaggerContainer>
-              {/* Feature 1 */}
-              <MotionStaggerItem className="bg-gray-900/80 rounded-xl p-8 mb-10 backdrop-blur-sm border border-blue-500/20 hover:border-blue-500/40 transition-all">
-                <div className="flex justify-center">
-                  <div className="bg-blue-600 p-3 rounded-lg w-14 h-14 flex items-center justify-center mb-5">
-                    <Diamond className="h-8 w-8 text-white" />
-                  </div>
-                </div>
-                <h3 className="text-xl font-semibold text-center mb-3">
-                  {t("qualityOverQuantity")}
-                </h3>
-              </MotionStaggerItem>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+            {workflowSteps.map((step, index) => {
+              const Icon = step.icon;
 
-              {/* Feature 3 */}
-              <MotionStaggerItem className="bg-gray-900/80 rounded-xl p-8 mb-10 backdrop-blur-sm border border-blue-500/20 hover:border-blue-500/40 transition-all">
-                <div className="flex justify-center">
-                  <div className="bg-blue-600 p-3 rounded-lg w-14 h-14 flex items-center justify-center mb-5">
-                    <LineChart className="h-8 w-8 text-white" />
+              return (
+                <MotionDiv
+                  key={step.title}
+                  className="rounded-lg border border-gray-800 bg-gray-950/85 p-5 text-center backdrop-blur-sm"
+                  delay={index * 0.08}
+                >
+                  <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-md border border-blue-500/30 bg-blue-500/10 text-blue-200">
+                    <Icon className="h-6 w-6" />
                   </div>
-                </div>
-                <h3 className="text-xl font-semibold text-center mb-3">
-                  {t("strongTechnicalAnalysis")}
-                </h3>
-              </MotionStaggerItem>
-
-              {/* Feature 5 */}
-              <MotionStaggerItem className="bg-gray-900/80 rounded-xl p-8 backdrop-blur-sm border border-blue-500/20 hover:border-blue-500/40 transition-all">
-                <div className="flex justify-center">
-                  <div className="bg-blue-600 p-3 rounded-lg w-14 h-14 flex items-center justify-center mb-5">
-                    <MessageSquare className="h-8 w-8 text-white" />
+                  <div className="text-xs font-semibold uppercase text-blue-300">
+                    {translate("step", "Step")} {index + 1}
                   </div>
-                </div>
-                <h3 className="text-xl font-semibold text-center mb-3">
-                  {t("telegramSignals")}
-                </h3>
-              </MotionStaggerItem>
-            </MotionStaggerContainer>
+                  <h3 className="mt-2 text-base font-semibold text-white">
+                    {step.title}
+                  </h3>
+                </MotionDiv>
+              );
+            })}
           </div>
         </div>
       </section>
 
       {/* Testimonials */}
       <Testimonials />
+
+      {/* FAQ and Risk */}
+      <section className="bg-black py-16 text-white">
+        <div className="container mx-auto grid max-w-6xl gap-6 px-4 lg:grid-cols-[1fr_0.75fr]">
+          <div>
+            <MotionHeading className="mb-6 text-3xl font-bold">
+              {translate("faq", "FAQ")}
+            </MotionHeading>
+            <div className="space-y-3">
+              {faqs.map((faq) => (
+                <div
+                  key={faq.question}
+                  className="rounded-lg border border-gray-800 bg-gray-950/85 p-5"
+                >
+                  <h3 className="font-semibold text-white">{faq.question}</h3>
+                  <p className="mt-2 text-sm leading-6 text-gray-400">
+                    {faq.answer}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="rounded-lg border border-blue-500/25 bg-blue-500/10 p-6">
+            <div className="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-md bg-blue-600">
+              <ShieldCheck className="h-6 w-6 text-white" />
+            </div>
+            <h2 className="text-2xl font-bold text-white">
+              {translate("riskDisclaimer", "Risk Disclaimer")}
+            </h2>
+            <p className="mt-3 text-sm leading-6 text-blue-100/90">
+              {translate(
+                "riskDisclaimerText",
+                "Forex and CFD trading involve significant risk and may not be suitable for every trader. Signals are market analysis, not guaranteed outcomes. Use appropriate position sizing, review each setup independently, and never risk money you cannot afford to lose."
+              )}
+            </p>
+            <Button asChild className="mt-6 bg-blue-600 hover:bg-blue-500">
+              <Link href="/signals">
+                {translate("viewSignals", "View Signals")}{" "}
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
+        </div>
+      </section>
 
       {/* CTA */}
       <section className="py-16 bg-black border-none text-white">

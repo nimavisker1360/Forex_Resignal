@@ -1,0 +1,1691 @@
+
+> signal-forex@0.1.0 dev
+> next dev --port 3001
+
+[32m✔[0m [33mConsole Ninja[0m extension is connected to [33mNext.js[0m, see [36mhttps://tinyurl.com/2vt8jxzw[0m
+   ▲ Next.js 15.3.0
+   - Local:        http://localhost:3001
+   - Network:      http://192.168.1.108:3001
+   - Environments: .env
+
+ ✓ Starting...
+ ✓ Ready in 4.5s
+ ○ Compiling /journal ...
+ ✓ Compiled /journal in 3.5s (865 modules)
+ ✓ Compiled in 791ms (367 modules)
+ ○ Compiling /api/journal/trades ...
+ ✓ Compiled /api/journal/trades in 2.6s (968 modules)
+ ✓ Compiled in 856ms (368 modules)
+ ✓ Compiled in 199ms (368 modules)
+ ✓ Compiled in 248ms (368 modules)
+ ✓ Compiled in 216ms (368 modules)
+ ✓ Compiled in 189ms (368 modules)
+ ✓ Compiled in 193ms (368 modules)
+ ✓ Compiled in 192ms (368 modules)
+ ✓ Compiled in 199ms (368 modules)
+ ✓ Compiled in 172ms (368 modules)
+ ✓ Compiled in 190ms (368 modules)
+ ✓ Compiled in 234ms (368 modules)
+ ✓ Compiled in 244ms (368 modules)
+ ✓ Compiled in 186ms (368 modules)
+ ✓ Compiled in 251ms (368 modules)
+ ✓ Compiled in 295ms (368 modules)
+ ✓ Compiled in 334ms (368 modules)
+ ✓ Compiled in 189ms (368 modules)
+ ✓ Compiled in 228ms (368 modules)
+ ✓ Compiled in 211ms (368 modules)
+ ✓ Compiled in 183ms (368 modules)
+ ✓ Compiled in 169ms (368 modules)
+ ✓ Compiled in 178ms (368 modules)
+ ✓ Compiled in 249ms (368 modules)
+ ✓ Compiled in 260ms (368 modules)
+ ✓ Compiled in 495ms (368 modules)
+ ✓ Compiled in 268ms (368 modules)
+ GET /api/journal/trades?limit=50&page=1 200 in 11189ms
+ ✓ Compiled in 339ms (368 modules)
+ GET /journal 200 in 15731ms
+ ✓ Compiled in 467ms (368 modules)
+ ✓ Compiled in 264ms (368 modules)
+ ✓ Compiled in 189ms (368 modules)
+ ✓ Compiled in 180ms (368 modules)
+ ✓ Compiled /favicon.ico in 596ms (970 modules)
+ GET /favicon.ico 200 in 605ms
+ ○ Compiling /_not-found ...
+ ✓ Compiled /_not-found in 1025ms (960 modules)
+ GET /sw.js 404 in 1444ms
+ ✓ Compiled in 983ms (371 modules)
+ ✓ Compiled in 399ms (371 modules)
+ ✓ Compiled in 659ms (371 modules)
+ ✓ Compiled in 922ms (368 modules)
+ GET /api/journal/trades?limit=50&page=1 200 in 260ms
+ GET /journal 200 in 655ms
+ GET /favicon.ico 200 in 16ms
+ ✓ Compiled /_not-found in 312ms (960 modules)
+ GET /sw.js 404 in 594ms
+ GET /_next/static/webpack/b8ed5d7e74bdbab3.webpack.hot-update.json 404 in 504ms
+ GET /api/journal/trades?limit=50&page=1 200 in 198ms
+ GET /journal 200 in 348ms
+ GET /favicon.ico 200 in 16ms
+ GET /sw.js 404 in 78ms
+ ✓ Compiled in 206ms (371 modules)
+ ○ Compiling /_error ...
+ ✓ Compiled /_error in 1567ms (1305 modules)
+ ✓ Compiled in 281ms (615 modules)
+ GET /journal 500 in 2487ms
+ ✓ Compiled in 680ms (615 modules)
+ GET /journal 200 in 547ms
+ ✓ Compiled in 400ms (615 modules)
+ ✓ Compiled in 246ms (615 modules)
+ GET /journal 200 in 279ms
+ ✓ Compiled in 208ms (615 modules)
+ ✓ Compiled in 221ms (615 modules)
+ GET /journal 200 in 441ms
+ ✓ Compiled in 780ms (1305 modules)
+ GET /journal 500 in 1161ms
+ ✓ Compiled in 351ms (615 modules)
+ ✓ Compiled in 768ms (1305 modules)
+ GET /journal 500 in 1065ms
+ ✓ Compiled in 284ms (615 modules)
+ ✓ Compiled in 756ms (1305 modules)
+ ✓ Compiled in 191ms (615 modules)
+ GET /journal 500 in 1012ms
+ ✓ Compiled in 237ms (615 modules)
+ GET /journal 200 in 516ms
+ ✓ Compiled in 405ms (615 modules)
+ GET /journal 200 in 433ms
+ ✓ Compiled in 274ms (615 modules)
+ ✓ Compiled in 269ms (615 modules)
+ GET /journal 200 in 311ms
+ ✓ Compiled in 338ms (615 modules)
+ GET /journal 200 in 384ms
+ ✓ Compiled in 319ms (615 modules)
+ ✓ Compiled in 326ms (615 modules)
+ GET /journal 200 in 451ms
+ ✓ Compiled in 277ms (615 modules)
+ GET /api/journal/trades?limit=50&page=1 200 in 800ms
+ GET /journal 200 in 1147ms
+ GET /journal 200 in 501ms
+ ✓ Compiled in 312ms (615 modules)
+ ✓ Compiled in 263ms (615 modules)
+ GET /journal 200 in 303ms
+ ✓ Compiled in 684ms (1305 modules)
+ ✓ Compiled in 186ms (615 modules)
+ GET /journal 500 in 1046ms
+ ✓ Compiled in 237ms (615 modules)
+ ✓ Compiled in 388ms (615 modules)
+ GET /journal 200 in 496ms
+ ✓ Compiled in 306ms (615 modules)
+ GET /journal 200 in 334ms
+ ✓ Compiled in 312ms (615 modules)
+ GET /journal 200 in 590ms
+ ✓ Compiled in 395ms (615 modules)
+ GET /journal 200 in 421ms
+ ✓ Compiled in 314ms (615 modules)
+ GET /journal 200 in 325ms
+ ✓ Compiled in 303ms (615 modules)
+ ✓ Compiled in 251ms (615 modules)
+ GET /journal 200 in 272ms
+ ✓ Compiled in 257ms (615 modules)
+ GET /journal 200 in 486ms
+ ✓ Compiled in 337ms (615 modules)
+ GET /journal 200 in 525ms
+ ✓ Compiled in 324ms (615 modules)
+ ✓ Compiled in 377ms (615 modules)
+ GET /journal 200 in 426ms
+ ✓ Compiled in 217ms (615 modules)
+ GET /journal 200 in 290ms
+ ✓ Compiled in 248ms (615 modules)
+ GET /journal 200 in 307ms
+ ✓ Compiled in 250ms (615 modules)
+ GET /journal 200 in 329ms
+ ✓ Compiled in 276ms (615 modules)
+ ✓ Compiled in 246ms (615 modules)
+ GET /journal 200 in 286ms
+ ✓ Compiled in 321ms (615 modules)
+ GET /journal 200 in 342ms
+ ✓ Compiled in 327ms (615 modules)
+ GET /journal 200 in 573ms
+ ✓ Compiled in 345ms (615 modules)
+ GET /journal 200 in 205ms
+ ✓ Compiled in 423ms (615 modules)
+ GET /journal 200 in 601ms
+ ✓ Compiled in 315ms (615 modules)
+ GET /journal 200 in 465ms
+ ✓ Compiled in 350ms (615 modules)
+ ✓ Compiled in 302ms (615 modules)
+ GET /journal 200 in 338ms
+ ✓ Compiled in 222ms (615 modules)
+ GET /journal 200 in 274ms
+ ✓ Compiled in 254ms (615 modules)
+ GET /journal 200 in 325ms
+ ✓ Compiled in 242ms (615 modules)
+ ✓ Compiled in 251ms (615 modules)
+ GET /journal 200 in 284ms
+ ✓ Compiled in 250ms (615 modules)
+ ✓ Compiled in 239ms (615 modules)
+ GET /journal 200 in 502ms
+ ✓ Compiled in 350ms (615 modules)
+ GET /journal 200 in 369ms
+ ✓ Compiled in 399ms (615 modules)
+ GET /journal 200 in 496ms
+ ✓ Compiled in 379ms (615 modules)
+ GET /journal 200 in 597ms
+ ✓ Compiled in 341ms (615 modules)
+ GET /journal 200 in 336ms
+ ✓ Compiled in 311ms (615 modules)
+ GET /journal 200 in 76ms
+ GET /journal 200 in 41ms
+ GET /journal 200 in 52ms
+ GET /journal 200 in 37ms
+ GET /journal 200 in 44ms
+ GET /journal 200 in 49ms
+ GET /journal 200 in 64ms
+ GET /journal 200 in 35ms
+ GET /journal 200 in 44ms
+ GET /journal 200 in 34ms
+ GET /journal 200 in 52ms
+ GET /journal 200 in 63ms
+ GET /journal 200 in 46ms
+ GET /journal 200 in 51ms
+ GET /journal 200 in 37ms
+ GET /journal 200 in 36ms
+ GET /journal 200 in 36ms
+ GET /journal 200 in 36ms
+ GET /journal 200 in 29ms
+ GET /journal 200 in 34ms
+ GET /api/journal/trades?limit=50&page=1 200 in 4278ms
+ GET /journal 200 in 4727ms
+ ✓ Compiled in 1983ms (1291 modules)
+ GET /sw.js 404 in 2053ms
+ GET /_next/static/webpack/31c99fdb426d5918.webpack.hot-update.json 404 in 2130ms
+ ✓ Compiled in 1798ms (615 modules)
+ ✓ Compiled in 464ms (615 modules)
+ ✓ Compiled in 306ms (615 modules)
+ ✓ Compiled in 589ms (1305 modules)
+ GET /_next/static/webpack/d3b859354187b60a.webpack.hot-update.json 404 in 924ms
+ GET /api/journal/trades?limit=50&page=1 200 in 4107ms
+ GET /journal 200 in 6035ms
+ GET /journal 200 in 4867ms
+ GET /favicon.ico 200 in 28ms
+ GET /sw.js 404 in 72ms
+ ✓ Compiled in 503ms (615 modules)
+ GET /journal 200 in 90ms
+ GET /favicon.ico 200 in 13ms
+ GET /api/journal/trades?limit=50&page=1 200 in 17635ms
+ ✓ Compiled in 405ms (611 modules)
+ GET /journal 200 in 67ms
+ GET /favicon.ico 200 in 19ms
+ ✓ Compiled in 234ms (611 modules)
+ GET /journal 200 in 206ms
+ ✓ Compiled in 334ms (611 modules)
+ GET /journal 200 in 104ms
+ ✓ Compiled in 280ms (611 modules)
+ GET /journal 200 in 54ms
+ ✓ Compiled in 369ms (611 modules)
+ ✓ Compiled in 306ms (611 modules)
+ GET /journal 200 in 807ms
+ ✓ Compiled in 659ms (611 modules)
+ ○ Compiling /_error ...
+ ✓ Compiled /_error in 1252ms (1197 modules)
+ GET /journal 500 in 2003ms
+ ✓ Compiled in 645ms (612 modules)
+ ✓ Compiled in 530ms (612 modules)
+ GET /journal 200 in 569ms
+ ✓ Compiled in 658ms (1197 modules)
+ ✓ Compiled in 217ms (612 modules)
+ GET /journal 500 in 953ms
+ ✓ Compiled in 210ms (612 modules)
+ GET /journal 200 in 639ms
+ ✓ Compiled in 624ms (612 modules)
+ ✓ Compiled in 398ms (612 modules)
+ GET /journal 200 in 429ms
+ ✓ Compiled in 289ms (612 modules)
+ GET /journal 200 in 459ms
+ ✓ Compiled in 298ms (612 modules)
+ GET /journal 200 in 409ms
+ ✓ Compiled in 360ms (612 modules)
+ ✓ Compiled in 299ms (612 modules)
+ GET /journal 200 in 361ms
+ ✓ Compiled in 257ms (612 modules)
+ GET /journal 200 in 284ms
+ ✓ Compiled in 216ms (612 modules)
+ GET /journal 200 in 216ms
+ ✓ Compiled in 203ms (612 modules)
+ ✓ Compiled in 206ms (612 modules)
+ GET /journal 200 in 278ms
+ ✓ Compiled in 225ms (612 modules)
+ GET /journal 200 in 230ms
+ ○ Compiling /api/journal/trades ...
+ ✓ Compiled /api/journal/trades in 1061ms (1299 modules)
+ GET /journal 200 in 1408ms
+ GET /journal 200 in 43ms
+ GET /journal 200 in 39ms
+ GET /journal 200 in 33ms
+ GET /journal 200 in 30ms
+ GET /journal 200 in 29ms
+ GET /journal 200 in 32ms
+ GET /api/journal/trades?limit=50&page=1 200 in 2179ms
+ GET /journal 200 in 2444ms
+ GET /api/journal/trades?limit=50&page=1 200 in 366ms
+ GET /journal 200 in 694ms
+ ○ Compiling /_not-found ...
+ ✓ Compiled /_not-found in 599ms (1289 modules)
+ GET /sw.js 404 in 946ms
+ ✓ Compiled in 821ms (615 modules)
+ ✓ Compiled in 823ms (615 modules)
+ ✓ Compiled in 570ms (615 modules)
+ ✓ Compiled in 455ms (615 modules)
+ ✓ Compiled in 435ms (615 modules)
+ ✓ Compiled in 563ms (615 modules)
+ GET /journal 200 in 619ms
+ ✓ Compiled in 437ms (615 modules)
+ ✓ Compiled in 423ms (615 modules)
+ GET /journal 200 in 564ms
+ ✓ Compiled in 346ms (615 modules)
+ GET /journal 200 in 607ms
+ ✓ Compiled in 357ms (615 modules)
+ ✓ Compiled in 338ms (615 modules)
+ GET /journal 200 in 409ms
+ ✓ Compiled in 422ms (615 modules)
+ GET /journal 200 in 725ms
+ ✓ Compiled in 448ms (615 modules)
+ GET /journal 200 in 584ms
+ ✓ Compiled in 487ms (615 modules)
+ ✓ Compiled in 416ms (615 modules)
+ GET /journal 200 in 452ms
+ ✓ Compiled in 335ms (615 modules)
+ GET /journal 200 in 381ms
+ ✓ Compiled in 362ms (615 modules)
+ GET /journal 200 in 342ms
+ ✓ Compiled in 274ms (615 modules)
+ ✓ Compiled in 232ms (615 modules)
+ GET /journal 200 in 291ms
+ ✓ Compiled in 263ms (615 modules)
+ GET /journal 200 in 288ms
+ ✓ Compiled in 209ms (615 modules)
+ GET /journal 200 in 264ms
+ ✓ Compiled in 244ms (615 modules)
+ GET /journal 200 in 257ms
+ ✓ Compiled in 278ms (615 modules)
+ GET /journal 200 in 378ms
+ ✓ Compiled in 312ms (615 modules)
+ ✓ Compiled in 454ms (615 modules)
+ GET /journal 200 in 639ms
+ ✓ Compiled in 399ms (615 modules)
+ GET /journal 200 in 582ms
+ ✓ Compiled in 438ms (615 modules)
+ ✓ Compiled in 251ms (615 modules)
+ GET /journal 200 in 329ms
+ ✓ Compiled in 273ms (615 modules)
+ ✓ Compiled in 343ms (615 modules)
+ GET /journal 200 in 440ms
+ ✓ Compiled in 307ms (615 modules)
+ GET /journal 200 in 338ms
+ ✓ Compiled in 242ms (615 modules)
+ ✓ Compiled in 394ms (615 modules)
+ GET /journal 500 in 668ms
+ ✓ Compiled in 420ms (615 modules)
+ GET /journal 200 in 507ms
+ ✓ Compiled in 387ms (615 modules)
+ GET /journal 200 in 312ms
+ ✓ Compiled in 277ms (615 modules)
+ ✓ Compiled in 499ms (615 modules)
+ GET /journal 200 in 613ms
+ ✓ Compiled in 517ms (615 modules)
+ GET /journal 200 in 787ms
+ ✓ Compiled in 367ms (615 modules)
+ ✓ Compiled in 368ms (615 modules)
+ GET /journal 200 in 443ms
+ ✓ Compiled in 482ms (615 modules)
+ GET /journal 200 in 688ms
+ ✓ Compiled in 345ms (615 modules)
+ GET /journal 200 in 453ms
+ ✓ Compiled in 370ms (615 modules)
+ ✓ Compiled in 278ms (615 modules)
+ GET /journal 200 in 304ms
+ ✓ Compiled in 763ms (1303 modules)
+ GET /journal 500 in 1734ms
+ ✓ Compiled in 1258ms (615 modules)
+ ✓ Compiled in 592ms (615 modules)
+ GET /journal 200 in 1592ms
+ ✓ Compiled in 1450ms (615 modules)
+ ✓ Compiled in 1041ms (615 modules)
+ GET /journal 200 in 1521ms
+ ✓ Compiled in 1233ms (615 modules)
+ ✓ Compiled in 676ms (615 modules)
+ GET /journal 200 in 814ms
+ ✓ Compiled in 602ms (615 modules)
+ ✓ Compiled in 535ms (615 modules)
+ GET /journal 200 in 1134ms
+ ✓ Compiled in 626ms (615 modules)
+ ✓ Compiled in 834ms (615 modules)
+ GET /journal 200 in 887ms
+ ✓ Compiled in 578ms (615 modules)
+ GET /journal 200 in 641ms
+ ✓ Compiled in 664ms (615 modules)
+ ✓ Compiled in 1744ms (615 modules)
+ GET /journal 200 in 2061ms
+ ✓ Compiled in 513ms (615 modules)
+ GET /journal 200 in 1177ms
+ ✓ Compiled in 876ms (615 modules)
+ ✓ Compiled in 1051ms (615 modules)
+ GET /journal 200 in 1231ms
+ ✓ Compiled in 578ms (615 modules)
+ GET /journal 200 in 830ms
+ ✓ Compiled in 856ms (615 modules)
+ ✓ Compiled in 524ms (615 modules)
+ GET /journal 200 in 620ms
+ ✓ Compiled in 455ms (615 modules)
+ GET /journal 200 in 480ms
+ ✓ Compiled in 551ms (615 modules)
+ GET /journal 200 in 757ms
+ ✓ Compiled in 629ms (615 modules)
+ GET /journal 200 in 575ms
+ ✓ Compiled in 462ms (615 modules)
+ GET /journal 200 in 422ms
+ ✓ Compiled in 502ms (615 modules)
+ GET /journal 200 in 849ms
+ ✓ Compiled in 793ms (615 modules)
+ GET /journal 200 in 705ms
+ ✓ Compiled in 638ms (615 modules)
+ ✓ Compiled in 618ms (615 modules)
+ GET /journal 200 in 676ms
+ ✓ Compiled in 607ms (615 modules)
+ GET /journal 200 in 868ms
+ ✓ Compiled in 376ms (615 modules)
+ GET /journal 200 in 314ms
+ ✓ Compiled in 283ms (615 modules)
+ ✓ Compiled in 263ms (615 modules)
+ GET /journal 200 in 283ms
+ ✓ Compiled in 260ms (615 modules)
+ GET /journal 200 in 568ms
+ ✓ Compiled in 388ms (615 modules)
+ GET /journal 200 in 466ms
+ ✓ Compiled in 384ms (615 modules)
+ GET /journal 200 in 310ms
+ ✓ Compiled in 337ms (615 modules)
+ ✓ Compiled in 464ms (615 modules)
+ GET /journal 200 in 586ms
+ ✓ Compiled in 517ms (615 modules)
+ GET /journal 200 in 393ms
+ ✓ Compiled in 312ms (615 modules)
+ ✓ Compiled in 642ms (1303 modules)
+ GET /journal 500 in 1064ms
+ GET /journal 200 in 136ms
+ GET /journal 200 in 35ms
+ GET /journal 200 in 28ms
+ GET /journal 200 in 41ms
+ GET /journal 200 in 26ms
+ GET /journal 200 in 31ms
+ GET /journal 200 in 33ms
+ GET /journal 200 in 26ms
+ GET /journal 200 in 58ms
+ GET /journal 200 in 229ms
+ GET /journal 200 in 84ms
+ GET /journal 200 in 43ms
+ GET /journal 200 in 48ms
+ GET /journal 200 in 49ms
+ GET /journal 200 in 37ms
+ GET /journal 200 in 36ms
+ GET /journal 200 in 40ms
+ GET /journal 200 in 38ms
+ GET /journal 200 in 35ms
+ GET /journal 200 in 33ms
+ GET /journal 200 in 45ms
+ GET /journal 200 in 29ms
+ GET /journal 200 in 31ms
+ GET /journal 200 in 33ms
+ GET /journal 200 in 31ms
+ GET /journal 200 in 29ms
+ GET /journal 200 in 29ms
+ GET /journal 200 in 28ms
+ GET /api/journal/trades?limit=50&page=1 200 in 793ms
+ GET /journal 200 in 977ms
+ GET /sw.js 404 in 55ms
+ ✓ Compiled in 950ms (615 modules)
+ GET /journal 200 in 48ms
+ ✓ Compiled in 637ms (615 modules)
+ GET /journal 200 in 246ms
+ ✓ Compiled in 494ms (611 modules)
+ ✓ Compiled in 528ms (611 modules)
+ ✓ Compiled in 635ms (611 modules)
+ GET /journal 200 in 857ms
+ ✓ Compiled in 415ms (611 modules)
+ GET /journal 200 in 519ms
+ ✓ Compiled in 396ms (611 modules)
+ ✓ Compiled in 391ms (611 modules)
+ GET /journal 200 in 716ms
+ ✓ Compiled in 410ms (611 modules)
+ ✓ Compiled in 339ms (611 modules)
+ GET /journal 200 in 372ms
+ ✓ Compiled in 299ms (611 modules)
+ GET /journal 200 in 670ms
+ ✓ Compiled in 400ms (611 modules)
+ ✓ Compiled in 396ms (611 modules)
+ GET /journal 200 in 439ms
+ ✓ Compiled in 428ms (611 modules)
+ GET /journal 200 in 643ms
+ ✓ Compiled in 320ms (611 modules)
+ ✓ Compiled in 387ms (611 modules)
+ GET /journal 200 in 428ms
+ ✓ Compiled in 315ms (611 modules)
+ GET /journal 200 in 585ms
+ ✓ Compiled in 472ms (611 modules)
+ ✓ Compiled in 327ms (611 modules)
+ GET /journal 200 in 443ms
+ ✓ Compiled in 248ms (611 modules)
+ GET /journal 200 in 439ms
+ ✓ Compiled in 266ms (611 modules)
+ GET /journal 200 in 321ms
+ ✓ Compiled in 272ms (611 modules)
+ GET /journal 200 in 271ms
+ ✓ Compiled in 250ms (611 modules)
+ ✓ Compiled in 329ms (611 modules)
+ GET /journal 200 in 365ms
+ GET /journal 200 in 110ms
+ GET /journal 200 in 137ms
+ GET /journal 200 in 78ms
+ GET /journal 200 in 57ms
+ GET /journal 200 in 47ms
+ GET /journal 200 in 52ms
+ GET /journal 200 in 48ms
+ GET /journal 200 in 44ms
+ ✓ Compiled in 1014ms (611 modules)
+ GET /journal 200 in 167ms
+ ✓ Compiled in 342ms (611 modules)
+ ✓ Compiled in 369ms (611 modules)
+ ✓ Compiled in 480ms (611 modules)
+ GET /api/journal/trades?limit=50&page=1 200 in 580ms
+ GET /journal 200 in 1151ms
+ ✓ Compiled in 370ms (611 modules)
+ GET /journal 200 in 487ms
+ ✓ Compiled in 332ms (611 modules)
+ ✓ Compiled in 368ms (611 modules)
+ GET /api/journal/trades?limit=50&page=1 200 in 473ms
+ GET /journal 200 in 876ms
+ GET /journal 200 in 661ms
+ ✓ Compiled in 444ms (611 modules)
+ ✓ Compiled in 318ms (611 modules)
+ GET /journal 200 in 429ms
+ ✓ Compiled in 286ms (611 modules)
+ ✓ Compiled in 305ms (611 modules)
+ GET /api/journal/trades?limit=50&page=1 200 in 432ms
+ GET /journal 200 in 760ms
+ GET /journal 200 in 628ms
+ ✓ Compiled in 393ms (611 modules)
+ ✓ Compiled in 279ms (611 modules)
+ GET /journal 200 in 615ms
+ ✓ Compiled in 371ms (611 modules)
+ ✓ Compiled in 340ms (611 modules)
+ GET /journal 200 in 434ms
+ ✓ Compiled in 260ms (611 modules)
+ ✓ Compiled in 333ms (611 modules)
+ GET /journal 200 in 606ms
+ ✓ Compiled in 329ms (611 modules)
+ GET /journal 200 in 337ms
+ ✓ Compiled in 331ms (611 modules)
+ GET /journal 200 in 554ms
+ ✓ Compiled in 306ms (611 modules)
+ GET /journal 200 in 331ms
+ ✓ Compiled in 273ms (611 modules)
+ ✓ Compiled in 289ms (611 modules)
+ GET /journal 200 in 327ms
+ ○ Compiling /_error ...
+ ✓ Compiled /_error in 1329ms (1299 modules)
+ GET /journal 500 in 1871ms
+ ✓ Compiled in 495ms (612 modules)
+ ✓ Compiled in 421ms (612 modules)
+ GET /journal 200 in 935ms
+ ✓ Compiled in 879ms (612 modules)
+ GET /journal 200 in 634ms
+ ✓ Compiled in 521ms (612 modules)
+ ✓ Compiled in 596ms (612 modules)
+ GET /journal 200 in 648ms
+ ✓ Compiled in 297ms (612 modules)
+ ✓ Compiled in 436ms (612 modules)
+ ✓ Compiled in 541ms (612 modules)
+ ✓ Compiled in 598ms (612 modules)
+ GET /journal 200 in 714ms
+ ✓ Compiled in 584ms (612 modules)
+ ✓ Compiled in 652ms (612 modules)
+ GET /journal 200 in 794ms
+ ✓ Compiled in 595ms (612 modules)
+ ✓ Compiled in 400ms (612 modules)
+ GET /journal 200 in 484ms
+ ✓ Compiled in 323ms (612 modules)
+ GET /journal 200 in 616ms
+ ✓ Compiled in 482ms (612 modules)
+ GET /journal 200 in 940ms
+ ✓ Compiled in 945ms (612 modules)
+ ✓ Compiled in 558ms (612 modules)
+ GET /journal 200 in 337ms
+ ✓ Compiled in 636ms (612 modules)
+ GET /journal 200 in 1266ms
+ ✓ Compiled in 741ms (612 modules)
+ ✓ Compiled in 474ms (612 modules)
+ ✓ Compiled in 568ms (612 modules)
+ GET /journal 200 in 1061ms
+ ✓ Compiled in 937ms (612 modules)
+ ✓ Compiled in 987ms (612 modules)
+ GET /api/journal/trades?limit=50&page=1 200 in 1494ms
+ GET /journal 200 in 2610ms
+ ✓ Compiled in 750ms (612 modules)
+ GET /journal 200 in 1215ms
+ ✓ Compiled in 798ms (612 modules)
+ GET /journal 200 in 810ms
+ ✓ Compiled in 461ms (612 modules)
+ GET /journal 200 in 821ms
+ ✓ Compiled in 474ms (612 modules)
+ ✓ Compiled in 971ms (612 modules)
+ GET /journal 200 in 1108ms
+ ✓ Compiled in 748ms (612 modules)
+ ✓ Compiled in 631ms (612 modules)
+ GET /journal 200 in 891ms
+ ✓ Compiled in 1351ms (1299 modules)
+ GET /journal 500 in 1952ms
+ ✓ Compiled in 772ms (612 modules)
+ ✓ Compiled in 1399ms (612 modules)
+ GET /journal 200 in 1499ms
+ ✓ Compiled in 500ms (612 modules)
+ GET /journal 200 in 853ms
+ ✓ Compiled in 430ms (612 modules)
+ GET /journal 200 in 577ms
+ ✓ Compiled in 486ms (612 modules)
+ ✓ Compiled in 553ms (612 modules)
+ GET /journal 200 in 564ms
+ ✓ Compiled in 317ms (612 modules)
+ GET /journal 200 in 536ms
+ ✓ Compiled in 578ms (612 modules)
+ ✓ Compiled in 603ms (612 modules)
+ GET /journal 200 in 814ms
+ ✓ Compiled in 658ms (612 modules)
+ ✓ Compiled in 589ms (612 modules)
+ GET /journal 200 in 1122ms
+ ✓ Compiled in 464ms (612 modules)
+ GET /journal 200 in 688ms
+ ✓ Compiled in 557ms (612 modules)
+ ✓ Compiled in 1296ms (1299 modules)
+ ✓ Compiled in 353ms (612 modules)
+ GET /journal 500 in 1747ms
+ ✓ Compiled in 530ms (612 modules)
+ GET /journal 200 in 1048ms
+ ✓ Compiled in 577ms (612 modules)
+ GET /journal 200 in 420ms
+ ✓ Compiled in 379ms (612 modules)
+ ✓ Compiled in 429ms (612 modules)
+ GET /journal 200 in 447ms
+ ✓ Compiled in 318ms (612 modules)
+ GET /journal 200 in 350ms
+ ✓ Compiled in 312ms (612 modules)
+ GET /journal 200 in 318ms
+ ✓ Compiled in 256ms (612 modules)
+ GET /journal 200 in 301ms
+ ✓ Compiled in 257ms (612 modules)
+ ✓ Compiled in 266ms (612 modules)
+ GET /journal 200 in 298ms
+ ✓ Compiled in 593ms (1299 modules)
+ ✓ Compiled in 302ms (612 modules)
+ GET /journal 500 in 962ms
+ ✓ Compiled in 393ms (612 modules)
+ GET /journal 200 in 631ms
+ ✓ Compiled in 552ms (612 modules)
+ GET /journal 200 in 353ms
+ ✓ Compiled in 289ms (612 modules)
+ ✓ Compiled in 260ms (612 modules)
+ GET /journal 200 in 294ms
+ ✓ Compiled in 391ms (612 modules)
+ ✓ Compiled in 397ms (612 modules)
+ GET /journal 200 in 509ms
+ ✓ Compiled in 224ms (612 modules)
+ GET /journal 200 in 273ms
+ ✓ Compiled in 231ms (612 modules)
+ GET /api/journal/trades?limit=50&page=1 200 in 1011ms
+ GET /journal 200 in 1472ms
+ ✓ Compiled in 230ms (612 modules)
+ GET /journal 200 in 256ms
+ ✓ Compiled in 214ms (612 modules)
+ GET /journal 200 in 218ms
+ ✓ Compiled in 238ms (612 modules)
+ ✓ Compiled in 211ms (612 modules)
+ GET /journal 200 in 247ms
+ ✓ Compiled in 222ms (612 modules)
+ GET /api/journal/trades?limit=50&page=1 200 in 619ms
+ GET /journal 200 in 919ms
+ GET /journal 200 in 322ms
+ ✓ Compiled in 289ms (612 modules)
+ GET /journal 200 in 362ms
+ ✓ Compiled in 298ms (612 modules)
+ GET /journal 200 in 379ms
+ ✓ Compiled in 307ms (612 modules)
+ GET /journal 200 in 268ms
+ ✓ Compiled in 257ms (612 modules)
+ GET /journal 200 in 286ms
+ ✓ Compiled in 279ms (612 modules)
+ ✓ Compiled in 442ms (612 modules)
+ GET /journal 200 in 565ms
+ ✓ Compiled in 560ms (612 modules)
+ GET /journal 200 in 787ms
+ ✓ Compiled in 466ms (612 modules)
+ GET /journal 200 in 519ms
+ ✓ Compiled in 419ms (612 modules)
+ ✓ Compiled in 425ms (612 modules)
+ GET /journal 200 in 450ms
+ ✓ Compiled in 564ms (612 modules)
+ GET /journal 200 in 1196ms
+ ✓ Compiled in 796ms (612 modules)
+ GET /journal 200 in 797ms
+ ✓ Compiled in 757ms (612 modules)
+ ✓ Compiled in 492ms (612 modules)
+ GET /journal 200 in 502ms
+ ✓ Compiled in 1096ms (612 modules)
+ ✓ Compiled in 724ms (612 modules)
+ GET /api/journal/trades?limit=50&page=1 200 in 715ms
+ GET /journal 200 in 1870ms
+ GET /journal 200 in 1156ms
+ ✓ Compiled in 834ms (612 modules)
+ ✓ Compiled in 825ms (612 modules)
+ GET /journal 200 in 1012ms
+ ✓ Compiled in 871ms (612 modules)
+ GET /journal 200 in 1265ms
+ ✓ Compiled in 776ms (612 modules)
+ ✓ Compiled in 699ms (612 modules)
+ ✓ Compiled in 384ms (612 modules)
+ GET /journal 200 in 738ms
+ ✓ Compiled in 401ms (612 modules)
+ ✓ Compiled in 574ms (612 modules)
+ GET /journal 200 in 692ms
+ ✓ Compiled in 487ms (612 modules)
+ ✓ Compiled in 394ms (612 modules)
+ GET /api/journal/trades?limit=50&page=1 200 in 404ms
+ GET /journal 200 in 938ms
+ ✓ Compiled in 393ms (612 modules)
+ GET /journal 200 in 733ms
+ ✓ Compiled in 395ms (612 modules)
+ GET /journal 200 in 508ms
+ ✓ Compiled in 401ms (612 modules)
+ GET /journal 200 in 549ms
+ ✓ Compiled in 363ms (612 modules)
+ ✓ Compiled in 462ms (612 modules)
+ GET /journal 200 in 542ms
+ ✓ Compiled in 395ms (612 modules)
+ GET /journal 200 in 766ms
+ ✓ Compiled in 515ms (612 modules)
+ ✓ Compiled in 540ms (612 modules)
+ GET /journal 200 in 677ms
+ ✓ Compiled in 377ms (612 modules)
+ GET /journal 200 in 479ms
+ ✓ Compiled in 411ms (612 modules)
+ GET /journal 200 in 629ms
+ ✓ Compiled in 530ms (612 modules)
+ ✓ Compiled in 460ms (612 modules)
+ GET /journal 200 in 468ms
+ ✓ Compiled in 368ms (612 modules)
+ ✓ Compiled in 347ms (612 modules)
+ GET /api/journal/trades?limit=50&page=1 200 in 645ms
+ GET /journal 200 in 607ms
+ GET /journal 200 in 1049ms
+ ✓ Compiled in 358ms (612 modules)
+ ✓ Compiled in 425ms (612 modules)
+ GET /journal 200 in 509ms
+ ✓ Compiled in 528ms (612 modules)
+ GET /journal 200 in 896ms
+ ✓ Compiled in 496ms (612 modules)
+ ✓ Compiled in 386ms (612 modules)
+ GET /journal 200 in 460ms
+ ✓ Compiled in 568ms (612 modules)
+ GET /journal 200 in 1075ms
+ ✓ Compiled in 557ms (612 modules)
+ ✓ Compiled in 1121ms (1299 modules)
+ GET /journal 500 in 1572ms
+ GET /journal 200 in 982ms
+ GET /journal 200 in 75ms
+ GET /journal 200 in 61ms
+ GET /journal 200 in 58ms
+ GET /journal 200 in 54ms
+ GET /journal 200 in 65ms
+ GET /journal 200 in 75ms
+ GET /journal 200 in 53ms
+ GET /journal 200 in 86ms
+ GET /journal 200 in 101ms
+ GET /journal 200 in 103ms
+ GET /journal 200 in 101ms
+ GET /journal 200 in 73ms
+ GET /journal 200 in 64ms
+ GET /journal 200 in 80ms
+ GET /journal 200 in 57ms
+ GET /journal 200 in 47ms
+ GET /journal 200 in 44ms
+ GET /journal 200 in 43ms
+ GET /journal 200 in 42ms
+ GET /journal 200 in 43ms
+ GET /journal 200 in 56ms
+ GET /journal 200 in 45ms
+ GET /journal 200 in 44ms
+ GET /journal 200 in 40ms
+ GET /journal 200 in 41ms
+ GET /journal 200 in 38ms
+ GET /journal 200 in 39ms
+ GET /journal 200 in 41ms
+ GET /journal 200 in 36ms
+ GET /journal 200 in 35ms
+ GET /journal 200 in 36ms
+ GET /journal 200 in 34ms
+ GET /journal 200 in 38ms
+ GET /journal 200 in 39ms
+ GET /journal 200 in 38ms
+ GET /journal 200 in 36ms
+ GET /journal 200 in 35ms
+ GET /journal 200 in 41ms
+ GET /journal 200 in 38ms
+ GET /journal 200 in 37ms
+ GET /journal 200 in 39ms
+ GET /journal 200 in 44ms
+ GET /journal 200 in 41ms
+ GET /journal 200 in 36ms
+ GET /api/journal/trades?limit=50&page=1 200 in 834ms
+ GET /journal 200 in 1114ms
+ ○ Compiling /_not-found ...
+ ✓ Compiled /_not-found in 3.1s (1303 modules)
+ GET /sw.js 404 in 3181ms
+ GET /journal 200 in 178ms
+ ✓ Compiled in 491ms (615 modules)
+ GET /journal 200 in 64ms
+ ✓ Compiled in 464ms (615 modules)
+ ✓ Compiled in 683ms (615 modules)
+ GET /journal 200 in 697ms
+ ✓ Compiled in 532ms (615 modules)
+ GET /journal 200 in 1149ms
+ ✓ Compiled in 759ms (615 modules)
+ ✓ Compiled in 602ms (615 modules)
+ GET /journal 200 in 678ms
+ ✓ Compiled in 489ms (615 modules)
+ GET /journal 200 in 605ms
+ GET /journal 200 in 87ms
+ GET /journal 200 in 252ms
+ ✓ Compiled in 416ms (615 modules)
+ GET /journal 200 in 63ms
+ ✓ Compiled in 463ms (614 modules)
+ GET /journal 200 in 215ms
+ ✓ Compiled in 264ms (611 modules)
+ ✓ Compiled in 387ms (611 modules)
+ GET /journal 200 in 392ms
+ ✓ Compiled in 260ms (611 modules)
+ GET /journal 200 in 434ms
+ ✓ Compiled in 287ms (611 modules)
+ GET /journal 200 in 412ms
+ ✓ Compiled in 409ms (611 modules)
+ ✓ Compiled in 349ms (611 modules)
+ GET /journal 200 in 387ms
+ ✓ Compiled in 312ms (611 modules)
+ GET /journal 200 in 583ms
+ ✓ Compiled in 345ms (611 modules)
+ ✓ Compiled in 277ms (611 modules)
+ GET /journal 200 in 367ms
+ ○ Compiling /_error ...
+ ✓ Compiled /_error in 917ms (1197 modules)
+ ✓ Compiled in 201ms (612 modules)
+ GET /journal 500 in 1303ms
+ ✓ Compiled in 381ms (612 modules)
+ GET /journal 200 in 811ms
+ ✓ Compiled in 586ms (612 modules)
+ ✓ Compiled in 464ms (612 modules)
+ GET /journal 200 in 564ms
+ ✓ Compiled in 254ms (612 modules)
+ GET /journal 200 in 311ms
+ ✓ Compiled in 254ms (612 modules)
+ GET /journal 200 in 337ms
+ ✓ Compiled in 281ms (612 modules)
+ ✓ Compiled in 299ms (612 modules)
+ GET /journal 200 in 330ms
+ ✓ Compiled in 250ms (612 modules)
+ GET /journal 200 in 257ms
+ ✓ Compiled in 372ms (612 modules)
+ GET /journal 200 in 427ms
+ ✓ Compiled in 221ms (612 modules)
+ GET /journal 200 in 303ms
+ ✓ Compiled in 257ms (612 modules)
+ GET /journal 200 in 239ms
+ ✓ Compiled in 234ms (612 modules)
+ ✓ Compiled in 266ms (612 modules)
+ GET /journal 200 in 284ms
+ GET /journal 200 in 40ms
+ GET /journal 200 in 28ms
+ GET /journal 200 in 36ms
+ GET /journal 200 in 34ms
+ GET /journal 200 in 27ms
+ GET /journal 200 in 26ms
+ GET /journal 200 in 34ms
+ ✓ Compiled /api/journal/trades in 181ms (687 modules)
+ GET /api/journal/trades?limit=50&page=1 200 in 1068ms
+ GET /journal 200 in 1378ms
+ ✓ Compiled in 725ms (612 modules)
+ ✓ Compiled in 373ms (612 modules)
+ ✓ Compiled in 302ms (612 modules)
+ ✓ Compiled in 444ms (612 modules)
+ ✓ Compiled in 272ms (612 modules)
+ ✓ Compiled in 270ms (612 modules)
+ ✓ Compiled in 275ms (612 modules)
+ ○ Compiling /_not-found ...
+ ✓ Compiled /_not-found in 1097ms (1303 modules)
+ GET /sw.js 404 in 1966ms
+ ✓ Compiled in 400ms (615 modules)
+ ✓ Compiled in 412ms (615 modules)
+ ✓ Compiled in 379ms (615 modules)
+ ✓ Compiled in 290ms (615 modules)
+ ✓ Compiled in 312ms (615 modules)
+ ✓ Compiled in 301ms (615 modules)
+ ✓ Compiled in 381ms (615 modules)
+ ✓ Compiled in 410ms (615 modules)
+ ✓ Compiled in 382ms (615 modules)
+ ✓ Compiled in 308ms (615 modules)
+ ✓ Compiled in 249ms (615 modules)
+ ✓ Compiled in 291ms (615 modules)
+ ✓ Compiled in 269ms (615 modules)
+ ✓ Compiled in 316ms (615 modules)
+ ✓ Compiled in 431ms (615 modules)
+ ✓ Compiled in 527ms (615 modules)
+ ✓ Compiled in 289ms (615 modules)
+ ✓ Compiled in 287ms (615 modules)
+ ✓ Compiled in 320ms (615 modules)
+ ✓ Compiled in 440ms (615 modules)
+ ✓ Compiled in 283ms (615 modules)
+ ✓ Compiled in 297ms (615 modules)
+ ✓ Compiled in 286ms (615 modules)
+ ✓ Compiled in 285ms (615 modules)
+ ✓ Compiled in 418ms (615 modules)
+ ✓ Compiled in 734ms (615 modules)
+ ✓ Compiled in 585ms (615 modules)
+ ✓ Compiled in 539ms (615 modules)
+ ✓ Compiled in 833ms (615 modules)
+ ✓ Compiled in 701ms (615 modules)
+ ✓ Compiled in 998ms (615 modules)
+ ✓ Compiled in 907ms (615 modules)
+ ✓ Compiled in 855ms (615 modules)
+ ✓ Compiled in 628ms (615 modules)
+ ✓ Compiled in 623ms (615 modules)
+ ✓ Compiled in 699ms (615 modules)
+ ✓ Compiled in 775ms (615 modules)
+ ✓ Compiled in 1012ms (615 modules)
+ ✓ Compiled in 853ms (615 modules)
+ ✓ Compiled in 511ms (615 modules)
+ ✓ Compiled in 651ms (615 modules)
+ ✓ Compiled in 683ms (615 modules)
+ ✓ Compiled in 627ms (615 modules)
+ ✓ Compiled in 661ms (615 modules)
+ ✓ Compiled in 530ms (615 modules)
+ ✓ Compiled in 382ms (615 modules)
+ ✓ Compiled in 368ms (615 modules)
+ ✓ Compiled in 368ms (615 modules)
+ ✓ Compiled in 371ms (615 modules)
+ ✓ Compiled in 542ms (615 modules)
+ ✓ Compiled in 497ms (615 modules)
+ ✓ Compiled in 565ms (615 modules)
+ ✓ Compiled in 559ms (615 modules)
+ ✓ Compiled in 403ms (615 modules)
+ ✓ Compiled in 407ms (615 modules)
+ ✓ Compiled in 489ms (615 modules)
+ ✓ Compiled in 619ms (615 modules)
+ ✓ Compiled in 448ms (615 modules)
+ ✓ Compiled in 468ms (615 modules)
+ ✓ Compiled in 572ms (615 modules)
+ ✓ Compiled in 630ms (615 modules)
+ ✓ Compiled in 528ms (615 modules)
+ ✓ Compiled in 445ms (615 modules)
+ ✓ Compiled in 455ms (615 modules)
+ ✓ Compiled in 672ms (615 modules)
+ ✓ Compiled in 709ms (615 modules)
+ ✓ Compiled in 422ms (615 modules)
+ ✓ Compiled in 549ms (615 modules)
+ ✓ Compiled in 638ms (615 modules)
+ ✓ Compiled in 549ms (615 modules)
+ ✓ Compiled in 429ms (615 modules)
+ ✓ Compiled in 523ms (615 modules)
+ ✓ Compiled in 731ms (615 modules)
+ ✓ Compiled in 577ms (615 modules)
+ ✓ Compiled in 565ms (615 modules)
+ ✓ Compiled in 861ms (615 modules)
+ ✓ Compiled in 538ms (615 modules)
+ ✓ Compiled in 684ms (615 modules)
+ ✓ Compiled in 591ms (615 modules)
+ ✓ Compiled in 455ms (615 modules)
+ ✓ Compiled in 671ms (615 modules)
+ ✓ Compiled in 609ms (615 modules)
+ ✓ Compiled in 454ms (615 modules)
+ ✓ Compiled in 506ms (615 modules)
+ ✓ Compiled in 700ms (615 modules)
+ ✓ Compiled in 762ms (615 modules)
+ ✓ Compiled in 827ms (615 modules)
+ ✓ Compiled in 611ms (615 modules)
+ ✓ Compiled in 485ms (615 modules)
+ ✓ Compiled in 358ms (615 modules)
+ ✓ Compiled in 585ms (615 modules)
+ ✓ Compiled in 617ms (615 modules)
+ ✓ Compiled in 508ms (615 modules)
+ ✓ Compiled in 377ms (615 modules)
+ ✓ Compiled in 407ms (615 modules)
+ ✓ Compiled in 530ms (615 modules)
+ ✓ Compiled in 518ms (615 modules)
+ ✓ Compiled in 399ms (615 modules)
+ ✓ Compiled in 359ms (615 modules)
+ ✓ Compiled in 778ms (615 modules)
+ ✓ Compiled in 795ms (611 modules)
+ ✓ Compiled in 565ms (611 modules)
+ ✓ Compiled in 638ms (611 modules)
+ ✓ Compiled in 457ms (611 modules)
+ ✓ Compiled in 662ms (611 modules)
+ ✓ Compiled in 556ms (611 modules)
+ ✓ Compiled in 473ms (611 modules)
+ ✓ Compiled in 608ms (611 modules)
+ ✓ Compiled in 506ms (611 modules)
+ ✓ Compiled in 362ms (611 modules)
+ ✓ Compiled in 428ms (611 modules)
+ ✓ Compiled in 563ms (611 modules)
+ ✓ Compiled in 436ms (611 modules)
+ ✓ Compiled in 431ms (611 modules)
+ ✓ Compiled in 477ms (611 modules)
+ ✓ Compiled in 502ms (611 modules)
+ ✓ Compiled in 431ms (611 modules)
+ ✓ Compiled in 372ms (611 modules)
+ ✓ Compiled in 337ms (611 modules)
+ ✓ Compiled in 604ms (611 modules)
+ ✓ Compiled in 607ms (611 modules)
+ ✓ Compiled in 370ms (611 modules)
+ ✓ Compiled in 414ms (611 modules)
+ ✓ Compiled in 492ms (611 modules)
+ ✓ Compiled in 311ms (611 modules)
+ ✓ Compiled in 304ms (611 modules)
+ ✓ Compiled in 279ms (611 modules)
+ ✓ Compiled in 352ms (611 modules)
+ ✓ Compiled in 359ms (611 modules)
+ ✓ Compiled in 429ms (611 modules)
+ ✓ Compiled in 363ms (611 modules)
+ ✓ Compiled in 334ms (611 modules)
+ ✓ Compiled in 451ms (611 modules)
+ ✓ Compiled in 423ms (611 modules)
+ ✓ Compiled in 355ms (611 modules)
+ ✓ Compiled in 529ms (611 modules)
+ ✓ Compiled in 444ms (611 modules)
+ ✓ Compiled in 747ms (611 modules)
+ ✓ Compiled in 395ms (611 modules)
+ ✓ Compiled in 459ms (611 modules)
+ GET /api/journal/trades?limit=50&page=1 200 in 1689ms
+ ✓ Compiled in 756ms (611 modules)
+ GET /journal 200 in 3280ms
+ ✓ Compiled in 421ms (611 modules)
+ ✓ Compiled in 365ms (611 modules)
+ ✓ Compiled in 480ms (611 modules)
+ ✓ Compiled in 788ms (611 modules)
+ ✓ Compiled in 504ms (611 modules)
+ ✓ Compiled in 496ms (611 modules)
+ ○ Compiling /_not-found ...
+ ✓ Compiled /_not-found in 1934ms (1260 modules)
+ ○ Compiling /favicon.ico ...
+ GET /sw.js 404 in 3061ms
+ ✓ Compiled /favicon.ico in 2.6s (648 modules)
+ GET /favicon.ico 200 in 2874ms
+ ✓ Compiled in 583ms (614 modules)
+ ✓ Compiled in 589ms (614 modules)
+ ✓ Compiled in 710ms (614 modules)
+ ✓ Compiled in 746ms (614 modules)
+ ✓ Compiled in 484ms (614 modules)
+ ✓ Compiled in 481ms (614 modules)
+ ✓ Compiled in 399ms (614 modules)
+ ✓ Compiled in 440ms (614 modules)
+ ✓ Compiled in 312ms (614 modules)
+ ✓ Compiled in 413ms (614 modules)
+ ✓ Compiled in 297ms (614 modules)
+ ✓ Compiled in 292ms (614 modules)
+ ✓ Compiled in 381ms (614 modules)
+ ✓ Compiled in 432ms (614 modules)
+ ✓ Compiled in 435ms (614 modules)
+ ✓ Compiled in 306ms (614 modules)
+ ✓ Compiled in 345ms (614 modules)
+ ✓ Compiled in 394ms (614 modules)
+ ✓ Compiled in 428ms (614 modules)
+ ✓ Compiled in 311ms (614 modules)
+ ✓ Compiled in 265ms (614 modules)
+ ✓ Compiled in 275ms (614 modules)
+ ✓ Compiled in 289ms (614 modules)
+ ✓ Compiled in 352ms (614 modules)
+ ✓ Compiled in 444ms (614 modules)
+ ✓ Compiled in 395ms (614 modules)
+ ✓ Compiled in 307ms (614 modules)
+ ✓ Compiled in 351ms (614 modules)
+ ✓ Compiled in 429ms (614 modules)
+ ✓ Compiled in 359ms (614 modules)
+ ✓ Compiled in 306ms (614 modules)
+ ✓ Compiled in 301ms (614 modules)
+ ✓ Compiled in 347ms (614 modules)
+ ✓ Compiled in 346ms (614 modules)
+ ✓ Compiled in 486ms (614 modules)
+ ✓ Compiled in 373ms (614 modules)
+ ✓ Compiled in 427ms (614 modules)
+ ✓ Compiled in 310ms (614 modules)
+ ✓ Compiled in 469ms (614 modules)
+ ✓ Compiled in 412ms (614 modules)
+ ✓ Compiled in 366ms (614 modules)
+ ✓ Compiled in 380ms (614 modules)
+ ✓ Compiled in 288ms (614 modules)
+ ✓ Compiled in 319ms (614 modules)
+ ✓ Compiled in 399ms (614 modules)
+ ✓ Compiled in 749ms (614 modules)
+ ✓ Compiled in 457ms (614 modules)
+ ✓ Compiled in 419ms (614 modules)
+ ✓ Compiled in 354ms (614 modules)
+ ✓ Compiled in 409ms (614 modules)
+ ✓ Compiled in 462ms (614 modules)
+ ✓ Compiled in 348ms (614 modules)
+ ✓ Compiled in 288ms (614 modules)
+ ✓ Compiled in 286ms (614 modules)
+ ✓ Compiled in 303ms (614 modules)
+ ✓ Compiled in 389ms (614 modules)
+ ✓ Compiled in 503ms (614 modules)
+ ✓ Compiled in 365ms (614 modules)
+ ✓ Compiled in 333ms (614 modules)
+ ✓ Compiled in 300ms (614 modules)
+ ✓ Compiled in 316ms (614 modules)
+ ✓ Compiled in 409ms (614 modules)
+ ✓ Compiled in 324ms (614 modules)
+ ✓ Compiled in 266ms (614 modules)
+ ✓ Compiled in 404ms (614 modules)
+ ✓ Compiled in 324ms (614 modules)
+ ✓ Compiled in 382ms (614 modules)
+ ✓ Compiled in 546ms (614 modules)
+ ✓ Compiled in 385ms (614 modules)
+ ✓ Compiled in 464ms (614 modules)
+ ✓ Compiled in 434ms (614 modules)
+ ✓ Compiled in 447ms (614 modules)
+ ✓ Compiled in 284ms (614 modules)
+ ✓ Compiled in 304ms (614 modules)
+ ✓ Compiled in 425ms (614 modules)
+ ✓ Compiled in 503ms (614 modules)
+ ✓ Compiled in 293ms (614 modules)
+ ✓ Compiled in 280ms (614 modules)
+ ✓ Compiled in 282ms (614 modules)
+ ✓ Compiled in 306ms (614 modules)
+ ✓ Compiled in 381ms (614 modules)
+ ✓ Compiled in 398ms (614 modules)
+ ✓ Compiled in 493ms (614 modules)
+ ✓ Compiled in 330ms (614 modules)
+ ✓ Compiled in 441ms (614 modules)
+ ✓ Compiled in 538ms (614 modules)
+ ✓ Compiled in 420ms (614 modules)
+ ✓ Compiled in 494ms (614 modules)
+ ✓ Compiled in 454ms (614 modules)
+ ✓ Compiled in 409ms (614 modules)
+ ✓ Compiled in 478ms (614 modules)
+ ✓ Compiled in 414ms (614 modules)
+ ✓ Compiled in 382ms (614 modules)
+ ✓ Compiled in 393ms (614 modules)
+ ✓ Compiled in 476ms (614 modules)
+ ✓ Compiled in 466ms (614 modules)
+ ✓ Compiled in 370ms (614 modules)
+ ✓ Compiled in 357ms (614 modules)
+ ✓ Compiled in 381ms (614 modules)
+ ✓ Compiled in 424ms (614 modules)
+ ✓ Compiled in 449ms (614 modules)
+ ✓ Compiled in 353ms (614 modules)
+ ✓ Compiled in 325ms (614 modules)
+ ✓ Compiled in 317ms (614 modules)
+ ✓ Compiled in 387ms (614 modules)
+ ✓ Compiled in 358ms (614 modules)
+ ✓ Compiled in 298ms (614 modules)
+ ✓ Compiled in 291ms (614 modules)
+ ✓ Compiled in 282ms (614 modules)
+ ✓ Compiled in 290ms (614 modules)
+ ✓ Compiled in 315ms (614 modules)
+ ✓ Compiled in 361ms (614 modules)
+ ✓ Compiled in 475ms (614 modules)
+ ✓ Compiled in 435ms (614 modules)
+ ✓ Compiled in 520ms (614 modules)
+ ✓ Compiled in 323ms (614 modules)
+ ✓ Compiled in 411ms (614 modules)
+ ✓ Compiled in 444ms (614 modules)
+ ✓ Compiled in 342ms (614 modules)
+ ✓ Compiled in 293ms (614 modules)
+ ✓ Compiled in 312ms (614 modules)
+ ✓ Compiled in 279ms (614 modules)
+ ✓ Compiled in 402ms (614 modules)
+ ✓ Compiled in 808ms (614 modules)
+ ✓ Compiled in 539ms (614 modules)
+ ✓ Compiled in 466ms (614 modules)
+ ✓ Compiled in 1175ms (614 modules)
+ ✓ Compiled in 668ms (611 modules)
+ ✓ Compiled in 937ms (611 modules)
+ ✓ Compiled in 1008ms (611 modules)
+ ✓ Compiled in 642ms (611 modules)
+ ✓ Compiled in 612ms (611 modules)
+ ✓ Compiled in 584ms (611 modules)
+ ✓ Compiled in 724ms (611 modules)
+ ✓ Compiled in 513ms (611 modules)
+ ✓ Compiled in 427ms (611 modules)
+ ✓ Compiled in 517ms (611 modules)
+ ✓ Compiled in 902ms (611 modules)
+ ✓ Compiled in 596ms (611 modules)
+ ✓ Compiled in 507ms (611 modules)
+ ✓ Compiled in 424ms (611 modules)
+ ✓ Compiled in 396ms (611 modules)
+ ✓ Compiled in 423ms (611 modules)
+ ✓ Compiled in 439ms (611 modules)
+ ✓ Compiled in 329ms (611 modules)
+ ✓ Compiled in 303ms (611 modules)
+ ✓ Compiled in 288ms (611 modules)
+ ✓ Compiled in 369ms (611 modules)
+ ✓ Compiled in 426ms (611 modules)
+ ✓ Compiled in 374ms (611 modules)
+ ✓ Compiled in 345ms (611 modules)
+ ✓ Compiled in 320ms (611 modules)
+ ✓ Compiled in 283ms (611 modules)
+ ✓ Compiled in 348ms (611 modules)
+ ✓ Compiled in 365ms (611 modules)
+ ✓ Compiled in 329ms (611 modules)
+ ✓ Compiled in 292ms (611 modules)
+ ✓ Compiled in 258ms (611 modules)
+ ✓ Compiled in 257ms (611 modules)
+ ✓ Compiled in 359ms (611 modules)
+ ✓ Compiled in 535ms (611 modules)
+ ✓ Compiled in 603ms (611 modules)
+ ✓ Compiled in 557ms (611 modules)
+ ✓ Compiled in 688ms (611 modules)
+ ✓ Compiled in 505ms (611 modules)
+ ✓ Compiled in 416ms (611 modules)
+ ✓ Compiled in 484ms (611 modules)
+ ✓ Compiled in 547ms (611 modules)
+ ✓ Compiled in 641ms (611 modules)
+ ✓ Compiled in 562ms (611 modules)
+ ✓ Compiled in 428ms (611 modules)
+ ✓ Compiled in 460ms (611 modules)
+ ✓ Compiled in 409ms (611 modules)
+ ✓ Compiled in 649ms (611 modules)
+ ✓ Compiled in 451ms (611 modules)
+ ✓ Compiled in 564ms (611 modules)
+ ✓ Compiled in 395ms (611 modules)
+ ✓ Compiled in 347ms (611 modules)
+ ✓ Compiled in 368ms (611 modules)
+ ✓ Compiled in 423ms (611 modules)
+ ✓ Compiled in 496ms (611 modules)
+ ✓ Compiled in 715ms (611 modules)
+ ✓ Compiled in 420ms (611 modules)
+ ✓ Compiled in 367ms (611 modules)
+ ✓ Compiled in 390ms (611 modules)
+ ✓ Compiled in 665ms (611 modules)
+ ✓ Compiled in 533ms (611 modules)
+ ✓ Compiled in 602ms (611 modules)
+ ✓ Compiled in 536ms (611 modules)
+ ✓ Compiled in 580ms (611 modules)
+ ✓ Compiled in 484ms (611 modules)
+ ✓ Compiled in 421ms (611 modules)
+ ✓ Compiled in 473ms (611 modules)
+ ✓ Compiled in 734ms (611 modules)
+ ✓ Compiled in 455ms (611 modules)
+ ✓ Compiled in 480ms (611 modules)
+ ✓ Compiled in 696ms (611 modules)
+ GET /favicon.ico 200 in 523ms
+ ✓ Compiled in 676ms (611 modules)
+ ✓ Compiled in 533ms (611 modules)
+ ✓ Compiled in 1518ms (611 modules)
+ ✓ Compiled in 315ms (611 modules)
+ ✓ Compiled in 369ms (611 modules)
+ GET /api/journal/trades?limit=50&page=1 200 in 1276ms
+ ✓ Compiled in 391ms (611 modules)
+ GET /journal 200 in 2890ms
+ ✓ Compiled in 312ms (611 modules)
+ ✓ Compiled in 373ms (611 modules)
+ ✓ Compiled in 440ms (611 modules)
+ ✓ Compiled in 308ms (611 modules)
+ ✓ Compiled in 255ms (611 modules)
+ ○ Compiling /_not-found ...
+ ✓ Compiled /_not-found in 1028ms (1248 modules)
+ GET /sw.js 404 in 1531ms
+ GET /favicon.ico 200 in 1040ms
+ ✓ Compiled in 281ms (614 modules)
+ ✓ Compiled in 460ms (614 modules)
+ ✓ Compiled in 598ms (614 modules)
+ ✓ Compiled in 279ms (614 modules)
+ ✓ Compiled in 183ms (614 modules)
+ ✓ Compiled in 459ms (611 modules)
+ ✓ Compiled in 244ms (611 modules)
+ ✓ Compiled in 614ms (611 modules)
+ ✓ Compiled in 410ms (611 modules)
+ ✓ Compiled in 377ms (611 modules)
+ ✓ Compiled in 267ms (611 modules)
+ ✓ Compiled in 274ms (611 modules)
+ ✓ Compiled in 317ms (611 modules)
+ ✓ Compiled in 305ms (611 modules)
+ ✓ Compiled in 211ms (611 modules)
+ ✓ Compiled in 208ms (611 modules)
+ ✓ Compiled in 211ms (611 modules)
+ ✓ Compiled in 189ms (611 modules)
+ ✓ Compiled in 206ms (611 modules)
+ ✓ Compiled in 217ms (611 modules)
+ ✓ Compiled in 374ms (611 modules)
+ ✓ Compiled in 251ms (611 modules)
+ ✓ Compiled in 633ms (611 modules)
+ ✓ Compiled in 240ms (611 modules)
+ ✓ Compiled in 221ms (611 modules)
+ ✓ Compiled in 244ms (611 modules)
+ ✓ Compiled in 329ms (611 modules)
+ ✓ Compiled in 238ms (611 modules)
+ ✓ Compiled in 272ms (611 modules)
+ ✓ Compiled in 312ms (611 modules)
+ ✓ Compiled in 222ms (611 modules)
+ ✓ Compiled in 193ms (611 modules)
+ ✓ Compiled in 210ms (611 modules)
+ ✓ Compiled in 281ms (611 modules)
+ ✓ Compiled in 247ms (611 modules)
+ ✓ Compiled in 213ms (611 modules)
+ ✓ Compiled in 364ms (611 modules)
+ ✓ Compiled in 292ms (611 modules)
+ ✓ Compiled in 416ms (611 modules)
+ ✓ Compiled in 327ms (611 modules)
+ ✓ Compiled in 288ms (611 modules)
+ ✓ Compiled in 236ms (611 modules)
+ ✓ Compiled in 312ms (611 modules)
+ ✓ Compiled in 410ms (611 modules)
+ GET /api/journal/trades?limit=50&page=1 200 in 1240ms
+ GET /journal 200 in 1681ms
+ ✓ Compiled /_not-found in 450ms (1246 modules)
+ GET /sw.js 404 in 947ms
+ ○ Compiling /journal/analytics ...
+ ✓ Compiled /journal/analytics in 976ms (1253 modules)
+ ○ Compiling /api/journal/stats ...
+ ✓ Compiled /api/journal/stats in 633ms (1256 modules)
+ GET /api/journal/stats 200 in 1584ms
+ GET /journal/analytics 200 in 2832ms
+ ✓ Compiled in 2.2s (614 modules)
+ ✓ Compiled in 3.6s (614 modules)
+ GET /api/journal/stats 200 in 1059ms
+ ✓ Compiled in 1586ms (614 modules)
+ GET /journal/analytics 200 in 5028ms
+ GET /journal/analytics 200 in 4417ms
+ ✓ Compiled in 1153ms (614 modules)
+ ✓ Compiled in 1460ms (614 modules)
+ GET /journal/analytics 200 in 2841ms
+ ○ Compiling /_error ...
+ ✓ Compiled /_error in 4.4s (1313 modules)
+ GET /journal/analytics 500 in 5064ms
+ ✓ Compiled in 734ms (615 modules)
+ ✓ Compiled in 937ms (615 modules)
+ GET /journal/analytics 200 in 1285ms
+ ✓ Compiled in 908ms (615 modules)
+ GET /journal/analytics 200 in 1513ms
+ ✓ Compiled in 546ms (615 modules)
+ ✓ Compiled in 644ms (615 modules)
+ GET /journal/analytics 200 in 1205ms
+ ✓ Compiled in 793ms (615 modules)
+ GET /journal/analytics 200 in 1142ms
+ ✓ Compiled in 489ms (615 modules)
+ ✓ Compiled in 523ms (615 modules)
+ GET /journal/analytics 200 in 1153ms
+ ✓ Compiled in 846ms (615 modules)
+ GET /journal/analytics 200 in 1311ms
+ ✓ Compiled in 477ms (615 modules)
+ ✓ Compiled in 957ms (615 modules)
+ GET /journal/analytics 200 in 1467ms
+ ✓ Compiled in 660ms (615 modules)
+ GET /journal/analytics 200 in 1167ms
+ ✓ Compiled in 721ms (615 modules)
+ GET /journal/analytics 200 in 1357ms
+ ✓ Compiled in 670ms (615 modules)
+ ✓ Compiled in 574ms (615 modules)
+ GET /journal/analytics 200 in 1203ms
+ ✓ Compiled in 577ms (615 modules)
+ GET /journal/analytics 200 in 888ms
+ ✓ Compiled in 1565ms (615 modules)
+ GET /journal/analytics 200 in 2188ms
+ ✓ Compiled in 609ms (615 modules)
+ ✓ Compiled in 557ms (615 modules)
+ GET /journal/analytics 200 in 1183ms
+ ✓ Compiled in 554ms (615 modules)
+ GET /journal/analytics 200 in 941ms
+ ✓ Compiled in 482ms (615 modules)
+ ✓ Compiled in 1100ms (615 modules)
+ GET /journal/analytics 200 in 1613ms
+ ✓ Compiled in 651ms (615 modules)
+ GET /journal/analytics 200 in 1218ms
+ ✓ Compiled in 1569ms (615 modules)
+ GET /journal/analytics 200 in 1747ms
+ ✓ Compiled in 756ms (615 modules)
+ ✓ Compiled in 887ms (615 modules)
+ GET /journal/analytics 200 in 1352ms
+ ✓ Compiled in 701ms (615 modules)
+ ✓ Compiled in 1628ms (1313 modules)
+ GET /journal/analytics 500 in 2389ms
+ GET /journal/analytics 200 in 488ms
+ GET /journal/analytics 200 in 609ms
+ GET /journal/analytics 200 in 415ms
+ GET /journal/analytics 200 in 129ms
+ GET /journal/analytics 200 in 195ms
+ GET /journal/analytics 200 in 113ms
+ GET /journal/analytics 200 in 92ms
+ GET /journal/analytics 200 in 78ms
+ GET /journal/analytics 200 in 69ms
+ GET /journal/analytics 200 in 78ms
+ GET /journal/analytics 200 in 99ms
+ GET /api/journal/stats 200 in 516ms
+ GET /journal/analytics 200 in 925ms
+ GET /sw.js 404 in 56ms
+ ✓ Compiled in 1183ms (615 modules)
+ GET /journal/analytics 200 in 94ms
+ ✓ Compiled in 978ms (1313 modules)
+ GET /journal/analytics 200 in 218ms
+ ✓ Compiled in 573ms (615 modules)
+ GET /journal/analytics 200 in 103ms
+ ✓ Compiled in 434ms (615 modules)
+ ✓ Compiled in 397ms (615 modules)
+ ✓ Compiled in 365ms (615 modules)
+ GET /journal/analytics 200 in 1005ms
+ ✓ Compiled in 394ms (615 modules)
+ GET /journal/analytics 200 in 422ms
+ ✓ Compiled in 341ms (615 modules)
+ ✓ Compiled in 508ms (615 modules)
+ GET /journal/analytics 200 in 824ms
+ ✓ Compiled in 438ms (615 modules)
+ GET /journal/analytics 200 in 674ms
+ ✓ Compiled in 460ms (615 modules)
+ GET /journal/analytics 200 in 687ms
+ ✓ Compiled in 313ms (615 modules)
+ ✓ Compiled in 453ms (615 modules)
+ GET /journal/analytics 200 in 752ms
+ ✓ Compiled in 747ms (615 modules)
+ GET /journal/analytics 200 in 1039ms
+ ✓ Compiled in 898ms (615 modules)
+ ✓ Compiled in 665ms (615 modules)
+ GET /journal/analytics 200 in 1654ms
+ ✓ Compiled in 607ms (615 modules)
+ GET /journal/analytics 200 in 1154ms
+ ✓ Compiled in 946ms (615 modules)
+ GET /journal/analytics 200 in 1883ms
+ ✓ Compiled in 975ms (615 modules)
+ ✓ Compiled in 1580ms (615 modules)
+ GET /journal/analytics 200 in 2491ms
+ ✓ Compiled in 537ms (615 modules)
+ ✓ Compiled in 616ms (615 modules)
+ GET /journal/analytics 200 in 911ms
+ ✓ Compiled in 514ms (615 modules)
+ ✓ Compiled in 603ms (615 modules)
+ GET /journal/analytics 200 in 1258ms
+ ✓ Compiled in 946ms (615 modules)
+ GET /journal/analytics 200 in 1370ms
+ ✓ Compiled in 461ms (615 modules)
+ ✓ Compiled in 650ms (615 modules)
+ GET /journal/analytics 200 in 958ms
+ ✓ Compiled in 908ms (615 modules)
+ ✓ Compiled in 696ms (615 modules)
+ GET /journal/analytics 200 in 1641ms
+ ✓ Compiled in 957ms (615 modules)
+ GET /journal/analytics 200 in 1085ms
+ ✓ Compiled in 819ms (615 modules)
+ ✓ Compiled in 978ms (615 modules)
+ GET /journal/analytics 200 in 1786ms
+ ✓ Compiled in 1136ms (615 modules)
+ GET /journal/analytics 200 in 1301ms
+ ✓ Compiled in 571ms (615 modules)
+ ✓ Compiled in 898ms (615 modules)
+ GET /journal/analytics 200 in 1469ms
+ GET /journal/analytics 200 in 554ms
+ GET /journal/analytics 200 in 280ms
+ GET /journal/analytics 200 in 184ms
+ GET /journal/analytics 200 in 139ms
+ GET /journal/analytics 200 in 450ms
+ GET /journal/analytics 200 in 243ms
+ GET /journal/analytics 200 in 378ms
+ GET /journal/analytics 200 in 200ms
+ GET /journal/analytics 200 in 199ms
+ GET /journal/analytics 200 in 180ms
+ GET /journal/analytics 200 in 126ms
+ GET /journal/analytics 200 in 124ms
+ ✓ Compiled in 1708ms (615 modules)
+ ✓ Compiled in 609ms (615 modules)
+ ✓ Compiled in 1237ms (1310 modules)
+ GET /journal/analytics 500 in 1667ms
+ GET /journal/analytics 200 in 1223ms
+ GET /journal/analytics 200 in 217ms
+ GET /api/journal/stats 200 in 669ms
+ GET /journal/analytics 200 in 1343ms
+ GET /sw.js 404 in 57ms
+ ✓ Compiled in 481ms (615 modules)
+ GET /journal/analytics 200 in 117ms
+ ✓ Compiled in 391ms (615 modules)
+ ✓ Compiled in 412ms (615 modules)
+ GET /journal/analytics 200 in 497ms
+ ✓ Compiled in 536ms (615 modules)
+ ✓ Compiled in 590ms (615 modules)
+ GET /journal/analytics 200 in 1120ms
+ ✓ Compiled in 702ms (615 modules)
+ GET /journal/analytics 200 in 905ms
+ ✓ Compiled in 724ms (615 modules)
+ GET /journal/analytics 200 in 1134ms
+ ✓ Compiled in 544ms (615 modules)
+ GET /journal/analytics 200 in 590ms
+ ✓ Compiled in 422ms (615 modules)
+ ✓ Compiled in 636ms (615 modules)
+ GET /journal/analytics 200 in 1059ms
+ ✓ Compiled in 1143ms (615 modules)
+ GET /journal/analytics 200 in 1381ms
+ ✓ Compiled in 637ms (615 modules)
+ ✓ Compiled in 651ms (615 modules)
+ GET /journal/analytics 200 in 868ms
+ ✓ Compiled in 832ms (615 modules)
+ GET /journal/analytics 200 in 1233ms
+ ✓ Compiled in 506ms (615 modules)
+ GET /journal/analytics 200 in 737ms
+ ✓ Compiled in 346ms (615 modules)
+ ✓ Compiled in 613ms (615 modules)
+ GET /journal/analytics 200 in 949ms
+ ✓ Compiled in 863ms (615 modules)
+ GET /journal/analytics 200 in 1145ms
+ ✓ Compiled in 373ms (615 modules)
+ ✓ Compiled in 696ms (615 modules)
+ GET /journal/analytics 200 in 1621ms
+ ✓ Compiled in 887ms (615 modules)
+ ✓ Compiled in 459ms (615 modules)
+ GET /journal/analytics 200 in 1226ms
+ ✓ Compiled in 477ms (615 modules)
+ GET /journal/analytics 200 in 609ms
+ ✓ Compiled in 970ms (615 modules)
+ GET /journal/analytics 200 in 1045ms
+ ✓ Compiled in 581ms (615 modules)
+ ✓ Compiled in 644ms (615 modules)
+ GET /journal/analytics 200 in 858ms
+ ✓ Compiled in 811ms (615 modules)
+ ✓ Compiled in 709ms (615 modules)
+ GET /journal/analytics 200 in 1548ms
+ ✓ Compiled in 632ms (615 modules)
+ GET /journal/analytics 200 in 931ms
+ ✓ Compiled in 1030ms (615 modules)
+ GET /journal/analytics 200 in 1483ms
+ ✓ Compiled in 502ms (615 modules)
+ ✓ Compiled in 530ms (615 modules)
+ GET /journal/analytics 200 in 975ms
+ ✓ Compiled in 770ms (615 modules)
+ GET /journal/analytics 200 in 932ms
+ ✓ Compiled in 411ms (615 modules)
+ ✓ Compiled in 470ms (615 modules)
+ GET /journal/analytics 200 in 843ms
+ ✓ Compiled in 451ms (615 modules)
+ GET /journal/analytics 200 in 625ms
+ ✓ Compiled in 551ms (615 modules)
+ GET /journal/analytics 200 in 714ms
+ ✓ Compiled in 827ms (615 modules)
+ ✓ Compiled in 825ms (615 modules)
+ GET /journal/analytics 200 in 1151ms
+ ✓ Compiled in 687ms (615 modules)
+ GET /journal/analytics 200 in 944ms
+ ✓ Compiled in 334ms (615 modules)
+ ✓ Compiled in 417ms (615 modules)
+ GET /journal/analytics 200 in 741ms
+ ✓ Compiled in 453ms (615 modules)
+ GET /journal/analytics 200 in 640ms
+ ✓ Compiled in 3.9s (1310 modules)
+ GET /journal/analytics 500 in 4545ms
+ ✓ Compiled in 833ms (615 modules)
+ ✓ Compiled in 1595ms (615 modules)
+ ✓ Compiled in 1900ms (615 modules)
+ GET /journal/analytics 200 in 2674ms
+ ✓ Compiled in 984ms (615 modules)
+ ✓ Compiled in 1580ms (615 modules)
+ GET /journal/analytics 200 in 2362ms
+ ✓ Compiled in 610ms (615 modules)
+ ✓ Compiled in 1237ms (615 modules)
+ GET /journal/analytics 200 in 1931ms
+ ✓ Compiled in 644ms (615 modules)
+ ✓ Compiled in 1051ms (615 modules)
+ GET /journal/analytics 200 in 1669ms
+ ✓ Compiled in 1128ms (615 modules)
+ GET /journal/analytics 200 in 1533ms
+ ✓ Compiled in 855ms (615 modules)
+ ✓ Compiled in 1104ms (615 modules)
+ GET /journal/analytics 200 in 1496ms
+ ✓ Compiled in 612ms (615 modules)
+ ✓ Compiled in 1001ms (615 modules)
+ GET /journal/analytics 200 in 1625ms
+ ✓ Compiled in 1185ms (615 modules)
+ GET /journal/analytics 200 in 1478ms
+ ✓ Compiled in 556ms (615 modules)
+ ✓ Compiled in 1004ms (615 modules)
+ GET /journal/analytics 200 in 1925ms
+ ✓ Compiled in 918ms (615 modules)
+ ✓ Compiled in 787ms (615 modules)
+ GET /journal/analytics 200 in 1069ms
+ ✓ Compiled in 687ms (615 modules)
+ ✓ Compiled in 539ms (615 modules)
+ GET /journal/analytics 200 in 1165ms
+ ✓ Compiled in 503ms (615 modules)
+ GET /journal/analytics 200 in 748ms
+ ✓ Compiled in 855ms (615 modules)
+ GET /journal/analytics 200 in 955ms
+ ✓ Compiled in 607ms (615 modules)
+ ✓ Compiled in 676ms (615 modules)
+ GET /journal/analytics 200 in 1251ms
+ ✓ Compiled in 803ms (615 modules)
+ GET /journal/analytics 200 in 1180ms
+ ✓ Compiled in 667ms (615 modules)
+ GET /journal/analytics 200 in 734ms
+ ✓ Compiled in 789ms (615 modules)
+ ✓ Compiled in 1062ms (615 modules)
+ GET /journal/analytics 200 in 1891ms
+ ✓ Compiled in 944ms (615 modules)
+ GET /journal/analytics 200 in 1742ms
+ ✓ Compiled in 808ms (615 modules)
+ ✓ Compiled in 640ms (615 modules)
+ GET /journal/analytics 200 in 927ms
+ ✓ Compiled in 527ms (612 modules)
+ ✓ Compiled in 758ms (612 modules)
+ ✓ Compiled in 565ms (612 modules)
+ GET /journal/analytics 200 in 974ms
+ GET /api/journal/stats 200 in 1574ms
+ ✓ Compiled in 472ms (612 modules)
+ GET /journal/analytics 200 in 2536ms
+ ✓ Compiled in 895ms (612 modules)
+ GET /journal/analytics 200 in 1393ms
+ ✓ Compiled in 595ms (612 modules)
+ GET /journal/analytics 200 in 751ms
+ ✓ Compiled in 531ms (612 modules)
+ ✓ Compiled in 605ms (612 modules)
+ GET /api/journal/stats 200 in 668ms
+ GET /journal/analytics 200 in 2090ms
+ ✓ Compiled in 2.1s (1306 modules)
+ GET /journal/analytics 500 in 2966ms
+ GET /journal/analytics 200 in 306ms
+ GET /journal/analytics 200 in 95ms
+ GET /journal/analytics 200 in 103ms
+ GET /journal/analytics 200 in 90ms
+ GET /journal/analytics 200 in 343ms
+ GET /journal/analytics 200 in 99ms
+ GET /journal/analytics 200 in 167ms
+ GET /journal/analytics 200 in 134ms
+ GET /journal/analytics 200 in 170ms
+ GET /journal/analytics 200 in 190ms
+ GET /journal/analytics 200 in 156ms
+ GET /journal/analytics 200 in 181ms
+ ✓ Compiled in 2.2s (1306 modules)
+ GET /journal/analytics 500 in 6174ms
+ GET /journal/analytics 500 in 295ms
+ GET /journal/analytics 500 in 335ms
+ GET /journal/analytics 500 in 267ms
+ GET /journal/analytics 500 in 262ms
+ GET /journal/analytics 500 in 430ms
+ GET /journal/analytics 500 in 201ms
+ GET /journal/analytics 500 in 272ms
+ GET /journal/analytics 500 in 218ms
+ GET /journal/analytics 500 in 526ms
+ GET /journal/analytics 500 in 219ms
+ GET /journal/analytics 500 in 180ms
+ ✓ Compiled in 536ms (612 modules)
+ ✓ Compiled in 2.7s (1306 modules)
+ GET /journal/analytics 500 in 3250ms
+ GET /journal/analytics 500 in 378ms
+ GET /journal/analytics 500 in 293ms
+ GET /journal/analytics 200 in 410ms
+ GET /journal/analytics 200 in 89ms
+ GET /journal/analytics 200 in 146ms
+ GET /journal/analytics 200 in 120ms
+ GET /journal/analytics 200 in 84ms
+ GET /journal/analytics 500 in 2172ms
+ ✓ Compiled in 631ms (612 modules)
+ ○ Compiling /_not-found ...
+ ✓ Compiled /_not-found in 2.5s (1310 modules)
+ GET /_next/static/chunks/main.js 500 in 2750ms
+ GET /_next/static/chunks/react-refresh.js 500 in 2748ms
+ GET /_next/static/chunks/pages/_app.js 500 in 2703ms
+ GET /_next/static/chunks/pages/_error.js 500 in 171ms
+ GET /sw.js 500 in 60ms
+ GET /api/journal/stats 200 in 6587ms
+ ✓ Compiled in 2.7s (615 modules)
+ ✓ Compiled in 951ms (615 modules)
+ ✓ Compiled in 475ms (615 modules)
+ ✓ Compiled in 561ms (615 modules)
+ ✓ Compiled in 989ms (615 modules)
+ ✓ Compiled in 864ms (615 modules)
+ ✓ Compiled in 480ms (615 modules)
+ ✓ Compiled in 1111ms (615 modules)
+ ✓ Compiled in 420ms (615 modules)
+ ✓ Compiled in 358ms (615 modules)
+ ✓ Compiled in 333ms (615 modules)
+ ✓ Compiled in 368ms (615 modules)
+ ✓ Compiled in 631ms (615 modules)
+ ✓ Compiled in 890ms (615 modules)
+ ✓ Compiled in 335ms (615 modules)
+ ✓ Compiled in 400ms (615 modules)
+ ✓ Compiled in 483ms (615 modules)
+ ✓ Compiled in 397ms (615 modules)
+ ✓ Compiled in 319ms (615 modules)
+ ✓ Compiled in 310ms (615 modules)
+ ✓ Compiled in 296ms (615 modules)
+ ✓ Compiled in 575ms (615 modules)
+ ✓ Compiled in 1753ms (615 modules)
+ ✓ Compiled in 401ms (615 modules)
+ ✓ Compiled in 349ms (615 modules)
+ ✓ Compiled in 366ms (615 modules)
+ ✓ Compiled in 355ms (615 modules)
+ ✓ Compiled in 350ms (615 modules)
+ ✓ Compiled in 429ms (615 modules)
+ ✓ Compiled in 483ms (615 modules)
+ ✓ Compiled in 425ms (615 modules)
+ ✓ Compiled in 310ms (615 modules)
+ ✓ Compiled in 306ms (615 modules)
+ ✓ Compiled in 280ms (615 modules)
+ ✓ Compiled in 388ms (615 modules)
+ ✓ Compiled in 482ms (615 modules)
+ ✓ Compiled in 379ms (615 modules)
+ ✓ Compiled in 359ms (615 modules)
+ ✓ Compiled in 402ms (615 modules)
+ ✓ Compiled in 434ms (615 modules)
+ ✓ Compiled in 320ms (615 modules)
+ ✓ Compiled in 248ms (615 modules)
+ ✓ Compiled in 241ms (615 modules)
+ ✓ Compiled in 249ms (615 modules)
+ ✓ Compiled in 252ms (615 modules)
+ ✓ Compiled in 285ms (615 modules)
+ ✓ Compiled in 465ms (615 modules)
+ ✓ Compiled in 646ms (615 modules)
+ ✓ Compiled in 1762ms (615 modules)
+ ✓ Compiled in 390ms (615 modules)
+ ✓ Compiled in 428ms (615 modules)
+ ✓ Compiled in 957ms (611 modules)
+ ✓ Compiled in 379ms (611 modules)
+ ✓ Compiled in 383ms (611 modules)
+ ✓ Compiled in 251ms (611 modules)
+ ✓ Compiled in 345ms (611 modules)
+[?25h

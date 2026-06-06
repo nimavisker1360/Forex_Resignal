@@ -1,0 +1,217 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum TradeDirection {
+  BUY
+  SELL
+}
+
+enum TradeStatus {
+  OPEN
+  CLOSED
+  CANCELLED
+}
+
+enum WebsiteSignalDirection {
+  BUY
+  SELL
+}
+
+enum WebsiteSignalStatus {
+  OPEN
+  CLOSED
+}
+
+enum WebsiteSignalCloseReason {
+  TP
+  SL
+}
+
+model TradingAccount {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  broker    String?
+  platform  String?
+  currency  String   @default("USD")
+  balance   Decimal? @db.Decimal(18, 2)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  trades    Trade[]
+  journals  DailyJournal[]
+}
+
+model Trade {
+  id          String         @id @default(cuid())
+  userId      String
+  accountId   String
+  symbol      String
+  direction   TradeDirection
+  status      TradeStatus    @default(OPEN)
+
+  entryPrice  Decimal?       @db.Decimal(18, 5)
+  exitPrice   Decimal?       @db.Decimal(18, 5)
+  stopLoss    Decimal?       @db.Decimal(18, 5)
+  takeProfit  Decimal?       @db.Decimal(18, 5)
+  lotSize     Decimal?       @db.Decimal(18, 2)
+  riskAmount  Decimal?       @db.Decimal(18, 2)
+  profitLoss  Decimal?       @db.Decimal(18, 2)
+  rr          Decimal?       @db.Decimal(10, 2)
+
+  setup       String?
+  session     String?
+  emotion     String?
+  mistake     String?
+  notes       String?
+
+  openedAt    DateTime?
+  closedAt    DateTime?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  account     TradingAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  screenshots TradeScreenshot[]
+  voiceMemos  VoiceMemo[]
+  tags        TradeTag[]
+
+  @@index([userId])
+  @@index([accountId])
+  @@index([symbol])
+  @@index([openedAt])
+  @@index([closedAt])
+}
+
+model TradeScreenshot {
+  id        String   @id @default(cuid())
+  tradeId   String
+  userId    String
+  type      String
+  url       String
+  createdAt DateTime @default(now())
+
+  trade     Trade    @relation(fields: [tradeId], references: [id], onDelete: Cascade)
+
+  @@index([tradeId])
+  @@index([userId])
+}
+
+model VoiceMemo {
+  id         String   @id @default(cuid())
+  tradeId    String?
+  userId     String
+  url        String
+  duration   Int?
+  transcript String?
+  createdAt  DateTime @default(now())
+
+  trade      Trade?   @relation(fields: [tradeId], references: [id], onDelete: SetNull)
+
+  @@index([tradeId])
+  @@index([userId])
+}
+
+model DailyJournal {
+  id        String   @id @default(cuid())
+  userId    String
+  accountId String?
+  date      DateTime
+  mood      String?
+  notes     String?
+  plan      String?
+  mistakes  String?
+  lesson    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  account   TradingAccount? @relation(fields: [accountId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([date])
+}
+
+model Playbook {
+  id          String   @id @default(cuid())
+  userId      String
+  name        String
+  description String?
+  rules       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model PropFirmChallenge {
+  id              String   @id @default(cuid())
+  userId          String
+  accountId       String?
+  name            String
+  startingBalance Decimal  @db.Decimal(18, 2)
+  profitTarget    Decimal? @db.Decimal(18, 2)
+  maxDailyLoss    Decimal? @db.Decimal(18, 2)
+  maxTotalLoss    Decimal? @db.Decimal(18, 2)
+  status          String   @default("ACTIVE")
+  startedAt       DateTime?
+  endedAt         DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([userId])
+  @@index([accountId])
+}
+
+model Tag {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  color     String?
+  createdAt DateTime @default(now())
+
+  trades    TradeTag[]
+
+  @@unique([userId, name])
+  @@index([userId])
+}
+
+model TradeTag {
+  tradeId String
+  tagId   String
+
+  trade   Trade @relation(fields: [tradeId], references: [id], onDelete: Cascade)
+  tag     Tag   @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([tradeId, tagId])
+}
+
+model WebsiteSignal {
+  id           String                    @id @default(cuid())
+  symbol       String
+  direction    WebsiteSignalDirection
+  entry        Decimal                   @db.Decimal(18, 5)
+  stopLoss     Decimal                   @db.Decimal(18, 5)
+  takeProfit   Decimal                   @db.Decimal(18, 5)
+  timeframe    String                    @default("")
+  source       String                    @default("UNKNOWN")
+  status       WebsiteSignalStatus       @default(OPEN)
+  ticket       String?
+  closeReason  WebsiteSignalCloseReason?
+  closePrice   Decimal?                  @db.Decimal(18, 5)
+  resultSource String?
+  createdAt    DateTime                  @default(now())
+  closedAt     DateTime?
+
+  @@index([createdAt])
+  @@index([symbol, createdAt])
+  @@index([status, createdAt])
+  @@index([direction, createdAt])
+  @@index([closeReason, createdAt])
+  @@index([ticket])
+}

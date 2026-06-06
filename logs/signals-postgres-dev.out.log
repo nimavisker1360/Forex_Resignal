@@ -1,0 +1,93 @@
+
+> signal-forex@0.1.0 dev
+> next dev
+
+[32m✔[0m [33mConsole Ninja[0m extension is connected to [33mNext.js[0m, see [36mhttps://tinyurl.com/2vt8jxzw[0m
+   ▲ Next.js 15.3.0
+   - Local:        http://localhost:3000
+   - Network:      http://192.168.1.106:3000
+   - Environments: .env
+
+ ✓ Starting...
+ ✓ Ready in 3.4s
+ ○ Compiling /api/signals ...
+ ✓ Compiled /api/signals in 2.7s (368 modules)
+prisma:error 
+Invalid `prisma.websiteSignal.findMany()` invocation:
+
+
+Can't reach database server at `ep-proud-leaf-agduw96y-pooler.c-2.eu-central-1.aws.neon.tech:5432`
+
+Please make sure your database server is running at `ep-proud-leaf-agduw96y-pooler.c-2.eu-central-1.aws.neon.tech:5432`.
+prisma:error 
+Invalid `prisma.websiteSignal.findMany()` invocation:
+
+
+Can't reach database server at `ep-proud-leaf-agduw96y-pooler.c-2.eu-central-1.aws.neon.tech:5432`
+
+Please make sure your database server is running at `ep-proud-leaf-agduw96y-pooler.c-2.eu-central-1.aws.neon.tech:5432`.
+prisma:error 
+Invalid `prisma.websiteSignal.findMany()` invocation:
+
+
+Can't reach database server at `ep-proud-leaf-agduw96y-pooler.c-2.eu-central-1.aws.neon.tech:5432`
+
+Please make sure your database server is running at `ep-proud-leaf-agduw96y-pooler.c-2.eu-central-1.aws.neon.tech:5432`.
+prisma:error 
+Invalid `prisma.websiteSignal.count()` invocation:
+
+
+Can't reach database server at `ep-proud-leaf-agduw96y-pooler.c-2.eu-central-1.aws.neon.tech:5432`
+
+Please make sure your database server is running at `ep-proud-leaf-agduw96y-pooler.c-2.eu-central-1.aws.neon.tech:5432`.
+ GET /api/signals?includeTest=true&limit=3 500 in 8480ms
+prisma:query SELECT "public"."WebsiteSignal"."id", "public"."WebsiteSignal"."symbol", "public"."WebsiteSignal"."direction"::text, "public"."WebsiteSignal"."entry", "public"."WebsiteSignal"."stopLoss", "public"."WebsiteSignal"."takeProfit", "public"."WebsiteSignal"."timeframe", "public"."WebsiteSignal"."source", "public"."WebsiteSignal"."status"::text, "public"."WebsiteSignal"."ticket", "public"."WebsiteSignal"."closeReason"::text, "public"."WebsiteSignal"."closePrice", "public"."WebsiteSignal"."resultSource", "public"."WebsiteSignal"."createdAt", "public"."WebsiteSignal"."closedAt" FROM "public"."WebsiteSignal" WHERE "public"."WebsiteSignal"."source" <> $1 ORDER BY "public"."WebsiteSignal"."createdAt" DESC LIMIT $2 OFFSET $3
+prisma:query SELECT COUNT(*) AS "_count$_all" FROM (SELECT "public"."WebsiteSignal"."id" FROM "public"."WebsiteSignal" WHERE "public"."WebsiteSignal"."source" <> $1 OFFSET $2) AS "sub"
+prisma:query SELECT "public"."WebsiteSignal"."id", "public"."WebsiteSignal"."symbol", "public"."WebsiteSignal"."direction"::text, "public"."WebsiteSignal"."entry", "public"."WebsiteSignal"."stopLoss", "public"."WebsiteSignal"."takeProfit", "public"."WebsiteSignal"."timeframe", "public"."WebsiteSignal"."source", "public"."WebsiteSignal"."status"::text, "public"."WebsiteSignal"."ticket", "public"."WebsiteSignal"."closeReason"::text, "public"."WebsiteSignal"."closePrice", "public"."WebsiteSignal"."resultSource", "public"."WebsiteSignal"."createdAt", "public"."WebsiteSignal"."closedAt" FROM "public"."WebsiteSignal" WHERE "public"."WebsiteSignal"."source" <> $1 ORDER BY "public"."WebsiteSignal"."createdAt" DESC LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."WebsiteSignal"."id", "public"."WebsiteSignal"."symbol", "public"."WebsiteSignal"."direction"::text, "public"."WebsiteSignal"."entry", "public"."WebsiteSignal"."stopLoss", "public"."WebsiteSignal"."takeProfit", "public"."WebsiteSignal"."timeframe", "public"."WebsiteSignal"."source", "public"."WebsiteSignal"."status"::text, "public"."WebsiteSignal"."ticket", "public"."WebsiteSignal"."closeReason"::text, "public"."WebsiteSignal"."closePrice", "public"."WebsiteSignal"."resultSource", "public"."WebsiteSignal"."createdAt", "public"."WebsiteSignal"."closedAt" FROM "public"."WebsiteSignal" WHERE "public"."WebsiteSignal"."source" <> $1 ORDER BY "public"."WebsiteSignal"."createdAt" DESC LIMIT $2 OFFSET $3
+prisma:query SELECT COUNT(*) AS "_count$_all" FROM (SELECT "public"."WebsiteSignal"."id" FROM "public"."WebsiteSignal" WHERE ("public"."WebsiteSignal"."source" <> $1 AND "public"."WebsiteSignal"."createdAt" >= $2 AND "public"."WebsiteSignal"."createdAt" < $3) OFFSET $4) AS "sub"
+ GET /api/signals?limit=3&page=1 200 in 1400ms
+prisma:query SELECT 1
+prisma:query SELECT 1
+prisma:query SELECT 1
+prisma:query SELECT 1
+prisma:query SELECT "public"."WebsiteSignal"."id", "public"."WebsiteSignal"."symbol", "public"."WebsiteSignal"."direction"::text, "public"."WebsiteSignal"."entry", "public"."WebsiteSignal"."stopLoss", "public"."WebsiteSignal"."takeProfit", "public"."WebsiteSignal"."timeframe", "public"."WebsiteSignal"."source", "public"."WebsiteSignal"."status"::text, "public"."WebsiteSignal"."ticket", "public"."WebsiteSignal"."closeReason"::text, "public"."WebsiteSignal"."closePrice", "public"."WebsiteSignal"."resultSource", "public"."WebsiteSignal"."createdAt", "public"."WebsiteSignal"."closedAt" FROM "public"."WebsiteSignal" WHERE 1=1 ORDER BY "public"."WebsiteSignal"."createdAt" DESC LIMIT $1 OFFSET $2
+prisma:query SELECT "public"."WebsiteSignal"."id", "public"."WebsiteSignal"."symbol", "public"."WebsiteSignal"."direction"::text, "public"."WebsiteSignal"."entry", "public"."WebsiteSignal"."stopLoss", "public"."WebsiteSignal"."takeProfit", "public"."WebsiteSignal"."timeframe", "public"."WebsiteSignal"."source", "public"."WebsiteSignal"."status"::text, "public"."WebsiteSignal"."ticket", "public"."WebsiteSignal"."closeReason"::text, "public"."WebsiteSignal"."closePrice", "public"."WebsiteSignal"."resultSource", "public"."WebsiteSignal"."createdAt", "public"."WebsiteSignal"."closedAt" FROM "public"."WebsiteSignal" WHERE 1=1 ORDER BY "public"."WebsiteSignal"."createdAt" DESC LIMIT $1 OFFSET $2
+prisma:query SELECT "public"."WebsiteSignal"."id", "public"."WebsiteSignal"."symbol", "public"."WebsiteSignal"."direction"::text, "public"."WebsiteSignal"."entry", "public"."WebsiteSignal"."stopLoss", "public"."WebsiteSignal"."takeProfit", "public"."WebsiteSignal"."timeframe", "public"."WebsiteSignal"."source", "public"."WebsiteSignal"."status"::text, "public"."WebsiteSignal"."ticket", "public"."WebsiteSignal"."closeReason"::text, "public"."WebsiteSignal"."closePrice", "public"."WebsiteSignal"."resultSource", "public"."WebsiteSignal"."createdAt", "public"."WebsiteSignal"."closedAt" FROM "public"."WebsiteSignal" WHERE 1=1 ORDER BY "public"."WebsiteSignal"."createdAt" DESC LIMIT $1 OFFSET $2
+prisma:query SELECT COUNT(*) AS "_count$_all" FROM (SELECT "public"."WebsiteSignal"."id" FROM "public"."WebsiteSignal" WHERE 1=1 OFFSET $1) AS "sub"
+prisma:query SELECT COUNT(*) AS "_count$_all" FROM (SELECT "public"."WebsiteSignal"."id" FROM "public"."WebsiteSignal" WHERE ("public"."WebsiteSignal"."createdAt" >= $1 AND "public"."WebsiteSignal"."createdAt" < $2) OFFSET $3) AS "sub"
+ GET /api/signals?includeTest=true&limit=3 200 in 391ms
+prisma:query INSERT INTO "public"."WebsiteSignal" ("id","symbol","direction","entry","stopLoss","takeProfit","timeframe","source","status","ticket","createdAt") VALUES ($1,$2,CAST($3::text AS "public"."WebsiteSignalDirection"),$4,$5,$6,$7,$8,CAST($9::text AS "public"."WebsiteSignalStatus"),$10,$11) RETURNING "public"."WebsiteSignal"."id", "public"."WebsiteSignal"."symbol", "public"."WebsiteSignal"."direction"::text, "public"."WebsiteSignal"."entry", "public"."WebsiteSignal"."stopLoss", "public"."WebsiteSignal"."takeProfit", "public"."WebsiteSignal"."timeframe", "public"."WebsiteSignal"."source", "public"."WebsiteSignal"."status"::text, "public"."WebsiteSignal"."ticket", "public"."WebsiteSignal"."closeReason"::text, "public"."WebsiteSignal"."closePrice", "public"."WebsiteSignal"."resultSource", "public"."WebsiteSignal"."createdAt", "public"."WebsiteSignal"."closedAt"
+Signal saved from bot: {
+  id: 'cmq268pek0000vdlox4ztq9qb',
+  pair: 'EUR/USD',
+  type: 'buy',
+  direction: 'BUY',
+  price: 1.085,
+  takeProfit: [ 1.095 ],
+  stopLoss: 1.08,
+  timestamp: '12:49 Istanbul',
+  success: undefined,
+  pairColor: 'text-white',
+  isOpen: true,
+  closeReason: undefined,
+  closePrice: undefined,
+  closedAt: undefined,
+  createdAt: '2026-06-06T09:49:27.066Z',
+  source: 'LOCAL_TEST',
+  status: 'OPEN',
+  timeframe: 'M15',
+  ticket: 'LOCAL-POSTGRES-TEST',
+  resultSource: undefined
+}
+ POST /api/signals 200 in 128ms
+prisma:query SELECT 1
+prisma:query SELECT 1
+prisma:query SELECT 1
+prisma:query SELECT 1
+prisma:query SELECT COUNT(*) AS "_count$_all" FROM (SELECT "public"."WebsiteSignal"."id" FROM "public"."WebsiteSignal" WHERE "public"."WebsiteSignal"."source" <> $1 OFFSET $2) AS "sub"
+prisma:query SELECT "public"."WebsiteSignal"."id", "public"."WebsiteSignal"."symbol", "public"."WebsiteSignal"."direction"::text, "public"."WebsiteSignal"."entry", "public"."WebsiteSignal"."stopLoss", "public"."WebsiteSignal"."takeProfit", "public"."WebsiteSignal"."timeframe", "public"."WebsiteSignal"."source", "public"."WebsiteSignal"."status"::text, "public"."WebsiteSignal"."ticket", "public"."WebsiteSignal"."closeReason"::text, "public"."WebsiteSignal"."closePrice", "public"."WebsiteSignal"."resultSource", "public"."WebsiteSignal"."createdAt", "public"."WebsiteSignal"."closedAt" FROM "public"."WebsiteSignal" WHERE "public"."WebsiteSignal"."source" <> $1 ORDER BY "public"."WebsiteSignal"."createdAt" DESC LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."WebsiteSignal"."id", "public"."WebsiteSignal"."symbol", "public"."WebsiteSignal"."direction"::text, "public"."WebsiteSignal"."entry", "public"."WebsiteSignal"."stopLoss", "public"."WebsiteSignal"."takeProfit", "public"."WebsiteSignal"."timeframe", "public"."WebsiteSignal"."source", "public"."WebsiteSignal"."status"::text, "public"."WebsiteSignal"."ticket", "public"."WebsiteSignal"."closeReason"::text, "public"."WebsiteSignal"."closePrice", "public"."WebsiteSignal"."resultSource", "public"."WebsiteSignal"."createdAt", "public"."WebsiteSignal"."closedAt" FROM "public"."WebsiteSignal" WHERE "public"."WebsiteSignal"."source" <> $1 ORDER BY "public"."WebsiteSignal"."createdAt" DESC LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."WebsiteSignal"."id", "public"."WebsiteSignal"."symbol", "public"."WebsiteSignal"."direction"::text, "public"."WebsiteSignal"."entry", "public"."WebsiteSignal"."stopLoss", "public"."WebsiteSignal"."takeProfit", "public"."WebsiteSignal"."timeframe", "public"."WebsiteSignal"."source", "public"."WebsiteSignal"."status"::text, "public"."WebsiteSignal"."ticket", "public"."WebsiteSignal"."closeReason"::text, "public"."WebsiteSignal"."closePrice", "public"."WebsiteSignal"."resultSource", "public"."WebsiteSignal"."createdAt", "public"."WebsiteSignal"."closedAt" FROM "public"."WebsiteSignal" WHERE "public"."WebsiteSignal"."source" <> $1 ORDER BY "public"."WebsiteSignal"."createdAt" DESC LIMIT $2 OFFSET $3
+prisma:query SELECT COUNT(*) AS "_count$_all" FROM (SELECT "public"."WebsiteSignal"."id" FROM "public"."WebsiteSignal" WHERE ("public"."WebsiteSignal"."source" <> $1 AND "public"."WebsiteSignal"."createdAt" >= $2 AND "public"."WebsiteSignal"."createdAt" < $3) OFFSET $4) AS "sub"
+ GET /api/signals?limit=3&page=1 200 in 290ms

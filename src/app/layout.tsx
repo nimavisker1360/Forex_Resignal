@@ -7,9 +7,9 @@ import { ToastProvider } from "@/components/ui/toast-provider";
 import { LanguageProvider } from "@/lib/language-context";
 
 export const metadata: Metadata = {
-  title: "Signal Forex - Provider of the Best Trading Signals",
+  title: "Signal Forex - Structured Forex Signals",
   description:
-    "Get accurate forex signals with professional analysis and 24/7 support",
+    "Structured forex signals with clear entry, exit, risk levels, and transparent tracking",
 };
 
 export default function RootLayout({

@@ -34,6 +34,10 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 
   // Translation function that handles nested keys
   const t = (key: string): string => {
+    if (typeof key !== "string" || key.length === 0) {
+      return "";
+    }
+
     const keys = key.split(".");
     let result = translations;
 

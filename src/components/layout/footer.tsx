@@ -1,49 +1,37 @@
 "use client";
 
 import Link from "next/link";
-import { LineChart, Link2, Info, Phone } from "lucide-react";
+import type { ReactNode } from "react";
+import { Info, LineChart, Link2, Phone } from "lucide-react";
+import { usePathname } from "next/navigation";
 import { useLanguage } from "@/lib/language-context";
 
 export function Footer() {
   const { t, language } = useLanguage();
+  const pathname = usePathname();
   const currentYear = new Date().getFullYear();
 
-  // Проверим наличие ключей локализации и используем запасные варианты если ключи не найдены
+  if (pathname?.startsWith("/dashboard") || pathname?.startsWith("/journal")) {
+    return null;
+  }
+
   const getTranslation = (key: string, fallback: string) => {
     const translation = t(key);
     return translation === key ? fallback : translation;
   };
 
-  // Заголовки на английском
-  const signalForexEN = "Signal Forex";
-  const quickLinksEN = "Quick Links";
-  const informationEN = "Information";
-  const contactUsEN = "Contact Us";
-
-  // Заголовки на фарси
-  const signalForexFA = "سیگنال فارکس";
-  const quickLinksFA = "لینک‌های سریع";
-  const informationFA = "اطلاعات";
-  const contactUsFA = "تماس با ما";
-
-  // Описания на английском и фарси
-  const providerDescEN =
-    "Provider of the best forex signals with high accuracy and professional analysis";
-  const providerDescFA =
-    "ارائه دهنده بهترین سیگنال‌های فارکس با دقت بالا و تحلیل حرفه‌ای";
-
-  // Авторские права на английском и фарси
-  const copyrightEN = `© ${currentYear} Signal Forex. All rights reserved.`;
-  const copyrightFA = `© ${currentYear} سیگنال فارکس. تمامی حقوق محفوظ است.`;
-
-  // Используем заголовки в зависимости от выбранного языка
-  const signalForex = language === "fa" ? signalForexFA : signalForexEN;
-  const quickLinks = language === "fa" ? quickLinksFA : quickLinksEN;
-  const information = language === "fa" ? informationFA : informationEN;
-  const contactUs = language === "fa" ? contactUsFA : contactUsEN;
-  const providerDesc = language === "fa" ? providerDescFA : providerDescEN;
-  const copyright = language === "fa" ? copyrightFA : copyrightEN;
-
+  const signalForex = getTranslation("footer.signalForex", "Signal Forex");
+  const quickLinks = getTranslation("footer.quickLinks", "Quick Links");
+  const information = getTranslation("footer.information", "Information");
+  const contactUs = getTranslation("footer.contactUs", "Contact Us");
+  const providerDesc = getTranslation(
+    "footer.providerDescription",
+    "Provider of structured forex signals with clear risk levels and transparent tracking"
+  );
+  const copyright = getTranslation(
+    "footer.copyright",
+    "© {year} Signal Forex. All rights reserved."
+  ).replace("{year}", String(currentYear));
   const address = getTranslation("footer.address", "Address: Turkey");
   const email = getTranslation("footer.email", "Email: nimabaghery@gmail.com");
 
@@ -52,151 +40,115 @@ export function Footer() {
       className="bg-black py-8 text-white"
       dir={language === "fa" ? "rtl" : "ltr"}
     >
-      <div className="container mx-auto px-4 max-w-screen-xl">
-        <div className="w-4/4 mx-auto border-t"></div>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-8">
-          <div
-            className={`text-center md:${language === "fa" ? "text-right" : "text-left"}`}
+      <div className="container mx-auto max-w-screen-xl px-4">
+        <div className="mx-auto w-full border-t border-gray-800" />
+        <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-4">
+          <FooterColumn
+            language={language}
+            icon={<LineChart className="h-5 w-5 text-blue-400" />}
+            title={signalForex}
           >
-            <h3
-              className={`text-lg font-bold mb-4 flex items-center gap-2 justify-center md:${language === "fa" ? "justify-end" : "justify-start"}`}
-            >
-              {language === "fa" ? (
-                <>
-                  {signalForex}
-                  <LineChart className="h-5 w-5 text-blue-400 mr-2" />
-                </>
-              ) : (
-                <>
-                  <LineChart className="h-5 w-5 text-blue-400 mr-2" />
-                  {signalForex}
-                </>
-              )}
-            </h3>
-            <p className="text-white text-sm">{providerDesc}</p>
-          </div>
+            <p className="text-sm leading-6 text-gray-300">{providerDesc}</p>
+          </FooterColumn>
 
-          <div
-            className={`text-center md:${language === "fa" ? "text-right" : "text-left"}`}
+          <FooterColumn
+            language={language}
+            icon={<Link2 className="h-5 w-5 text-blue-400" />}
+            title={quickLinks}
           >
-            <h3
-              className={`text-lg font-bold mb-4 flex items-center gap-2 justify-center md:${language === "fa" ? "justify-end" : "justify-start"}`}
-            >
-              {language === "fa" ? (
-                <>
-                  {quickLinks}
-                  <Link2 className="h-5 w-5 text-blue-400 mr-2" />
-                </>
-              ) : (
-                <>
-                  <Link2 className="h-5 w-5 text-blue-400 mr-2" />
-                  {quickLinks}
-                </>
-              )}
-            </h3>
             <ul className="space-y-2">
               <li>
-                <Link
-                  href="/"
-                  className="text-white hover:text-blue-400 transition text-sm"
-                >
-                  {t("home")}
-                </Link>
+                <FooterLink href="/">{t("home")}</FooterLink>
               </li>
               <li>
-                <Link
-                  href="/signals"
-                  className="text-white hover:text-blue-400 transition text-sm"
-                >
-                  {t("signals")}
-                </Link>
+                <FooterLink href="/signals">{t("signals")}</FooterLink>
               </li>
-              {/* <li>
-                <Link
-                  href="/premium"
-                  className="text-white hover:text-blue-400 transition text-sm"
-                >
-                  {t("premium")}
-                </Link>
-              </li> */}
+              <li>
+                <FooterLink href="/blog">{t("blog")}</FooterLink>
+              </li>
             </ul>
-          </div>
+          </FooterColumn>
 
-          <div
-            className={`text-center md:${language === "fa" ? "text-right" : "text-left"}`}
+          <FooterColumn
+            language={language}
+            icon={<Info className="h-5 w-5 text-blue-400" />}
+            title={information}
           >
-            <h3
-              className={`text-lg font-bold mb-4 flex items-center gap-2 justify-center md:${language === "fa" ? "justify-end" : "justify-start"}`}
-            >
-              {language === "fa" ? (
-                <>
-                  {information}
-                  <Info className="h-5 w-5 text-blue-400 mr-2" />
-                </>
-              ) : (
-                <>
-                  <Info className="h-5 w-5 text-blue-400 mr-2" />
-                  {information}
-                </>
-              )}
-            </h3>
             <ul className="space-y-2">
               <li>
-                <Link
-                  href="/about"
-                  className="text-white hover:text-blue-400 transition text-sm"
-                >
-                  {t("about")}
-                </Link>
+                <FooterLink href="/about">{t("about")}</FooterLink>
               </li>
               <li>
-                <Link
-                  href="/contact"
-                  className="text-white hover:text-blue-400 transition text-sm"
-                >
-                  {t("contact")}
-                </Link>
+                <FooterLink href="/contact">{t("contact")}</FooterLink>
               </li>
-              {/* <li>
-                <Link
-                  href="/faq"
-                  className="text-white hover:text-blue-400 transition text-sm"
-                >
-                  FAQ
-                </Link>
-              </li> */}
             </ul>
-          </div>
+          </FooterColumn>
 
-          <div
-            className={`text-center md:${language === "fa" ? "text-right" : "text-left"}`}
+          <FooterColumn
+            language={language}
+            icon={<Phone className="h-5 w-5 text-blue-400" />}
+            title={contactUs}
           >
-            <h3
-              className={`text-lg font-bold mb-4 flex items-center gap-2 justify-center md:${language === "fa" ? "justify-end" : "justify-start"}`}
-            >
-              {language === "fa" ? (
-                <>
-                  {contactUs}
-                  <Phone className="h-5 w-5 text-blue-400 mr-2" />
-                </>
-              ) : (
-                <>
-                  <Phone className="h-5 w-5 text-blue-400 mr-2" />
-                  {contactUs}
-                </>
-              )}
-            </h3>
-            <ul className="space-y-2 text-white text-sm">
+            <ul className="space-y-2 text-sm text-gray-300">
               <li>{address}</li>
               <li>{email}</li>
             </ul>
-          </div>
+          </FooterColumn>
         </div>
 
-        <div className="mt-8 pt-6 border-t text-white text-center">
+        <div className="mt-8 border-t border-gray-800 pt-6 text-center text-sm text-gray-300">
           <p>{copyright}</p>
         </div>
       </div>
     </footer>
+  );
+}
+
+function FooterColumn({
+  language,
+  icon,
+  title,
+  children,
+}: {
+  language: "en" | "fa";
+  icon: ReactNode;
+  title: string;
+  children: ReactNode;
+}) {
+  return (
+    <div
+      className={`text-center md:${language === "fa" ? "text-right" : "text-left"}`}
+    >
+      <h3
+        className={`mb-4 flex items-center justify-center gap-2 text-lg font-bold md:${language === "fa" ? "justify-end" : "justify-start"}`}
+      >
+        {language === "fa" ? (
+          <>
+            {title}
+            {icon}
+          </>
+        ) : (
+          <>
+            {icon}
+            {title}
+          </>
+        )}
+      </h3>
+      {children}
+    </div>
+  );
+}
+
+function FooterLink({
+  href,
+  children,
+}: {
+  href: string;
+  children: ReactNode;
+}) {
+  return (
+    <Link href={href} className="text-sm text-white transition hover:text-blue-400">
+      {children}
+    </Link>
   );
 }

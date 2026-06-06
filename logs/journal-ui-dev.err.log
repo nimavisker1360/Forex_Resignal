@@ -1,0 +1,477 @@
+ ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ ⨯ SyntaxError: Unexpected end of JSON input
+    at JSON.parse (<anonymous>) {
+  page: '/journal'
+}
+ ⨯ SyntaxError: Unexpected end of JSON input
+    at JSON.parse (<anonymous>) {
+  page: '/journal'
+}
+ ⨯ SyntaxError: Unexpected end of JSON input
+    at JSON.parse (<anonymous>) {
+  page: '/journal'
+}
+ ⨯ SyntaxError: Unexpected end of JSON input
+    at JSON.parse (<anonymous>) {
+  page: '/journal'
+}
+ ⨯ SyntaxError: Unexpected end of JSON input
+    at JSON.parse (<anonymous>) {
+  page: '/journal'
+}
+<w> [webpack.cache.PackFileCacheStrategy] Restoring pack from C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\cache\webpack\client-development.pack.gz failed: TypeError: Cannot read properties of undefined (reading 'hasStartTime')
+ ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ ⨯ SyntaxError: Unexpected end of JSON input
+    at JSON.parse (<anonymous>) {
+  page: '/journal'
+}
+ ⨯ SyntaxError: Unexpected end of JSON input
+    at JSON.parse (<anonymous>) {
+  page: '/journal'
+}
+<w> [webpack.cache.PackFileCacheStrategy] Restoring pack from C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\cache\webpack\client-development.pack.gz failed: TypeError: Cannot read properties of undefined (reading 'hasStartTime')
+ ⨯ SyntaxError: Unexpected end of JSON input
+    at JSON.parse (<anonymous>) {
+  page: '/journal'
+}
+ ⨯ SyntaxError: Unexpected end of JSON input
+    at JSON.parse (<anonymous>) {
+  page: '/journal'
+}
+ ⨯ SyntaxError: Unexpected end of JSON input
+    at JSON.parse (<anonymous>) {
+  page: '/journal'
+}
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, rename 'C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\cache\webpack\client-development\0.pack.gz_' -> 'C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\cache\webpack\client-development\0.pack.gz'
+ ⨯ SyntaxError: Unexpected end of JSON input
+    at JSON.parse (<anonymous>) {
+  page: '/journal'
+}
+ ⨯ SyntaxError: Unexpected end of JSON input
+    at JSON.parse (<anonymous>) {
+  page: '/journal'
+}
+ ⨯ SyntaxError: Unexpected end of JSON input
+    at JSON.parse (<anonymous>) {
+  page: '/journal'
+}
+ ⨯ SyntaxError: Unexpected end of JSON input
+    at JSON.parse (<anonymous>) {
+  page: '/journal'
+}
+ ⨯ SyntaxError: Unexpected end of JSON input
+    at JSON.parse (<anonymous>) {
+  page: '/journal'
+}
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, rename 'C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\cache\webpack\client-development\0.pack.gz_' -> 'C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\cache\webpack\client-development\0.pack.gz'
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, rename 'C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\cache\webpack\client-development\0.pack.gz_' -> 'C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\cache\webpack\client-development\0.pack.gz'
+<w> [webpack.cache.PackFileCacheStrategy] Restoring pack from C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\cache\webpack\client-development.pack.gz failed: TypeError: Cannot read properties of undefined (reading 'hasStartTime')
+ ⨯ SyntaxError: Unexpected end of JSON input
+    at JSON.parse (<anonymous>) {
+  page: '/journal'
+}
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, rename 'C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\cache\webpack\client-development\0.pack.gz_' -> 'C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\cache\webpack\client-development\0.pack.gz'
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, rename 'C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\cache\webpack\client-development\0.pack.gz_' -> 'C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\cache\webpack\client-development\0.pack.gz'
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, rename 'C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\cache\webpack\client-development\0.pack.gz_' -> 'C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\cache\webpack\client-development\0.pack.gz'
+<w> [webpack.cache.PackFileCacheStrategy] Restoring pack from C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\cache\webpack\client-development.pack.gz failed: TypeError: Cannot read properties of undefined (reading 'hasStartTime')
+ ⨯ SyntaxError: Unexpected end of JSON input
+    at JSON.parse (<anonymous>) {
+  page: '/journal/analytics'
+}
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, rename 'C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\cache\webpack\client-development\0.pack.gz_' -> 'C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\cache\webpack\client-development\0.pack.gz'
+ ⨯ SyntaxError: Unexpected end of JSON input
+    at JSON.parse (<anonymous>) {
+  page: '/journal/analytics'
+}
+<w> [webpack.cache.PackFileCacheStrategy] Restoring pack from C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\cache\webpack\client-development.pack.gz failed: TypeError: Cannot read properties of undefined (reading 'hasStartTime')
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, rename 'C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\cache\webpack\client-development\0.pack.gz_' -> 'C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\cache\webpack\client-development\0.pack.gz'
+ ⨯ SyntaxError: Unexpected end of JSON input
+    at JSON.parse (<anonymous>) {
+  page: '/journal/analytics'
+}
+ ⨯ SyntaxError: Unexpected end of JSON input
+    at JSON.parse (<anonymous>) {
+  page: '/journal/analytics'
+}
+<w> [webpack.cache.PackFileCacheStrategy] Restoring pack failed from C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\cache\webpack\client-development.pack.gz: Error: incorrect header check
+ ⨯ SyntaxError: Unexpected end of JSON input
+    at JSON.parse (<anonymous>) {
+  page: '/journal/analytics'
+}
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, rename 'C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\cache\webpack\client-development\0.pack.gz_' -> 'C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\cache\webpack\client-development\0.pack.gz'
+ ⨯ Error: ENOENT: no such file or directory, open 'C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\server\app-paths-manifest.json'
+    at Object.readFileUtf8 (c:\Users\NIMA\.cursor\extensions\wallabyjs.console-ninja-1.0.532-universal\out\buildHook\index.js:1:3583583) {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\NIMA\\Desktop\\PROJECT\\Recent Project\\signal-forex\\.next\\server\\app-paths-manifest.json',
+  page: '/journal/analytics'
+}
+ ⨯ Error: ENOENT: no such file or directory, open 'C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\server\pages-manifest.json'
+    at Object.readFileUtf8 (c:\Users\NIMA\.cursor\extensions\wallabyjs.console-ninja-1.0.532-universal\out\buildHook\index.js:1:3583583) {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\NIMA\\Desktop\\PROJECT\\Recent Project\\signal-forex\\.next\\server\\pages-manifest.json'
+}
+ ⨯ Error: ENOENT: no such file or directory, open 'C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\server\app\journal\analytics\page.js'
+    at Object.readFileUtf8 (c:\Users\NIMA\.cursor\extensions\wallabyjs.console-ninja-1.0.532-universal\out\buildHook\index.js:1:3583583) {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\NIMA\\Desktop\\PROJECT\\Recent Project\\signal-forex\\.next\\server\\app\\journal\\analytics\\page.js',
+  page: '/journal/analytics'
+}
+ ⨯ Error: ENOENT: no such file or directory, open 'C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\server\pages\_document.js'
+    at Object.readFileUtf8 (c:\Users\NIMA\.cursor\extensions\wallabyjs.console-ninja-1.0.532-universal\out\buildHook\index.js:1:3583583) {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\NIMA\\Desktop\\PROJECT\\Recent Project\\signal-forex\\.next\\server\\pages\\_document.js'
+}
+ ⨯ Error: ENOENT: no such file or directory, open 'C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\server\app\journal\analytics\page.js'
+    at Object.readFileUtf8 (c:\Users\NIMA\.cursor\extensions\wallabyjs.console-ninja-1.0.532-universal\out\buildHook\index.js:1:3583583) {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\NIMA\\Desktop\\PROJECT\\Recent Project\\signal-forex\\.next\\server\\app\\journal\\analytics\\page.js',
+  page: '/journal/analytics'
+}
+ ⨯ Error: ENOENT: no such file or directory, open 'C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\server\pages\_document.js'
+    at Object.readFileUtf8 (c:\Users\NIMA\.cursor\extensions\wallabyjs.console-ninja-1.0.532-universal\out\buildHook\index.js:1:3583583) {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\NIMA\\Desktop\\PROJECT\\Recent Project\\signal-forex\\.next\\server\\pages\\_document.js'
+}
+ ⨯ Error: ENOENT: no such file or directory, open 'C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\server\app\journal\analytics\page.js'
+    at Object.readFileUtf8 (c:\Users\NIMA\.cursor\extensions\wallabyjs.console-ninja-1.0.532-universal\out\buildHook\index.js:1:3583583) {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\NIMA\\Desktop\\PROJECT\\Recent Project\\signal-forex\\.next\\server\\app\\journal\\analytics\\page.js',
+  page: '/journal/analytics'
+}
+ ⨯ Error: ENOENT: no such file or directory, open 'C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\server\pages\_document.js'
+    at Object.readFileUtf8 (c:\Users\NIMA\.cursor\extensions\wallabyjs.console-ninja-1.0.532-universal\out\buildHook\index.js:1:3583583) {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\NIMA\\Desktop\\PROJECT\\Recent Project\\signal-forex\\.next\\server\\pages\\_document.js'
+}
+ ⨯ Error: ENOENT: no such file or directory, open 'C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\server\app\journal\analytics\page.js'
+    at Object.readFileUtf8 (c:\Users\NIMA\.cursor\extensions\wallabyjs.console-ninja-1.0.532-universal\out\buildHook\index.js:1:3583583) {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\NIMA\\Desktop\\PROJECT\\Recent Project\\signal-forex\\.next\\server\\app\\journal\\analytics\\page.js',
+  page: '/journal/analytics'
+}
+ ⨯ Error: ENOENT: no such file or directory, open 'C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\server\pages\_document.js'
+    at Object.readFileUtf8 (c:\Users\NIMA\.cursor\extensions\wallabyjs.console-ninja-1.0.532-universal\out\buildHook\index.js:1:3583583) {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\NIMA\\Desktop\\PROJECT\\Recent Project\\signal-forex\\.next\\server\\pages\\_document.js'
+}
+ ⨯ Error: ENOENT: no such file or directory, open 'C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\server\app\journal\analytics\page.js'
+    at Object.readFileUtf8 (c:\Users\NIMA\.cursor\extensions\wallabyjs.console-ninja-1.0.532-universal\out\buildHook\index.js:1:3583583) {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\NIMA\\Desktop\\PROJECT\\Recent Project\\signal-forex\\.next\\server\\app\\journal\\analytics\\page.js',
+  page: '/journal/analytics'
+}
+ ⨯ Error: ENOENT: no such file or directory, open 'C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\server\pages\_document.js'
+    at Object.readFileUtf8 (c:\Users\NIMA\.cursor\extensions\wallabyjs.console-ninja-1.0.532-universal\out\buildHook\index.js:1:3583583) {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\NIMA\\Desktop\\PROJECT\\Recent Project\\signal-forex\\.next\\server\\pages\\_document.js'
+}
+ ⨯ Error: ENOENT: no such file or directory, open 'C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\server\app\journal\analytics\page.js'
+    at Object.readFileUtf8 (c:\Users\NIMA\.cursor\extensions\wallabyjs.console-ninja-1.0.532-universal\out\buildHook\index.js:1:3583583) {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\NIMA\\Desktop\\PROJECT\\Recent Project\\signal-forex\\.next\\server\\app\\journal\\analytics\\page.js',
+  page: '/journal/analytics'
+}
+ ⨯ Error: ENOENT: no such file or directory, open 'C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\server\pages\_document.js'
+    at Object.readFileUtf8 (c:\Users\NIMA\.cursor\extensions\wallabyjs.console-ninja-1.0.532-universal\out\buildHook\index.js:1:3583583) {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\NIMA\\Desktop\\PROJECT\\Recent Project\\signal-forex\\.next\\server\\pages\\_document.js'
+}
+ ⨯ Error: ENOENT: no such file or directory, open 'C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\server\app\journal\analytics\page.js'
+    at Object.readFileUtf8 (c:\Users\NIMA\.cursor\extensions\wallabyjs.console-ninja-1.0.532-universal\out\buildHook\index.js:1:3583583) {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\NIMA\\Desktop\\PROJECT\\Recent Project\\signal-forex\\.next\\server\\app\\journal\\analytics\\page.js',
+  page: '/journal/analytics'
+}
+ ⨯ Error: ENOENT: no such file or directory, open 'C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\server\pages\_document.js'
+    at Object.readFileUtf8 (c:\Users\NIMA\.cursor\extensions\wallabyjs.console-ninja-1.0.532-universal\out\buildHook\index.js:1:3583583) {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\NIMA\\Desktop\\PROJECT\\Recent Project\\signal-forex\\.next\\server\\pages\\_document.js'
+}
+ ⨯ Error: ENOENT: no such file or directory, open 'C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\server\app\journal\analytics\page.js'
+    at Object.readFileUtf8 (c:\Users\NIMA\.cursor\extensions\wallabyjs.console-ninja-1.0.532-universal\out\buildHook\index.js:1:3583583) {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\NIMA\\Desktop\\PROJECT\\Recent Project\\signal-forex\\.next\\server\\app\\journal\\analytics\\page.js',
+  page: '/journal/analytics'
+}
+ ⨯ Error: ENOENT: no such file or directory, open 'C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\server\pages\_document.js'
+    at Object.readFileUtf8 (c:\Users\NIMA\.cursor\extensions\wallabyjs.console-ninja-1.0.532-universal\out\buildHook\index.js:1:3583583) {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\NIMA\\Desktop\\PROJECT\\Recent Project\\signal-forex\\.next\\server\\pages\\_document.js'
+}
+ ⨯ Error: ENOENT: no such file or directory, open 'C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\server\app\journal\analytics\page.js'
+    at Object.readFileUtf8 (c:\Users\NIMA\.cursor\extensions\wallabyjs.console-ninja-1.0.532-universal\out\buildHook\index.js:1:3583583) {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\NIMA\\Desktop\\PROJECT\\Recent Project\\signal-forex\\.next\\server\\app\\journal\\analytics\\page.js',
+  page: '/journal/analytics'
+}
+ ⨯ Error: ENOENT: no such file or directory, open 'C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\server\pages\_document.js'
+    at Object.readFileUtf8 (c:\Users\NIMA\.cursor\extensions\wallabyjs.console-ninja-1.0.532-universal\out\buildHook\index.js:1:3583583) {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\NIMA\\Desktop\\PROJECT\\Recent Project\\signal-forex\\.next\\server\\pages\\_document.js'
+}
+ ⨯ Error: ENOENT: no such file or directory, open 'C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\server\app\journal\analytics\page.js'
+    at Object.readFileUtf8 (c:\Users\NIMA\.cursor\extensions\wallabyjs.console-ninja-1.0.532-universal\out\buildHook\index.js:1:3583583) {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\NIMA\\Desktop\\PROJECT\\Recent Project\\signal-forex\\.next\\server\\app\\journal\\analytics\\page.js',
+  page: '/journal/analytics'
+}
+ ⨯ Error: ENOENT: no such file or directory, open 'C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\server\pages\_document.js'
+    at Object.readFileUtf8 (c:\Users\NIMA\.cursor\extensions\wallabyjs.console-ninja-1.0.532-universal\out\buildHook\index.js:1:3583583) {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\NIMA\\Desktop\\PROJECT\\Recent Project\\signal-forex\\.next\\server\\pages\\_document.js'
+}
+ ⨯ Error: ENOENT: no such file or directory, open 'C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\server\app\journal\analytics\page.js'
+    at Object.readFileUtf8 (c:\Users\NIMA\.cursor\extensions\wallabyjs.console-ninja-1.0.532-universal\out\buildHook\index.js:1:3583583) {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\NIMA\\Desktop\\PROJECT\\Recent Project\\signal-forex\\.next\\server\\app\\journal\\analytics\\page.js',
+  page: '/journal/analytics'
+}
+ ⨯ Error: ENOENT: no such file or directory, open 'C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\server\pages\_document.js'
+    at Object.readFileUtf8 (c:\Users\NIMA\.cursor\extensions\wallabyjs.console-ninja-1.0.532-universal\out\buildHook\index.js:1:3583583) {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\NIMA\\Desktop\\PROJECT\\Recent Project\\signal-forex\\.next\\server\\pages\\_document.js'
+}
+ ⨯ Error: ENOENT: no such file or directory, open 'C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\server\app\journal\analytics\page.js'
+    at Object.readFileUtf8 (c:\Users\NIMA\.cursor\extensions\wallabyjs.console-ninja-1.0.532-universal\out\buildHook\index.js:1:3583583) {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\NIMA\\Desktop\\PROJECT\\Recent Project\\signal-forex\\.next\\server\\app\\journal\\analytics\\page.js',
+  page: '/journal/analytics'
+}
+ ⨯ Error: ENOENT: no such file or directory, open 'C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\server\pages\_document.js'
+    at Object.readFileUtf8 (c:\Users\NIMA\.cursor\extensions\wallabyjs.console-ninja-1.0.532-universal\out\buildHook\index.js:1:3583583) {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\NIMA\\Desktop\\PROJECT\\Recent Project\\signal-forex\\.next\\server\\pages\\_document.js'
+}
+ ⨯ Error: ENOENT: no such file or directory, open 'C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\server\app\journal\analytics\page.js'
+    at Object.readFileUtf8 (c:\Users\NIMA\.cursor\extensions\wallabyjs.console-ninja-1.0.532-universal\out\buildHook\index.js:1:3583583) {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\NIMA\\Desktop\\PROJECT\\Recent Project\\signal-forex\\.next\\server\\app\\journal\\analytics\\page.js',
+  page: '/journal/analytics'
+}
+ ⨯ Error: ENOENT: no such file or directory, open 'C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\server\pages\_document.js'
+    at Object.readFileUtf8 (c:\Users\NIMA\.cursor\extensions\wallabyjs.console-ninja-1.0.532-universal\out\buildHook\index.js:1:3583583) {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\NIMA\\Desktop\\PROJECT\\Recent Project\\signal-forex\\.next\\server\\pages\\_document.js'
+}
+ ⨯ Error: ENOENT: no such file or directory, open 'C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\server\app\journal\analytics\page.js'
+    at Object.readFileUtf8 (c:\Users\NIMA\.cursor\extensions\wallabyjs.console-ninja-1.0.532-universal\out\buildHook\index.js:1:3583583) {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\NIMA\\Desktop\\PROJECT\\Recent Project\\signal-forex\\.next\\server\\app\\journal\\analytics\\page.js',
+  page: '/journal/analytics'
+}
+ ⨯ Error: ENOENT: no such file or directory, open 'C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\server\pages\_document.js'
+    at Object.readFileUtf8 (c:\Users\NIMA\.cursor\extensions\wallabyjs.console-ninja-1.0.532-universal\out\buildHook\index.js:1:3583583) {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\NIMA\\Desktop\\PROJECT\\Recent Project\\signal-forex\\.next\\server\\pages\\_document.js'
+}
+ ⨯ TypeError: e[o] is not a function
+    at Object.t [as require] (C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\server\webpack-runtime.js:1:127)
+    at JSON.parse (<anonymous>) {
+  digest: '594387247'
+}
+TypeError: e[o] is not a function
+    at Object.t [as require] (C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\server\webpack-runtime.js:1:127)
+    at JSON.parse (<anonymous>)
+ ⨯ TypeError: e[o] is not a function
+    at Object.t [as require] (C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\server\webpack-runtime.js:1:127)
+    at JSON.parse (<anonymous>) {
+  page: '/journal/analytics'
+}
+ ⨯ Error: Cannot find module './447.js'
+Require stack:
+- C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\server\webpack-runtime.js
+- C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\server\app\_not-found\page.js
+- C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\node_modules\next\dist\server\require.js
+- C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\node_modules\next\dist\server\load-components.js
+- C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\node_modules\next\dist\build\utils.js
+- C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\node_modules\next\dist\build\swc\options.js
+- C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\node_modules\next\dist\build\swc\index.js
+- C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\node_modules\next\dist\build\analysis\parse-module.js
+- C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\node_modules\next\dist\build\analysis\get-page-static-info.js
+- C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\node_modules\next\dist\server\lib\router-utils\setup-dev-bundler.js
+- C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\node_modules\next\dist\server\lib\router-server.js
+- C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\node_modules\next\dist\server\lib\start-server.js
+    at __webpack_require__.f.require (C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\server\webpack-runtime.js:203:28)
+    at <unknown> (C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\server\webpack-runtime.js:116:40)
+    at Array.reduce (<anonymous>)
+    at __webpack_require__.e (C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\server\webpack-runtime.js:115:67)
+    at Array.map (<anonymous>)
+    at __webpack_require__.X (C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\server\webpack-runtime.js:167:22)
+    at <unknown> (C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\server\app\_not-found\page.js:1:1826)
+    at Object.<anonymous> (C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\server\app\_not-found\page.js:1:1876) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [Array]
+}
+ ⨯ Error: Cannot find module './447.js'
+Require stack:
+- C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\server\webpack-runtime.js
+- C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\server\app\_not-found\page.js
+- C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\node_modules\next\dist\server\require.js
+- C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\node_modules\next\dist\server\load-components.js
+- C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\node_modules\next\dist\build\utils.js
+- C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\node_modules\next\dist\build\swc\options.js
+- C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\node_modules\next\dist\build\swc\index.js
+- C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\node_modules\next\dist\build\analysis\parse-module.js
+- C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\node_modules\next\dist\build\analysis\get-page-static-info.js
+- C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\node_modules\next\dist\server\lib\router-utils\setup-dev-bundler.js
+- C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\node_modules\next\dist\server\lib\router-server.js
+- C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\node_modules\next\dist\server\lib\start-server.js
+    at __webpack_require__.f.require (C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\server\webpack-runtime.js:203:28)
+    at <unknown> (C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\server\webpack-runtime.js:116:40)
+    at Array.reduce (<anonymous>)
+    at __webpack_require__.e (C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\server\webpack-runtime.js:115:67)
+    at Array.map (<anonymous>)
+    at __webpack_require__.X (C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\server\webpack-runtime.js:167:22)
+    at <unknown> (C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\server\app\_not-found\page.js:1:1826)
+    at Object.<anonymous> (C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\server\app\_not-found\page.js:1:1876) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [Array]
+}
+ ⨯ Error: Cannot find module './447.js'
+Require stack:
+- C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\server\webpack-runtime.js
+- C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\server\app\_not-found\page.js
+- C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\node_modules\next\dist\server\require.js
+- C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\node_modules\next\dist\server\load-components.js
+- C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\node_modules\next\dist\build\utils.js
+- C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\node_modules\next\dist\build\swc\options.js
+- C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\node_modules\next\dist\build\swc\index.js
+- C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\node_modules\next\dist\build\analysis\parse-module.js
+- C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\node_modules\next\dist\build\analysis\get-page-static-info.js
+- C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\node_modules\next\dist\server\lib\router-utils\setup-dev-bundler.js
+- C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\node_modules\next\dist\server\lib\router-server.js
+- C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\node_modules\next\dist\server\lib\start-server.js
+    at __webpack_require__.f.require (C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\server\webpack-runtime.js:203:28)
+    at <unknown> (C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\server\webpack-runtime.js:116:40)
+    at Array.reduce (<anonymous>)
+    at __webpack_require__.e (C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\server\webpack-runtime.js:115:67)
+    at Array.map (<anonymous>)
+    at __webpack_require__.X (C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\server\webpack-runtime.js:167:22)
+    at <unknown> (C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\server\app\_not-found\page.js:1:1826)
+    at Object.<anonymous> (C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\server\app\_not-found\page.js:1:1876) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [Array]
+}
+ ⨯ Error: Cannot find module './447.js'
+Require stack:
+- C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\server\webpack-runtime.js
+- C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\server\app\_not-found\page.js
+- C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\node_modules\next\dist\server\require.js
+- C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\node_modules\next\dist\server\load-components.js
+- C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\node_modules\next\dist\build\utils.js
+- C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\node_modules\next\dist\build\swc\options.js
+- C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\node_modules\next\dist\build\swc\index.js
+- C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\node_modules\next\dist\build\analysis\parse-module.js
+- C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\node_modules\next\dist\build\analysis\get-page-static-info.js
+- C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\node_modules\next\dist\server\lib\router-utils\setup-dev-bundler.js
+- C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\node_modules\next\dist\server\lib\router-server.js
+- C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\node_modules\next\dist\server\lib\start-server.js
+    at __webpack_require__.f.require (C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\server\webpack-runtime.js:203:28)
+    at <unknown> (C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\server\webpack-runtime.js:116:40)
+    at Array.reduce (<anonymous>)
+    at __webpack_require__.e (C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\server\webpack-runtime.js:115:67)
+    at Array.map (<anonymous>)
+    at __webpack_require__.X (C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\server\webpack-runtime.js:167:22)
+    at <unknown> (C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\server\app\_not-found\page.js:1:1826)
+    at Object.<anonymous> (C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\server\app\_not-found\page.js:1:1876) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [Array]
+}
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, rename 'C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\cache\webpack\client-development\0.pack.gz_' -> 'C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\cache\webpack\client-development\0.pack.gz'
+ ⨯ Error: Cannot find module './447.js'
+Require stack:
+- C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\server\webpack-runtime.js
+- C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\server\app\_not-found\page.js
+- C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\node_modules\next\dist\server\require.js
+- C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\node_modules\next\dist\server\load-components.js
+- C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\node_modules\next\dist\build\utils.js
+- C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\node_modules\next\dist\build\swc\options.js
+- C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\node_modules\next\dist\build\swc\index.js
+- C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\node_modules\next\dist\build\analysis\parse-module.js
+- C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\node_modules\next\dist\build\analysis\get-page-static-info.js
+- C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\node_modules\next\dist\server\lib\router-utils\setup-dev-bundler.js
+- C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\node_modules\next\dist\server\lib\router-server.js
+- C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\node_modules\next\dist\server\lib\start-server.js
+    at __webpack_require__.f.require (C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\server\webpack-runtime.js:203:28)
+    at <unknown> (C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\server\webpack-runtime.js:116:40)
+    at Array.reduce (<anonymous>)
+    at __webpack_require__.e (C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\server\webpack-runtime.js:115:67)
+    at Array.map (<anonymous>)
+    at __webpack_require__.X (C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\server\webpack-runtime.js:167:22)
+    at <unknown> (C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\server\app\_not-found\page.js:1:1826)
+    at Object.<anonymous> (C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\server\app\_not-found\page.js:1:1876) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [Array]
+}
+<w> [webpack.cache.PackFileCacheStrategy] Restoring pack from C:\Users\NIMA\Desktop\PROJECT\Recent Project\signal-forex\.next\cache\webpack\client-development.pack.gz failed: TypeError: Cannot read properties of undefined (reading 'hasStartTime')

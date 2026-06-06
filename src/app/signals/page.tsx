@@ -1,329 +1,1649 @@
 "use client";
 
+import {
+  Fragment,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
+import {
+  Activity,
+  ArrowDownCircle,
+  ArrowUpCircle,
+  CalendarDays,
+  CheckCircle2,
+  ChevronDown,
+  Calculator,
+  Copy,
+  Filter,
+  Info,
+  Loader2,
+  RefreshCw,
+  RotateCcw,
+  X,
+  XCircle,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SignalCard } from "@/components/ui/signal-card";
-import {
-  SearchIcon,
-  Filter,
-  ArrowUpDown,
-  Check,
-  ChevronDown,
-  ArrowDownUp,
-} from "lucide-react";
-import { useState } from "react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  MotionDiv,
-  MotionStaggerContainer,
-  MotionStaggerItem,
-} from "@/components/ui/motion-content";
+import { MotionDiv } from "@/components/ui/motion-content";
 import { useLanguage } from "@/lib/language-context";
+import { fetchWebsiteSignals } from "@/lib/fetch-signals";
+import {
+  formatSignalDateGroupLabel,
+  formatSignalDateTime,
+  getSignalDateKey,
+} from "@/lib/signal-time";
+import { cn } from "@/lib/utils";
+import type {
+  DailySignalSummary,
+  DisplaySignal,
+  SignalDateFilter,
+  SignalDirectionFilter,
+  SignalListResponse,
+  SignalStatusFilter,
+  SignalSummary,
+} from "@/lib/signal-types";
 
-// Sample data for signals
-const signals = [
-  {
-    id: "1",
-    pair: "EUR/USD",
-    type: "buy" as const,
-    price: 1.0825,
-    takeProfit: [1.0845, 1.0865, 1.0885],
-    stopLoss: 1.0805,
-    timestamp: "Today - 10:30",
-    success: true,
-    isPremium: false,
-  },
-  {
-    id: "2",
-    pair: "GBP/JPY",
-    type: "sell" as const,
-    price: 168.45,
-    takeProfit: [168.25, 168.05],
-    stopLoss: 168.65,
-    timestamp: "Today - 08:15",
-    success: false,
-    isPremium: false,
-  },
-  {
-    id: "3",
-    pair: "XAU/USD",
-    type: "buy" as const,
-    price: 2352.0,
-    takeProfit: [2360.0, 2370.0, 2380.0],
-    stopLoss: 2340.0,
-    timestamp: "Yesterday - 15:45",
-    isPremium: true,
-  },
-  {
-    id: "4",
-    pair: "USD/JPY",
-    type: "buy" as const,
-    price: 154.5,
-    takeProfit: [154.8, 155.1],
-    stopLoss: 154.2,
-    timestamp: "Yesterday - 12:20",
-    success: true,
-    isPremium: false,
-  },
-  {
-    id: "5",
-    pair: "EUR/GBP",
-    type: "sell" as const,
-    price: 0.855,
-    takeProfit: [0.853, 0.851],
-    stopLoss: 0.857,
-    timestamp: "Yesterday - 09:45",
-    success: true,
-    isPremium: false,
-  },
-  {
-    id: "6",
-    pair: "AUD/USD",
-    type: "buy" as const,
-    price: 0.6625,
-    takeProfit: [0.6645, 0.6665],
-    stopLoss: 0.6605,
-    timestamp: "2 days ago - 14:30",
-    isPremium: true,
-  },
-  {
-    id: "7",
-    pair: "USD/CAD",
-    type: "sell" as const,
-    price: 1.365,
-    takeProfit: [1.363, 1.361, 1.359],
-    stopLoss: 1.367,
-    timestamp: "2 days ago - 11:15",
-    success: false,
-    isPremium: false,
-  },
-  {
-    id: "8",
-    pair: "NZD/USD",
-    type: "buy" as const,
-    price: 0.5985,
-    takeProfit: [0.6005, 0.6025],
-    stopLoss: 0.5965,
-    timestamp: "3 days ago - 16:40",
-    success: true,
-    isPremium: false,
-  },
-  {
-    id: "9",
-    pair: "GBP/USD",
-    type: "sell" as const,
-    price: 1.2485,
-    takeProfit: [1.2465, 1.2445, 1.2425],
-    stopLoss: 1.2505,
-    timestamp: "3 days ago - 13:20",
-    success: true,
-    isPremium: false,
-  },
-  {
-    id: "10",
-    pair: "USD/CHF",
-    type: "buy" as const,
-    price: 0.9045,
-    takeProfit: [0.9065, 0.9085],
-    stopLoss: 0.9025,
-    timestamp: "4 days ago - 09:15",
-    success: true,
-    isPremium: false,
-  },
-  {
-    id: "11",
-    pair: "EUR/JPY",
-    type: "sell" as const,
-    price: 164.75,
-    takeProfit: [164.55, 164.35, 164.15],
-    stopLoss: 164.95,
-    timestamp: "4 days ago - 14:50",
-    success: false,
-    isPremium: false,
-  },
-  {
-    id: "12",
-    pair: "CAD/JPY",
-    type: "buy" as const,
-    price: 113.25,
-    takeProfit: [113.45, 113.65],
-    stopLoss: 113.05,
-    timestamp: "5 days ago - 11:30",
-    isPremium: true,
-  },
-];
+const PAGE_SIZE = 12;
+const LIVE_REFRESH_INTERVAL = 5000;
 
-export default function SignalsPage() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [signalTypeFilter, setSignalTypeFilter] = useState<
-    "all" | "buy" | "sell"
-  >("all");
-  const [sortOrder, setSortOrder] = useState<"newest" | "oldest" | "pair">(
-    "newest"
-  );
-  const { t } = useLanguage();
+type SignalFilters = {
+  status: SignalStatusFilter;
+  symbol: string;
+  direction: SignalDirectionFilter;
+  date: SignalDateFilter;
+};
 
-  // Filter signals based on search query and type filter
-  let filteredSignals = signals.filter(
-    (signal) =>
-      signal.pair.toLowerCase().includes(searchQuery.toLowerCase()) &&
-      (signalTypeFilter === "all" || signal.type === signalTypeFilter)
-  );
+type SelectOption<T extends string> = {
+  label: string;
+  value: T;
+};
 
-  // Sort signals based on the selected sort order
-  filteredSignals = [...filteredSignals].sort((a, b) => {
-    if (sortOrder === "pair") {
-      return a.pair.localeCompare(b.pair);
-    } else if (sortOrder === "newest") {
-      // For simplicity, we'll sort by ID in reverse (assuming higher ID = newer)
-      return parseInt(b.id) - parseInt(a.id);
-    } else {
-      // oldest first
-      return parseInt(a.id) - parseInt(b.id);
+const DEFAULT_FILTERS: SignalFilters = {
+  status: "all",
+  symbol: "all",
+  direction: "all",
+  date: "all",
+};
+
+const EMPTY_SUMMARY: SignalSummary = {
+  today: 0,
+  open: 0,
+  tpHit: 0,
+  slHit: 0,
+};
+
+function formatNumber(value: number | undefined) {
+  if (value === undefined || !Number.isFinite(value)) {
+    return "-";
+  }
+
+  return value.toLocaleString("en-US", {
+    maximumFractionDigits: 5,
+  });
+}
+
+function getSignalStatus(signal: DisplaySignal) {
+  if (signal.isOpen) {
+    return "Open";
+  }
+
+  return "Closed";
+}
+
+function getSignalResult(signal: DisplaySignal) {
+  if (signal.isOpen) {
+    return "Running";
+  }
+
+  if (signal.closeReason === "TP") {
+    return "TP Hit";
+  }
+
+  if (signal.closeReason === "SL") {
+    return "SL Hit";
+  }
+
+  return "Closed";
+}
+
+function getSignalStatusKey(signal: DisplaySignal) {
+  return signal.isOpen ? "open" : "closed";
+}
+
+function getSignalResultKey(signal: DisplaySignal) {
+  if (signal.isOpen) {
+    return "running";
+  }
+
+  if (signal.closeReason === "TP") {
+    return "tpHit";
+  }
+
+  if (signal.closeReason === "SL") {
+    return "slHit";
+  }
+
+  return "closed";
+}
+
+function getStatusClass(signal: DisplaySignal) {
+  if (signal.isOpen) {
+    return "border-green-500/30 bg-green-500/10 text-green-300";
+  }
+
+  return "border-gray-700 bg-gray-700/40 text-gray-300";
+}
+
+function getResultClass(signal: DisplaySignal) {
+  if (signal.isOpen) {
+    return "border-blue-500/30 bg-blue-500/10 text-blue-200";
+  }
+
+  if (signal.closeReason === "TP") {
+    return "border-green-500/30 bg-green-500/10 text-green-300";
+  }
+
+  if (signal.closeReason === "SL") {
+    return "border-red-500/30 bg-red-500/10 text-red-300";
+  }
+
+  return "border-gray-700 bg-gray-700/40 text-gray-300";
+}
+
+function getResultIcon(signal: DisplaySignal) {
+  if (signal.isOpen) {
+    return <Activity className="h-3.5 w-3.5" />;
+  }
+
+  if (signal.closeReason === "SL") {
+    return <XCircle className="h-3.5 w-3.5" />;
+  }
+
+  return <CheckCircle2 className="h-3.5 w-3.5" />;
+}
+
+function getDirectionClass(type: DisplaySignal["type"]) {
+  return type === "buy"
+    ? "border-green-500/30 bg-green-500/10 text-green-300"
+    : "border-red-500/30 bg-red-500/10 text-red-300";
+}
+
+function getDateGroup(signal: DisplaySignal) {
+  if (!signal.createdAt) {
+    return {
+      key: "unknown",
+      label: "Unknown date",
+    };
+  }
+
+  const createdAt = new Date(signal.createdAt);
+
+  if (Number.isNaN(createdAt.getTime())) {
+    return {
+      key: "unknown",
+      label: "Unknown date",
+    };
+  }
+
+  return {
+    key: getSignalDateKey(createdAt),
+    label: formatSignalDateGroupLabel(createdAt),
+  };
+}
+
+function groupSignalsByDate(signals: DisplaySignal[]) {
+  const groups = new Map<
+    string,
+    {
+      key: string;
+      label: string;
+      signals: DisplaySignal[];
     }
+  >();
+
+  signals.forEach((signal) => {
+    const group = getDateGroup(signal);
+    const currentGroup = groups.get(group.key);
+
+    if (currentGroup) {
+      currentGroup.signals.push(signal);
+      return;
+    }
+
+    groups.set(group.key, {
+      ...group,
+      signals: [signal],
+    });
   });
 
-  return (
-    <div className="bg-black text-white relative">
-      <div
-        className="absolute inset-0 mx-auto bg-[url('/images/back.jpg')] bg-no-repeat bg-center opacity-20 z-0"
-        style={{
-          width: "100%",
-          height: "100%",
-          backgroundSize: "cover",
-        }}
-      ></div>
-      <div className="max-w-screen-xl mx-auto px-4 py-16 relative z-10">
-        <MotionDiv className="flex justify-center items-center mb-8">
-          <h1 className="text-4xl font-bold">{t("forexSignals")}</h1>
-        </MotionDiv>
+  return Array.from(groups.values());
+}
 
-        {/* Search and filters */}
-        <div className="flex flex-col mb-10 mx-auto max-w-5xl">
-          {/* Search Row */}
-          <div className="flex flex-col sm:flex-row gap-3 mb-4">
-            <div className="relative flex-1 w-full">
-              <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <input
-                type="text"
-                placeholder={t("signalSearch")}
-                className="w-full h-10 pr-3 pl-10 rounded-md border border-gray-800 bg-gray-900 text-sm text-white ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring text-left"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
+function getClosedSignalPips(signal: DisplaySignal) {
+  if (signal.isOpen) {
+    return undefined;
+  }
+
+  const exitPrice =
+    signal.closePrice ??
+    (signal.closeReason === "TP" ? signal.takeProfit[0] : undefined) ??
+    (signal.closeReason === "SL" ? signal.stopLoss : undefined);
+  const pipSize = getPipSize(signal.pair);
+
+  if (exitPrice === undefined || !pipSize) {
+    return undefined;
+  }
+
+  const rawMove =
+    signal.type === "buy"
+      ? exitPrice - signal.price
+      : signal.price - exitPrice;
+
+  return rawMove / pipSize;
+}
+
+function buildDailySummaryFallback(
+  key: string,
+  label: string,
+  signals: DisplaySignal[]
+): DailySignalSummary {
+  return signals.reduce<DailySignalSummary>(
+    (summary, signal) => {
+      const pips = getClosedSignalPips(signal);
+
+      summary.signalCount += 1;
+      summary.open += signal.isOpen ? 1 : 0;
+      summary.tpHit += signal.closeReason === "TP" ? 1 : 0;
+      summary.slHit += signal.closeReason === "SL" ? 1 : 0;
+
+      if (pips !== undefined && Number.isFinite(pips)) {
+        summary.netPips += pips;
+
+        if (pips >= 0) {
+          summary.profitPips += pips;
+        } else {
+          summary.lossPips += Math.abs(pips);
+        }
+      }
+
+      return summary;
+    },
+    {
+      dateKey: key,
+      label,
+      signalCount: 0,
+      open: 0,
+      tpHit: 0,
+      slHit: 0,
+      profitPips: 0,
+      lossPips: 0,
+      netPips: 0,
+    }
+  );
+}
+
+function mergeSignals(current: DisplaySignal[], next: DisplaySignal[]) {
+  const seenIds = new Set(current.map((signal) => signal.id));
+  const uniqueNext = next.filter((signal) => !seenIds.has(signal.id));
+
+  return [...current, ...uniqueNext];
+}
+
+function formatDetailsDate(value: string | undefined) {
+  if (!value) {
+    return "-";
+  }
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return "-";
+  }
+
+  return formatSignalDateTime(date);
+}
+
+function formatLiveTime(date: Date | null) {
+  if (!date) {
+    return "-";
+  }
+
+  return date.toLocaleTimeString("en-GB", {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
+}
+
+function formatPipsValue(value: number, options: { signed?: boolean } = {}) {
+  const normalized = Number.isFinite(value) ? value : 0;
+  const prefix = options.signed && normalized > 0 ? "+" : "";
+
+  return `${prefix}${normalized.toFixed(1)}`;
+}
+
+function getRiskReward(signal: DisplaySignal) {
+  const reward = Math.abs((signal.takeProfit[0] || 0) - signal.price);
+  const risk = Math.abs(signal.price - signal.stopLoss);
+
+  if (!risk || !reward) {
+    return "-";
+  }
+
+  return `1:${(reward / risk).toFixed(2)}`;
+}
+
+function getPipSize(pair: string) {
+  if (pair.includes("JPY")) {
+    return 0.01;
+  }
+
+  if (pair.includes("XAU")) {
+    return 0.1;
+  }
+
+  return 0.0001;
+}
+
+function getSignalPips(
+  signal: DisplaySignal,
+  translate: (key: string, fallback: string) => string
+) {
+  const pipSize = getPipSize(signal.pair);
+  const referencePrice =
+    signal.isOpen === false && signal.closePrice !== undefined
+      ? signal.closePrice
+      : signal.takeProfit[0];
+
+  if (!referencePrice || !pipSize) {
+    return "-";
+  }
+
+  const rawMove =
+    signal.type === "buy"
+      ? referencePrice - signal.price
+      : signal.price - referencePrice;
+  const pips = rawMove / pipSize;
+  const prefix = signal.isOpen === false && pips > 0 ? "+" : "";
+
+  return `${prefix}${pips.toFixed(1)} ${translate("pips", "pips")}`;
+}
+
+function getAnalysisReason(
+  signal: DisplaySignal,
+  translate: (key: string, fallback: string) => string
+) {
+  return translate(
+    "analysisReasonTemplate",
+    "{symbol} {direction} setup with entry at {entry}, stop loss at {stopLoss}, and first target at {takeProfit}. The setup is published with predefined invalidation and target levels so risk can be reviewed before execution."
+  )
+    .replace("{symbol}", signal.pair)
+    .replace(
+      "{direction}",
+      signal.type === "buy" ? translate("buy", "Buy") : translate("sell", "Sell")
+    )
+    .replace("{entry}", formatNumber(signal.price))
+    .replace("{stopLoss}", formatNumber(signal.stopLoss))
+    .replace("{takeProfit}", formatNumber(signal.takeProfit[0]));
+}
+
+function getCopyText(
+  signal: DisplaySignal,
+  translate: (key: string, fallback: string) => string
+) {
+  return [
+    `${signal.pair} ${signal.type.toUpperCase()}`,
+    `${translate("entry", "Entry")}: ${formatNumber(signal.price)}`,
+    `${translate("stopLoss", "Stop Loss")}: ${formatNumber(signal.stopLoss)}`,
+    `${translate("takeProfit1", "Take Profit 1")}: ${formatNumber(signal.takeProfit[0])}`,
+    `${translate("status", "Status")}: ${translate(getSignalStatusKey(signal), getSignalStatus(signal))}`,
+    `${translate("result", "Result")}: ${translate(getSignalResultKey(signal), getSignalResult(signal))}`,
+    `${translate("riskReward", "Risk/Reward")}: ${getRiskReward(signal)}`,
+  ].join("\n");
+}
+
+function getResultSourceLabel(
+  signal: DisplaySignal,
+  translate: (key: string, fallback: string) => string
+) {
+  if (signal.resultSource === "derived") {
+    return translate("derivedResult", "Derived from later prices");
+  }
+
+  if (signal.resultSource === "python") {
+    return translate("pythonMt5Result", "Python MT5 ticks");
+  }
+
+  if (signal.resultSource === "stored") {
+    return translate("storedResult", "Confirmed by close event");
+  }
+
+  return "-";
+}
+
+function SelectFilter<T extends string>({
+  label,
+  value,
+  options,
+  onChange,
+}: {
+  label: string;
+  value: T;
+  options: SelectOption<T>[];
+  onChange: (value: T) => void;
+}) {
+  return (
+    <label className="flex min-w-[150px] flex-1 flex-col gap-1 text-xs font-medium uppercase text-gray-500">
+      {label}
+      <select
+        value={value}
+        onChange={(event) => onChange(event.target.value as T)}
+        className="h-10 rounded-md border border-gray-800 bg-gray-950 px-3 text-sm normal-case text-white outline-none transition-colors focus:border-blue-500"
+      >
+        {options.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
+function TableSkeleton() {
+  return (
+    <>
+      {Array.from({ length: 8 }).map((_, index) => (
+        <tr key={index} className="animate-pulse border-t border-gray-900">
+          {Array.from({ length: 9 }).map((__, cellIndex) => (
+            <td key={cellIndex} className="px-4 py-3">
+              <div className="h-4 rounded bg-gray-800" />
+            </td>
+          ))}
+        </tr>
+      ))}
+    </>
+  );
+}
+
+function CardSkeleton() {
+  return (
+    <div className="space-y-3 md:hidden">
+      {Array.from({ length: 4 }).map((_, index) => (
+        <div
+          key={index}
+          className="h-[124px] animate-pulse rounded-lg border border-gray-800 bg-gray-950/80 p-3"
+        >
+          <div className="flex items-center justify-between">
+            <div className="h-5 w-24 rounded bg-gray-800" />
+            <div className="h-7 w-32 rounded bg-gray-800" />
+          </div>
+          <div className="mt-3 h-11 rounded bg-gray-900" />
+          <div className="mt-3 h-6 rounded bg-gray-800" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export default function SignalsPage() {
+  const { t } = useLanguage();
+  const [filters, setFilters] = useState<SignalFilters>(DEFAULT_FILTERS);
+  const [page, setPage] = useState(1);
+  const [signals, setSignals] = useState<DisplaySignal[]>([]);
+  const [summary, setSummary] = useState<SignalSummary>(EMPTY_SUMMARY);
+  const [dailySummaries, setDailySummaries] = useState<
+    SignalListResponse["dailySummaries"]
+  >([]);
+  const [pagination, setPagination] = useState<
+    SignalListResponse["pagination"]
+  >({
+    page: 1,
+    limit: PAGE_SIZE,
+    total: 0,
+    totalPages: 1,
+    hasMore: false,
+  });
+  const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [lastUpdatedAt, setLastUpdatedAt] = useState<Date | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedSignal, setSelectedSignal] = useState<DisplaySignal | null>(
+    null
+  );
+  const [copiedSignalId, setCopiedSignalId] = useState<string | null>(null);
+  const [expandedDateGroups, setExpandedDateGroups] = useState<Set<string>>(
+    () => new Set()
+  );
+
+  const translate = useCallback(
+    (key: string, fallback: string) => {
+      const value = t(key);
+      return value === key ? fallback : value;
+    },
+    [t]
+  );
+
+  const statusOptions = useMemo<SelectOption<SignalStatusFilter>[]>(
+    () => [
+      { value: "all", label: translate("all", "All") },
+      { value: "open", label: translate("open", "Open") },
+      { value: "closed", label: translate("closed", "Closed") },
+      { value: "tp", label: translate("tpHit", "TP Hit") },
+      { value: "sl", label: translate("slHit", "SL Hit") },
+    ],
+    [translate]
+  );
+
+  const symbolOptions = useMemo<SelectOption<string>[]>(
+    () => [
+      { value: "all", label: translate("all", "All") },
+      { value: "XAUUSD", label: "XAUUSD" },
+      { value: "EURUSD", label: "EURUSD" },
+      { value: "GBPUSD", label: "GBPUSD" },
+      { value: "USDJPY", label: "USDJPY" },
+    ],
+    [translate]
+  );
+
+  const directionOptions = useMemo<SelectOption<SignalDirectionFilter>[]>(
+    () => [
+      { value: "all", label: translate("all", "All") },
+      { value: "BUY", label: translate("buy", "Buy") },
+      { value: "SELL", label: translate("sell", "Sell") },
+    ],
+    [translate]
+  );
+
+  const dateOptions = useMemo<SelectOption<SignalDateFilter>[]>(
+    () => [
+      { value: "all", label: translate("all", "All") },
+      { value: "today", label: translate("today", "Today") },
+      { value: "yesterday", label: translate("yesterday", "Yesterday") },
+      { value: "week", label: translate("thisWeek", "This Week") },
+    ],
+    [translate]
+  );
+
+  const queryOptions = useMemo(
+    () => ({
+      limit: PAGE_SIZE,
+      page,
+      status: filters.status,
+      symbol: filters.symbol,
+      direction: filters.direction,
+      date: filters.date,
+    }),
+    [filters.date, filters.direction, filters.status, filters.symbol, page]
+  );
+
+  const groupedSignals = useMemo(() => groupSignalsByDate(signals), [signals]);
+  const dailySummaryMap = useMemo(
+    () =>
+      new Map(
+        dailySummaries
+          .filter((dailySummary) => dailySummary.dateKey)
+          .map((dailySummary) => [dailySummary.dateKey, dailySummary])
+      ),
+    [dailySummaries]
+  );
+  const isInitialLoading = isLoading && page === 1 && signals.length === 0;
+  const isLoadingMore = isLoading && page > 1;
+
+  const applySignalResponse = useCallback(
+    (
+      data: SignalListResponse,
+      optionsPage: number,
+      mode: "page" | "replace"
+    ) => {
+      const totalPages = Math.max(Math.ceil(data.pagination.total / PAGE_SIZE), 1);
+      const loadedCount =
+        mode === "replace" ? data.signals.length : optionsPage * PAGE_SIZE;
+
+      setSummary(data.summary);
+      setDailySummaries(data.dailySummaries);
+      setPagination({
+        page: mode === "replace" ? page : optionsPage,
+        limit: PAGE_SIZE,
+        total: data.pagination.total,
+        totalPages,
+        hasMore:
+          mode === "replace"
+            ? loadedCount < data.pagination.total
+            : optionsPage < totalPages,
+      });
+      setSignals((current) => {
+        if (mode === "replace" || optionsPage === 1) {
+          return data.signals;
+        }
+
+        return mergeSignals(current, data.signals);
+      });
+      setLastUpdatedAt(new Date());
+    },
+    [page]
+  );
+
+  const updateFilter = useCallback(
+    <K extends keyof SignalFilters,>(key: K, value: SignalFilters[K]) => {
+      setFilters((current) => ({ ...current, [key]: value }));
+      setPage(1);
+      setSignals([]);
+      setDailySummaries([]);
+      setSelectedSignal(null);
+    },
+    []
+  );
+
+  const resetFilters = useCallback(() => {
+    setFilters(DEFAULT_FILTERS);
+    setPage(1);
+    setSignals([]);
+    setDailySummaries([]);
+    setSelectedSignal(null);
+  }, []);
+
+  const openSignalDetails = useCallback((signal: DisplaySignal) => {
+    setSelectedSignal(signal);
+    setCopiedSignalId(null);
+  }, []);
+
+  const closeSignalDetails = useCallback(() => {
+    setSelectedSignal(null);
+  }, []);
+
+  const toggleDateGroup = useCallback((key: string) => {
+    setExpandedDateGroups((current) => {
+      const next = new Set(current);
+
+      if (next.has(key)) {
+        next.delete(key);
+      } else {
+        next.add(key);
+      }
+
+      return next;
+    });
+  }, []);
+
+  const loadMore = useCallback(() => {
+    if (!pagination.hasMore || isLoading) {
+      return;
+    }
+
+    setPage((current) => current + 1);
+  }, [isLoading, pagination.hasMore]);
+
+  const copySignal = useCallback(async (signal: DisplaySignal) => {
+    try {
+      await navigator.clipboard.writeText(getCopyText(signal, translate));
+      setCopiedSignalId(signal.id);
+      window.setTimeout(() => setCopiedSignalId(null), 1800);
+    } catch (copyError) {
+      console.error("Failed to copy signal:", copyError);
+    }
+  }, [translate]);
+
+  const refreshVisibleSignals = useCallback(async () => {
+    const visibleLimit = Math.min(PAGE_SIZE * page, 50);
+
+    setIsRefreshing(true);
+
+    try {
+      const data = await fetchWebsiteSignals({
+        ...queryOptions,
+        page: 1,
+        limit: visibleLimit,
+      });
+
+      applySignalResponse(data, 1, "replace");
+      setError(null);
+    } catch (refreshError) {
+      console.warn("Failed to refresh signals:", refreshError);
+      setError(translate("signalsLoadError", "Failed to load signals"));
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, [applySignalResponse, page, queryOptions, translate]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    setIsLoading(true);
+    setError(null);
+
+    fetchWebsiteSignals(queryOptions, controller.signal)
+      .then((data) => {
+        applySignalResponse(data, queryOptions.page, "page");
+      })
+      .catch((fetchError) => {
+        if (
+          fetchError instanceof DOMException &&
+          fetchError.name === "AbortError"
+        ) {
+          return;
+        }
+
+        console.warn("Failed to load signals:", fetchError);
+        setError(translate("signalsLoadError", "Failed to load signals"));
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) {
+          setIsLoading(false);
+        }
+      });
+
+    return () => {
+      controller.abort();
+    };
+  }, [applySignalResponse, queryOptions, translate]);
+
+  useEffect(() => {
+    setExpandedDateGroups((current) => {
+      const availableKeys = new Set(groupedSignals.map((group) => group.key));
+      const next = new Set(
+        Array.from(current).filter((key) => availableKeys.has(key))
+      );
+
+      if (next.size === 0 && groupedSignals[0]) {
+        next.add(groupedSignals[0].key);
+      }
+
+      if (
+        next.size === current.size &&
+        Array.from(next).every((key) => current.has(key))
+      ) {
+        return current;
+      }
+
+      return next;
+    });
+  }, [groupedSignals]);
+
+  useEffect(() => {
+    let isRequestRunning = false;
+
+    const intervalId = window.setInterval(() => {
+      if (isRequestRunning) {
+        return;
+      }
+
+      const controller = new AbortController();
+      const visibleLimit = Math.min(PAGE_SIZE * page, 50);
+      const refreshOptions = {
+        ...queryOptions,
+        page: 1,
+        limit: visibleLimit,
+      };
+
+      isRequestRunning = true;
+      setIsRefreshing(true);
+
+      fetchWebsiteSignals(refreshOptions, controller.signal)
+        .then((data) => {
+          applySignalResponse(data, 1, "replace");
+          setError(null);
+        })
+        .catch((fetchError) => {
+          if (
+            fetchError instanceof DOMException &&
+            fetchError.name === "AbortError"
+          ) {
+            return;
+          }
+
+          console.warn("Failed to refresh signals:", fetchError);
+        })
+        .finally(() => {
+          isRequestRunning = false;
+          setIsRefreshing(false);
+        });
+    }, LIVE_REFRESH_INTERVAL);
+
+    return () => {
+      window.clearInterval(intervalId);
+    };
+  }, [applySignalResponse, page, queryOptions]);
+
+  return (
+    <div className="relative min-h-screen bg-black text-white">
+      <div
+        className="absolute inset-0 z-0 bg-[url('/images/back.jpg')] bg-cover bg-center opacity-15"
+        aria-hidden="true"
+      />
+
+      <div className="relative z-10 mx-auto max-w-screen-xl px-4 py-12 md:py-16">
+        <MotionDiv className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+          <div>
+            <h1 className="text-3xl font-bold md:text-4xl">
+              {translate("forexSignals", "Forex Signals")}
+            </h1>
+            <div className="mt-2 text-sm text-gray-400">
+              {translate("showingSignals", "Showing")} {signals.length} /{" "}
+              {pagination.total}
+            </div>
+            <div className="mt-2 inline-flex items-center gap-2 rounded-md border border-blue-500/25 bg-blue-500/10 px-2.5 py-1 text-xs font-medium text-blue-200">
+              {isRefreshing ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <Activity className="h-3.5 w-3.5" />
+              )}
+              <span>{translate("liveUpdates", "Live updates")}</span>
+              <span className="text-blue-200/70">
+                {translate("updatedAt", "Updated")}{" "}
+                {formatLiveTime(lastUpdatedAt)}
+              </span>
             </div>
           </div>
+          <Button
+            type="button"
+            onClick={refreshVisibleSignals}
+            disabled={isRefreshing}
+            className="w-full bg-blue-600 text-white hover:bg-blue-500 disabled:bg-gray-800 md:w-auto"
+          >
+            {isRefreshing ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <RefreshCw className="mr-2 h-4 w-4" />
+            )}
+            {translate("refresh", "Refresh")}
+          </Button>
+        </MotionDiv>
 
-          {/* Filter buttons row */}
-          <div className="flex flex-row gap-2 overflow-x-auto pb-1">
+        <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <SummaryCard
+            label={translate("todaySignals", "Today Signals")}
+            value={summary.today}
+            icon={<Activity className="h-4 w-4" />}
+            colorClass="border-blue-500/30 text-blue-200"
+          />
+          <SummaryCard
+            label={translate("openSignals", "Open Signals")}
+            value={summary.open}
+            icon={<ArrowUpCircle className="h-4 w-4" />}
+            colorClass="border-green-500/30 text-green-300"
+          />
+          <SummaryCard
+            label={translate("tpHit", "TP Hit")}
+            value={summary.tpHit}
+            icon={<CheckCircle2 className="h-4 w-4" />}
+            colorClass="border-green-500/30 text-green-300"
+          />
+          <SummaryCard
+            label={translate("slHit", "SL Hit")}
+            value={summary.slHit}
+            icon={<XCircle className="h-4 w-4" />}
+            colorClass="border-red-500/30 text-red-300"
+          />
+        </div>
+
+        <div className="mb-6 rounded-lg border border-gray-800 bg-gray-950/85 p-4 backdrop-blur-sm">
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2 text-sm font-semibold text-gray-200">
+              <Filter className="h-4 w-4 text-blue-300" />
+              {translate("filters", "Filters")}
+            </div>
             <Button
+              type="button"
               variant="outline"
               size="sm"
-              className={`flex items-center gap-1 px-4 ${
-                sortOrder === "newest"
-                  ? "bg-gray-800 border-gray-700"
-                  : "border-gray-800 text-gray-300 hover:text-white"
-              }`}
-              onClick={() => setSortOrder("newest")}
+              onClick={resetFilters}
+              className="border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white"
             >
-              <ArrowDownUp className="h-4 w-4" />
-              {t("newest")}
+              <RotateCcw className="mr-1.5 h-3.5 w-3.5" />
+              {translate("resetFilters", "Reset")}
             </Button>
+          </div>
 
-            <Button
-              variant="outline"
-              size="sm"
-              className={`flex items-center gap-1 px-4 ${
-                signalTypeFilter === "all"
-                  ? "bg-gray-800 border-gray-700"
-                  : "border-gray-800 text-gray-300 hover:text-white"
-              }`}
-              onClick={() => setSignalTypeFilter("all")}
-            >
-              <Filter className="h-4 w-4" />
-              {t("allSignals")}
-            </Button>
-
-            <Button
-              variant="outline"
-              size="sm"
-              className={`flex items-center gap-1 px-4 ${
-                signalTypeFilter === "buy"
-                  ? "bg-gray-800 border-gray-700"
-                  : "border-gray-800 text-gray-300 hover:text-white"
-              }`}
-              onClick={() => setSignalTypeFilter("buy")}
-            >
-              {t("buySignals")}
-            </Button>
-
-            <Button
-              variant="outline"
-              size="sm"
-              className={`flex items-center gap-1 px-4 ${
-                signalTypeFilter === "sell"
-                  ? "bg-gray-800 border-gray-700"
-                  : "border-gray-800 text-gray-300 hover:text-white"
-              }`}
-              onClick={() => setSignalTypeFilter("sell")}
-            >
-              {t("sellSignals")}
-            </Button>
-
-            <Button
-              variant="outline"
-              size="sm"
-              className={`flex items-center gap-1 px-4 ${
-                sortOrder === "oldest"
-                  ? "bg-gray-800 border-gray-700"
-                  : "border-gray-800 text-gray-300 hover:text-white"
-              }`}
-              onClick={() => setSortOrder("oldest")}
-            >
-              {t("oldest")}
-            </Button>
-
-            <Button
-              variant="outline"
-              size="sm"
-              className={`flex items-center gap-1 px-4 ${
-                sortOrder === "pair"
-                  ? "bg-gray-800 border-gray-700"
-                  : "border-gray-800 text-gray-300 hover:text-white"
-              }`}
-              onClick={() => setSortOrder("pair")}
-            >
-              {t("symbolAZ")}
-            </Button>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <SelectFilter
+              label={translate("status", "Status")}
+              value={filters.status}
+              options={statusOptions}
+              onChange={(value) => updateFilter("status", value)}
+            />
+            <SelectFilter
+              label={translate("symbol", "Symbol")}
+              value={filters.symbol}
+              options={symbolOptions}
+              onChange={(value) => updateFilter("symbol", value)}
+            />
+            <SelectFilter
+              label={translate("directionLabel", "Direction")}
+              value={filters.direction}
+              options={directionOptions}
+              onChange={(value) => updateFilter("direction", value)}
+            />
+            <SelectFilter
+              label={translate("date", "Date")}
+              value={filters.date}
+              options={dateOptions}
+              onChange={(value) => updateFilter("date", value)}
+            />
           </div>
         </div>
 
-        {/* Signals Grid */}
-        <div className="max-w-6xl mx-auto mb-12">
-          {filteredSignals.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredSignals.map((signal) => (
-                <div key={signal.id} className="h-full">
-                  <SignalCard {...signal} />
+        {error && (
+          <div className="mb-6 rounded-lg border border-red-500/30 bg-red-950/40 p-4 text-sm text-red-200">
+            {error}
+          </div>
+        )}
+
+        {isInitialLoading && <CardSkeleton />}
+
+        <div className="md:hidden">
+          {!isInitialLoading &&
+            groupedSignals.map((group) => {
+              const groupSummary =
+                dailySummaryMap.get(group.key) ??
+                buildDailySummaryFallback(
+                  group.key,
+                  group.label,
+                  group.signals
+                );
+
+              return (
+                <div key={group.key} className="mb-3">
+                  <DateGroupHeading
+                    label={group.label}
+                    count={groupSummary.signalCount || group.signals.length}
+                    summary={groupSummary}
+                    isOpen={expandedDateGroups.has(group.key)}
+                    onToggle={() => toggleDateGroup(group.key)}
+                    translate={translate}
+                  />
+                  {expandedDateGroups.has(group.key) && (
+                    <div className="mt-3 space-y-3">
+                      {group.signals.map((signal) => (
+                        <SignalCard
+                          key={signal.id}
+                          {...signal}
+                          onDetails={() => openSignalDetails(signal)}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+        </div>
+
+        <div className="hidden overflow-hidden rounded-lg border border-gray-800 bg-gray-950/85 backdrop-blur-sm md:block">
+          <div className="overflow-x-auto">
+            <table className="min-w-full text-left text-sm">
+              <thead className="bg-black/40 text-xs uppercase text-gray-500">
+                <tr>
+                  <th className="px-4 py-3 font-semibold">
+                    {translate("symbol", "Symbol")}
+                  </th>
+                  <th className="px-4 py-3 font-semibold">
+                    {translate("directionLabel", "Direction")}
+                  </th>
+                  <th className="px-4 py-3 font-semibold">
+                    {translate("entry", "Entry")}
+                  </th>
+                  <th className="px-4 py-3 font-semibold">
+                    {translate("stopLoss", "Stop Loss")}
+                  </th>
+                  <th className="px-4 py-3 font-semibold">
+                    {translate("takeProfit1", "Take Profit 1")}
+                  </th>
+                  <th className="px-4 py-3 font-semibold">
+                    {translate("status", "Status")}
+                  </th>
+                  <th className="px-4 py-3 font-semibold">
+                    {translate("result", "Result")}
+                  </th>
+                  <th className="px-4 py-3 font-semibold">
+                    {translate("time", "Time")}
+                  </th>
+                  <th className="px-4 py-3 font-semibold">
+                    {translate("details", "Details")}
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {isInitialLoading ? (
+                  <TableSkeleton />
+                ) : (
+                  groupedSignals.map((group) => {
+                    const groupSummary =
+                      dailySummaryMap.get(group.key) ??
+                      buildDailySummaryFallback(
+                        group.key,
+                        group.label,
+                        group.signals
+                      );
+
+                    return (
+                      <Fragment key={group.key}>
+                        <tr>
+                          <td
+                            colSpan={9}
+                            className="border-t border-gray-800 bg-black/35 px-4 py-0"
+                          >
+                            <button
+                              type="button"
+                              onClick={() => toggleDateGroup(group.key)}
+                              className="flex w-full flex-col gap-2 py-3 text-left text-sm font-semibold text-blue-100 transition-colors hover:text-white lg:flex-row lg:items-center lg:justify-between"
+                              aria-expanded={expandedDateGroups.has(group.key)}
+                            >
+                              <span className="inline-flex items-center gap-2">
+                                <CalendarDays className="h-4 w-4 text-blue-300" />
+                                <span>{group.label}</span>
+                              </span>
+                              <span className="inline-flex items-center gap-3">
+                                <DailySummaryStats
+                                  summary={groupSummary}
+                                  count={
+                                    groupSummary.signalCount ||
+                                    group.signals.length
+                                  }
+                                  translate={translate}
+                                />
+                                <ChevronDown
+                                  className={cn(
+                                    "h-4 w-4 shrink-0 text-blue-300 transition-transform",
+                                    expandedDateGroups.has(group.key)
+                                      ? "rotate-180"
+                                      : "rotate-0"
+                                  )}
+                                />
+                              </span>
+                            </button>
+                          </td>
+                        </tr>
+                        {expandedDateGroups.has(group.key) &&
+                          group.signals.map((signal) => (
+                            <SignalTableRows
+                              key={signal.id}
+                              signal={signal}
+                              onDetails={() => openSignalDetails(signal)}
+                              translate={translate}
+                            />
+                          ))}
+                      </Fragment>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {!isInitialLoading && signals.length === 0 && (
+          <div className="mt-6 flex min-h-[180px] items-center justify-center rounded-lg border border-gray-800 bg-gray-950/85 p-8 text-center text-gray-400">
+            <div>
+              <Filter className="mx-auto mb-3 h-10 w-10 text-gray-600" />
+              <p className="text-base">{translate("noSignalsFound", "No signals found")}</p>
+              <p className="mt-1 text-sm text-gray-500">
+                {translate("tryDifferentPair", "Try different filters")}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {signals.length > 0 && (
+          <div className="mt-6 flex justify-center">
+            <Button
+              type="button"
+              onClick={loadMore}
+              disabled={!pagination.hasMore || isLoadingMore}
+              className="min-w-[150px] bg-blue-600 text-white hover:bg-blue-500 disabled:bg-gray-800"
+            >
+              {isLoadingMore ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  {translate("loadingSignals", "Loading")}
+                </>
+              ) : pagination.hasMore ? (
+                translate("loadMore", "Load More")
+              ) : (
+                translate("noMoreSignals", "No More Signals")
+              )}
+            </Button>
+          </div>
+        )}
+
+        <RiskCalculator translate={translate} />
+      </div>
+
+      {selectedSignal && (
+        <SignalDetailsModal
+          signal={selectedSignal}
+          copiedSignalId={copiedSignalId}
+          onClose={closeSignalDetails}
+          onCopy={() => copySignal(selectedSignal)}
+          translate={translate}
+        />
+      )}
+    </div>
+  );
+}
+
+function SignalTableRows({
+  signal,
+  onDetails,
+  translate,
+}: {
+  signal: DisplaySignal;
+  onDetails: () => void;
+  translate: (key: string, fallback: string) => string;
+}) {
+  return (
+      <tr className="border-t border-gray-900 transition-colors hover:bg-gray-900/70">
+        <td className="px-4 py-3 font-semibold text-white">{signal.pair}</td>
+        <td className="px-4 py-3">
+          <span
+            className={cn(
+              "inline-flex items-center gap-1 rounded-md border px-2 py-1 text-xs font-semibold",
+              getDirectionClass(signal.type)
+            )}
+          >
+            {signal.type === "buy" ? (
+              <ArrowUpCircle className="h-3.5 w-3.5" />
+            ) : (
+              <ArrowDownCircle className="h-3.5 w-3.5" />
+            )}
+            {signal.type === "buy"
+              ? translate("buy", "Buy")
+              : translate("sell", "Sell")}
+          </span>
+        </td>
+        <td className="px-4 py-3 text-gray-200">
+          {formatNumber(signal.price)}
+        </td>
+        <td className="px-4 py-3 text-red-300">
+          {formatNumber(signal.stopLoss)}
+        </td>
+        <td className="px-4 py-3 text-green-300">
+          {formatNumber(signal.takeProfit[0])}
+        </td>
+        <td className="px-4 py-3">
+          <span
+            className={cn(
+              "inline-flex rounded-md border px-2 py-1 text-xs font-semibold",
+              getStatusClass(signal)
+            )}
+          >
+            {translate(getSignalStatusKey(signal), getSignalStatus(signal))}
+          </span>
+        </td>
+        <td className="px-4 py-3">
+          <span
+            className={cn(
+              "inline-flex items-center gap-1 rounded-md border px-2 py-1 text-xs font-semibold",
+              getResultClass(signal)
+            )}
+          >
+            {getResultIcon(signal)}
+            {translate(getSignalResultKey(signal), getSignalResult(signal))}
+          </span>
+        </td>
+        <td className="px-4 py-3 text-gray-400">{signal.timestamp}</td>
+        <td className="px-4 py-3">
+          <button
+            type="button"
+            onClick={onDetails}
+            className="inline-flex h-8 items-center gap-1 rounded-md border border-blue-500/40 bg-blue-500/10 px-3 text-xs font-semibold text-blue-200 transition-colors hover:bg-blue-500/20"
+          >
+            <Info className="h-3.5 w-3.5" />
+            {translate("details", "Details")}
+          </button>
+        </td>
+      </tr>
+  );
+}
+
+function SignalDetailsModal({
+  signal,
+  copiedSignalId,
+  onClose,
+  onCopy,
+  translate,
+}: {
+  signal: DisplaySignal;
+  copiedSignalId: string | null;
+  onClose: () => void;
+  onCopy: () => void;
+  translate: (key: string, fallback: string) => string;
+}) {
+  const timeline = [
+    {
+      label: translate("timelinePublished", "Published"),
+      active: Boolean(signal.createdAt || signal.timestamp),
+    },
+    { label: translate("timelineEntryActivated", "Entry Activated"), active: true },
+    { label: translate("timelineTpHit", "TP Hit"), active: signal.closeReason === "TP" },
+    { label: translate("timelineSlHit", "SL Hit"), active: signal.closeReason === "SL" },
+    { label: translate("timelineClosed", "Closed"), active: signal.isOpen === false },
+    {
+      label: translate("timelineExpired", "Expired"),
+      active: signal.isOpen === false && !signal.closeReason,
+    },
+  ];
+
+  const scrollToRiskTool = () => {
+    onClose();
+    window.setTimeout(() => {
+      document
+        .getElementById("risk-tool")
+        ?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 50);
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-end justify-center bg-black/75 p-0 backdrop-blur-sm md:items-center md:p-6"
+      role="dialog"
+      aria-modal="true"
+      aria-label={translate("signalDetails", "Signal details")}
+    >
+      <div className="max-h-[92vh] w-full overflow-y-auto rounded-t-lg border border-gray-800 bg-gray-950 text-white shadow-2xl md:max-w-3xl md:rounded-lg">
+        <div className="sticky top-0 z-10 flex items-start justify-between gap-4 border-b border-gray-800 bg-gray-950/95 p-4 backdrop-blur">
+          <div>
+            <div className="flex flex-wrap items-center gap-2">
+              <h2 className="text-2xl font-bold">{signal.pair}</h2>
+              <span
+                className={cn(
+                  "inline-flex items-center rounded-md border px-2 py-1 text-xs font-semibold",
+                  getDirectionClass(signal.type)
+                )}
+              >
+                {signal.type === "buy"
+                  ? translate("buy", "Buy")
+                  : translate("sell", "Sell")}
+              </span>
+              <span
+                className={cn(
+                  "inline-flex rounded-md border px-2 py-1 text-xs font-semibold",
+                  getStatusClass(signal)
+                )}
+              >
+                {translate(getSignalStatusKey(signal), getSignalStatus(signal))}
+              </span>
+            </div>
+            <p className="mt-1 text-sm text-gray-400">
+              {formatDetailsDate(signal.createdAt)} / {signal.timestamp}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-md border border-gray-800 p-2 text-gray-300 transition-colors hover:bg-gray-900 hover:text-white"
+            aria-label={translate("closeSignalDetails", "Close signal details")}
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+
+        <div className="space-y-5 p-4 md:p-6">
+          <div
+            className={cn(
+              "rounded-lg border p-4",
+              getResultClass(signal)
+            )}
+          >
+            <div className="text-xs uppercase opacity-75">
+              {translate("result", "Result")}
+            </div>
+            <div className="mt-1 flex flex-wrap items-center gap-2 text-sm font-semibold">
+              {getResultIcon(signal)}
+              {translate(getSignalResultKey(signal), getSignalResult(signal))}
+              {!signal.isOpen && signal.closePrice !== undefined && (
+                <span className="text-xs font-medium opacity-80">
+                  {translate("closePrice", "Close Price")}:{" "}
+                  {formatNumber(signal.closePrice)}
+                </span>
+              )}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3 text-sm md:grid-cols-4">
+            <DetailValue
+              label={translate("symbol", "Symbol")}
+              value={signal.pair}
+            />
+            <DetailValue
+              label={translate("directionLabel", "Direction")}
+              value={
+                signal.type === "buy"
+                  ? translate("buy", "Buy")
+                  : translate("sell", "Sell")
+              }
+            />
+            <DetailValue
+              label={translate("entryPrice", "Entry")}
+              value={formatNumber(signal.price)}
+            />
+            <DetailValue
+              label={translate("stopLoss", "Stop Loss")}
+              value={formatNumber(signal.stopLoss)}
+              valueClassName="text-red-300"
+            />
+            <DetailValue
+              label={translate("takeProfit1", "Take Profit 1")}
+              value={formatNumber(signal.takeProfit[0])}
+              valueClassName="text-green-300"
+            />
+            <DetailValue
+              label={translate("riskReward", "Risk/Reward")}
+              value={getRiskReward(signal)}
+            />
+            <DetailValue
+              label={translate("pipsLabel", "Pips")}
+              value={getSignalPips(signal, translate)}
+            />
+            <DetailValue
+              label={translate("time", "Time")}
+              value={signal.timestamp}
+            />
+            <DetailValue
+              label={translate("source", "Source")}
+              value={signal.source || "-"}
+            />
+            <DetailValue
+              label={translate("resultSource", "Result Source")}
+              value={getResultSourceLabel(signal, translate)}
+            />
+            <DetailValue
+              label={translate("closedAt", "Closed At")}
+              value={formatDetailsDate(signal.closedAt)}
+            />
+            <DetailValue
+              label={translate("ticket", "Ticket")}
+              value={signal.ticket || "-"}
+            />
+          </div>
+
+          <div className="rounded-lg border border-gray-800 bg-black/25 p-4">
+            <h3 className="mb-2 text-sm font-semibold text-white">
+              {translate("analysisReason", "Analysis reason")}
+            </h3>
+            <p className="text-sm leading-6 text-gray-400">
+              {getAnalysisReason(signal, translate)}
+            </p>
+          </div>
+
+          <div className="rounded-lg border border-gray-800 bg-black/25 p-4">
+            <h3 className="mb-4 text-sm font-semibold text-white">
+              {translate("signalTimeline", "Signal timeline")}
+            </h3>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+              {timeline.map((item) => (
+                <div
+                  key={item.label}
+                  className={cn(
+                    "rounded-md border px-3 py-2 text-xs font-semibold",
+                    item.active
+                      ? "border-blue-500/35 bg-blue-500/10 text-blue-200"
+                      : "border-gray-800 bg-gray-900/60 text-gray-500"
+                  )}
+                >
+                  {item.label}
                 </div>
               ))}
             </div>
-          ) : (
-            <div className="min-h-[300px] flex items-center justify-center text-center p-8 text-gray-400 bg-gray-900/80 backdrop-blur-sm rounded-lg border border-gray-800 w-full">
-              <div>
-                <SearchIcon className="h-12 w-12 mx-auto mb-4 opacity-30" />
-                <p className="text-lg">{t("noSignalsFound")}</p>
-                <p className="text-sm mt-2 text-gray-500">
-                  {t("tryDifferentPair")}
-                </p>
-              </div>
-            </div>
-          )}
+          </div>
+
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <Button
+              type="button"
+              onClick={onCopy}
+              className="bg-blue-600 text-white hover:bg-blue-500"
+            >
+              <Copy className="mr-2 h-4 w-4" />
+              {copiedSignalId === signal.id
+                ? translate("copied", "Copied")
+                : translate("copySignal", "Copy Signal")}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={scrollToRiskTool}
+              className="border-blue-500/40 bg-blue-500/10 text-blue-100 hover:bg-blue-500/20 hover:text-white"
+            >
+              <Calculator className="mr-2 h-4 w-4" />
+              {translate("openRiskCalculator", "Open Risk Calculator")}
+            </Button>
+          </div>
         </div>
+      </div>
+    </div>
+  );
+}
+
+function RiskCalculator({
+  translate,
+}: {
+  translate: (key: string, fallback: string) => string;
+}) {
+  const [accountBalance, setAccountBalance] = useState(10000);
+  const [riskPercent, setRiskPercent] = useState(1);
+  const [stopLossPips, setStopLossPips] = useState(30);
+  const riskAmount = accountBalance * (riskPercent / 100);
+  const lotSize =
+    stopLossPips > 0 ? riskAmount / (stopLossPips * 10) : 0;
+
+  return (
+    <section
+      id="risk-tool"
+      className="mt-10 rounded-lg border border-blue-500/20 bg-gray-950/85 p-4 backdrop-blur-sm md:p-6"
+    >
+      <div className="mb-5 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+        <div>
+          <h2 className="text-2xl font-bold text-white">
+            {translate("riskCalculator", "Risk Calculator")}
+          </h2>
+          <p className="mt-1 text-sm text-gray-400">
+            {translate(
+              "riskCalculatorDescription",
+              "Estimate lot size using account balance, risk percentage, and stop loss distance. Assumes $10 per pip for one standard lot."
+            )}
+          </p>
+        </div>
+        <Calculator className="h-8 w-8 text-blue-300" />
+      </div>
+
+      <div className="grid gap-3 md:grid-cols-4">
+        <CalculatorField
+          label={translate("accountBalance", "Account balance")}
+          value={accountBalance}
+          min={0}
+          step={100}
+          onChange={setAccountBalance}
+        />
+        <CalculatorField
+          label={translate("riskPercent", "Risk %")}
+          value={riskPercent}
+          min={0}
+          step={0.1}
+          onChange={setRiskPercent}
+        />
+        <CalculatorField
+          label={translate("stopLossPips", "Stop loss pips")}
+          value={stopLossPips}
+          min={0}
+          step={1}
+          onChange={setStopLossPips}
+        />
+        <div className="rounded-md border border-blue-500/30 bg-blue-500/10 p-3">
+          <div className="text-xs font-medium uppercase text-blue-200">
+            {translate("recommendedLotSize", "Recommended lot size")}
+          </div>
+          <div className="mt-2 text-2xl font-bold text-white">
+            {Number.isFinite(lotSize) ? lotSize.toFixed(2) : "0.00"}
+          </div>
+          <div className="mt-1 text-xs text-blue-100/80">
+            {translate("riskAmount", "Risk amount")}: ${riskAmount.toFixed(2)}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function CalculatorField({
+  label,
+  value,
+  min,
+  step,
+  onChange,
+}: {
+  label: string;
+  value: number;
+  min: number;
+  step: number;
+  onChange: (value: number) => void;
+}) {
+  return (
+    <label className="flex flex-col gap-1 text-xs font-medium uppercase text-gray-500">
+      {label}
+      <input
+        type="number"
+        min={min}
+        step={step}
+        value={value}
+        onChange={(event) => onChange(Number(event.target.value))}
+        className="h-11 rounded-md border border-gray-800 bg-black px-3 text-sm normal-case text-white outline-none transition-colors focus:border-blue-500"
+      />
+    </label>
+  );
+}
+
+function SummaryCard({
+  label,
+  value,
+  icon,
+  colorClass,
+}: {
+  label: string;
+  value: number;
+  icon: ReactNode;
+  colorClass: string;
+}) {
+  return (
+    <div className="rounded-lg border border-gray-800 bg-gray-950/85 p-4 backdrop-blur-sm">
+      <div className={cn("mb-3 inline-flex rounded-md border p-2", colorClass)}>
+        {icon}
+      </div>
+      <div className="text-2xl font-bold text-white">{value}</div>
+      <div className="mt-1 text-xs font-medium uppercase text-gray-500">
+        {label}
+      </div>
+    </div>
+  );
+}
+
+function DailySummaryStats({
+  summary,
+  count,
+  translate,
+}: {
+  summary: DailySignalSummary;
+  count: number;
+  translate: (key: string, fallback: string) => string;
+}) {
+  const netClass =
+    summary.netPips > 0
+      ? "text-green-300"
+      : summary.netPips < 0
+        ? "text-red-300"
+        : "text-gray-300";
+
+  return (
+    <span className="flex flex-wrap items-center gap-2 text-xs text-gray-400">
+      <span>
+        {count} {translate("signals", "Signals")}
+      </span>
+      <span className="text-green-300">
+        {translate("tpHit", "TP Hit")}: {summary.tpHit}
+      </span>
+      <span className="text-red-300">
+        {translate("slHit", "SL Hit")}: {summary.slHit}
+      </span>
+      <span className="text-green-300">
+        {translate("dailyProfit", "Profit")}: +
+        {formatPipsValue(summary.profitPips)} {translate("pips", "pips")}
+      </span>
+      <span className="text-red-300">
+        {translate("dailyLoss", "Loss")}: -
+        {formatPipsValue(summary.lossPips)} {translate("pips", "pips")}
+      </span>
+      <span className={netClass}>
+        {translate("dailyNet", "Net")}:{" "}
+        {formatPipsValue(summary.netPips, { signed: true })}{" "}
+        {translate("pips", "pips")}
+      </span>
+    </span>
+  );
+}
+
+function DateGroupHeading({
+  label,
+  count,
+  summary,
+  isOpen,
+  onToggle,
+  translate,
+}: {
+  label: string;
+  count: number;
+  summary: DailySignalSummary;
+  isOpen: boolean;
+  onToggle: () => void;
+  translate: (key: string, fallback: string) => string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      className="flex w-full flex-col gap-2 rounded-lg border border-gray-800 bg-gray-950/85 px-3 py-3 text-left text-sm font-semibold text-blue-100"
+      aria-expanded={isOpen}
+    >
+      <span className="flex w-full items-center justify-between gap-3">
+        <span className="inline-flex items-center gap-2">
+          <CalendarDays className="h-4 w-4 text-blue-300" />
+          <span>{label}</span>
+        </span>
+        <ChevronDown
+          className={cn(
+            "h-4 w-4 shrink-0 text-blue-300 transition-transform",
+            isOpen ? "rotate-180" : "rotate-0"
+          )}
+        />
+      </span>
+      <DailySummaryStats
+        summary={summary}
+        count={count}
+        translate={translate}
+      />
+    </button>
+  );
+}
+
+function DetailValue({
+  label,
+  value,
+  valueClassName,
+  title,
+}: {
+  label: string;
+  value: string;
+  valueClassName?: string;
+  title?: string;
+}) {
+  return (
+    <div className="min-w-0">
+      <div className="text-gray-500">{label}</div>
+      <div
+        className={cn("mt-1 font-semibold text-gray-200", valueClassName)}
+        title={title}
+      >
+        {value}
       </div>
     </div>
   );

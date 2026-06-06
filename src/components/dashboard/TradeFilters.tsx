@@ -1,0 +1,141 @@
+"use client";
+
+import type { FormEvent } from "react";
+import type { ReactNode } from "react";
+import { Filter, RotateCcw } from "lucide-react";
+import type { TradingAccountDto } from "@/components/dashboard/types";
+
+export type TradeFilterValues = {
+  accountId: string;
+  symbol: string;
+  direction: string;
+  status: string;
+  from: string;
+  to: string;
+};
+
+export function TradeFilters({
+  accounts,
+  values,
+  onChange,
+  onClear,
+  action,
+}: {
+  accounts: TradingAccountDto[];
+  values: TradeFilterValues;
+  onChange: (values: TradeFilterValues) => void;
+  onClear: () => void;
+  action?: ReactNode;
+}) {
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    onChange({
+      accountId: String(formData.get("accountId") || ""),
+      symbol: String(formData.get("symbol") || ""),
+      direction: String(formData.get("direction") || ""),
+      status: String(formData.get("status") || ""),
+      from: String(formData.get("from") || ""),
+      to: String(formData.get("to") || ""),
+    });
+  }
+
+  return (
+    <div className="rounded-xl border border-slate-800 bg-[#0F172A] p-4 shadow-sm">
+      <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <div>
+          <h3 className="text-sm font-semibold text-white">Trade Filters</h3>
+          <p className="text-xs text-slate-400">Filter by account, symbol, direction, status, and date.</p>
+        </div>
+        {action}
+      </div>
+      <form onSubmit={handleSubmit} className="grid gap-3 md:grid-cols-7">
+        <label className="space-y-1 text-xs font-medium uppercase text-slate-400">
+          Account
+          <select
+            name="accountId"
+            defaultValue={values.accountId}
+            className="h-11 w-full rounded-xl border border-slate-800 bg-[#111827] px-3 text-sm normal-case text-[#E5E7EB] outline-none focus:border-blue-600"
+          >
+            <option value="">All</option>
+            {accounts.map((account) => (
+              <option key={account.id} value={account.id}>
+                {account.name}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="space-y-1 text-xs font-medium uppercase text-slate-400">
+          Symbol
+          <input
+            name="symbol"
+            defaultValue={values.symbol}
+            placeholder="EURUSD"
+            className="h-11 w-full rounded-xl border border-slate-800 bg-[#111827] px-3 text-sm uppercase text-[#E5E7EB] outline-none focus:border-blue-600"
+          />
+        </label>
+        <label className="space-y-1 text-xs font-medium uppercase text-slate-400">
+          Direction
+          <select
+            name="direction"
+            defaultValue={values.direction}
+            className="h-11 w-full rounded-xl border border-slate-800 bg-[#111827] px-3 text-sm normal-case text-[#E5E7EB] outline-none focus:border-blue-600"
+          >
+            <option value="">All</option>
+            <option value="BUY">BUY</option>
+            <option value="SELL">SELL</option>
+          </select>
+        </label>
+        <label className="space-y-1 text-xs font-medium uppercase text-slate-400">
+          Status
+          <select
+            name="status"
+            defaultValue={values.status}
+            className="h-11 w-full rounded-xl border border-slate-800 bg-[#111827] px-3 text-sm normal-case text-[#E5E7EB] outline-none focus:border-blue-600"
+          >
+            <option value="">All</option>
+            <option value="OPEN">OPEN</option>
+            <option value="CLOSED">CLOSED</option>
+            <option value="CANCELLED">CANCELLED</option>
+          </select>
+        </label>
+        <label className="space-y-1 text-xs font-medium uppercase text-slate-400">
+          From
+          <input
+            name="from"
+            type="date"
+            defaultValue={values.from}
+            className="h-11 w-full rounded-xl border border-slate-800 bg-[#111827] px-3 text-sm normal-case text-[#E5E7EB] outline-none focus:border-blue-600"
+          />
+        </label>
+        <label className="space-y-1 text-xs font-medium uppercase text-slate-400">
+          To
+          <input
+            name="to"
+            type="date"
+            defaultValue={values.to}
+            className="h-11 w-full rounded-xl border border-slate-800 bg-[#111827] px-3 text-sm normal-case text-[#E5E7EB] outline-none focus:border-blue-600"
+          />
+        </label>
+        <div className="flex gap-2 self-end">
+          <button
+            type="submit"
+            className="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-[#2563EB] px-4 text-sm font-semibold text-white hover:bg-blue-500"
+          >
+            <Filter className="h-4 w-4" />
+            Filter
+          </button>
+          <button
+            type="button"
+            onClick={onClear}
+            className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-slate-800 text-slate-300 hover:bg-slate-800"
+            aria-label="Clear filters"
+            title="Clear filters"
+          >
+            <RotateCcw className="h-4 w-4" />
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}

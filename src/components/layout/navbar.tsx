@@ -4,13 +4,21 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Menu, ArrowUpRight } from "lucide-react";
 import { useState } from "react";
-import Image from "next/image";
+import { usePathname } from "next/navigation";
 import { useLanguage } from "@/lib/language-context";
 import { LanguageSwitcher } from "@/components/language-switcher";
 
 export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const pathname = usePathname();
   const { t, language } = useLanguage();
+  const ctaClass =
+    "bg-blue-600 text-white border-blue-500/50 hover:bg-blue-500 hover:text-white rounded-md shadow-sm";
+  const navLinkClass = "text-white hover:text-blue-300 transition";
+
+  if (pathname?.startsWith("/dashboard") || pathname?.startsWith("/journal")) {
+    return null;
+  }
 
   return (
     <nav className="relative bg-gradient-to-r from-black to-black/95 w-full z-30 border-b border-gray-800/30">
@@ -23,7 +31,7 @@ export function Navbar() {
               <Button
                 variant="outline"
                 asChild
-                className="bg-blue-600/80 text-white border-blue-700/30 hover:bg-blue-700/50 rounded-lg"
+                className={ctaClass}
               >
                 <Link
                   href="https://t.me/+uRJNzAveahQ0NjM0"
@@ -55,28 +63,22 @@ export function Navbar() {
             }`}
           >
             {/* Order is important here */}
-            <Link
-              href="/"
-              className="text-white hover:text-blue-300 transition"
-            >
+            <Link href="/" className={navLinkClass}>
               {t("home")}
             </Link>
-            <Link
-              href="/blog"
-              className="text-white hover:text-blue-300 transition"
-            >
+            <Link href="/signals" className={navLinkClass}>
+              {t("signals") === "signals" ? "Signals" : t("signals")}
+            </Link>
+            <Link href="/journal" className={navLinkClass}>
+              Journal
+            </Link>
+            <Link href="/blog" className={navLinkClass}>
               {t("blog")}
             </Link>
-            <Link
-              href="/about"
-              className="text-white hover:text-blue-300 transition"
-            >
+            <Link href="/about" className={navLinkClass}>
               {t("about")}
             </Link>
-            <Link
-              href="/contact"
-              className="text-white hover:text-blue-300 transition"
-            >
+            <Link href="/contact" className={navLinkClass}>
               {t("contact")}
             </Link>
           </div>
@@ -98,7 +100,7 @@ export function Navbar() {
               <Button
                 variant="outline"
                 asChild
-                className="bg-blue-600/80 text-white border-blue-700/30 hover:bg-blue-700/50 rounded-lg"
+                className={ctaClass}
               >
                 <Link
                   href="https://t.me/+uRJNzAveahQ0NjM0"
@@ -146,6 +148,20 @@ export function Navbar() {
               {t("blog")}
             </Link>
             <Link
+              href="/signals"
+              className="text-white hover:text-blue-300 px-4 py-2 rounded-md hover:bg-gray-900/50 transition w-full"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              {t("signals") === "signals" ? "Signals" : t("signals")}
+            </Link>
+            <Link
+              href="/journal"
+              className="text-white hover:text-blue-300 px-4 py-2 rounded-md hover:bg-gray-900/50 transition w-full"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Journal
+            </Link>
+            <Link
               href="/about"
               className="text-white hover:text-blue-300 px-4 py-2 rounded-md hover:bg-gray-900/50 transition w-full"
               onClick={() => setIsMenuOpen(false)}
@@ -162,7 +178,7 @@ export function Navbar() {
             <div
               className={`pt-2 flex flex-col space-y-2 w-full ${language === "en" ? "items-end" : ""}`}
             >
-              <Button asChild className="bg-blue-600/80 text-white w-full">
+              <Button asChild className={`${ctaClass} w-full`}>
                 <Link
                   href="https://t.me/+uRJNzAveahQ0NjM0"
                   className="flex items-center justify-center gap-1"

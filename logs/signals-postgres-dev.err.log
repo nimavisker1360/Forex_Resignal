@@ -1,0 +1,20 @@
+Signal API GET error: Error [PrismaClientInitializationError]: 
+Invalid `prisma.websiteSignal.findMany()` invocation:
+
+
+Can't reach database server at `ep-proud-leaf-agduw96y-pooler.c-2.eu-central-1.aws.neon.tech:5432`
+
+Please make sure your database server is running at `ep-proud-leaf-agduw96y-pooler.c-2.eu-central-1.aws.neon.tech:5432`.
+    at async getTradingSignalsPage (src\lib\signal-store.ts:1073:52)
+    at async GET (src\app\api\signals\route.ts:25:19)
+  1071 |   }
+  1072 |
+> 1073 |   const [signals, total, summary, dailySummaries] = await Promise.all([
+       |                                                    ^
+  1074 |     prisma.websiteSignal.findMany({
+  1075 |       where: filter,
+  1076 |       orderBy: { createdAt: "desc" }, {
+  clientVersion: '6.19.3',
+  errorCode: undefined,
+  retryable: undefined
+}

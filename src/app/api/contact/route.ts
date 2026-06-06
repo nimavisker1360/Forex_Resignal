@@ -1,8 +1,4 @@
 import { NextResponse } from "next/server";
-import { Resend } from "resend";
-
-// Create a new Resend instance using the API key
-const resend = new Resend(process.env.RESEND_API_KEY);
 
 // Simple validation helper
 function isValidEmail(email: string) {
@@ -20,6 +16,13 @@ export async function POST(request: Request) {
     if (!name || !email || !subject || !message) {
       return NextResponse.json(
         { error: "All fields are required" },
+        { status: 400 }
+      );
+    }
+
+    if (!isValidEmail(email)) {
+      return NextResponse.json(
+        { error: "Please enter a valid email address" },
         { status: 400 }
       );
     }

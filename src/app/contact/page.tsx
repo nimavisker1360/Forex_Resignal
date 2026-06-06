@@ -1,7 +1,8 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Mail, MapPin, MessageSquare } from "lucide-react";
+import { Mail, MapPin, MessageSquare, Send } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useLanguage } from "@/lib/language-context";
@@ -68,13 +69,31 @@ export default function ContactPage() {
             {t("contactPage.title")}
           </h1>
           <p className="text-lg text-white font-semibold">
-            {t("contactPage.subtitle")}
+            {t("contactPage.telegramSubtitle")}
           </p>
         </div>
 
         <div className="grid md:grid-cols-2 gap-12 items-start text-left">
           {/* Contact Info */}
           <div>
+            <div className="mb-8 rounded-lg border border-blue-500/25 bg-blue-500/10 p-8 text-left">
+              <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-md bg-blue-600">
+                <Send className="h-6 w-6 text-white" />
+              </div>
+              <h2 className="mb-3 text-2xl font-bold text-white">
+                {t("contactPage.telegramSupport")}
+              </h2>
+              <p className="mb-6 text-sm leading-6 text-blue-100/90">
+                {t("contactPage.telegramSupportText")}
+              </p>
+              <Button asChild className="bg-blue-600 hover:bg-blue-500">
+                <Link href="https://t.me/+uRJNzAveahQ0NjM0">
+                  {t("contactPage.openTelegram")}{" "}
+                  <Send className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
+            </div>
+
             <div className="bg-card border rounded-lg p-8 mb-8 text-left">
               <h2 className="text-2xl font-bold mb-6">
                 {t("contactPage.contactInfo")}

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { ArrowLeft, Calendar, User, Link as LinkIcon } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { useLanguage } from "@/lib/language-context";
 
 // NewsAPI news item interface
 interface NewsItem {
@@ -19,6 +20,11 @@ interface NewsItem {
 export default function NewsDetailPage() {
   const params = useParams();
   const newsId = params.id as string;
+  const { t } = useLanguage();
+  const translate = (key: string, fallback: string) => {
+    const value = t(key);
+    return value === key ? fallback : value;
+  };
 
   const [newsItem, setNewsItem] = useState<NewsItem | null>(null);
   const [loading, setLoading] = useState(true);
@@ -32,7 +38,7 @@ export default function NewsDetailPage() {
         const response = await fetch("/api/news-api");
 
         if (!response.ok) {
-          throw new Error("Failed to fetch news data");
+          throw new Error("blogPage.loadError");
         }
 
         const data = await response.json();
@@ -41,14 +47,14 @@ export default function NewsDetailPage() {
         const item = data.news.find((item: NewsItem) => item.id === newsId);
 
         if (!item) {
-          throw new Error("News article not found");
+          throw new Error("blogPage.notFound");
         }
 
         setNewsItem(item);
         setLoading(false);
       } catch (err) {
         console.error("Error fetching news detail:", err);
-        setError("Failed to fetch news details. Please try again later.");
+        setError("blogPage.detailLoadError");
         setLoading(false);
       }
     };
@@ -75,7 +81,8 @@ export default function NewsDetailPage() {
             href="/blog"
             className="inline-flex items-center text-blue-400 hover:text-blue-300 transition-colors"
           >
-            <ArrowLeft size={16} className="mr-1" /> Back to all news
+            <ArrowLeft size={16} className="mr-1" />{" "}
+            {translate("blogPage.backToNews", "Back to all news")}
           </Link>
         </div>
 
@@ -85,7 +92,10 @@ export default function NewsDetailPage() {
           </div>
         ) : error ? (
           <div className="text-red-500 text-center p-8 border border-red-700 rounded-lg bg-red-900/20">
-            {error}
+            {translate(
+              error,
+              "Failed to fetch news details. Please try again later."
+            )}
           </div>
         ) : newsItem ? (
           <div className="bg-gray-900 rounded-xl overflow-hidden border border-gray-800 max-w-4xl mx-auto text-left">
@@ -95,10 +105,14 @@ export default function NewsDetailPage() {
                   src={newsItem.imageUrl}
                   alt={newsItem.title}
                   className="w-full h-full object-cover absolute"
+                  loading="lazy"
+                  decoding="async"
                 />
               ) : (
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-teal-600 flex items-center justify-center">
-                  <span className="text-2xl font-bold">Financial News</span>
+                  <span className="text-2xl font-bold">
+                    {translate("blogPage.financialNews", "Financial News")}
+                  </span>
                 </div>
               )}
             </div>
@@ -123,7 +137,10 @@ export default function NewsDetailPage() {
 
                 <div className="bg-gray-800/50 p-6 rounded-lg flex flex-col md:flex-row items-center justify-between">
                   <p className="text-gray-300 mb-4 md:mb-0">
-                    Read the full article on the original source:
+                    {translate(
+                      "blogPage.originalSourceText",
+                      "Read the full article on the original source:"
+                    )}
                   </p>
                   <Link
                     href={newsItem.url}
@@ -131,17 +148,20 @@ export default function NewsDetailPage() {
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    Visit Source <LinkIcon size={16} className="ml-2" />
+                    {translate("blogPage.visitSource", "Visit Source")}{" "}
+                    <LinkIcon size={16} className="ml-2" />
                   </Link>
                 </div>
 
                 <div className="mt-10 border-t border-gray-800 pt-6">
-                  <h3 className="text-xl font-bold mb-4">Disclaimer</h3>
+                  <h3 className="text-xl font-bold mb-4">
+                    {translate("blogPage.disclaimer", "Disclaimer")}
+                  </h3>
                   <p className="text-gray-400">
-                    The information provided in this article is for
-                    informational purposes only and should not be considered as
-                    financial advice. Always conduct your own research before
-                    making any investment decisions.
+                    {translate(
+                      "blogPage.disclaimerText",
+                      "The information provided in this article is for informational purposes only and should not be considered as financial advice. Always conduct your own research before making any investment decisions."
+                    )}
                   </p>
                 </div>
               </div>
@@ -149,7 +169,9 @@ export default function NewsDetailPage() {
           </div>
         ) : (
           <div className="text-center p-8">
-            <p className="text-xl text-gray-400">News article not found</p>
+            <p className="text-xl text-gray-400">
+              {translate("blogPage.notFound", "News article not found")}
+            </p>
           </div>
         )}
       </div>
