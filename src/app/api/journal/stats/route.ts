@@ -1,40 +1,86 @@
 import { NextResponse } from "next/server";
-import { getJournalStats } from "@/lib/journal/analytics-service";
-import { journalTradeQuerySchema } from "@/lib/journal/validators";
+import { prisma } from "@/lib/prisma";
+import { buildTradeWhere } from "@/lib/journal/prisma-trades";
 
 export const dynamic = "force-dynamic";
 
+function toNumber(value: unknown) {
+  if (value === null || value === undefined) {
+    return 0;
+  }
+
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
 export async function GET(request: Request) {
   try {
-    const url = new URL(request.url);
-    const parsed = journalTradeQuerySchema.safeParse(
-      Object.fromEntries(url.searchParams.entries())
-    );
+    const { searchParams } = new URL(request.url);
+    const { where, errors } = buildTradeWhere(searchParams);
 
-    if (!parsed.success) {
+    if (errors.length > 0) {
       return NextResponse.json(
         {
           success: false,
-          message: "Invalid journal stats filters",
-          issues: parsed.error.issues.map((issue) => ({
-            path: issue.path.join("."),
-            message: issue.message,
-          })),
+          message: "Validation failed",
+          errors,
         },
         { status: 400 }
       );
     }
 
-    const stats = await getJournalStats({
-      symbol: parsed.data.symbol,
-      status: parsed.data.status,
-      result: parsed.data.result,
-      tradeType: parsed.data.tradeType,
-      from: parsed.data.dateFrom,
-      to: parsed.data.dateTo,
+    const trades = await prisma.trade.findMany({
+      where,
+      orderBy: [{ openedAt: "desc" }, { createdAt: "desc" }],
     });
+    const closedTrades = trades.filter((trade) => trade.status === "CLOSED");
+    const openTrades = trades.filter((trade) => trade.status === "OPEN");
+    const wins = closedTrades.filter((trade) => toNumber(trade.profitLoss) > 0);
+    const grossProfit = wins.reduce(
+      (total, trade) => total + toNumber(trade.profitLoss),
+      0
+    );
+    const grossLoss = closedTrades.reduce((total, trade) => {
+      const pnl = toNumber(trade.profitLoss);
+      return pnl < 0 ? total + Math.abs(pnl) : total;
+    }, 0);
+    const totalProfit = trades.reduce(
+      (total, trade) => total + toNumber(trade.profitLoss),
+      0
+    );
+    const rrTrades = closedTrades.filter((trade) => trade.rr !== null);
+    const symbolTotals = closedTrades.reduce<Record<string, number>>((totals, trade) => {
+      totals[trade.symbol] = (totals[trade.symbol] || 0) + toNumber(trade.profitLoss);
+      return totals;
+    }, {});
+    const rankedSymbols = Object.entries(symbolTotals).sort((a, b) => b[1] - a[1]);
 
-    return NextResponse.json({ success: true, stats });
+    return NextResponse.json({
+      success: true,
+      stats: {
+        totalTrades: trades.length,
+        closedTrades: closedTrades.length,
+        openTrades: openTrades.length,
+        winRate:
+          closedTrades.length > 0 ? (wins.length / closedTrades.length) * 100 : 0,
+        totalProfit,
+        profitFactor: grossLoss > 0 ? grossProfit / grossLoss : null,
+        averageRR:
+          rrTrades.length > 0
+            ? rrTrades.reduce((total, trade) => total + toNumber(trade.rr), 0) /
+              rrTrades.length
+            : null,
+        expectancy:
+          closedTrades.length > 0
+            ? closedTrades.reduce(
+                (total, trade) => total + toNumber(trade.profitLoss),
+                0
+              ) / closedTrades.length
+            : null,
+        bestSymbol: rankedSymbols[0]?.[0] || null,
+        worstSymbol: rankedSymbols[rankedSymbols.length - 1]?.[0] || null,
+      },
+    });
   } catch (error) {
     console.error("Journal stats API error:", error);
 

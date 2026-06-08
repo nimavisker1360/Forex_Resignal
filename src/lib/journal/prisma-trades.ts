@@ -1,0 +1,706 @@
+import { Prisma, TradeDirection, TradeStatus } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
+import {
+  calculateTradeMetrics,
+  decimalValue,
+  parseDate,
+  parsePositiveInt,
+} from "@/lib/journal/api-utils";
+import type {
+  JournalAccountPayload,
+  JournalEventPayload,
+  ProcessJournalEventInput,
+  ProcessJournalEventResult,
+} from "@/lib/journal/journal-service";
+
+export const journalTradeInclude = {
+  account: true,
+  screenshots: true,
+  tags: {
+    include: {
+      tag: true,
+    },
+  },
+} satisfies Prisma.TradeInclude;
+
+type JournalTradeWithRelations = Prisma.TradeGetPayload<{
+  include: typeof journalTradeInclude;
+}>;
+
+type BuildCreateResult =
+  | {
+      data: Omit<Prisma.TradeUncheckedCreateInput, "accountId"> & {
+        accountId?: string;
+      };
+      errors?: never;
+    }
+  | {
+      data?: never;
+      errors: string[];
+    };
+
+type BuildUpdateResult =
+  | {
+      data: Prisma.TradeUncheckedUpdateInput;
+      errors?: never;
+    }
+  | {
+      data?: never;
+      errors: string[];
+    };
+
+const DEFAULT_USER_ID = "demo-user";
+const MT5_SETUP_PREFIX = "MT5:";
+
+function firstDefined(body: Record<string, unknown>, names: string[]) {
+  for (const name of names) {
+    if (body[name] !== undefined) {
+      return body[name];
+    }
+  }
+
+  return undefined;
+}
+
+function optionalString(value: unknown) {
+  if (value === undefined) {
+    return undefined;
+  }
+
+  if (value === null) {
+    return null;
+  }
+
+  const text = String(value).trim();
+  return text ? text : null;
+}
+
+function parseDirection(value: unknown) {
+  if (value === undefined || value === null || value === "") {
+    return null;
+  }
+
+  const normalized = String(value).trim().toUpperCase();
+
+  if (normalized === TradeDirection.BUY || normalized === TradeDirection.SELL) {
+    return normalized;
+  }
+
+  return null;
+}
+
+function parseStatus(value: unknown) {
+  if (value === undefined || value === null || value === "") {
+    return undefined;
+  }
+
+  const normalized = String(value).trim().toUpperCase();
+
+  if (
+    normalized === TradeStatus.OPEN ||
+    normalized === TradeStatus.CLOSED ||
+    normalized === TradeStatus.CANCELLED
+  ) {
+    return normalized;
+  }
+
+  return null;
+}
+
+function parseRequiredDecimal(
+  value: unknown,
+  fieldName: string,
+  errors: string[]
+) {
+  const parsed = decimalValue(value);
+
+  if (parsed === undefined) {
+    errors.push(`${fieldName} is required and must be a valid number`);
+  }
+
+  return parsed;
+}
+
+function parseOptionalDecimal(
+  value: unknown,
+  fieldName: string,
+  errors: string[]
+) {
+  if (value === undefined) {
+    return undefined;
+  }
+
+  if (value === null || value === "") {
+    return null;
+  }
+
+  const parsed = decimalValue(value);
+
+  if (parsed === undefined) {
+    errors.push(`${fieldName} must be a valid number`);
+    return undefined;
+  }
+
+  return parsed;
+}
+
+function parseRequiredDate(value: unknown, fieldName: string, errors: string[]) {
+  const parsed = parseDate(value);
+
+  if (!parsed) {
+    errors.push(`${fieldName} is required and must be a valid date`);
+  }
+
+  return parsed || undefined;
+}
+
+function parseOptionalDate(value: unknown, fieldName: string, errors: string[]) {
+  if (value === undefined) {
+    return undefined;
+  }
+
+  if (value === null || value === "") {
+    return null;
+  }
+
+  const parsed = parseDate(value);
+
+  if (!parsed) {
+    errors.push(`${fieldName} must be a valid date`);
+    return undefined;
+  }
+
+  return parsed;
+}
+
+export function serializeJournalTrade(trade: JournalTradeWithRelations) {
+  return {
+    ...trade,
+    tradingAccount: trade.account,
+    side: trade.direction,
+    entryTime: trade.openedAt,
+    exitTime: trade.closedAt,
+    strategy: trade.session,
+    mistakes: trade.mistake,
+  };
+}
+
+export async function ensureManualTradingAccount(userId: string) {
+  const existing = await prisma.tradingAccount.findFirst({
+    where: { userId },
+    orderBy: { createdAt: "asc" },
+  });
+
+  if (existing) {
+    return existing.id;
+  }
+
+  const account = await prisma.tradingAccount.create({
+    data: {
+      userId,
+      name: "Manual Journal",
+      broker: "Manual",
+      platform: "SignalMax",
+      currency: "USD",
+    },
+  });
+
+  return account.id;
+}
+
+function getMt5ExternalTradeKey(event: JournalEventPayload) {
+  const value =
+    event.positionId?.trim() ||
+    event.ticket?.trim() ||
+    event.orderTicket?.trim() ||
+    event.dealTicket?.trim() ||
+    "";
+
+  return value ? `${MT5_SETUP_PREFIX}${value}` : null;
+}
+
+function toPrismaDirection(value: JournalEventPayload["tradeType"]) {
+  return value === "sell" ? TradeDirection.SELL : TradeDirection.BUY;
+}
+
+function nullableDecimal(value: number | null | undefined) {
+  return value === undefined || value === null ? undefined : String(value);
+}
+
+function nullableDecimalOrNull(value: number | null | undefined) {
+  return value === undefined || value === null ? null : String(value);
+}
+
+async function ensureMt5TradingAccount(
+  userId: string,
+  account: JournalAccountPayload
+) {
+  const existing = await prisma.tradingAccount.findFirst({
+    where: {
+      userId,
+      name: account.accountNumber,
+      broker: account.broker,
+      platform: account.serverName,
+    },
+  });
+
+  if (existing) {
+    return existing;
+  }
+
+  return prisma.tradingAccount.create({
+    data: {
+      userId,
+      name: account.accountNumber,
+      broker: account.broker,
+      platform: account.serverName,
+      currency: account.currency || "USD",
+      balance: nullableDecimal(account.balance),
+    },
+  });
+}
+
+async function findMt5Trade(accountId: string, sourceKey: string | null) {
+  if (!sourceKey) {
+    return null;
+  }
+
+  return prisma.trade.findFirst({
+    where: {
+      accountId,
+      setup: sourceKey,
+    },
+    orderBy: { createdAt: "desc" },
+  });
+}
+
+async function findFallbackOpenMt5Trade(
+  accountId: string,
+  event: JournalEventPayload
+) {
+  const symbol = event.symbol?.trim().toUpperCase();
+
+  if (!symbol) {
+    return null;
+  }
+
+  return prisma.trade.findFirst({
+    where: {
+      accountId,
+      symbol,
+      status: TradeStatus.OPEN,
+      setup: { startsWith: MT5_SETUP_PREFIX },
+    },
+    orderBy: { openedAt: "desc" },
+  });
+}
+
+export async function processJournalEventPrisma(
+  input: ProcessJournalEventInput
+): Promise<ProcessJournalEventResult> {
+  const userId = process.env.DEMO_USER_ID || DEFAULT_USER_ID;
+  const account = await ensureMt5TradingAccount(userId, input.account);
+  const event = input.event;
+  const sourceKey = getMt5ExternalTradeKey(event);
+  const symbol = event.symbol?.trim().toUpperCase() || "UNKNOWN";
+  const direction = toPrismaDirection(event.tradeType);
+  const baseData = {
+    userId,
+    accountId: account.id,
+    symbol,
+    direction,
+    entryPrice: nullableDecimal(event.entryPrice),
+    stopLoss: nullableDecimal(event.stopLoss),
+    takeProfit: nullableDecimal(event.takeProfit),
+    lotSize: nullableDecimal(event.lotSize),
+    session: event.session || undefined,
+    notes: event.comment || undefined,
+    setup: sourceKey || `${MT5_SETUP_PREFIX}${event.idempotencyKey}`,
+  };
+
+  if (
+    event.eventType === "open" ||
+    event.eventType === "pending_activated" ||
+    event.eventType === "sync_recovered"
+  ) {
+    const existing = await findMt5Trade(account.id, sourceKey);
+
+    if (existing) {
+      const trade = await prisma.trade.update({
+        where: { id: existing.id },
+        data: {
+          ...baseData,
+          status: TradeStatus.OPEN,
+          exitPrice: null,
+          profitLoss: null,
+          rr: null,
+          openedAt: event.eventTime,
+          closedAt: null,
+        },
+      });
+
+      return { success: true, duplicate: false, tradeId: trade.id };
+    }
+
+    const trade = await prisma.trade.create({
+      data: {
+        ...baseData,
+        status: TradeStatus.OPEN,
+        openedAt: event.eventTime,
+      },
+    });
+
+    return { success: true, duplicate: false, tradeId: trade.id };
+  }
+
+  const existing =
+    (await findMt5Trade(account.id, sourceKey)) ||
+    (await findFallbackOpenMt5Trade(account.id, event));
+  const isFinalClose = event.eventType === "close";
+  const status = isFinalClose ? TradeStatus.CLOSED : TradeStatus.OPEN;
+  const metrics = calculateTradeMetrics({
+    status,
+    direction: existing?.direction || direction,
+    entryPrice: existing?.entryPrice ?? event.entryPrice,
+    exitPrice: event.closePrice,
+    stopLoss: existing?.stopLoss ?? event.stopLoss,
+    lotSize: existing?.lotSize ?? event.lotSize,
+    profitLoss: event.profit,
+  });
+  const closeData = {
+    symbol,
+    direction: existing?.direction || direction,
+    status,
+    exitPrice: nullableDecimalOrNull(event.closePrice),
+    stopLoss: nullableDecimal(event.stopLoss),
+    takeProfit: nullableDecimal(event.takeProfit),
+    lotSize: nullableDecimal(event.lotSize),
+    profitLoss: nullableDecimalOrNull(event.profit),
+    rr: metrics.rr,
+    session: event.session || existing?.session || undefined,
+    notes: event.comment || existing?.notes || undefined,
+    closedAt: isFinalClose ? event.eventTime : null,
+  };
+
+  if (existing) {
+    const trade = await prisma.trade.update({
+      where: { id: existing.id },
+      data: closeData,
+    });
+
+    return { success: true, duplicate: false, tradeId: trade.id };
+  }
+
+  const trade = await prisma.trade.create({
+    data: {
+      ...baseData,
+      status,
+      entryPrice: nullableDecimal(event.entryPrice),
+      exitPrice: nullableDecimal(event.closePrice),
+      profitLoss: nullableDecimal(event.profit) ?? metrics.profitLoss,
+      rr: metrics.rr,
+      openedAt: event.openTime ?? null,
+      closedAt: isFinalClose ? event.eventTime : null,
+    },
+  });
+
+  return { success: true, duplicate: false, tradeId: trade.id };
+}
+
+export async function saveMt5ScreenshotToPrismaTrade(input: {
+  accountNumber: string;
+  broker: string;
+  serverName: string;
+  positionId: string;
+  type: string;
+  imageUrl: string;
+}) {
+  const userId = process.env.DEMO_USER_ID || DEFAULT_USER_ID;
+  const account = await prisma.tradingAccount.findFirst({
+    where: {
+      userId,
+      name: input.accountNumber,
+      broker: input.broker,
+      platform: input.serverName,
+    },
+  });
+
+  if (!account) {
+    return false;
+  }
+
+  const trade = await findMt5Trade(account.id, `${MT5_SETUP_PREFIX}${input.positionId}`);
+
+  if (!trade) {
+    return false;
+  }
+
+  await prisma.tradeScreenshot.create({
+    data: {
+      userId,
+      tradeId: trade.id,
+      type: input.type,
+      url: input.imageUrl,
+    },
+  });
+
+  return true;
+}
+
+export function buildTradeWhere(searchParams: URLSearchParams) {
+  const where: Prisma.TradeWhereInput = {};
+  const errors: string[] = [];
+  const accountId = searchParams.get("accountId");
+  const symbol = searchParams.get("symbol");
+  const side = searchParams.get("side") || searchParams.get("direction") || searchParams.get("type");
+  const status = searchParams.get("status");
+  const userId = searchParams.get("userId");
+  const dateFrom = parseDate(searchParams.get("dateFrom") || searchParams.get("from"));
+  const dateTo = parseDate(searchParams.get("dateTo") || searchParams.get("to"));
+
+  if (userId) {
+    where.userId = userId;
+  }
+
+  if (accountId) {
+    where.accountId = accountId;
+  }
+
+  if (symbol) {
+    where.symbol = { contains: symbol.trim(), mode: "insensitive" };
+  }
+
+  if (side) {
+    const direction = parseDirection(side);
+
+    if (!direction) {
+      errors.push("side must be BUY or SELL");
+    } else {
+      where.direction = direction;
+    }
+  }
+
+  if (status) {
+    const parsedStatus = parseStatus(status);
+
+    if (!parsedStatus) {
+      errors.push("status must be OPEN, CLOSED, or CANCELLED");
+    } else {
+      where.status = parsedStatus;
+    }
+  }
+
+  if (dateFrom === null) {
+    errors.push("dateFrom must be a valid date");
+  }
+
+  if (dateTo === null) {
+    errors.push("dateTo must be a valid date");
+  }
+
+  if (dateFrom || dateTo) {
+    where.openedAt = {
+      ...(dateFrom ? { gte: dateFrom } : {}),
+      ...(dateTo ? { lte: dateTo } : {}),
+    };
+  }
+
+  return { where, errors };
+}
+
+export function getPagination(searchParams: URLSearchParams) {
+  const page = parsePositiveInt(searchParams.get("page"), 1);
+  const limit = Math.min(parsePositiveInt(searchParams.get("limit"), 50), 100);
+  const totalPages = (total: number) => Math.max(Math.ceil(total / limit), 1);
+
+  return {
+    page,
+    limit,
+    skip: (page - 1) * limit,
+    totalPages,
+  };
+}
+
+export function buildManualTradeCreateData(
+  body: Record<string, unknown>
+): BuildCreateResult {
+  const errors: string[] = [];
+  const symbol = optionalString(body.symbol);
+  const direction = parseDirection(
+    firstDefined(body, ["side", "direction", "type"])
+  );
+  const statusInput = body.status;
+  const parsedStatus = parseStatus(statusInput);
+  const status =
+    statusInput === undefined || statusInput === null || statusInput === ""
+      ? TradeStatus.OPEN
+      : parsedStatus;
+  const entryPrice = parseRequiredDecimal(
+    firstDefined(body, ["entryPrice", "entry"]),
+    "entryPrice",
+    errors
+  );
+  const openedAt = parseRequiredDate(
+    firstDefined(body, ["entryTime", "openedAt", "openTime"]),
+    "entryTime",
+    errors
+  );
+  const exitPrice = parseOptionalDecimal(
+    firstDefined(body, ["exitPrice", "exit"]),
+    "exitPrice",
+    errors
+  );
+  const profitLoss = parseOptionalDecimal(
+    firstDefined(body, ["profitLoss", "pnl"]),
+    "profitLoss",
+    errors
+  );
+  const lotSize = parseOptionalDecimal(
+    firstDefined(body, ["lotSize", "volume"]),
+    "lotSize",
+    errors
+  );
+  const closedAt = parseOptionalDate(
+    firstDefined(body, ["exitTime", "closedAt", "closeTime"]),
+    "exitTime",
+    errors
+  );
+
+  if (!symbol) {
+    errors.push("symbol is required");
+  }
+
+  if (!direction) {
+    errors.push("side must be BUY or SELL");
+  }
+
+  if (!status) {
+    errors.push("status must be OPEN, CLOSED, or CANCELLED");
+  }
+
+  const stopLoss = parseOptionalDecimal(body.stopLoss, "stopLoss", errors);
+  const takeProfit = parseOptionalDecimal(body.takeProfit, "takeProfit", errors);
+  const riskAmount = parseOptionalDecimal(body.riskAmount, "riskAmount", errors);
+  const rrInput = parseOptionalDecimal(body.rr, "rr", errors);
+
+  if (errors.length > 0 || !symbol || !direction || !status || !entryPrice || !openedAt) {
+    return { errors };
+  }
+
+  const metrics = calculateTradeMetrics({
+    ...body,
+    direction,
+    status,
+    entryPrice,
+    exitPrice,
+    stopLoss,
+    lotSize,
+    profitLoss,
+  });
+
+  return {
+    data: {
+      userId: String(body.userId || DEFAULT_USER_ID),
+      accountId: optionalString(body.accountId) || undefined,
+      symbol: symbol.toUpperCase(),
+      direction,
+      status,
+      entryPrice,
+      exitPrice,
+      stopLoss,
+      takeProfit,
+      lotSize,
+      riskAmount,
+      profitLoss: profitLoss ?? metrics.profitLoss,
+      rr: rrInput ?? metrics.rr,
+      setup: optionalString(body.setup),
+      session: optionalString(firstDefined(body, ["strategy", "session"])),
+      emotion: optionalString(body.emotion),
+      mistake: optionalString(firstDefined(body, ["mistakes", "mistake"])),
+      notes: optionalString(body.notes),
+      openedAt,
+      closedAt,
+    },
+  };
+}
+
+export function buildManualTradeUpdateData(
+  body: Record<string, unknown>
+): BuildUpdateResult {
+  const errors: string[] = [];
+  const data: Prisma.TradeUncheckedUpdateInput = {};
+  const directionValue = firstDefined(body, ["side", "direction", "type"]);
+  const openedAtValue = firstDefined(body, ["entryTime", "openedAt", "openTime"]);
+  const closedAtValue = firstDefined(body, ["exitTime", "closedAt", "closeTime"]);
+
+  if (directionValue !== undefined) {
+    const direction = parseDirection(directionValue);
+
+    if (!direction) {
+      errors.push("side must be BUY or SELL");
+    } else {
+      data.direction = direction;
+    }
+  }
+
+  if (body.status !== undefined) {
+    const status = parseStatus(body.status);
+
+    if (!status) {
+      errors.push("status must be OPEN, CLOSED, or CANCELLED");
+    } else {
+      data.status = status;
+    }
+  }
+
+  if (openedAtValue !== undefined) {
+    data.openedAt = parseOptionalDate(openedAtValue, "entryTime", errors);
+  }
+
+  if (closedAtValue !== undefined) {
+    data.closedAt = parseOptionalDate(closedAtValue, "exitTime", errors);
+  }
+
+  if (body.symbol !== undefined) {
+    const symbol = optionalString(body.symbol);
+    data.symbol = symbol ? symbol.toUpperCase() : "";
+  }
+
+  if (body.accountId !== undefined) {
+    const accountId = optionalString(body.accountId);
+    data.accountId = accountId || undefined;
+  }
+
+  for (const [field, value] of [
+    ["entryPrice", firstDefined(body, ["entryPrice", "entry"])],
+    ["exitPrice", firstDefined(body, ["exitPrice", "exit"])],
+    ["stopLoss", body.stopLoss],
+    ["takeProfit", body.takeProfit],
+    ["lotSize", firstDefined(body, ["lotSize", "volume"])],
+    ["riskAmount", body.riskAmount],
+    ["profitLoss", firstDefined(body, ["profitLoss", "pnl"])],
+    ["rr", body.rr],
+  ] as const) {
+    if (value !== undefined) {
+      data[field] = parseOptionalDecimal(value, field, errors);
+    }
+  }
+
+  for (const [field, value] of [
+    ["setup", body.setup],
+    ["session", firstDefined(body, ["strategy", "session"])],
+    ["emotion", body.emotion],
+    ["mistake", firstDefined(body, ["mistakes", "mistake"])],
+    ["notes", body.notes],
+  ] as const) {
+    if (value !== undefined) {
+      data[field] = optionalString(value);
+    }
+  }
+
+  if (errors.length > 0) {
+    return { errors };
+  }
+
+  return { data };
+}

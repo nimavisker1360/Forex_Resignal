@@ -1,8 +1,7 @@
 import { mkdir, writeFile } from "fs/promises";
 import path from "path";
 import { put } from "@vercel/blob";
-import { getJournalCollection } from "@/lib/journal/db";
-import type { JournalTrade } from "@/lib/journal/types";
+import { saveMt5ScreenshotToPrismaTrade } from "@/lib/journal/prisma-trades";
 
 const DEFAULT_SCREENSHOT_TIMEFRAME = "M5";
 const DEFAULT_SCREENSHOT_BARS = 120;
@@ -182,33 +181,14 @@ async function saveScreenshotUrlToTrade(
   input: JournalScreenshotUploadInput,
   imageUrl: string
 ) {
-  const collection = await getJournalCollection();
-  const screenshotFields: Partial<JournalTrade> =
-    input.type === "entry"
-      ? {
-          entryScreenshotUrl: imageUrl,
-          entryScreenshotStatus: "uploaded",
-        }
-      : {
-          exitScreenshotUrl: imageUrl,
-          exitScreenshotStatus: "uploaded",
-        };
-  const result = await collection.updateOne(
-    {
-      accountNumber: input.accountNumber,
-      broker: input.broker,
-      serverName: input.serverName,
-      positionId: input.positionId,
-    },
-    {
-      $set: {
-        ...screenshotFields,
-        updatedAt: new Date(),
-      },
-    }
-  );
-
-  return result.matchedCount > 0;
+  return saveMt5ScreenshotToPrismaTrade({
+    accountNumber: input.accountNumber,
+    broker: input.broker,
+    serverName: input.serverName,
+    positionId: input.positionId,
+    type: input.type,
+    imageUrl,
+  });
 }
 
 export async function uploadJournalScreenshot(

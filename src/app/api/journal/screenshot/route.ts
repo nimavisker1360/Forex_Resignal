@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { getJournalScreenshotConfig, uploadJournalScreenshot } from "@/lib/journal/screenshot-service";
 import { journalScreenshotRequestSchema } from "@/lib/journal/validators";
 
 export const runtime = "nodejs";
@@ -9,10 +8,12 @@ function jsonError(message: string, status: number) {
   return NextResponse.json({ success: false, message }, { status });
 }
 
-export async function POST(request: Request) {
-  const config = getJournalScreenshotConfig();
+function isJournalScreenshotUploadEnabled() {
+  return process.env.JOURNAL_UPLOAD_ENABLED?.trim().toLowerCase() === "true";
+}
 
-  if (!config.uploadEnabled) {
+export async function POST(request: Request) {
+  if (!isJournalScreenshotUploadEnabled()) {
     return NextResponse.json({
       success: false,
       disabled: true,
@@ -44,6 +45,9 @@ export async function POST(request: Request) {
       return jsonError("Unauthorized", 401);
     }
 
+    const { uploadJournalScreenshot } = await import(
+      "@/lib/journal/screenshot-service"
+    );
     const { imageUrl } = await uploadJournalScreenshot(parsed.data);
 
     return NextResponse.json({ success: true, imageUrl });

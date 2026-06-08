@@ -85,6 +85,7 @@ export const journalEventRequestSchema = z.object({
       session: nullableStringSchema,
       entryScreenshotStatus: nullableStringSchema,
       exitScreenshotStatus: nullableStringSchema,
+      openTime: z.coerce.date().nullable().optional(),
       eventTime: z.coerce.date(),
     })
     .passthrough(),

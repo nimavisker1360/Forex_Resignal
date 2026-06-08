@@ -3,7 +3,7 @@
 //| Records MT5 trade events and sends them to a Next.js journal API. |
 //+------------------------------------------------------------------+
 #property strict
-#property version   "1.00"
+#property version   "1.04"
 #property description "Trade Journal Recorder. Records trades only; never opens, closes, or modifies trades."
 
 input string          JOURNAL_API_BASE_URL = "http://127.0.0.1:3000";
@@ -18,6 +18,8 @@ input int             SCREENSHOT_WIDTH = 1280;
 input int             SCREENSHOT_HEIGHT = 720;
 input int             SCREENSHOT_DELAY_MS = 1500;
 
+const string TJR_BUILD = "TradeJournalRecorder 1.04 local-time-screenshot-force-capture";
+
 string g_lockName = "";
 bool   g_hasLock = false;
 long   g_cachedPositionIds[];
@@ -26,13 +28,15 @@ double g_cachedEntryPrices[];
 double g_cachedStopLosses[];
 double g_cachedTakeProfits[];
 string g_cachedTradeTypes[];
+long   g_syncAttemptPositionIds[];
+datetime g_syncAttemptTimes[];
 
 //+------------------------------------------------------------------+
 //| Expert lifecycle                                                  |
 //+------------------------------------------------------------------+
 int OnInit()
 {
-   Print("Trade Journal Recorder EA initialized.");
+   Print(TJR_BUILD, " initialized.");
    Print("API URL: ", NormalizeBaseUrl(JOURNAL_API_BASE_URL));
    Print("This EA records trades only. It does not open, close, or modify trades.");
 
@@ -70,7 +74,10 @@ void OnDeinit(const int reason)
 void OnTimer()
 {
    if(JOURNAL_ENABLED)
+   {
       RefreshPositionLevelCache();
+      SyncOpenPositions();
+   }
 }
 
 //+------------------------------------------------------------------+
@@ -160,6 +167,7 @@ string BuildTradeEventJson(string eventType, ulong dealTicket, string fallbackSy
    long magicNumber = HistoryDealGetInteger(dealTicket, DEAL_MAGIC);
    string comment = HistoryDealGetString(dealTicket, DEAL_COMMENT);
    datetime eventTime = (datetime)HistoryDealGetInteger(dealTicket, DEAL_TIME);
+   datetime openTime = eventTime;
 
    double entryPrice = 0.0;
    double closePrice = 0.0;
@@ -173,6 +181,7 @@ string BuildTradeEventJson(string eventType, ulong dealTicket, string fallbackSy
       closePrice = dealPrice;
 
    FillPositionTradeDetails(positionIdLong, symbol, eventTime, entryPrice, stopLoss, takeProfit, tradeType);
+   openTime = GetPositionOpenTime(positionIdLong, symbol, eventTime);
 
    string accountNumber = (string)AccountInfoInteger(ACCOUNT_LOGIN);
    string broker = GetBrokerName();
@@ -236,7 +245,78 @@ string BuildTradeEventJson(string eventType, ulong dealTicket, string fallbackSy
    json += "\"atr\":null,";
    json += "\"rsi\":null,";
    json += "\"session\":" + JsonString(GetSession(eventTime)) + ",";
-   json += "\"eventTime\":" + JsonString(TimeToIso8601(eventTime));
+   json += "\"openTime\":" + JsonString(TimeToTraderLocalIso8601(openTime)) + ",";
+   json += "\"eventTime\":" + JsonString(TimeToTraderLocalIso8601(eventTime));
+   json += "}}";
+
+   return json;
+}
+
+string BuildOpenPositionSyncJson()
+{
+   long positionIdLong = PositionGetInteger(POSITION_IDENTIFIER);
+   ulong positionTicket = (ulong)PositionGetInteger(POSITION_TICKET);
+   string symbol = PositionGetString(POSITION_SYMBOL);
+
+   if(positionIdLong <= 0 || symbol == "")
+      return "";
+
+   double lotSize = PositionGetDouble(POSITION_VOLUME);
+   double entryPrice = PositionGetDouble(POSITION_PRICE_OPEN);
+   double stopLoss = PositionGetDouble(POSITION_SL);
+   double takeProfit = PositionGetDouble(POSITION_TP);
+   long magicNumber = PositionGetInteger(POSITION_MAGIC);
+   string comment = PositionGetString(POSITION_COMMENT);
+   datetime eventTime = (datetime)PositionGetInteger(POSITION_TIME);
+   string tradeType = PositionGetInteger(POSITION_TYPE) == POSITION_TYPE_BUY ? "buy" : "sell";
+   string accountNumber = (string)AccountInfoInteger(ACCOUNT_LOGIN);
+   string broker = GetBrokerName();
+   string serverName = GetServerName();
+   string positionId = (string)positionIdLong;
+   string ticket = (string)positionTicket;
+   string idempotencyKey = BuildIdempotencyKey(accountNumber, broker, serverName, positionId, ticket, "sync_recovered");
+   string sourceType = magicNumber == 0 ? "manual" : "expert_advisor";
+   int digits = DigitsForSymbol(symbol);
+
+   string json = "{";
+   json += "\"uploadSecret\":" + JsonString(JOURNAL_UPLOAD_SECRET) + ",";
+   json += "\"account\":{";
+   json += "\"accountNumber\":" + JsonString(accountNumber) + ",";
+   json += "\"broker\":" + JsonString(broker) + ",";
+   json += "\"serverName\":" + JsonString(serverName) + ",";
+   json += "\"balance\":" + DoubleToJson(AccountInfoDouble(ACCOUNT_BALANCE), 2) + ",";
+   json += "\"equity\":" + DoubleToJson(AccountInfoDouble(ACCOUNT_EQUITY), 2) + ",";
+   json += "\"freeMargin\":" + DoubleToJson(AccountInfoDouble(ACCOUNT_MARGIN_FREE), 2) + ",";
+   json += "\"currency\":" + JsonString(GetAccountCurrency());
+   json += "},";
+   json += "\"event\":{";
+   json += "\"eventType\":\"sync_recovered\",";
+   json += "\"idempotencyKey\":" + JsonString(idempotencyKey) + ",";
+   json += "\"ticket\":" + JsonString(ticket) + ",";
+   json += "\"positionId\":" + JsonString(positionId) + ",";
+   json += "\"orderTicket\":null,";
+   json += "\"dealTicket\":" + JsonString(ticket) + ",";
+   json += "\"symbol\":" + JsonString(symbol) + ",";
+   json += "\"tradeType\":" + JsonString(tradeType) + ",";
+   json += "\"lotSize\":" + DoubleToJson(lotSize, 2) + ",";
+   json += "\"entryPrice\":" + DoubleToJson(entryPrice, digits) + ",";
+   json += "\"closePrice\":null,";
+   json += "\"stopLoss\":" + NullablePriceToJson(stopLoss, digits) + ",";
+   json += "\"takeProfit\":" + NullablePriceToJson(takeProfit, digits) + ",";
+   json += "\"profit\":null,";
+   json += "\"commission\":0,";
+   json += "\"swap\":0,";
+   json += "\"magicNumber\":" + (string)magicNumber + ",";
+   json += "\"comment\":" + JsonString(comment) + ",";
+   json += "\"sourceType\":" + JsonString(sourceType) + ",";
+   json += "\"entrySource\":\"market_order\",";
+   json += "\"timeframe\":" + JsonString(TimeframeToString((ENUM_TIMEFRAMES)ChartPeriod(ChartID()))) + ",";
+   json += "\"spread\":" + (string)GetSpread(symbol) + ",";
+   json += "\"atr\":null,";
+   json += "\"rsi\":null,";
+   json += "\"session\":" + JsonString(GetSession(eventTime)) + ",";
+   json += "\"openTime\":" + JsonString(TimeToTraderLocalIso8601(eventTime)) + ",";
+   json += "\"eventTime\":" + JsonString(TimeToTraderLocalIso8601(eventTime));
    json += "}}";
 
    return json;
@@ -333,12 +413,9 @@ void ProcessScreenshotForDeal(string eventType, ulong dealTicket, string fallbac
       return;
    }
 
-   if(!WaitForChartReady(chartId, symbol, JOURNAL_SCREENSHOT_TIMEFRAME, SCREENSHOT_DELAY_MS + 5000))
-   {
-      Print("Screenshot error: chart not ready for ", symbol);
-      CleanupTemporaryChart(chartId, isTemporary);
-      return;
-   }
+   ChartNavigate(chartId, CHART_END, 0);
+   ChartRedraw(chartId);
+   Print("Screenshot capture using visible chart. Symbol: ", symbol, ", chart ID: ", (string)chartId, ", timeframe: ", TimeframeToString((ENUM_TIMEFRAMES)ChartPeriod(chartId)));
 
    double entryPrice = 0.0;
    double stopLoss = 0.0;
@@ -373,7 +450,7 @@ void ProcessScreenshotForDeal(string eventType, ulong dealTicket, string fallbac
       return;
    }
 
-   if(SendScreenshotToApi(positionId, (string)dealTicket, screenshotType, TimeToIso8601(capturedAt), "captured_on_time", imageBase64))
+   if(SendScreenshotToApi(positionId, (string)dealTicket, screenshotType, TimeToTraderLocalIso8601(capturedAt), "captured_on_time", imageBase64))
       Print("Screenshot uploaded. Type: ", screenshotType, ", deal: ", (string)dealTicket);
    else
       Print("Screenshot upload failed. Type: ", screenshotType, ", deal: ", (string)dealTicket);
@@ -446,20 +523,57 @@ long FindChartBySymbol(string symbol)
 bool WaitForChartReady(long chartId, string symbol, ENUM_TIMEFRAMES tf, int timeoutMs)
 {
    int waited = 0;
-   int stepMs = 100;
+   int stepMs = 200;
+   int readyChecks = 0;
 
    while(waited <= timeoutMs)
    {
-      ChartSetSymbolPeriod(chartId, symbol, tf);
+      if(ChartSymbol(chartId) != symbol || (ENUM_TIMEFRAMES)ChartPeriod(chartId) != tf)
+         ChartSetSymbolPeriod(chartId, symbol, tf);
+
+      ChartNavigate(chartId, CHART_END, 0);
       ChartRedraw(chartId);
 
       long synchronized = 0;
-      if(Bars(symbol, tf) > 0 && SeriesInfoInteger(symbol, tf, SERIES_SYNCHRONIZED, synchronized) && synchronized > 0)
-         return true;
+      bool seriesKnown = SeriesInfoInteger(symbol, tf, SERIES_SYNCHRONIZED, synchronized);
+      bool chartMatches = ChartSymbol(chartId) == symbol && (ENUM_TIMEFRAMES)ChartPeriod(chartId) == tf;
+      bool hasBars = Bars(symbol, tf) > 0;
+
+      if(chartMatches && hasBars)
+      {
+         readyChecks++;
+
+         if(readyChecks >= 3 || (seriesKnown && synchronized > 0))
+            return true;
+      }
+      else
+      {
+         readyChecks = 0;
+      }
+
+      if(waited == 2000 || waited == 5000)
+      {
+         DebugPrint(
+            "Waiting for chart. Symbol: " + symbol +
+            ", timeframe: " + TimeframeToString(tf) +
+            ", bars: " + (string)Bars(symbol, tf) +
+            ", chart symbol: " + ChartSymbol(chartId) +
+            ", chart period: " + TimeframeToString((ENUM_TIMEFRAMES)ChartPeriod(chartId)) +
+            ", synchronized: " + (string)(seriesKnown ? synchronized : -1)
+         );
+      }
 
       Sleep(stepMs);
       waited += stepMs;
    }
+
+   Print(
+      "Chart ready timeout. Symbol: ", symbol,
+      ", timeframe: ", TimeframeToString(tf),
+      ", bars: ", Bars(symbol, tf),
+      ", chart symbol: ", ChartSymbol(chartId),
+      ", chart period: ", TimeframeToString((ENUM_TIMEFRAMES)ChartPeriod(chartId))
+   );
 
    return false;
 }
@@ -534,7 +648,16 @@ bool ReadFileToBase64(string filename, string &base64)
    base64 = "";
    ResetLastError();
 
-   int handle = FileOpen(filename, FILE_READ | FILE_BIN);
+   int handle = INVALID_HANDLE;
+   for(int attempt = 0; attempt < 20; attempt++)
+   {
+      handle = FileOpen(filename, FILE_READ | FILE_BIN);
+      if(handle != INVALID_HANDLE)
+         break;
+
+      Sleep(100);
+   }
+
    if(handle == INVALID_HANDLE)
    {
       Print("FileOpen screenshot failed. File: ", filename, ", error: ", GetLastError());
@@ -808,6 +931,78 @@ void RefreshPositionLevelCache()
    }
 }
 
+int FindSyncAttemptIndex(long positionId)
+{
+   for(int i = 0; i < ArraySize(g_syncAttemptPositionIds); i++)
+   {
+      if(g_syncAttemptPositionIds[i] == positionId)
+         return i;
+   }
+
+   return -1;
+}
+
+datetime GetLastSyncAttemptTime(long positionId)
+{
+   int index = FindSyncAttemptIndex(positionId);
+   if(index < 0)
+      return 0;
+
+   return g_syncAttemptTimes[index];
+}
+
+void SetLastSyncAttemptTime(long positionId, datetime value)
+{
+   int index = FindSyncAttemptIndex(positionId);
+   if(index < 0)
+   {
+      index = ArraySize(g_syncAttemptPositionIds);
+      ArrayResize(g_syncAttemptPositionIds, index + 1);
+      ArrayResize(g_syncAttemptTimes, index + 1);
+   }
+
+   g_syncAttemptPositionIds[index] = positionId;
+   g_syncAttemptTimes[index] = value;
+}
+
+void SyncOpenPositions()
+{
+   datetime now = TimeCurrent();
+
+   for(int i = PositionsTotal() - 1; i >= 0; i--)
+   {
+      ulong ticket = PositionGetTicket(i);
+      if(ticket == 0 || !PositionSelectByTicket(ticket))
+         continue;
+
+      long positionId = PositionGetInteger(POSITION_IDENTIFIER);
+      if(positionId <= 0)
+         continue;
+
+      datetime lastAttempt = GetLastSyncAttemptTime(positionId);
+      if(lastAttempt > 0 && now - lastAttempt < 30)
+         continue;
+
+      string jsonBody = BuildOpenPositionSyncJson();
+      if(jsonBody == "")
+         continue;
+
+      string response = "";
+      int statusCode = 0;
+      SetLastSyncAttemptTime(positionId, now);
+
+      if(HttpPostJson("/api/journal/event", jsonBody, response, statusCode))
+      {
+         Print("Open position sync sent. Position: ", (string)positionId, ", status code: ", statusCode);
+         DebugPrint("Open position sync response: " + response);
+      }
+      else
+      {
+         Print("Open position sync failed. Position: ", (string)positionId, ", status code: ", statusCode, ", response: ", response);
+      }
+   }
+}
+
 bool GetCachedPositionTradeDetails(
    long positionId,
    string symbol,
@@ -913,6 +1108,61 @@ void FillPositionTradeDetails(
          return;
       }
    }
+}
+
+datetime GetPositionOpenTime(long positionId, string symbol, datetime fallbackTime)
+{
+   if(positionId <= 0)
+      return fallbackTime;
+
+   if(PositionSelectByTicket((ulong)positionId))
+   {
+      datetime positionTime = (datetime)PositionGetInteger(POSITION_TIME);
+      if(positionTime > 0)
+         return positionTime;
+   }
+
+   for(int i = PositionsTotal() - 1; i >= 0; i--)
+   {
+      ulong ticket = PositionGetTicket(i);
+      if(ticket == 0 || !PositionSelectByTicket(ticket))
+         continue;
+      if(PositionGetInteger(POSITION_IDENTIFIER) != positionId)
+         continue;
+
+      datetime positionTime = (datetime)PositionGetInteger(POSITION_TIME);
+      if(positionTime > 0)
+         return positionTime;
+   }
+
+   datetime from = fallbackTime - 86400 * 60;
+   datetime to = fallbackTime + 60;
+   if(!HistorySelect(from, to))
+      return fallbackTime;
+
+   datetime earliestOpenTime = 0;
+   int total = HistoryDealsTotal();
+   for(int index = 0; index < total; index++)
+   {
+      ulong historyDeal = HistoryDealGetTicket(index);
+      if(historyDeal == 0)
+         continue;
+      if(HistoryDealGetInteger(historyDeal, DEAL_POSITION_ID) != positionId)
+         continue;
+      if(symbol != "" && HistoryDealGetString(historyDeal, DEAL_SYMBOL) != symbol)
+         continue;
+
+      ENUM_DEAL_ENTRY historyEntry = (ENUM_DEAL_ENTRY)HistoryDealGetInteger(historyDeal, DEAL_ENTRY);
+      ENUM_DEAL_TYPE historyType = (ENUM_DEAL_TYPE)HistoryDealGetInteger(historyDeal, DEAL_TYPE);
+      if(historyEntry == DEAL_ENTRY_IN && (historyType == DEAL_TYPE_BUY || historyType == DEAL_TYPE_SELL))
+      {
+         datetime historyTime = (datetime)HistoryDealGetInteger(historyDeal, DEAL_TIME);
+         if(historyTime > 0 && (earliestOpenTime == 0 || historyTime < earliestOpenTime))
+            earliestOpenTime = historyTime;
+      }
+   }
+
+   return earliestOpenTime > 0 ? earliestOpenTime : fallbackTime;
 }
 
 string GetTradeTypeForDeal(ulong dealTicket, ENUM_DEAL_TYPE fallbackDealType)
@@ -1063,6 +1313,13 @@ string TimeToIso8601(datetime value)
       parts.min,
       parts.sec
    );
+}
+
+string TimeToTraderLocalIso8601(datetime brokerServerTime)
+{
+   datetime utcTime = brokerServerTime + (TimeGMT() - TimeCurrent());
+
+   return TimeToIso8601(utcTime);
 }
 
 int DigitsForSymbol(string symbol)

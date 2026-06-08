@@ -1,47 +1,109 @@
+import { Prisma } from "@prisma/client";
 import { NextResponse } from "next/server";
-import { listJournalTrades } from "@/lib/journal/journal-service";
-import { journalTradeQuerySchema } from "@/lib/journal/validators";
+import { prisma } from "@/lib/prisma";
+import {
+  buildManualTradeCreateData,
+  buildTradeWhere,
+  ensureManualTradingAccount,
+  getPagination,
+  journalTradeInclude,
+  serializeJournalTrade,
+} from "@/lib/journal/prisma-trades";
 
 export const dynamic = "force-dynamic";
 
+function validationResponse(errors: string[]) {
+  return NextResponse.json(
+    {
+      success: false,
+      message: "Validation failed",
+      errors,
+    },
+    { status: 400 }
+  );
+}
+
 export async function GET(request: Request) {
   try {
-    const url = new URL(request.url);
-    const parsed = journalTradeQuerySchema.safeParse(
-      Object.fromEntries(url.searchParams.entries())
-    );
+    const { searchParams } = new URL(request.url);
+    const { where, errors } = buildTradeWhere(searchParams);
 
-    if (!parsed.success) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: "Invalid journal trade filters",
-          issues: parsed.error.issues.map((issue) => ({
-            path: issue.path.join("."),
-            message: issue.message,
-          })),
-        },
-        { status: 400 }
-      );
+    if (errors.length > 0) {
+      return validationResponse(errors);
     }
 
-    const result = await listJournalTrades({
-      symbol: parsed.data.symbol,
-      status: parsed.data.status,
-      result: parsed.data.result,
-      tradeType: parsed.data.tradeType,
-      from: parsed.data.dateFrom,
-      to: parsed.data.dateTo,
-      page: parsed.data.page,
-      limit: parsed.data.limit,
-    });
+    const { page, limit, skip, totalPages } = getPagination(searchParams);
+    const [total, trades] = await prisma.$transaction([
+      prisma.trade.count({ where }),
+      prisma.trade.findMany({
+        where,
+        include: journalTradeInclude,
+        orderBy: [{ openedAt: "desc" }, { createdAt: "desc" }],
+        skip,
+        take: limit,
+      }),
+    ]);
+    const pages = totalPages(total);
 
-    return NextResponse.json({ success: true, ...result });
+    return NextResponse.json({
+      success: true,
+      trades: trades.map(serializeJournalTrade),
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: pages,
+        hasMore: page < pages,
+      },
+    });
   } catch (error) {
-    console.error("Journal trades API error:", error);
+    console.error("Journal trades GET error:", error);
 
     return NextResponse.json(
       { success: false, message: "Failed to load journal trades" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function POST(request: Request) {
+  try {
+    const body = (await request.json()) as Record<string, unknown>;
+    const built = buildManualTradeCreateData(body);
+
+    if (built.errors) {
+      return validationResponse(built.errors);
+    }
+
+    const accountId =
+      built.data.accountId || (await ensureManualTradingAccount(built.data.userId));
+    const trade = await prisma.trade.create({
+      data: {
+        ...built.data,
+        accountId,
+      },
+      include: journalTradeInclude,
+    });
+
+    return NextResponse.json(
+      {
+        success: true,
+        trade: serializeJournalTrade(trade),
+      },
+      { status: 201 }
+    );
+  } catch (error) {
+    console.error("Journal trades POST error:", error);
+
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2003"
+    ) {
+      return validationResponse(["accountId does not match an existing trading account"]);
+    }
+
+    return NextResponse.json(
+      { success: false, message: "Failed to create journal trade" },
       { status: 500 }
     );
   }

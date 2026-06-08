@@ -1,0 +1,34 @@
+Tags POST error: Error [PrismaClientKnownRequestError]: 
+Invalid `prisma.tag.create()` invocation:
+
+
+Unique constraint failed on the fields: (`userId`,`name`)
+    at async POST (src\app\api\tags\route.ts:45:16)
+  43 |
+  44 |     const db = prisma as any;
+> 45 |     const tag = await db.tag.create({
+     |                ^
+  46 |       data: {
+  47 |         userId,
+  48 |         name: String(name).trim(), {
+  code: 'P2002',
+  meta: [Object],
+  clientVersion: '6.19.3'
+}
+Trade PATCH error: Error [PrismaClientKnownRequestError]: 
+Invalid `prisma.trade.findUnique()` invocation:
+
+
+Transaction API error: Transaction already closed: A query cannot be executed on an expired transaction. The timeout for this transaction was 5000 ms, however 5092 ms passed since the start of the transaction. Consider increasing the interactive transaction timeout or doing less work in the transaction.
+    at async PATCH (src\app\api\trades\[id]\route.ts:120:18)
+  118 |     }
+  119 |
+> 120 |     const trade = await prisma.$transaction(async (tx) => {
+      |                  ^
+  121 |       const txDb = tx as any;
+  122 |       const existing = await txDb.trade.findUnique({ where: { id } });
+  123 | {
+  code: 'P2028',
+  meta: [Object],
+  clientVersion: '6.19.3'
+}

@@ -2,9 +2,11 @@ import Link from "next/link";
 import { ArrowDown, ArrowUp, Eye, Plus, RotateCcw, Search } from "lucide-react";
 import {
   fetchJournalApi,
+  type JournalSummaryResponse,
   mapPrismaTradeToJournalTrade,
   type PrismaTradesResponse,
 } from "@/app/journal/_lib/journal-api";
+import { ManualTradeForm } from "@/app/journal/manual-trade-form";
 import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -73,6 +75,32 @@ function badgeClass(kind: "status" | "side", value: string | null | undefined) {
   return "border-slate-700 bg-slate-900 text-slate-300";
 }
 
+function SummaryCard({
+  label,
+  value,
+  tone = "neutral",
+}: {
+  label: string;
+  value: string;
+  tone?: "neutral" | "profit" | "loss" | "blue";
+}) {
+  const toneClass =
+    tone === "profit"
+      ? "text-emerald-300"
+      : tone === "loss"
+        ? "text-red-300"
+        : tone === "blue"
+          ? "text-blue-200"
+          : "text-white";
+
+  return (
+    <div className="rounded-lg border border-slate-800 bg-[#0F172A] p-4 shadow-sm">
+      <div className="text-xs font-medium uppercase text-slate-400">{label}</div>
+      <div className={cn("mt-2 text-2xl font-semibold", toneClass)}>{value}</div>
+    </div>
+  );
+}
+
 function buildPageHref(page: number, values: Record<string, string | undefined>) {
   const params = new URLSearchParams();
   params.set("page", String(page));
@@ -106,12 +134,14 @@ export default async function JournalPage({ searchParams }: JournalPageProps) {
   appendParam(query, "dateFrom", filters.dateFrom);
   appendParam(query, "dateTo", filters.dateTo);
 
-  const prismaData = await fetchJournalApi<PrismaTradesResponse>(
-    `/api/trades?${query.toString()}`
-  );
+  const [prismaData, summaryData] = await Promise.all([
+    fetchJournalApi<PrismaTradesResponse>(`/api/journal/trades?${query.toString()}`),
+    fetchJournalApi<JournalSummaryResponse>(`/api/journal/summary?${query.toString()}`),
+  ]);
   let trades = (prismaData.data?.trades || prismaData.trades || []).map(
     mapPrismaTradeToJournalTrade
   );
+  const summary = summaryData.summary;
 
   if (filters.result) {
     trades = trades.filter((trade) => trade.result === filters.result);
@@ -136,19 +166,36 @@ export default async function JournalPage({ searchParams }: JournalPageProps) {
         </div>
       </div>
 
+      <ManualTradeForm />
+
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <SummaryCard
+          label="Total Trades"
+          value={formatNumber(summary.totalTrades, 0)}
+          tone="blue"
+        />
+        <SummaryCard
+          label="Win Rate"
+          value={`${formatNumber(summary.winRate, 1)}%`}
+          tone="profit"
+        />
+        <SummaryCard
+          label="Total PnL"
+          value={formatNumber(summary.totalPnL, 2)}
+          tone={summary.totalPnL > 0 ? "profit" : summary.totalPnL < 0 ? "loss" : "neutral"}
+        />
+        <SummaryCard
+          label="Profit Factor"
+          value={formatNumber(summary.profitFactor, 2)}
+        />
+      </div>
+
       <div className="rounded-xl border border-slate-800 bg-[#0F172A] p-4 shadow-sm">
         <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
             <h2 className="text-sm font-semibold text-white">Filters</h2>
             <p className="text-xs text-slate-400">Narrow the journal by symbol, status, result, direction, and date.</p>
           </div>
-          <Link
-            href="/dashboard/trades?userId=demo-user"
-            className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#2563EB] px-4 text-sm font-semibold text-white hover:bg-blue-500"
-          >
-            <Plus className="h-4 w-4" />
-            New Trade
-          </Link>
         </div>
 
         <form className="grid gap-3 md:grid-cols-7">

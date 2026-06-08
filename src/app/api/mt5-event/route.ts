@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { getJournalCollection } from "@/lib/journal-store";
 import {
   saveTradingSignal,
   SignalValidationError,
@@ -159,6 +158,7 @@ function assertAuthorized(request: Request, url: URL) {
 }
 
 async function saveJournalEvent(payload: Mt5EventPayload) {
+  const { getJournalCollection } = await import("@/lib/journal-store");
   const collection = await getJournalCollection();
   const now = new Date().toISOString();
   const openTime = toIsoString(payload.openTimestamp);

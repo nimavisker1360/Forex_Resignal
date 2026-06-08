@@ -68,6 +68,13 @@ export type PrismaTradeScreenshotDto = {
   createdAt: string;
 };
 
+export type PrismaTradingAccountsResponse = {
+  success: boolean;
+  data?: PrismaTradingAccountDto[];
+  accounts?: PrismaTradingAccountDto[];
+  message?: string;
+};
+
 export type PrismaTagDto = {
   id: string;
   userId: string;
@@ -107,8 +114,14 @@ export type PrismaTradeDto = {
   createdAt: string;
   updatedAt: string;
   account?: PrismaTradingAccountDto | null;
+  tradingAccount?: PrismaTradingAccountDto | null;
   screenshots?: PrismaTradeScreenshotDto[];
   tags?: PrismaTradeTagDto[];
+  side?: "BUY" | "SELL";
+  strategy?: string | null;
+  entryTime?: string | null;
+  exitTime?: string | null;
+  mistakes?: string | null;
 };
 
 export type PrismaTradesResponse = {
@@ -118,7 +131,9 @@ export type PrismaTradesResponse = {
     pagination?: JournalTradesResponse["pagination"];
   };
   trades?: PrismaTradeDto[];
-  pagination?: JournalTradesResponse["pagination"];
+  pagination?: JournalTradesResponse["pagination"] & {
+    hasMore?: boolean;
+  };
 };
 
 export type PrismaTradeResponse = {
@@ -126,6 +141,25 @@ export type PrismaTradeResponse = {
   data?: PrismaTradeDto;
   trade?: PrismaTradeDto;
   message?: string;
+};
+
+export type JournalSummaryResponse = {
+  success: boolean;
+  summary: {
+    totalTrades: number;
+    winningTrades: number;
+    losingTrades: number;
+    breakEvenTrades: number;
+    winRate: number;
+    totalPnL: number;
+    averageWin: number;
+    averageLoss: number;
+    profitFactor: number | null;
+    bestTrade: PrismaTradeDto | null;
+    worstTrade: PrismaTradeDto | null;
+    openTrades: number;
+    closedTrades: number;
+  };
 };
 
 async function getBaseUrl() {
@@ -184,6 +218,7 @@ function screenshotUrl(trade: PrismaTradeDto, type: string) {
 
 export function mapPrismaTradeToJournalTrade(trade: PrismaTradeDto): JournalTradeDto {
   const profitLoss = toNumber(trade.profitLoss);
+  const account = trade.account || trade.tradingAccount;
   const entryScreenshotUrl = screenshotUrl(trade, "entry");
   const exitScreenshotUrl = screenshotUrl(trade, "exit");
   const psychology: Psychology | null =
@@ -204,9 +239,9 @@ export function mapPrismaTradeToJournalTrade(trade: PrismaTradeDto): JournalTrad
     _id: trade.id,
     userId: trade.userId,
     licenseKeyHash: null,
-    accountNumber: trade.account?.name || trade.accountId,
-    broker: trade.account?.broker || "-",
-    serverName: trade.account?.platform || "-",
+    accountNumber: account?.name || trade.accountId,
+    broker: account?.broker || "-",
+    serverName: account?.platform || "-",
     symbol: trade.symbol,
     ticket: null,
     positionId: null,
@@ -234,9 +269,9 @@ export function mapPrismaTradeToJournalTrade(trade: PrismaTradeDto): JournalTrad
     spread: null,
     atr: null,
     rsi: null,
-    session: trade.session,
-    openTime: trade.openedAt,
-    closeTime: trade.closedAt,
+    session: trade.strategy || trade.session,
+    openTime: trade.entryTime || trade.openedAt,
+    closeTime: trade.exitTime || trade.closedAt,
     durationSeconds: null,
     result: inferResult(trade.status, profitLoss),
     status:

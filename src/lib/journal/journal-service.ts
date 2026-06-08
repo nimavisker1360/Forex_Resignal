@@ -63,6 +63,7 @@ export type JournalEventPayload = {
   entryScreenshotStatus?: string | null;
   exitScreenshotStatus?: string | null;
   eventTime: Date;
+  openTime?: Date | null;
 };
 
 export type ProcessJournalEventInput = {

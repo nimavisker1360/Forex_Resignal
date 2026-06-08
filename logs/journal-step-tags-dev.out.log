@@ -1,0 +1,1105 @@
+
+> signal-forex@0.1.0 dev
+> next dev
+
+[32m✔[0m [33mConsole Ninja[0m extension is connected to [33mNext.js[0m, see [36mhttps://tinyurl.com/2vt8jxzw[0m
+   ▲ Next.js 15.3.0
+   - Local:        http://localhost:3000
+   - Network:      http://192.168.1.8:3000
+   - Environments: .env
+
+ ✓ Starting...
+ ✓ Ready in 5.4s
+ ○ Compiling /api/journal/trades ...
+ ✓ Compiled /api/journal/trades in 1929ms (368 modules)
+prisma:query BEGIN
+prisma:query SELECT COUNT(*) AS "_count$_all" FROM (SELECT "public"."Trade"."id" FROM "public"."Trade" WHERE 1=1 OFFSET $1) AS "sub"
+prisma:query SELECT "public"."Trade"."id", "public"."Trade"."userId", "public"."Trade"."accountId", "public"."Trade"."symbol", "public"."Trade"."direction"::text, "public"."Trade"."status"::text, "public"."Trade"."entryPrice", "public"."Trade"."exitPrice", "public"."Trade"."stopLoss", "public"."Trade"."takeProfit", "public"."Trade"."lotSize", "public"."Trade"."riskAmount", "public"."Trade"."profitLoss", "public"."Trade"."rr", "public"."Trade"."setup", "public"."Trade"."session", "public"."Trade"."emotion", "public"."Trade"."mistake", "public"."Trade"."notes", "public"."Trade"."openedAt", "public"."Trade"."closedAt", "public"."Trade"."createdAt", "public"."Trade"."updatedAt" FROM "public"."Trade" WHERE 1=1 ORDER BY "public"."Trade"."openedAt" DESC, "public"."Trade"."createdAt" DESC LIMIT $1 OFFSET $2
+prisma:query SELECT "public"."TradingAccount"."id", "public"."TradingAccount"."userId", "public"."TradingAccount"."name", "public"."TradingAccount"."broker", "public"."TradingAccount"."platform", "public"."TradingAccount"."currency", "public"."TradingAccount"."balance", "public"."TradingAccount"."createdAt", "public"."TradingAccount"."updatedAt" FROM "public"."TradingAccount" WHERE "public"."TradingAccount"."id" IN ($1) OFFSET $2
+prisma:query SELECT "public"."TradeScreenshot"."id", "public"."TradeScreenshot"."tradeId", "public"."TradeScreenshot"."userId", "public"."TradeScreenshot"."type", "public"."TradeScreenshot"."url", "public"."TradeScreenshot"."createdAt" FROM "public"."TradeScreenshot" WHERE "public"."TradeScreenshot"."tradeId" IN ($1) OFFSET $2
+prisma:query SELECT "public"."TradeTag"."tradeId", "public"."TradeTag"."tagId" FROM "public"."TradeTag" WHERE "public"."TradeTag"."tradeId" IN ($1) OFFSET $2
+prisma:query COMMIT
+ GET /api/journal/trades?limit=1 200 in 6296ms
+ ○ Compiling /api/journal/trades/[id] ...
+ ✓ Compiled /api/journal/trades/[id] in 1126ms (372 modules)
+prisma:query SELECT 1
+prisma:query SELECT "public"."Trade"."id", "public"."Trade"."userId", "public"."Trade"."accountId", "public"."Trade"."symbol", "public"."Trade"."direction"::text, "public"."Trade"."status"::text, "public"."Trade"."entryPrice", "public"."Trade"."exitPrice", "public"."Trade"."stopLoss", "public"."Trade"."takeProfit", "public"."Trade"."lotSize", "public"."Trade"."riskAmount", "public"."Trade"."profitLoss", "public"."Trade"."rr", "public"."Trade"."setup", "public"."Trade"."session", "public"."Trade"."emotion", "public"."Trade"."mistake", "public"."Trade"."notes", "public"."Trade"."openedAt", "public"."Trade"."closedAt", "public"."Trade"."createdAt", "public"."Trade"."updatedAt" FROM "public"."Trade" WHERE ("public"."Trade"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TradingAccount"."id", "public"."TradingAccount"."userId", "public"."TradingAccount"."name", "public"."TradingAccount"."broker", "public"."TradingAccount"."platform", "public"."TradingAccount"."currency", "public"."TradingAccount"."balance", "public"."TradingAccount"."createdAt", "public"."TradingAccount"."updatedAt" FROM "public"."TradingAccount" WHERE "public"."TradingAccount"."id" IN ($1) OFFSET $2
+prisma:query SELECT "public"."TradeScreenshot"."id", "public"."TradeScreenshot"."tradeId", "public"."TradeScreenshot"."userId", "public"."TradeScreenshot"."type", "public"."TradeScreenshot"."url", "public"."TradeScreenshot"."createdAt" FROM "public"."TradeScreenshot" WHERE "public"."TradeScreenshot"."tradeId" IN ($1) OFFSET $2
+prisma:query SELECT "public"."TradeTag"."tradeId", "public"."TradeTag"."tagId" FROM "public"."TradeTag" WHERE "public"."TradeTag"."tradeId" IN ($1) OFFSET $2
+prisma:query BEGIN
+prisma:query SELECT "public"."Tag"."id", "public"."Tag"."userId", "public"."Tag"."name", "public"."Tag"."color", "public"."Tag"."createdAt" FROM "public"."Tag" WHERE "public"."Tag"."id" IN ($1) OFFSET $2
+prisma:query SELECT "public"."Trade"."id" FROM "public"."Trade" WHERE ("public"."Trade"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+ GET /api/journal/trades/cmq24xjmz0007vdtoem94j8n2 200 in 4882ms
+prisma:query SELECT "public"."Trade"."id", "public"."Trade"."userId" FROM "public"."Trade" WHERE ("public"."Trade"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TradeTag"."tradeId", "public"."TradeTag"."tagId" FROM "public"."TradeTag" WHERE "public"."TradeTag"."tradeId" IN ($1) OFFSET $2
+prisma:query DELETE FROM "public"."TradeTag" WHERE "public"."TradeTag"."tradeId" = $1
+prisma:query SELECT "public"."Tag"."id", "public"."Tag"."userId", "public"."Tag"."name", "public"."Tag"."color", "public"."Tag"."createdAt" FROM "public"."Tag" WHERE "public"."Tag"."id" IN ($1) OFFSET $2
+ GET /api/journal/trades/cmq24xjmz0007vdtoem94j8n2/tags 200 in 5980ms
+prisma:query SELECT "public"."Tag"."id" FROM "public"."Tag" WHERE (("public"."Tag"."userId" = $1 AND "public"."Tag"."name" = $2) AND 1=1) OFFSET $3
+prisma:query SELECT "public"."Tag"."id", "public"."Tag"."userId", "public"."Tag"."name", "public"."Tag"."color", "public"."Tag"."createdAt" FROM "public"."Tag" WHERE ("public"."Tag"."id" = $1 AND (("public"."Tag"."userId" = $2 AND "public"."Tag"."name" = $3) AND 1=1)) LIMIT $4 OFFSET $5
+prisma:query SELECT "public"."Tag"."id", "public"."Tag"."userId", "public"."Tag"."name", "public"."Tag"."color", "public"."Tag"."createdAt" FROM "public"."Tag" WHERE "public"."Tag"."id" = $1 LIMIT $2 OFFSET $3
+prisma:query INSERT INTO "public"."TradeTag" ("tradeId","tagId") VALUES ($1,$2) RETURNING "public"."TradeTag"."tradeId", "public"."TradeTag"."tagId"
+prisma:query SELECT "public"."Tag"."id" FROM "public"."Tag" WHERE (("public"."Tag"."userId" = $1 AND "public"."Tag"."name" = $2) AND 1=1) OFFSET $3
+prisma:query INSERT INTO "public"."Tag" ("id","userId","name","createdAt") VALUES ($1,$2,$3,$4) RETURNING "public"."Tag"."id"
+prisma:query SELECT "public"."Tag"."id", "public"."Tag"."userId", "public"."Tag"."name", "public"."Tag"."color", "public"."Tag"."createdAt" FROM "public"."Tag" WHERE "public"."Tag"."id" = $1 LIMIT $2 OFFSET $3
+prisma:query INSERT INTO "public"."TradeTag" ("tradeId","tagId") VALUES ($1,$2) RETURNING "public"."TradeTag"."tradeId", "public"."TradeTag"."tagId"
+prisma:query SELECT "public"."Tag"."id" FROM "public"."Tag" WHERE (("public"."Tag"."userId" = $1 AND "public"."Tag"."name" = $2) AND 1=1) OFFSET $3
+prisma:query INSERT INTO "public"."Tag" ("id","userId","name","createdAt") VALUES ($1,$2,$3,$4) RETURNING "public"."Tag"."id"
+prisma:query SELECT "public"."Tag"."id", "public"."Tag"."userId", "public"."Tag"."name", "public"."Tag"."color", "public"."Tag"."createdAt" FROM "public"."Tag" WHERE "public"."Tag"."id" = $1 LIMIT $2 OFFSET $3
+prisma:query INSERT INTO "public"."TradeTag" ("tradeId","tagId") VALUES ($1,$2) RETURNING "public"."TradeTag"."tradeId", "public"."TradeTag"."tagId"
+prisma:query COMMIT
+ POST /api/journal/trades/cmq24xjmz0007vdtoem94j8n2/tags 200 in 8442ms
+prisma:query SELECT 1
+prisma:query BEGIN
+prisma:query SELECT "public"."Trade"."id", "public"."Trade"."userId" FROM "public"."Trade" WHERE ("public"."Trade"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query DELETE FROM "public"."TradeTag" WHERE "public"."TradeTag"."tradeId" = $1
+prisma:query SELECT "public"."Tag"."id" FROM "public"."Tag" WHERE (("public"."Tag"."userId" = $1 AND "public"."Tag"."name" = $2) AND 1=1) OFFSET $3
+prisma:query SELECT "public"."Tag"."id", "public"."Tag"."userId", "public"."Tag"."name", "public"."Tag"."color", "public"."Tag"."createdAt" FROM "public"."Tag" WHERE ("public"."Tag"."id" = $1 AND (("public"."Tag"."userId" = $2 AND "public"."Tag"."name" = $3) AND 1=1)) LIMIT $4 OFFSET $5
+prisma:query SELECT "public"."Tag"."id", "public"."Tag"."userId", "public"."Tag"."name", "public"."Tag"."color", "public"."Tag"."createdAt" FROM "public"."Tag" WHERE "public"."Tag"."id" = $1 LIMIT $2 OFFSET $3
+prisma:query INSERT INTO "public"."TradeTag" ("tradeId","tagId") VALUES ($1,$2) RETURNING "public"."TradeTag"."tradeId", "public"."TradeTag"."tagId"
+prisma:query COMMIT
+ POST /api/journal/trades/cmq24xjmz0007vdtoem94j8n2/tags 200 in 469ms
+prisma:query SELECT "public"."Trade"."id" FROM "public"."Trade" WHERE ("public"."Trade"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TradeTag"."tradeId", "public"."TradeTag"."tagId" FROM "public"."TradeTag" WHERE "public"."TradeTag"."tradeId" IN ($1) OFFSET $2
+prisma:query SELECT "public"."Tag"."id", "public"."Tag"."userId", "public"."Tag"."name", "public"."Tag"."color", "public"."Tag"."createdAt" FROM "public"."Tag" WHERE "public"."Tag"."id" IN ($1) OFFSET $2
+ GET /api/journal/trades/cmq24xjmz0007vdtoem94j8n2/tags 200 in 301ms
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+prisma:error Error in PostgreSQL connection: Error { kind: Closed, cause: None }
+ ○ Compiling /dashboard ...
+ ✓ Compiled /dashboard in 4.9s (906 modules)
+ GET /dashboard 200 in 5796ms
+ ✓ Compiled in 952ms (390 modules)
+ ○ Compiling /favicon.ico ...
+ ✓ Compiled /favicon.ico in 2s (922 modules)
+ GET /dashboard 200 in 2613ms
+ ○ Compiling /dashboard/accounts ...
+ ✓ Compiled /dashboard/accounts in 695ms (920 modules)
+ GET /favicon.ico 200 in 3257ms
+ GET /dashboard/accounts 200 in 1403ms
+ GET /dashboard/accounts 200 in 139ms
+ ○ Compiling /api/trading-accounts ...
+ ✓ Compiled /api/trading-accounts in 816ms (927 modules)
+ GET /dashboard/accounts 200 in 1053ms
+ GET /dashboard/accounts 200 in 78ms
+ GET /dashboard/accounts 200 in 74ms
+ GET /dashboard/accounts 200 in 72ms
+ GET /dashboard/accounts 200 in 76ms
+ GET /dashboard/accounts 200 in 245ms
+ GET /dashboard/accounts 200 in 121ms
+ GET /dashboard/accounts 200 in 68ms
+ GET /dashboard/accounts 200 in 61ms
+ GET /dashboard/accounts 200 in 55ms
+ GET /dashboard/accounts 200 in 58ms
+ GET /dashboard/accounts 200 in 68ms
+ GET /dashboard/accounts 200 in 58ms
+ GET /dashboard/accounts 200 in 60ms
+ GET /dashboard/accounts 200 in 73ms
+ GET /dashboard/accounts 200 in 53ms
+ GET /dashboard/accounts 200 in 56ms
+ GET /dashboard/accounts 200 in 48ms
+ GET /dashboard/accounts 200 in 67ms
+ GET /dashboard/accounts 200 in 63ms
+ GET /dashboard/accounts 200 in 87ms
+ GET /dashboard/accounts 200 in 147ms
+ GET /dashboard/accounts 200 in 87ms
+ GET /dashboard/accounts 200 in 95ms
+ GET /dashboard/accounts 200 in 123ms
+ GET /dashboard/accounts 200 in 91ms
+ GET /dashboard/accounts 200 in 81ms
+ GET /dashboard/accounts 200 in 72ms
+ GET /dashboard/accounts 200 in 130ms
+ GET /dashboard/accounts 200 in 136ms
+ GET /dashboard/accounts 200 in 84ms
+prisma:query SELECT "public"."TradingAccount"."id", "public"."TradingAccount"."userId", "public"."TradingAccount"."name", "public"."TradingAccount"."broker", "public"."TradingAccount"."platform", "public"."TradingAccount"."currency", "public"."TradingAccount"."balance", "public"."TradingAccount"."createdAt", "public"."TradingAccount"."updatedAt" FROM "public"."TradingAccount" WHERE "public"."TradingAccount"."userId" = $1 ORDER BY "public"."TradingAccount"."createdAt" DESC OFFSET $2
+ GET /api/trading-accounts?userId=demo-user 200 in 3989ms
+ GET /dashboard/accounts 200 in 79ms
+ GET /dashboard/accounts 200 in 80ms
+prisma:query SELECT "public"."TradingAccount"."id", "public"."TradingAccount"."userId", "public"."TradingAccount"."name", "public"."TradingAccount"."broker", "public"."TradingAccount"."platform", "public"."TradingAccount"."currency", "public"."TradingAccount"."balance", "public"."TradingAccount"."createdAt", "public"."TradingAccount"."updatedAt" FROM "public"."TradingAccount" WHERE "public"."TradingAccount"."userId" = $1 ORDER BY "public"."TradingAccount"."createdAt" DESC OFFSET $2
+ GET /api/trading-accounts?userId=demo-user 200 in 335ms
+ GET /dashboard/accounts 200 in 265ms
+ GET /dashboard/accounts 200 in 164ms
+ GET /dashboard/accounts 200 in 40ms
+ GET /dashboard/accounts 200 in 44ms
+ GET /dashboard/accounts 200 in 40ms
+ GET /dashboard/accounts 200 in 39ms
+ GET /dashboard/accounts 200 in 43ms
+ GET /dashboard/accounts 200 in 48ms
+ GET /dashboard/accounts 200 in 57ms
+ GET /dashboard/accounts 200 in 47ms
+ GET /dashboard/accounts 200 in 38ms
+ GET /dashboard/accounts 200 in 46ms
+ GET /dashboard/accounts 200 in 39ms
+ GET /dashboard/accounts 200 in 43ms
+ GET /dashboard/accounts 200 in 42ms
+ GET /dashboard/accounts 200 in 48ms
+ GET /dashboard/accounts 200 in 41ms
+ GET /dashboard/accounts 200 in 40ms
+ GET /dashboard/accounts 200 in 45ms
+ GET /dashboard/accounts 200 in 40ms
+ GET /dashboard/accounts 200 in 39ms
+ GET /dashboard/accounts 200 in 41ms
+ GET /dashboard/accounts 200 in 45ms
+ GET /dashboard/accounts 200 in 43ms
+ GET /dashboard/accounts 200 in 54ms
+ GET /dashboard/accounts 200 in 43ms
+ GET /dashboard/accounts 200 in 45ms
+ GET /dashboard/accounts 200 in 44ms
+ GET /dashboard/accounts 200 in 56ms
+ GET /dashboard/accounts 200 in 42ms
+ GET /dashboard/accounts 200 in 46ms
+ GET /dashboard/accounts 200 in 44ms
+ GET /dashboard/accounts 200 in 40ms
+ GET /dashboard/accounts 200 in 42ms
+ GET /dashboard/accounts 200 in 44ms
+ GET /dashboard/accounts 200 in 41ms
+ GET /dashboard/accounts 200 in 43ms
+ GET /dashboard/accounts 200 in 57ms
+ GET /dashboard/accounts 200 in 47ms
+ GET /dashboard/accounts 200 in 40ms
+ GET /dashboard/accounts 200 in 38ms
+ GET /dashboard/accounts 200 in 47ms
+ GET /dashboard/accounts 200 in 45ms
+ GET /dashboard/accounts 200 in 45ms
+ GET /dashboard/accounts 200 in 41ms
+ GET /dashboard/accounts 200 in 39ms
+ GET /dashboard/accounts 200 in 41ms
+ GET /dashboard/accounts 200 in 48ms
+ GET /dashboard/accounts 200 in 39ms
+ GET /dashboard/accounts 200 in 45ms
+ GET /dashboard/accounts 200 in 49ms
+ GET /dashboard/accounts 200 in 51ms
+ GET /dashboard/accounts 200 in 48ms
+ GET /dashboard/accounts 200 in 40ms
+ GET /dashboard/accounts 200 in 43ms
+ GET /dashboard/accounts 200 in 39ms
+ GET /dashboard/accounts 200 in 41ms
+ GET /dashboard/accounts 200 in 44ms
+ GET /dashboard/accounts 200 in 87ms
+ ✓ Compiled in 631ms (394 modules)
+ GET /dashboard/accounts 200 in 600ms
+ ✓ Compiled in 241ms (394 modules)
+ GET /dashboard/accounts 200 in 468ms
+ ✓ Compiled in 271ms (394 modules)
+ ✓ Compiled in 312ms (394 modules)
+ GET /dashboard/accounts 200 in 375ms
+ ✓ Compiled in 330ms (394 modules)
+ GET /dashboard/accounts 200 in 679ms
+ ✓ Compiled in 392ms (394 modules)
+ ✓ Compiled in 271ms (394 modules)
+ GET /dashboard/accounts 200 in 308ms
+ ✓ Compiled in 203ms (394 modules)
+ GET /dashboard/accounts 200 in 428ms
+ ✓ Compiled in 255ms (394 modules)
+ GET /dashboard/accounts 200 in 235ms
+ ✓ Compiled in 219ms (394 modules)
+ ✓ Compiled in 256ms (394 modules)
+ GET /dashboard/accounts 200 in 273ms
+ ✓ Compiled in 218ms (394 modules)
+ GET /dashboard/accounts 200 in 413ms
+ ✓ Compiled in 241ms (394 modules)
+ ✓ Compiled in 283ms (394 modules)
+ GET /dashboard/accounts 200 in 347ms
+ ✓ Compiled in 372ms (394 modules)
+ GET /dashboard/accounts 200 in 772ms
+ ✓ Compiled in 440ms (394 modules)
+ GET /dashboard 200 in 540ms
+ ✓ Compiled in 428ms (394 modules)
+prisma:query SELECT "public"."TradingAccount"."id", "public"."TradingAccount"."userId", "public"."TradingAccount"."name", "public"."TradingAccount"."broker", "public"."TradingAccount"."platform", "public"."TradingAccount"."currency", "public"."TradingAccount"."balance", "public"."TradingAccount"."createdAt", "public"."TradingAccount"."updatedAt" FROM "public"."TradingAccount" WHERE "public"."TradingAccount"."userId" = $1 ORDER BY "public"."TradingAccount"."createdAt" DESC OFFSET $2
+ GET /api/trading-accounts?userId=demo-user 200 in 524ms
+ GET /dashboard 200 in 762ms
+ ○ Compiling /api/trades ...
+ ✓ Compiled /api/trades in 1519ms (943 modules)
+ GET /dashboard 200 in 1423ms
+prisma:query SELECT "public"."TradingAccount"."id", "public"."TradingAccount"."userId", "public"."TradingAccount"."name", "public"."TradingAccount"."broker", "public"."TradingAccount"."platform", "public"."TradingAccount"."currency", "public"."TradingAccount"."balance", "public"."TradingAccount"."createdAt", "public"."TradingAccount"."updatedAt" FROM "public"."TradingAccount" WHERE "public"."TradingAccount"."userId" = $1 ORDER BY "public"."TradingAccount"."createdAt" DESC OFFSET $2
+ GET /api/trading-accounts?userId=demo-user 200 in 1424ms
+ GET /dashboard 200 in 68ms
+ GET /dashboard 200 in 64ms
+ GET /dashboard 200 in 45ms
+ GET /dashboard 200 in 45ms
+ GET /dashboard 200 in 47ms
+ GET /dashboard 200 in 47ms
+ GET /dashboard 200 in 42ms
+ GET /dashboard 200 in 53ms
+ GET /dashboard 200 in 88ms
+ GET /dashboard 200 in 65ms
+ GET /dashboard 200 in 59ms
+ GET /dashboard 200 in 65ms
+ GET /dashboard 200 in 279ms
+ GET /dashboard 200 in 234ms
+prisma:query BEGIN
+ GET /dashboard 200 in 151ms
+ GET /dashboard 200 in 141ms
+ GET /dashboard 200 in 96ms
+ GET /dashboard 200 in 66ms
+ GET /dashboard 200 in 55ms
+prisma:query SELECT COUNT(*) AS "_count$_all" FROM (SELECT "public"."Trade"."id" FROM "public"."Trade" WHERE "public"."Trade"."userId" = $1 OFFSET $2) AS "sub"
+ GET /dashboard 200 in 57ms
+ GET /dashboard 200 in 47ms
+ GET /dashboard 200 in 50ms
+ GET /dashboard 200 in 55ms
+ GET /dashboard 200 in 55ms
+prisma:query SELECT "public"."Trade"."id", "public"."Trade"."userId", "public"."Trade"."accountId", "public"."Trade"."symbol", "public"."Trade"."direction"::text, "public"."Trade"."status"::text, "public"."Trade"."entryPrice", "public"."Trade"."exitPrice", "public"."Trade"."stopLoss", "public"."Trade"."takeProfit", "public"."Trade"."lotSize", "public"."Trade"."riskAmount", "public"."Trade"."profitLoss", "public"."Trade"."rr", "public"."Trade"."setup", "public"."Trade"."session", "public"."Trade"."emotion", "public"."Trade"."mistake", "public"."Trade"."notes", "public"."Trade"."openedAt", "public"."Trade"."closedAt", "public"."Trade"."createdAt", "public"."Trade"."updatedAt" FROM "public"."Trade" WHERE "public"."Trade"."userId" = $1 ORDER BY "public"."Trade"."createdAt" DESC LIMIT $2 OFFSET $3
+ GET /dashboard 200 in 56ms
+ GET /dashboard 200 in 59ms
+ GET /dashboard 200 in 55ms
+ GET /dashboard 200 in 56ms
+ GET /dashboard 200 in 53ms
+ GET /dashboard 200 in 43ms
+ GET /dashboard 200 in 50ms
+ GET /dashboard 200 in 42ms
+prisma:query SELECT "public"."TradingAccount"."id", "public"."TradingAccount"."userId", "public"."TradingAccount"."name", "public"."TradingAccount"."broker", "public"."TradingAccount"."platform", "public"."TradingAccount"."currency", "public"."TradingAccount"."balance", "public"."TradingAccount"."createdAt", "public"."TradingAccount"."updatedAt" FROM "public"."TradingAccount" WHERE "public"."TradingAccount"."id" IN ($1,$2) OFFSET $3
+ GET /dashboard 200 in 48ms
+ GET /dashboard 200 in 46ms
+ GET /dashboard 200 in 44ms
+ GET /dashboard 200 in 45ms
+ GET /dashboard 200 in 47ms
+ GET /dashboard 200 in 52ms
+ GET /dashboard 200 in 43ms
+ GET /dashboard 200 in 45ms
+ GET /dashboard 200 in 47ms
+ GET /dashboard 200 in 48ms
+prisma:query SELECT "public"."TradeScreenshot"."id", "public"."TradeScreenshot"."tradeId", "public"."TradeScreenshot"."userId", "public"."TradeScreenshot"."type", "public"."TradeScreenshot"."url", "public"."TradeScreenshot"."createdAt" FROM "public"."TradeScreenshot" WHERE "public"."TradeScreenshot"."tradeId" IN ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18) OFFSET $19
+ GET /dashboard 200 in 49ms
+ GET /dashboard 200 in 46ms
+ GET /dashboard 200 in 53ms
+ GET /dashboard 200 in 48ms
+ GET /dashboard 200 in 42ms
+ GET /dashboard 200 in 40ms
+prisma:query SELECT "public"."VoiceMemo"."id", "public"."VoiceMemo"."tradeId", "public"."VoiceMemo"."userId", "public"."VoiceMemo"."url", "public"."VoiceMemo"."duration", "public"."VoiceMemo"."transcript", "public"."VoiceMemo"."createdAt" FROM "public"."VoiceMemo" WHERE "public"."VoiceMemo"."tradeId" IN ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18) OFFSET $19
+ GET /dashboard 200 in 42ms
+ GET /dashboard 200 in 41ms
+ GET /dashboard 200 in 41ms
+ GET /dashboard 200 in 41ms
+ GET /dashboard 200 in 44ms
+ GET /dashboard 200 in 47ms
+ GET /dashboard 200 in 46ms
+ GET /dashboard 200 in 40ms
+ GET /dashboard 200 in 41ms
+prisma:query SELECT "public"."TradeTag"."tradeId", "public"."TradeTag"."tagId" FROM "public"."TradeTag" WHERE "public"."TradeTag"."tradeId" IN ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18) OFFSET $19
+ GET /dashboard 200 in 40ms
+ GET /dashboard 200 in 42ms
+ GET /dashboard 200 in 39ms
+ GET /dashboard 200 in 40ms
+ GET /dashboard 200 in 44ms
+ GET /dashboard 200 in 44ms
+ GET /dashboard 200 in 42ms
+ GET /dashboard 200 in 42ms
+ GET /dashboard 200 in 39ms
+ GET /dashboard 200 in 41ms
+ GET /dashboard 200 in 46ms
+prisma:query SELECT "public"."Tag"."id", "public"."Tag"."userId", "public"."Tag"."name", "public"."Tag"."color", "public"."Tag"."createdAt" FROM "public"."Tag" WHERE "public"."Tag"."id" IN ($1,$2,$3,$4,$5) OFFSET $6
+ GET /dashboard 200 in 42ms
+ GET /dashboard 200 in 43ms
+prisma:query COMMIT
+ GET /api/trades?userId=demo-user&limit=100 200 in 6452ms
+ GET /dashboard 200 in 57ms
+prisma:query BEGIN
+ GET /dashboard 200 in 200ms
+prisma:query SELECT COUNT(*) AS "_count$_all" FROM (SELECT "public"."Trade"."id" FROM "public"."Trade" WHERE "public"."Trade"."userId" = $1 OFFSET $2) AS "sub"
+ GET /dashboard 200 in 196ms
+ GET /dashboard 200 in 43ms
+ GET /dashboard 200 in 47ms
+ GET /dashboard 200 in 41ms
+ GET /dashboard 200 in 46ms
+ GET /dashboard 200 in 40ms
+prisma:query SELECT "public"."Trade"."id", "public"."Trade"."userId", "public"."Trade"."accountId", "public"."Trade"."symbol", "public"."Trade"."direction"::text, "public"."Trade"."status"::text, "public"."Trade"."entryPrice", "public"."Trade"."exitPrice", "public"."Trade"."stopLoss", "public"."Trade"."takeProfit", "public"."Trade"."lotSize", "public"."Trade"."riskAmount", "public"."Trade"."profitLoss", "public"."Trade"."rr", "public"."Trade"."setup", "public"."Trade"."session", "public"."Trade"."emotion", "public"."Trade"."mistake", "public"."Trade"."notes", "public"."Trade"."openedAt", "public"."Trade"."closedAt", "public"."Trade"."createdAt", "public"."Trade"."updatedAt" FROM "public"."Trade" WHERE "public"."Trade"."userId" = $1 ORDER BY "public"."Trade"."createdAt" DESC LIMIT $2 OFFSET $3
+ GET /dashboard 200 in 53ms
+ GET /dashboard 200 in 39ms
+prisma:query SELECT "public"."TradingAccount"."id", "public"."TradingAccount"."userId", "public"."TradingAccount"."name", "public"."TradingAccount"."broker", "public"."TradingAccount"."platform", "public"."TradingAccount"."currency", "public"."TradingAccount"."balance", "public"."TradingAccount"."createdAt", "public"."TradingAccount"."updatedAt" FROM "public"."TradingAccount" WHERE "public"."TradingAccount"."id" IN ($1,$2) OFFSET $3
+ GET /dashboard 200 in 39ms
+ GET /dashboard 200 in 41ms
+ GET /dashboard 200 in 40ms
+ GET /dashboard 200 in 39ms
+ GET /dashboard 200 in 43ms
+ GET /dashboard 200 in 42ms
+ GET /dashboard 200 in 43ms
+ GET /dashboard 200 in 44ms
+prisma:query SELECT "public"."TradeScreenshot"."id", "public"."TradeScreenshot"."tradeId", "public"."TradeScreenshot"."userId", "public"."TradeScreenshot"."type", "public"."TradeScreenshot"."url", "public"."TradeScreenshot"."createdAt" FROM "public"."TradeScreenshot" WHERE "public"."TradeScreenshot"."tradeId" IN ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18) OFFSET $19
+ GET /dashboard 200 in 43ms
+ GET /dashboard 200 in 41ms
+ GET /dashboard 200 in 68ms
+ GET /dashboard 200 in 46ms
+ GET /dashboard 200 in 43ms
+prisma:query SELECT "public"."VoiceMemo"."id", "public"."VoiceMemo"."tradeId", "public"."VoiceMemo"."userId", "public"."VoiceMemo"."url", "public"."VoiceMemo"."duration", "public"."VoiceMemo"."transcript", "public"."VoiceMemo"."createdAt" FROM "public"."VoiceMemo" WHERE "public"."VoiceMemo"."tradeId" IN ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18) OFFSET $19
+prisma:query SELECT "public"."TradeTag"."tradeId", "public"."TradeTag"."tagId" FROM "public"."TradeTag" WHERE "public"."TradeTag"."tradeId" IN ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18) OFFSET $19
+ GET /dashboard 200 in 54ms
+prisma:query SELECT "public"."Tag"."id", "public"."Tag"."userId", "public"."Tag"."name", "public"."Tag"."color", "public"."Tag"."createdAt" FROM "public"."Tag" WHERE "public"."Tag"."id" IN ($1,$2,$3,$4,$5) OFFSET $6
+ GET /dashboard 200 in 40ms
+prisma:query COMMIT
+ GET /api/trades?userId=demo-user&limit=100 200 in 1573ms
+ GET /dashboard 200 in 51ms
+ GET /dashboard 200 in 58ms
+ GET /dashboard 200 in 185ms
+ GET /dashboard 200 in 236ms
+ GET /dashboard 200 in 52ms
+ GET /dashboard 200 in 41ms
+ GET /dashboard 200 in 42ms
+ GET /dashboard 200 in 41ms
+ GET /dashboard 200 in 39ms
+ GET /dashboard 200 in 39ms
+ GET /dashboard 200 in 38ms
+ GET /dashboard 200 in 47ms
+ GET /dashboard 200 in 39ms
+ GET /dashboard 200 in 441ms
+ ✓ Compiled in 627ms (394 modules)
+ GET /dashboard 200 in 271ms
+ GET /dashboard 200 in 48ms
+ GET /dashboard 200 in 41ms
+ GET /dashboard 200 in 51ms
+ GET /dashboard 200 in 46ms
+ GET /dashboard 200 in 43ms
+ GET /dashboard 200 in 45ms
+ GET /dashboard 200 in 47ms
+ GET /dashboard 200 in 45ms
+ GET /dashboard 200 in 41ms
+ GET /dashboard 200 in 46ms
+ GET /dashboard 200 in 41ms
+ GET /dashboard 200 in 44ms
+ GET /dashboard 200 in 48ms
+ GET /dashboard 200 in 39ms
+ GET /dashboard 200 in 47ms
+ GET /dashboard 200 in 44ms
+ GET /dashboard 200 in 50ms
+ GET /dashboard 200 in 38ms
+ ✓ Compiled /dashboard/trades in 458ms (951 modules)
+ GET /dashboard/trades 200 in 586ms
+prisma:query SELECT 1
+prisma:query SELECT "public"."TradingAccount"."id", "public"."TradingAccount"."userId", "public"."TradingAccount"."name", "public"."TradingAccount"."broker", "public"."TradingAccount"."platform", "public"."TradingAccount"."currency", "public"."TradingAccount"."balance", "public"."TradingAccount"."createdAt", "public"."TradingAccount"."updatedAt" FROM "public"."TradingAccount" WHERE "public"."TradingAccount"."userId" = $1 ORDER BY "public"."TradingAccount"."createdAt" DESC OFFSET $2
+ GET /api/trading-accounts?userId=demo-user 200 in 218ms
+ ○ Compiling /api/tags ...
+ ✓ Compiled /api/tags in 595ms (953 modules)
+prisma:query BEGIN
+prisma:query SELECT 1
+prisma:query SELECT COUNT(*) AS "_count$_all" FROM (SELECT "public"."Trade"."id" FROM "public"."Trade" WHERE "public"."Trade"."userId" = $1 OFFSET $2) AS "sub"
+prisma:query SELECT "public"."Trade"."id", "public"."Trade"."userId", "public"."Trade"."accountId", "public"."Trade"."symbol", "public"."Trade"."direction"::text, "public"."Trade"."status"::text, "public"."Trade"."entryPrice", "public"."Trade"."exitPrice", "public"."Trade"."stopLoss", "public"."Trade"."takeProfit", "public"."Trade"."lotSize", "public"."Trade"."riskAmount", "public"."Trade"."profitLoss", "public"."Trade"."rr", "public"."Trade"."setup", "public"."Trade"."session", "public"."Trade"."emotion", "public"."Trade"."mistake", "public"."Trade"."notes", "public"."Trade"."openedAt", "public"."Trade"."closedAt", "public"."Trade"."createdAt", "public"."Trade"."updatedAt" FROM "public"."Trade" WHERE "public"."Trade"."userId" = $1 ORDER BY "public"."Trade"."createdAt" DESC LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."Tag"."id", "public"."Tag"."userId", "public"."Tag"."name", "public"."Tag"."color", "public"."Tag"."createdAt" FROM "public"."Tag" WHERE "public"."Tag"."userId" = $1 ORDER BY "public"."Tag"."name" ASC OFFSET $2
+ GET /api/tags?userId=demo-user 200 in 1138ms
+prisma:query SELECT "public"."TradingAccount"."id", "public"."TradingAccount"."userId", "public"."TradingAccount"."name", "public"."TradingAccount"."broker", "public"."TradingAccount"."platform", "public"."TradingAccount"."currency", "public"."TradingAccount"."balance", "public"."TradingAccount"."createdAt", "public"."TradingAccount"."updatedAt" FROM "public"."TradingAccount" WHERE "public"."TradingAccount"."id" IN ($1,$2) OFFSET $3
+prisma:query SELECT "public"."TradeScreenshot"."id", "public"."TradeScreenshot"."tradeId", "public"."TradeScreenshot"."userId", "public"."TradeScreenshot"."type", "public"."TradeScreenshot"."url", "public"."TradeScreenshot"."createdAt" FROM "public"."TradeScreenshot" WHERE "public"."TradeScreenshot"."tradeId" IN ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18) OFFSET $19
+prisma:query SELECT "public"."VoiceMemo"."id", "public"."VoiceMemo"."tradeId", "public"."VoiceMemo"."userId", "public"."VoiceMemo"."url", "public"."VoiceMemo"."duration", "public"."VoiceMemo"."transcript", "public"."VoiceMemo"."createdAt" FROM "public"."VoiceMemo" WHERE "public"."VoiceMemo"."tradeId" IN ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18) OFFSET $19
+prisma:query SELECT "public"."Tag"."id", "public"."Tag"."userId", "public"."Tag"."name", "public"."Tag"."color", "public"."Tag"."createdAt" FROM "public"."Tag" WHERE "public"."Tag"."userId" = $1 ORDER BY "public"."Tag"."name" ASC OFFSET $2
+ GET /api/tags?userId=demo-user 200 in 148ms
+prisma:query SELECT "public"."TradeTag"."tradeId", "public"."TradeTag"."tagId" FROM "public"."TradeTag" WHERE "public"."TradeTag"."tradeId" IN ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18) OFFSET $19
+prisma:query SELECT "public"."Tag"."id", "public"."Tag"."userId", "public"."Tag"."name", "public"."Tag"."color", "public"."Tag"."createdAt" FROM "public"."Tag" WHERE "public"."Tag"."id" IN ($1,$2,$3,$4,$5) OFFSET $6
+prisma:query COMMIT
+prisma:query SELECT "public"."TradingAccount"."id", "public"."TradingAccount"."userId", "public"."TradingAccount"."name", "public"."TradingAccount"."broker", "public"."TradingAccount"."platform", "public"."TradingAccount"."currency", "public"."TradingAccount"."balance", "public"."TradingAccount"."createdAt", "public"."TradingAccount"."updatedAt" FROM "public"."TradingAccount" WHERE "public"."TradingAccount"."userId" = $1 ORDER BY "public"."TradingAccount"."createdAt" DESC OFFSET $2
+ GET /api/trades?userId=demo-user&limit=100 200 in 1613ms
+ GET /api/trading-accounts?userId=demo-user 200 in 1355ms
+prisma:query BEGIN
+prisma:query SELECT COUNT(*) AS "_count$_all" FROM (SELECT "public"."Trade"."id" FROM "public"."Trade" WHERE "public"."Trade"."userId" = $1 OFFSET $2) AS "sub"
+prisma:query SELECT "public"."Trade"."id", "public"."Trade"."userId", "public"."Trade"."accountId", "public"."Trade"."symbol", "public"."Trade"."direction"::text, "public"."Trade"."status"::text, "public"."Trade"."entryPrice", "public"."Trade"."exitPrice", "public"."Trade"."stopLoss", "public"."Trade"."takeProfit", "public"."Trade"."lotSize", "public"."Trade"."riskAmount", "public"."Trade"."profitLoss", "public"."Trade"."rr", "public"."Trade"."setup", "public"."Trade"."session", "public"."Trade"."emotion", "public"."Trade"."mistake", "public"."Trade"."notes", "public"."Trade"."openedAt", "public"."Trade"."closedAt", "public"."Trade"."createdAt", "public"."Trade"."updatedAt" FROM "public"."Trade" WHERE "public"."Trade"."userId" = $1 ORDER BY "public"."Trade"."createdAt" DESC LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TradingAccount"."id", "public"."TradingAccount"."userId", "public"."TradingAccount"."name", "public"."TradingAccount"."broker", "public"."TradingAccount"."platform", "public"."TradingAccount"."currency", "public"."TradingAccount"."balance", "public"."TradingAccount"."createdAt", "public"."TradingAccount"."updatedAt" FROM "public"."TradingAccount" WHERE "public"."TradingAccount"."id" IN ($1,$2) OFFSET $3
+prisma:query SELECT "public"."TradeScreenshot"."id", "public"."TradeScreenshot"."tradeId", "public"."TradeScreenshot"."userId", "public"."TradeScreenshot"."type", "public"."TradeScreenshot"."url", "public"."TradeScreenshot"."createdAt" FROM "public"."TradeScreenshot" WHERE "public"."TradeScreenshot"."tradeId" IN ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18) OFFSET $19
+prisma:query SELECT "public"."VoiceMemo"."id", "public"."VoiceMemo"."tradeId", "public"."VoiceMemo"."userId", "public"."VoiceMemo"."url", "public"."VoiceMemo"."duration", "public"."VoiceMemo"."transcript", "public"."VoiceMemo"."createdAt" FROM "public"."VoiceMemo" WHERE "public"."VoiceMemo"."tradeId" IN ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18) OFFSET $19
+prisma:query SELECT "public"."TradeTag"."tradeId", "public"."TradeTag"."tagId" FROM "public"."TradeTag" WHERE "public"."TradeTag"."tradeId" IN ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18) OFFSET $19
+prisma:query SELECT "public"."Tag"."id", "public"."Tag"."userId", "public"."Tag"."name", "public"."Tag"."color", "public"."Tag"."createdAt" FROM "public"."Tag" WHERE "public"."Tag"."id" IN ($1,$2,$3,$4,$5) OFFSET $6
+prisma:query COMMIT
+ GET /api/trades?userId=demo-user&limit=100 200 in 4191ms
+ ✓ Compiled in 301ms (403 modules)
+prisma:query SELECT 1
+prisma:query INSERT INTO "public"."Tag" ("id","userId","name","color","createdAt") VALUES ($1,$2,$3,$4,$5) RETURNING "public"."Tag"."id", "public"."Tag"."userId", "public"."Tag"."name", "public"."Tag"."color", "public"."Tag"."createdAt"
+prisma:error 
+Invalid `prisma.tag.create()` invocation:
+
+
+Unique constraint failed on the fields: (`userId`,`name`)
+ POST /api/tags 409 in 417ms
+ ○ Compiling /api/trades/[id] ...
+ ✓ Compiled /api/trades/[id] in 822ms (933 modules)
+prisma:query SELECT 1
+prisma:query BEGIN
+prisma:query SELECT "public"."Trade"."id", "public"."Trade"."userId", "public"."Trade"."accountId", "public"."Trade"."symbol", "public"."Trade"."direction"::text, "public"."Trade"."status"::text, "public"."Trade"."entryPrice", "public"."Trade"."exitPrice", "public"."Trade"."stopLoss", "public"."Trade"."takeProfit", "public"."Trade"."lotSize", "public"."Trade"."riskAmount", "public"."Trade"."profitLoss", "public"."Trade"."rr", "public"."Trade"."setup", "public"."Trade"."session", "public"."Trade"."emotion", "public"."Trade"."mistake", "public"."Trade"."notes", "public"."Trade"."openedAt", "public"."Trade"."closedAt", "public"."Trade"."createdAt", "public"."Trade"."updatedAt" FROM "public"."Trade" WHERE ("public"."Trade"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query UPDATE "public"."Trade" SET "status" = CAST($1::text AS "public"."TradeStatus"), "direction" = CAST($2::text AS "public"."TradeDirection"), "openedAt" = $3, "closedAt" = $4, "symbol" = $5, "setup" = $6, "session" = $7, "emotion" = $8, "mistake" = $9, "notes" = $10, "entryPrice" = $11, "exitPrice" = $12, "stopLoss" = $13, "takeProfit" = $14, "lotSize" = $15, "riskAmount" = $16, "profitLoss" = $17, "rr" = $18, "updatedAt" = $19 WHERE ("public"."Trade"."id" = $20 AND 1=1) RETURNING "public"."Trade"."id", "public"."Trade"."userId", "public"."Trade"."accountId", "public"."Trade"."symbol", "public"."Trade"."direction"::text, "public"."Trade"."status"::text, "public"."Trade"."entryPrice", "public"."Trade"."exitPrice", "public"."Trade"."stopLoss", "public"."Trade"."takeProfit", "public"."Trade"."lotSize", "public"."Trade"."riskAmount", "public"."Trade"."profitLoss", "public"."Trade"."rr", "public"."Trade"."setup", "public"."Trade"."session", "public"."Trade"."emotion", "public"."Trade"."mistake", "public"."Trade"."notes", "public"."Trade"."openedAt", "public"."Trade"."closedAt", "public"."Trade"."createdAt", "public"."Trade"."updatedAt"
+prisma:query DELETE FROM "public"."TradeTag" WHERE "public"."TradeTag"."tradeId" = $1
+prisma:query INSERT INTO "public"."TradeTag" ("tradeId","tagId") VALUES ($1,$2), ($3,$4), ($5,$6), ($7,$8) ON CONFLICT DO NOTHING
+prisma:query SELECT "public"."Trade"."id", "public"."Trade"."userId", "public"."Trade"."accountId", "public"."Trade"."symbol", "public"."Trade"."direction"::text, "public"."Trade"."status"::text, "public"."Trade"."entryPrice", "public"."Trade"."exitPrice", "public"."Trade"."stopLoss", "public"."Trade"."takeProfit", "public"."Trade"."lotSize", "public"."Trade"."riskAmount", "public"."Trade"."profitLoss", "public"."Trade"."rr", "public"."Trade"."setup", "public"."Trade"."session", "public"."Trade"."emotion", "public"."Trade"."mistake", "public"."Trade"."notes", "public"."Trade"."openedAt", "public"."Trade"."closedAt", "public"."Trade"."createdAt", "public"."Trade"."updatedAt" FROM "public"."Trade" WHERE ("public"."Trade"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT 1
+prisma:query BEGIN
+prisma:query SELECT "public"."TradingAccount"."id", "public"."TradingAccount"."userId", "public"."TradingAccount"."name", "public"."TradingAccount"."broker", "public"."TradingAccount"."platform", "public"."TradingAccount"."currency", "public"."TradingAccount"."balance", "public"."TradingAccount"."createdAt", "public"."TradingAccount"."updatedAt" FROM "public"."TradingAccount" WHERE "public"."TradingAccount"."id" IN ($1) OFFSET $2
+prisma:query SELECT "public"."Trade"."id", "public"."Trade"."userId", "public"."Trade"."accountId", "public"."Trade"."symbol", "public"."Trade"."direction"::text, "public"."Trade"."status"::text, "public"."Trade"."entryPrice", "public"."Trade"."exitPrice", "public"."Trade"."stopLoss", "public"."Trade"."takeProfit", "public"."Trade"."lotSize", "public"."Trade"."riskAmount", "public"."Trade"."profitLoss", "public"."Trade"."rr", "public"."Trade"."setup", "public"."Trade"."session", "public"."Trade"."emotion", "public"."Trade"."mistake", "public"."Trade"."notes", "public"."Trade"."openedAt", "public"."Trade"."closedAt", "public"."Trade"."createdAt", "public"."Trade"."updatedAt" FROM "public"."Trade" WHERE ("public"."Trade"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TradeScreenshot"."id", "public"."TradeScreenshot"."tradeId", "public"."TradeScreenshot"."userId", "public"."TradeScreenshot"."type", "public"."TradeScreenshot"."url", "public"."TradeScreenshot"."createdAt" FROM "public"."TradeScreenshot" WHERE "public"."TradeScreenshot"."tradeId" IN ($1) OFFSET $2
+prisma:query SELECT "public"."VoiceMemo"."id", "public"."VoiceMemo"."tradeId", "public"."VoiceMemo"."userId", "public"."VoiceMemo"."url", "public"."VoiceMemo"."duration", "public"."VoiceMemo"."transcript", "public"."VoiceMemo"."createdAt" FROM "public"."VoiceMemo" WHERE "public"."VoiceMemo"."tradeId" IN ($1) OFFSET $2
+prisma:query SELECT "public"."TradeTag"."tradeId", "public"."TradeTag"."tagId" FROM "public"."TradeTag" WHERE "public"."TradeTag"."tradeId" IN ($1) OFFSET $2
+ ✓ Compiled in 425ms (403 modules)
+prisma:query SELECT "public"."Tag"."id", "public"."Tag"."userId", "public"."Tag"."name", "public"."Tag"."color", "public"."Tag"."createdAt" FROM "public"."Tag" WHERE "public"."Tag"."id" IN ($1,$2,$3,$4) OFFSET $5
+ ✓ Compiled in 270ms (403 modules)
+prisma:query COMMIT
+prisma:query UPDATE "public"."Trade" SET "status" = CAST($1::text AS "public"."TradeStatus"), "direction" = CAST($2::text AS "public"."TradeDirection"), "openedAt" = $3, "closedAt" = $4, "symbol" = $5, "setup" = $6, "session" = $7, "emotion" = $8, "mistake" = $9, "notes" = $10, "entryPrice" = $11, "exitPrice" = $12, "stopLoss" = $13, "takeProfit" = $14, "lotSize" = $15, "riskAmount" = $16, "profitLoss" = $17, "rr" = $18, "updatedAt" = $19 WHERE ("public"."Trade"."id" = $20 AND 1=1) RETURNING "public"."Trade"."id", "public"."Trade"."userId", "public"."Trade"."accountId", "public"."Trade"."symbol", "public"."Trade"."direction"::text, "public"."Trade"."status"::text, "public"."Trade"."entryPrice", "public"."Trade"."exitPrice", "public"."Trade"."stopLoss", "public"."Trade"."takeProfit", "public"."Trade"."lotSize", "public"."Trade"."riskAmount", "public"."Trade"."profitLoss", "public"."Trade"."rr", "public"."Trade"."setup", "public"."Trade"."session", "public"."Trade"."emotion", "public"."Trade"."mistake", "public"."Trade"."notes", "public"."Trade"."openedAt", "public"."Trade"."closedAt", "public"."Trade"."createdAt", "public"."Trade"."updatedAt"
+ PATCH /api/trades/cmq2en3kh0001vdwo20hgp5mb 200 in 6936ms
+ ✓ Compiled in 285ms (403 modules)
+ ✓ Compiled in 373ms (403 modules)
+prisma:query DELETE FROM "public"."TradeTag" WHERE "public"."TradeTag"."tradeId" = $1
+prisma:query BEGIN
+prisma:query SELECT COUNT(*) AS "_count$_all" FROM (SELECT "public"."Trade"."id" FROM "public"."Trade" WHERE "public"."Trade"."userId" = $1 OFFSET $2) AS "sub"
+ ✓ Compiled in 287ms (403 modules)
+prisma:query SELECT "public"."Trade"."id", "public"."Trade"."userId", "public"."Trade"."accountId", "public"."Trade"."symbol", "public"."Trade"."direction"::text, "public"."Trade"."status"::text, "public"."Trade"."entryPrice", "public"."Trade"."exitPrice", "public"."Trade"."stopLoss", "public"."Trade"."takeProfit", "public"."Trade"."lotSize", "public"."Trade"."riskAmount", "public"."Trade"."profitLoss", "public"."Trade"."rr", "public"."Trade"."setup", "public"."Trade"."session", "public"."Trade"."emotion", "public"."Trade"."mistake", "public"."Trade"."notes", "public"."Trade"."openedAt", "public"."Trade"."closedAt", "public"."Trade"."createdAt", "public"."Trade"."updatedAt" FROM "public"."Trade" WHERE "public"."Trade"."userId" = $1 ORDER BY "public"."Trade"."createdAt" DESC LIMIT $2 OFFSET $3
+prisma:query INSERT INTO "public"."TradeTag" ("tradeId","tagId") VALUES ($1,$2), ($3,$4), ($5,$6), ($7,$8) ON CONFLICT DO NOTHING
+prisma:query SELECT "public"."TradingAccount"."id", "public"."TradingAccount"."userId", "public"."TradingAccount"."name", "public"."TradingAccount"."broker", "public"."TradingAccount"."platform", "public"."TradingAccount"."currency", "public"."TradingAccount"."balance", "public"."TradingAccount"."createdAt", "public"."TradingAccount"."updatedAt" FROM "public"."TradingAccount" WHERE "public"."TradingAccount"."id" IN ($1,$2) OFFSET $3
+ ✓ Compiled in 392ms (403 modules)
+prisma:query SELECT "public"."Trade"."id", "public"."Trade"."userId", "public"."Trade"."accountId", "public"."Trade"."symbol", "public"."Trade"."direction"::text, "public"."Trade"."status"::text, "public"."Trade"."entryPrice", "public"."Trade"."exitPrice", "public"."Trade"."stopLoss", "public"."Trade"."takeProfit", "public"."Trade"."lotSize", "public"."Trade"."riskAmount", "public"."Trade"."profitLoss", "public"."Trade"."rr", "public"."Trade"."setup", "public"."Trade"."session", "public"."Trade"."emotion", "public"."Trade"."mistake", "public"."Trade"."notes", "public"."Trade"."openedAt", "public"."Trade"."closedAt", "public"."Trade"."createdAt", "public"."Trade"."updatedAt" FROM "public"."Trade" WHERE ("public"."Trade"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TradeScreenshot"."id", "public"."TradeScreenshot"."tradeId", "public"."TradeScreenshot"."userId", "public"."TradeScreenshot"."type", "public"."TradeScreenshot"."url", "public"."TradeScreenshot"."createdAt" FROM "public"."TradeScreenshot" WHERE "public"."TradeScreenshot"."tradeId" IN ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18) OFFSET $19
+prisma:query SELECT "public"."VoiceMemo"."id", "public"."VoiceMemo"."tradeId", "public"."VoiceMemo"."userId", "public"."VoiceMemo"."url", "public"."VoiceMemo"."duration", "public"."VoiceMemo"."transcript", "public"."VoiceMemo"."createdAt" FROM "public"."VoiceMemo" WHERE "public"."VoiceMemo"."tradeId" IN ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18) OFFSET $19
+ ✓ Compiled in 341ms (403 modules)
+ ✓ Compiled in 253ms (403 modules)
+prisma:query SELECT "public"."TradeTag"."tradeId", "public"."TradeTag"."tagId" FROM "public"."TradeTag" WHERE "public"."TradeTag"."tradeId" IN ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18) OFFSET $19
+prisma:query SELECT "public"."TradingAccount"."id", "public"."TradingAccount"."userId", "public"."TradingAccount"."name", "public"."TradingAccount"."broker", "public"."TradingAccount"."platform", "public"."TradingAccount"."currency", "public"."TradingAccount"."balance", "public"."TradingAccount"."createdAt", "public"."TradingAccount"."updatedAt" FROM "public"."TradingAccount" WHERE "public"."TradingAccount"."id" IN ($1) OFFSET $2
+ ✓ Compiled in 249ms (403 modules)
+prisma:query SELECT "public"."TradeScreenshot"."id", "public"."TradeScreenshot"."tradeId", "public"."TradeScreenshot"."userId", "public"."TradeScreenshot"."type", "public"."TradeScreenshot"."url", "public"."TradeScreenshot"."createdAt" FROM "public"."TradeScreenshot" WHERE "public"."TradeScreenshot"."tradeId" IN ($1) OFFSET $2
+ ✓ Compiled in 222ms (403 modules)
+ ✓ Compiled in 212ms (403 modules)
+prisma:query SELECT "public"."VoiceMemo"."id", "public"."VoiceMemo"."tradeId", "public"."VoiceMemo"."userId", "public"."VoiceMemo"."url", "public"."VoiceMemo"."duration", "public"."VoiceMemo"."transcript", "public"."VoiceMemo"."createdAt" FROM "public"."VoiceMemo" WHERE "public"."VoiceMemo"."tradeId" IN ($1) OFFSET $2
+ ✓ Compiled in 200ms (403 modules)
+prisma:query ROLLBACK
+prisma:query SELECT "public"."Tag"."id", "public"."Tag"."userId", "public"."Tag"."name", "public"."Tag"."color", "public"."Tag"."createdAt" FROM "public"."Tag" WHERE "public"."Tag"."id" IN ($1,$2,$3,$4,$5,$6,$7) OFFSET $8
+prisma:error 
+Invalid `prisma.trade.findUnique()` invocation:
+
+
+Transaction API error: Transaction already closed: A query cannot be executed on an expired transaction. The timeout for this transaction was 5000 ms, however 5092 ms passed since the start of the transaction. Consider increasing the interactive transaction timeout or doing less work in the transaction.
+ PATCH /api/trades/cmq2en3kh0001vdwo20hgp5mb 500 in 5430ms
+prisma:query COMMIT
+ GET /api/trades?userId=demo-user&limit=100 200 in 3057ms
+ ✓ Compiled in 518ms (403 modules)
+ ✓ Compiled in 382ms (403 modules)
+ ✓ Compiled in 382ms (403 modules)
+ ✓ Compiled in 466ms (403 modules)
+ ✓ Compiled in 298ms (403 modules)
+ ✓ Compiled in 354ms (403 modules)
+ ✓ Compiled in 306ms (403 modules)
+ ✓ Compiled in 232ms (403 modules)
+ ✓ Compiled in 214ms (403 modules)
+ ✓ Compiled in 207ms (403 modules)
+ ✓ Compiled in 212ms (403 modules)
+ ✓ Compiled in 220ms (403 modules)
+ ✓ Compiled in 206ms (403 modules)
+ ✓ Compiled in 216ms (403 modules)
+ ✓ Compiled in 209ms (403 modules)
+ ✓ Compiled in 360ms (403 modules)
+ ✓ Compiled in 314ms (403 modules)
+ ✓ Compiled in 289ms (403 modules)
+ ✓ Compiled in 265ms (403 modules)
+ ✓ Compiled in 327ms (403 modules)
+ ✓ Compiled in 315ms (403 modules)
+ ✓ Compiled in 256ms (403 modules)
+ ✓ Compiled in 230ms (403 modules)
+ ✓ Compiled in 222ms (403 modules)
+ ✓ Compiled in 199ms (403 modules)
+ ✓ Compiled in 236ms (403 modules)
+ ✓ Compiled in 252ms (403 modules)
+ ✓ Compiled in 261ms (403 modules)
+ ✓ Compiled in 238ms (403 modules)
+ ✓ Compiled in 352ms (403 modules)
+ ✓ Compiled in 362ms (403 modules)
+ ✓ Compiled in 302ms (403 modules)
+ ✓ Compiled in 315ms (403 modules)
+ ✓ Compiled in 361ms (403 modules)
+ ✓ Compiled in 289ms (403 modules)
+ ✓ Compiled in 206ms (403 modules)
+ ✓ Compiled in 210ms (403 modules)
+ ✓ Compiled in 217ms (403 modules)
+ ✓ Compiled in 228ms (403 modules)
+ ✓ Compiled in 299ms (403 modules)
+ ✓ Compiled in 215ms (403 modules)
+ ✓ Compiled in 223ms (403 modules)
+ ✓ Compiled in 225ms (403 modules)
+ ✓ Compiled in 332ms (403 modules)
+ ✓ Compiled in 346ms (403 modules)
+ ✓ Compiled in 295ms (403 modules)
+ ✓ Compiled in 291ms (403 modules)
+ ✓ Compiled in 428ms (403 modules)
+ ✓ Compiled in 435ms (403 modules)
+ ✓ Compiled in 259ms (403 modules)
+ ✓ Compiled in 201ms (403 modules)
+ ✓ Compiled in 198ms (403 modules)
+ ✓ Compiled in 206ms (403 modules)
+ ✓ Compiled in 221ms (403 modules)
+ ✓ Compiled in 221ms (403 modules)
+ ✓ Compiled in 223ms (403 modules)
+ ✓ Compiled in 314ms (403 modules)
+ ✓ Compiled in 354ms (403 modules)
+ ✓ Compiled in 314ms (403 modules)
+ ✓ Compiled in 289ms (403 modules)
+ ✓ Compiled in 367ms (403 modules)
+ ✓ Compiled in 360ms (403 modules)
+ ✓ Compiled in 231ms (403 modules)
+ ✓ Compiled in 247ms (403 modules)
+ ✓ Compiled in 212ms (403 modules)
+ ✓ Compiled in 214ms (403 modules)
+ ✓ Compiled in 216ms (403 modules)
+ ✓ Compiled in 213ms (403 modules)
+ ✓ Compiled in 216ms (403 modules)
+ ✓ Compiled in 309ms (403 modules)
+ ✓ Compiled in 373ms (403 modules)
+ ✓ Compiled in 619ms (403 modules)
+ ✓ Compiled in 289ms (403 modules)
+ ✓ Compiled in 361ms (403 modules)
+ ✓ Compiled in 344ms (403 modules)
+ ✓ Compiled in 256ms (403 modules)
+ ✓ Compiled in 238ms (403 modules)
+ ✓ Compiled in 320ms (403 modules)
+ ✓ Compiled in 249ms (403 modules)
+ ✓ Compiled in 225ms (403 modules)
+ ✓ Compiled in 220ms (403 modules)
+ ✓ Compiled in 213ms (403 modules)
+ ✓ Compiled in 305ms (403 modules)
+ ✓ Compiled in 348ms (403 modules)
+ ✓ Compiled in 348ms (403 modules)
+ ✓ Compiled in 271ms (403 modules)
+ ✓ Compiled in 374ms (403 modules)
+ ✓ Compiled in 370ms (403 modules)
+ ✓ Compiled in 258ms (403 modules)
+ ✓ Compiled in 209ms (403 modules)
+ ✓ Compiled in 224ms (403 modules)
+ ✓ Compiled in 203ms (403 modules)
+ ✓ Compiled in 213ms (403 modules)
+ ✓ Compiled in 219ms (403 modules)
+ ✓ Compiled in 227ms (403 modules)
+ ✓ Compiled in 251ms (403 modules)
+ ✓ Compiled in 410ms (403 modules)
+ ✓ Compiled in 497ms (403 modules)
+ ✓ Compiled in 494ms (403 modules)
+ ✓ Compiled in 456ms (403 modules)
+ ✓ Compiled in 599ms (403 modules)
+ ✓ Compiled in 512ms (403 modules)
+prisma:query SELECT 1
+ ✓ Compiled in 469ms (403 modules)
+prisma:query BEGIN
+prisma:query SELECT "public"."Trade"."id", "public"."Trade"."userId", "public"."Trade"."accountId", "public"."Trade"."symbol", "public"."Trade"."direction"::text, "public"."Trade"."status"::text, "public"."Trade"."entryPrice", "public"."Trade"."exitPrice", "public"."Trade"."stopLoss", "public"."Trade"."takeProfit", "public"."Trade"."lotSize", "public"."Trade"."riskAmount", "public"."Trade"."profitLoss", "public"."Trade"."rr", "public"."Trade"."setup", "public"."Trade"."session", "public"."Trade"."emotion", "public"."Trade"."mistake", "public"."Trade"."notes", "public"."Trade"."openedAt", "public"."Trade"."closedAt", "public"."Trade"."createdAt", "public"."Trade"."updatedAt" FROM "public"."Trade" WHERE ("public"."Trade"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+ ✓ Compiled in 409ms (403 modules)
+prisma:query UPDATE "public"."Trade" SET "status" = CAST($1::text AS "public"."TradeStatus"), "direction" = CAST($2::text AS "public"."TradeDirection"), "openedAt" = $3, "closedAt" = $4, "symbol" = $5, "setup" = $6, "session" = $7, "emotion" = $8, "mistake" = $9, "notes" = $10, "entryPrice" = $11, "exitPrice" = $12, "stopLoss" = $13, "takeProfit" = $14, "lotSize" = $15, "riskAmount" = $16, "profitLoss" = $17, "rr" = $18, "updatedAt" = $19 WHERE ("public"."Trade"."id" = $20 AND 1=1) RETURNING "public"."Trade"."id", "public"."Trade"."userId", "public"."Trade"."accountId", "public"."Trade"."symbol", "public"."Trade"."direction"::text, "public"."Trade"."status"::text, "public"."Trade"."entryPrice", "public"."Trade"."exitPrice", "public"."Trade"."stopLoss", "public"."Trade"."takeProfit", "public"."Trade"."lotSize", "public"."Trade"."riskAmount", "public"."Trade"."profitLoss", "public"."Trade"."rr", "public"."Trade"."setup", "public"."Trade"."session", "public"."Trade"."emotion", "public"."Trade"."mistake", "public"."Trade"."notes", "public"."Trade"."openedAt", "public"."Trade"."closedAt", "public"."Trade"."createdAt", "public"."Trade"."updatedAt"
+prisma:query DELETE FROM "public"."TradeTag" WHERE "public"."TradeTag"."tradeId" = $1
+ ✓ Compiled in 399ms (403 modules)
+prisma:query INSERT INTO "public"."TradeTag" ("tradeId","tagId") VALUES ($1,$2), ($3,$4), ($5,$6), ($7,$8) ON CONFLICT DO NOTHING
+prisma:query SELECT "public"."Trade"."id", "public"."Trade"."userId", "public"."Trade"."accountId", "public"."Trade"."symbol", "public"."Trade"."direction"::text, "public"."Trade"."status"::text, "public"."Trade"."entryPrice", "public"."Trade"."exitPrice", "public"."Trade"."stopLoss", "public"."Trade"."takeProfit", "public"."Trade"."lotSize", "public"."Trade"."riskAmount", "public"."Trade"."profitLoss", "public"."Trade"."rr", "public"."Trade"."setup", "public"."Trade"."session", "public"."Trade"."emotion", "public"."Trade"."mistake", "public"."Trade"."notes", "public"."Trade"."openedAt", "public"."Trade"."closedAt", "public"."Trade"."createdAt", "public"."Trade"."updatedAt" FROM "public"."Trade" WHERE ("public"."Trade"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TradingAccount"."id", "public"."TradingAccount"."userId", "public"."TradingAccount"."name", "public"."TradingAccount"."broker", "public"."TradingAccount"."platform", "public"."TradingAccount"."currency", "public"."TradingAccount"."balance", "public"."TradingAccount"."createdAt", "public"."TradingAccount"."updatedAt" FROM "public"."TradingAccount" WHERE "public"."TradingAccount"."id" IN ($1) OFFSET $2
+prisma:query SELECT "public"."TradeScreenshot"."id", "public"."TradeScreenshot"."tradeId", "public"."TradeScreenshot"."userId", "public"."TradeScreenshot"."type", "public"."TradeScreenshot"."url", "public"."TradeScreenshot"."createdAt" FROM "public"."TradeScreenshot" WHERE "public"."TradeScreenshot"."tradeId" IN ($1) OFFSET $2
+prisma:query SELECT "public"."VoiceMemo"."id", "public"."VoiceMemo"."tradeId", "public"."VoiceMemo"."userId", "public"."VoiceMemo"."url", "public"."VoiceMemo"."duration", "public"."VoiceMemo"."transcript", "public"."VoiceMemo"."createdAt" FROM "public"."VoiceMemo" WHERE "public"."VoiceMemo"."tradeId" IN ($1) OFFSET $2
+prisma:query SELECT "public"."TradeTag"."tradeId", "public"."TradeTag"."tagId" FROM "public"."TradeTag" WHERE "public"."TradeTag"."tradeId" IN ($1) OFFSET $2
+prisma:query SELECT "public"."Tag"."id", "public"."Tag"."userId", "public"."Tag"."name", "public"."Tag"."color", "public"."Tag"."createdAt" FROM "public"."Tag" WHERE "public"."Tag"."id" IN ($1,$2,$3,$4) OFFSET $5
+ ✓ Compiled in 1169ms (403 modules)
+prisma:query COMMIT
+prisma:query SELECT 1
+prisma:query BEGIN
+ PATCH /api/trades/cmq2en3kh0001vdwo20hgp5mb 200 in 3018ms
+prisma:query SELECT "public"."Trade"."id", "public"."Trade"."userId", "public"."Trade"."accountId", "public"."Trade"."symbol", "public"."Trade"."direction"::text, "public"."Trade"."status"::text, "public"."Trade"."entryPrice", "public"."Trade"."exitPrice", "public"."Trade"."stopLoss", "public"."Trade"."takeProfit", "public"."Trade"."lotSize", "public"."Trade"."riskAmount", "public"."Trade"."profitLoss", "public"."Trade"."rr", "public"."Trade"."setup", "public"."Trade"."session", "public"."Trade"."emotion", "public"."Trade"."mistake", "public"."Trade"."notes", "public"."Trade"."openedAt", "public"."Trade"."closedAt", "public"."Trade"."createdAt", "public"."Trade"."updatedAt" FROM "public"."Trade" WHERE ("public"."Trade"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+ ✓ Compiled in 818ms (403 modules)
+prisma:query UPDATE "public"."Trade" SET "status" = CAST($1::text AS "public"."TradeStatus"), "direction" = CAST($2::text AS "public"."TradeDirection"), "openedAt" = $3, "closedAt" = $4, "symbol" = $5, "setup" = $6, "session" = $7, "emotion" = $8, "mistake" = $9, "notes" = $10, "entryPrice" = $11, "exitPrice" = $12, "stopLoss" = $13, "takeProfit" = $14, "lotSize" = $15, "riskAmount" = $16, "profitLoss" = $17, "rr" = $18, "updatedAt" = $19 WHERE ("public"."Trade"."id" = $20 AND 1=1) RETURNING "public"."Trade"."id", "public"."Trade"."userId", "public"."Trade"."accountId", "public"."Trade"."symbol", "public"."Trade"."direction"::text, "public"."Trade"."status"::text, "public"."Trade"."entryPrice", "public"."Trade"."exitPrice", "public"."Trade"."stopLoss", "public"."Trade"."takeProfit", "public"."Trade"."lotSize", "public"."Trade"."riskAmount", "public"."Trade"."profitLoss", "public"."Trade"."rr", "public"."Trade"."setup", "public"."Trade"."session", "public"."Trade"."emotion", "public"."Trade"."mistake", "public"."Trade"."notes", "public"."Trade"."openedAt", "public"."Trade"."closedAt", "public"."Trade"."createdAt", "public"."Trade"."updatedAt"
+prisma:query BEGIN
+prisma:query SELECT COUNT(*) AS "_count$_all" FROM (SELECT "public"."Trade"."id" FROM "public"."Trade" WHERE "public"."Trade"."userId" = $1 OFFSET $2) AS "sub"
+ ✓ Compiled in 456ms (403 modules)
+prisma:query SELECT "public"."Trade"."id", "public"."Trade"."userId", "public"."Trade"."accountId", "public"."Trade"."symbol", "public"."Trade"."direction"::text, "public"."Trade"."status"::text, "public"."Trade"."entryPrice", "public"."Trade"."exitPrice", "public"."Trade"."stopLoss", "public"."Trade"."takeProfit", "public"."Trade"."lotSize", "public"."Trade"."riskAmount", "public"."Trade"."profitLoss", "public"."Trade"."rr", "public"."Trade"."setup", "public"."Trade"."session", "public"."Trade"."emotion", "public"."Trade"."mistake", "public"."Trade"."notes", "public"."Trade"."openedAt", "public"."Trade"."closedAt", "public"."Trade"."createdAt", "public"."Trade"."updatedAt" FROM "public"."Trade" WHERE "public"."Trade"."userId" = $1 ORDER BY "public"."Trade"."createdAt" DESC LIMIT $2 OFFSET $3
+prisma:query DELETE FROM "public"."TradeTag" WHERE "public"."TradeTag"."tradeId" = $1
+prisma:query SELECT "public"."TradingAccount"."id", "public"."TradingAccount"."userId", "public"."TradingAccount"."name", "public"."TradingAccount"."broker", "public"."TradingAccount"."platform", "public"."TradingAccount"."currency", "public"."TradingAccount"."balance", "public"."TradingAccount"."createdAt", "public"."TradingAccount"."updatedAt" FROM "public"."TradingAccount" WHERE "public"."TradingAccount"."id" IN ($1,$2) OFFSET $3
+prisma:query SELECT "public"."TradeScreenshot"."id", "public"."TradeScreenshot"."tradeId", "public"."TradeScreenshot"."userId", "public"."TradeScreenshot"."type", "public"."TradeScreenshot"."url", "public"."TradeScreenshot"."createdAt" FROM "public"."TradeScreenshot" WHERE "public"."TradeScreenshot"."tradeId" IN ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18) OFFSET $19
+ ✓ Compiled in 418ms (403 modules)
+prisma:query SELECT "public"."VoiceMemo"."id", "public"."VoiceMemo"."tradeId", "public"."VoiceMemo"."userId", "public"."VoiceMemo"."url", "public"."VoiceMemo"."duration", "public"."VoiceMemo"."transcript", "public"."VoiceMemo"."createdAt" FROM "public"."VoiceMemo" WHERE "public"."VoiceMemo"."tradeId" IN ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18) OFFSET $19
+prisma:query INSERT INTO "public"."TradeTag" ("tradeId","tagId") VALUES ($1,$2), ($3,$4), ($5,$6), ($7,$8) ON CONFLICT DO NOTHING
+ ✓ Compiled in 514ms (403 modules)
+prisma:query SELECT "public"."TradeTag"."tradeId", "public"."TradeTag"."tagId" FROM "public"."TradeTag" WHERE "public"."TradeTag"."tradeId" IN ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18) OFFSET $19
+prisma:query SELECT "public"."Trade"."id", "public"."Trade"."userId", "public"."Trade"."accountId", "public"."Trade"."symbol", "public"."Trade"."direction"::text, "public"."Trade"."status"::text, "public"."Trade"."entryPrice", "public"."Trade"."exitPrice", "public"."Trade"."stopLoss", "public"."Trade"."takeProfit", "public"."Trade"."lotSize", "public"."Trade"."riskAmount", "public"."Trade"."profitLoss", "public"."Trade"."rr", "public"."Trade"."setup", "public"."Trade"."session", "public"."Trade"."emotion", "public"."Trade"."mistake", "public"."Trade"."notes", "public"."Trade"."openedAt", "public"."Trade"."closedAt", "public"."Trade"."createdAt", "public"."Trade"."updatedAt" FROM "public"."Trade" WHERE ("public"."Trade"."id" = $1 AND 1=1) LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TradingAccount"."id", "public"."TradingAccount"."userId", "public"."TradingAccount"."name", "public"."TradingAccount"."broker", "public"."TradingAccount"."platform", "public"."TradingAccount"."currency", "public"."TradingAccount"."balance", "public"."TradingAccount"."createdAt", "public"."TradingAccount"."updatedAt" FROM "public"."TradingAccount" WHERE "public"."TradingAccount"."id" IN ($1) OFFSET $2
+prisma:query SELECT "public"."Tag"."id", "public"."Tag"."userId", "public"."Tag"."name", "public"."Tag"."color", "public"."Tag"."createdAt" FROM "public"."Tag" WHERE "public"."Tag"."id" IN ($1,$2,$3,$4,$5,$6,$7) OFFSET $8
+prisma:query SELECT "public"."TradeScreenshot"."id", "public"."TradeScreenshot"."tradeId", "public"."TradeScreenshot"."userId", "public"."TradeScreenshot"."type", "public"."TradeScreenshot"."url", "public"."TradeScreenshot"."createdAt" FROM "public"."TradeScreenshot" WHERE "public"."TradeScreenshot"."tradeId" IN ($1) OFFSET $2
+ ✓ Compiled in 487ms (403 modules)
+prisma:query SELECT "public"."VoiceMemo"."id", "public"."VoiceMemo"."tradeId", "public"."VoiceMemo"."userId", "public"."VoiceMemo"."url", "public"."VoiceMemo"."duration", "public"."VoiceMemo"."transcript", "public"."VoiceMemo"."createdAt" FROM "public"."VoiceMemo" WHERE "public"."VoiceMemo"."tradeId" IN ($1) OFFSET $2
+prisma:query COMMIT
+ GET /api/trades?userId=demo-user&limit=100 200 in 2226ms
+prisma:query SELECT "public"."TradeTag"."tradeId", "public"."TradeTag"."tagId" FROM "public"."TradeTag" WHERE "public"."TradeTag"."tradeId" IN ($1) OFFSET $2
+ ✓ Compiled in 449ms (403 modules)
+prisma:query SELECT "public"."Tag"."id", "public"."Tag"."userId", "public"."Tag"."name", "public"."Tag"."color", "public"."Tag"."createdAt" FROM "public"."Tag" WHERE "public"."Tag"."id" IN ($1,$2,$3,$4) OFFSET $5
+ ✓ Compiled in 290ms (403 modules)
+prisma:query COMMIT
+ PATCH /api/trades/cmq2en3kh0001vdwo20hgp5mb 200 in 3857ms
+ ✓ Compiled in 365ms (403 modules)
+prisma:query BEGIN
+prisma:query SELECT COUNT(*) AS "_count$_all" FROM (SELECT "public"."Trade"."id" FROM "public"."Trade" WHERE "public"."Trade"."userId" = $1 OFFSET $2) AS "sub"
+ ✓ Compiled in 298ms (403 modules)
+prisma:query SELECT "public"."Trade"."id", "public"."Trade"."userId", "public"."Trade"."accountId", "public"."Trade"."symbol", "public"."Trade"."direction"::text, "public"."Trade"."status"::text, "public"."Trade"."entryPrice", "public"."Trade"."exitPrice", "public"."Trade"."stopLoss", "public"."Trade"."takeProfit", "public"."Trade"."lotSize", "public"."Trade"."riskAmount", "public"."Trade"."profitLoss", "public"."Trade"."rr", "public"."Trade"."setup", "public"."Trade"."session", "public"."Trade"."emotion", "public"."Trade"."mistake", "public"."Trade"."notes", "public"."Trade"."openedAt", "public"."Trade"."closedAt", "public"."Trade"."createdAt", "public"."Trade"."updatedAt" FROM "public"."Trade" WHERE "public"."Trade"."userId" = $1 ORDER BY "public"."Trade"."createdAt" DESC LIMIT $2 OFFSET $3
+prisma:query SELECT "public"."TradingAccount"."id", "public"."TradingAccount"."userId", "public"."TradingAccount"."name", "public"."TradingAccount"."broker", "public"."TradingAccount"."platform", "public"."TradingAccount"."currency", "public"."TradingAccount"."balance", "public"."TradingAccount"."createdAt", "public"."TradingAccount"."updatedAt" FROM "public"."TradingAccount" WHERE "public"."TradingAccount"."id" IN ($1,$2) OFFSET $3
+ ✓ Compiled in 514ms (403 modules)
+prisma:query SELECT "public"."TradeScreenshot"."id", "public"."TradeScreenshot"."tradeId", "public"."TradeScreenshot"."userId", "public"."TradeScreenshot"."type", "public"."TradeScreenshot"."url", "public"."TradeScreenshot"."createdAt" FROM "public"."TradeScreenshot" WHERE "public"."TradeScreenshot"."tradeId" IN ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18) OFFSET $19
+prisma:query SELECT "public"."VoiceMemo"."id", "public"."VoiceMemo"."tradeId", "public"."VoiceMemo"."userId", "public"."VoiceMemo"."url", "public"."VoiceMemo"."duration", "public"."VoiceMemo"."transcript", "public"."VoiceMemo"."createdAt" FROM "public"."VoiceMemo" WHERE "public"."VoiceMemo"."tradeId" IN ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18) OFFSET $19
+prisma:query SELECT "public"."TradeTag"."tradeId", "public"."TradeTag"."tagId" FROM "public"."TradeTag" WHERE "public"."TradeTag"."tradeId" IN ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18) OFFSET $19
+ ✓ Compiled in 548ms (403 modules)
+prisma:query SELECT "public"."Tag"."id", "public"."Tag"."userId", "public"."Tag"."name", "public"."Tag"."color", "public"."Tag"."createdAt" FROM "public"."Tag" WHERE "public"."Tag"."id" IN ($1,$2,$3,$4,$5,$6,$7) OFFSET $8
+ ✓ Compiled in 473ms (403 modules)
+prisma:query COMMIT
+ GET /api/trades?userId=demo-user&limit=100 200 in 2264ms
+ ✓ Compiled in 405ms (403 modules)
+ ✓ Compiled in 317ms (403 modules)
+ ✓ Compiled in 277ms (403 modules)
+ ✓ Compiled in 210ms (403 modules)
+ ✓ Compiled in 188ms (403 modules)
+ ✓ Compiled in 194ms (403 modules)
+ ✓ Compiled in 202ms (403 modules)
+ ✓ Compiled in 208ms (403 modules)
+ ✓ Compiled in 182ms (403 modules)
+ ✓ Compiled in 175ms (403 modules)
+ ✓ Compiled in 187ms (403 modules)
+ ✓ Compiled in 294ms (403 modules)
+ ✓ Compiled in 270ms (403 modules)
+ ✓ Compiled in 317ms (403 modules)
+ ✓ Compiled in 252ms (403 modules)
+ ✓ Compiled in 306ms (403 modules)
+ ✓ Compiled in 316ms (403 modules)
+ ✓ Compiled in 261ms (403 modules)
+ ✓ Compiled in 217ms (403 modules)
+ ✓ Compiled in 201ms (403 modules)
+ ✓ Compiled in 209ms (403 modules)
+ ✓ Compiled in 206ms (403 modules)
+ ✓ Compiled in 217ms (403 modules)
+ ✓ Compiled in 198ms (403 modules)
+ ✓ Compiled in 208ms (403 modules)
+ ✓ Compiled in 202ms (403 modules)
+ ✓ Compiled in 239ms (403 modules)
+ ✓ Compiled in 309ms (403 modules)
+ ✓ Compiled in 366ms (403 modules)
+ ✓ Compiled in 597ms (403 modules)
+ ✓ Compiled in 275ms (403 modules)
+ ✓ Compiled in 303ms (403 modules)
+ ✓ Compiled in 279ms (403 modules)
+ ✓ Compiled in 264ms (403 modules)
+ ✓ Compiled in 218ms (403 modules)
+ ✓ Compiled in 278ms (403 modules)
+ ✓ Compiled in 217ms (403 modules)
+ ✓ Compiled in 211ms (403 modules)
+ ✓ Compiled in 201ms (403 modules)
+ ✓ Compiled in 191ms (403 modules)
+ ✓ Compiled in 217ms (403 modules)
+ ✓ Compiled in 214ms (403 modules)
+ ✓ Compiled in 240ms (403 modules)
+ ✓ Compiled in 323ms (403 modules)
+ ✓ Compiled in 301ms (403 modules)
+ ✓ Compiled in 255ms (403 modules)
+ ✓ Compiled in 351ms (403 modules)
+ ✓ Compiled in 461ms (403 modules)
+ ✓ Compiled in 337ms (403 modules)
+ ✓ Compiled in 250ms (403 modules)
+ ✓ Compiled in 220ms (403 modules)
+ ✓ Compiled in 189ms (403 modules)
+ ✓ Compiled in 208ms (403 modules)
+ ✓ Compiled in 223ms (403 modules)
+ ✓ Compiled in 202ms (403 modules)
+ ✓ Compiled in 184ms (403 modules)
+ ✓ Compiled in 301ms (403 modules)
+ ✓ Compiled in 331ms (403 modules)
+ ✓ Compiled in 265ms (403 modules)
+ ✓ Compiled in 249ms (403 modules)
+ ✓ Compiled in 327ms (403 modules)
+ ✓ Compiled in 307ms (403 modules)
+ ✓ Compiled in 249ms (403 modules)
+ ✓ Compiled in 203ms (403 modules)
+ ✓ Compiled in 216ms (403 modules)
+ ✓ Compiled in 213ms (403 modules)
+ ✓ Compiled in 203ms (403 modules)
+ ✓ Compiled in 181ms (403 modules)
+ ✓ Compiled in 198ms (403 modules)
+ ✓ Compiled in 198ms (403 modules)
+ ✓ Compiled in 208ms (403 modules)
+ ✓ Compiled in 277ms (403 modules)
+ ✓ Compiled in 305ms (403 modules)
+ ✓ Compiled in 316ms (403 modules)
+ ✓ Compiled in 273ms (403 modules)
+ ✓ Compiled in 294ms (403 modules)
+ ✓ Compiled in 518ms (403 modules)
+ ✓ Compiled in 248ms (403 modules)
+ ✓ Compiled in 197ms (403 modules)
+ ✓ Compiled in 194ms (403 modules)
+ ✓ Compiled in 220ms (403 modules)
+ ✓ Compiled in 195ms (403 modules)
+ ✓ Compiled in 193ms (403 modules)
+ ✓ Compiled in 189ms (403 modules)
+ ✓ Compiled in 187ms (403 modules)
+ ✓ Compiled in 192ms (403 modules)
+ ✓ Compiled in 360ms (403 modules)
+ ✓ Compiled in 378ms (403 modules)
+ ✓ Compiled in 271ms (403 modules)
+ ✓ Compiled in 277ms (403 modules)
+ ✓ Compiled in 323ms (403 modules)
+ ✓ Compiled in 309ms (403 modules)
+ ✓ Compiled in 211ms (403 modules)
+ ✓ Compiled in 221ms (403 modules)
+ ✓ Compiled in 193ms (403 modules)
+ ✓ Compiled in 199ms (403 modules)
+ ✓ Compiled in 203ms (403 modules)
+ ✓ Compiled in 187ms (403 modules)
+ ✓ Compiled in 189ms (403 modules)
+ ✓ Compiled in 231ms (403 modules)
+ ✓ Compiled in 221ms (403 modules)
+ ✓ Compiled in 299ms (403 modules)
+ ✓ Compiled in 310ms (403 modules)
+ ✓ Compiled in 285ms (403 modules)
+ ✓ Compiled in 267ms (403 modules)
+ ✓ Compiled in 315ms (403 modules)
+ ✓ Compiled in 303ms (403 modules)
+ ✓ Compiled in 247ms (403 modules)
+ ✓ Compiled in 199ms (403 modules)
+ ✓ Compiled in 197ms (403 modules)
+ ✓ Compiled in 196ms (403 modules)
+ ✓ Compiled in 215ms (403 modules)
+ ✓ Compiled in 207ms (403 modules)
+ ✓ Compiled in 196ms (403 modules)
+ ✓ Compiled in 177ms (403 modules)
+ ✓ Compiled in 201ms (403 modules)
+ ✓ Compiled in 253ms (403 modules)
+ ✓ Compiled in 318ms (403 modules)
+ ✓ Compiled in 318ms (403 modules)
+ ✓ Compiled in 291ms (403 modules)
+ ✓ Compiled in 277ms (403 modules)
+ ✓ Compiled in 342ms (403 modules)
+ ✓ Compiled in 440ms (403 modules)
+ ✓ Compiled in 223ms (403 modules)
+ ✓ Compiled in 219ms (403 modules)
+ ✓ Compiled in 280ms (403 modules)
+ ✓ Compiled in 217ms (403 modules)
+ ✓ Compiled in 216ms (403 modules)
+ ✓ Compiled in 209ms (403 modules)
+ ✓ Compiled in 203ms (403 modules)
+ ✓ Compiled in 234ms (403 modules)
+ ✓ Compiled in 321ms (403 modules)
+ ✓ Compiled in 320ms (403 modules)
+ ✓ Compiled in 288ms (403 modules)
+ ✓ Compiled in 314ms (403 modules)
+ ✓ Compiled in 293ms (403 modules)
+ ✓ Compiled in 268ms (403 modules)
+ ✓ Compiled in 204ms (403 modules)
+ ✓ Compiled in 205ms (403 modules)
+ ✓ Compiled in 186ms (403 modules)
+ ✓ Compiled in 208ms (403 modules)
+ ✓ Compiled in 201ms (403 modules)
+ ✓ Compiled in 190ms (403 modules)
+ ✓ Compiled in 199ms (403 modules)
+ ✓ Compiled in 206ms (403 modules)
+ ✓ Compiled in 209ms (403 modules)
+ ✓ Compiled in 312ms (403 modules)
+ ✓ Compiled in 315ms (403 modules)
+ ✓ Compiled in 277ms (403 modules)
+ ✓ Compiled in 248ms (403 modules)
+ ✓ Compiled in 348ms (403 modules)
+ ✓ Compiled in 390ms (403 modules)
+ ✓ Compiled in 231ms (403 modules)
+ ✓ Compiled in 214ms (403 modules)
+ ✓ Compiled in 278ms (403 modules)
+ ✓ Compiled in 513ms (403 modules)
+ ✓ Compiled in 338ms (403 modules)
+ ✓ Compiled in 253ms (403 modules)
+ ✓ Compiled in 297ms (403 modules)
+ ✓ Compiled in 378ms (403 modules)
+ ✓ Compiled in 252ms (403 modules)
+ ✓ Compiled in 216ms (403 modules)
+ ✓ Compiled in 333ms (403 modules)
+ ✓ Compiled in 350ms (403 modules)
+ ✓ Compiled in 216ms (403 modules)
+ ✓ Compiled in 195ms (403 modules)
+ ✓ Compiled in 166ms (403 modules)
+ ✓ Compiled in 216ms (403 modules)
+ ✓ Compiled in 182ms (403 modules)
+ ✓ Compiled in 173ms (403 modules)
+ ✓ Compiled in 182ms (403 modules)
+ ✓ Compiled in 177ms (403 modules)
+ ✓ Compiled in 178ms (403 modules)
+ ✓ Compiled in 197ms (403 modules)
+ ✓ Compiled in 289ms (403 modules)
+ ✓ Compiled in 352ms (403 modules)
+ ✓ Compiled in 371ms (403 modules)
+ ✓ Compiled in 257ms (403 modules)
+ ✓ Compiled in 198ms (403 modules)
+ ✓ Compiled in 418ms (403 modules)
+ ✓ Compiled in 553ms (403 modules)
+ ✓ Compiled in 311ms (403 modules)
+ ✓ Compiled in 199ms (403 modules)
+ ✓ Compiled in 209ms (403 modules)
+ ✓ Compiled in 254ms (403 modules)
+ ✓ Compiled in 240ms (403 modules)
+ ✓ Compiled in 230ms (403 modules)
+ ✓ Compiled in 239ms (403 modules)
+ ✓ Compiled in 396ms (403 modules)
+ ✓ Compiled in 665ms (403 modules)
+ ✓ Compiled in 482ms (403 modules)
+ ✓ Compiled in 404ms (403 modules)
+ ✓ Compiled in 712ms (403 modules)
+ ✓ Compiled in 436ms (403 modules)
+ ✓ Compiled in 288ms (403 modules)
+ ✓ Compiled in 270ms (403 modules)
+ ✓ Compiled in 260ms (403 modules)
+ ✓ Compiled in 256ms (403 modules)
+ ✓ Compiled in 384ms (403 modules)
+ ✓ Compiled in 419ms (403 modules)
+ ✓ Compiled in 637ms (403 modules)
+ ✓ Compiled in 529ms (403 modules)
+ ✓ Compiled in 544ms (403 modules)
+ ✓ Compiled in 391ms (403 modules)
+ ✓ Compiled in 322ms (403 modules)
+ ✓ Compiled in 280ms (403 modules)
+ ✓ Compiled in 264ms (403 modules)
+ ✓ Compiled in 268ms (403 modules)
+ ✓ Compiled in 369ms (403 modules)
+ ✓ Compiled in 410ms (403 modules)
+ ✓ Compiled in 338ms (403 modules)
+ ✓ Compiled in 315ms (403 modules)
+ ✓ Compiled in 476ms (403 modules)
+ ✓ Compiled in 415ms (403 modules)
+ ✓ Compiled in 295ms (403 modules)
+ ✓ Compiled in 257ms (403 modules)
+ ✓ Compiled in 236ms (403 modules)
+ ✓ Compiled in 243ms (403 modules)
+ ✓ Compiled in 229ms (403 modules)
+ ✓ Compiled in 229ms (403 modules)
+ ✓ Compiled in 360ms (403 modules)
+ ✓ Compiled in 587ms (403 modules)
+ ✓ Compiled in 338ms (403 modules)
+ ✓ Compiled in 281ms (403 modules)
+ ✓ Compiled in 406ms (403 modules)
+ ✓ Compiled in 432ms (403 modules)
+ ✓ Compiled in 304ms (403 modules)
+ ✓ Compiled in 253ms (403 modules)
+ ✓ Compiled in 244ms (403 modules)
+ ✓ Compiled in 226ms (403 modules)
+ ✓ Compiled in 228ms (403 modules)
+ ✓ Compiled in 233ms (403 modules)
+ ✓ Compiled in 220ms (403 modules)
+ ✓ Compiled in 386ms (403 modules)
+ ✓ Compiled in 439ms (403 modules)
+ ✓ Compiled in 322ms (403 modules)
+ ✓ Compiled in 295ms (403 modules)
+ ✓ Compiled in 464ms (403 modules)
+ ✓ Compiled in 740ms (403 modules)
+ ✓ Compiled in 1120ms (403 modules)
+ ✓ Compiled in 1314ms (403 modules)
+ ✓ Compiled in 1098ms (403 modules)
+ ✓ Compiled in 657ms (403 modules)
+ ✓ Compiled in 660ms (403 modules)
+ ✓ Compiled in 521ms (403 modules)
+ ✓ Compiled in 510ms (403 modules)
+ ✓ Compiled in 910ms (403 modules)
+ ✓ Compiled in 482ms (403 modules)
+ ✓ Compiled in 396ms (403 modules)
+ ✓ Compiled in 382ms (403 modules)
+ ✓ Compiled in 809ms (403 modules)
+ ✓ Compiled in 639ms (403 modules)
+ ✓ Compiled in 379ms (403 modules)
+ ✓ Compiled in 360ms (403 modules)
+ ✓ Compiled in 343ms (403 modules)
+ ✓ Compiled in 469ms (403 modules)
+ ✓ Compiled in 512ms (403 modules)
+ ✓ Compiled in 355ms (403 modules)
+ ✓ Compiled in 304ms (403 modules)
+ ✓ Compiled in 277ms (403 modules)
+ ✓ Compiled in 286ms (403 modules)
+ ✓ Compiled in 269ms (403 modules)
+ ✓ Compiled in 433ms (403 modules)
+ ✓ Compiled in 611ms (403 modules)
+ ✓ Compiled in 827ms (403 modules)
+ ✓ Compiled in 499ms (403 modules)
+ ✓ Compiled in 697ms (403 modules)
+ ✓ Compiled in 656ms (403 modules)
+ ✓ Compiled in 458ms (403 modules)
+ ✓ Compiled in 673ms (403 modules)
+ ✓ Compiled in 1122ms (403 modules)
+ ✓ Compiled in 617ms (403 modules)
+ ✓ Compiled in 492ms (403 modules)
+ ✓ Compiled in 443ms (403 modules)
+ ✓ Compiled in 539ms (403 modules)
+ ✓ Compiled in 474ms (403 modules)
+ ✓ Compiled in 428ms (403 modules)
+ ✓ Compiled in 546ms (403 modules)
+ ✓ Compiled in 298ms (403 modules)
+ ✓ Compiled in 249ms (403 modules)
+ ✓ Compiled in 220ms (403 modules)
+ ✓ Compiled in 347ms (403 modules)
+ ✓ Compiled in 325ms (403 modules)
+ ✓ Compiled in 312ms (403 modules)
+ ✓ Compiled in 260ms (403 modules)
+ ✓ Compiled in 371ms (403 modules)
+ ✓ Compiled in 491ms (403 modules)
+ ✓ Compiled in 296ms (403 modules)
+ ✓ Compiled in 229ms (403 modules)
+ ✓ Compiled in 303ms (403 modules)
+ ✓ Compiled in 284ms (403 modules)
+ ✓ Compiled in 247ms (403 modules)
+ ✓ Compiled in 223ms (403 modules)
+ ✓ Compiled in 258ms (403 modules)
+ ✓ Compiled in 323ms (403 modules)
+ ✓ Compiled in 455ms (403 modules)
+ ✓ Compiled in 339ms (403 modules)
+ ✓ Compiled in 299ms (403 modules)
+ ✓ Compiled in 249ms (403 modules)
+ ✓ Compiled in 375ms (403 modules)
+ ✓ Compiled in 400ms (403 modules)
+ ✓ Compiled in 339ms (403 modules)
+ ✓ Compiled in 241ms (403 modules)
+ ✓ Compiled in 232ms (403 modules)
+ ✓ Compiled in 207ms (403 modules)
+ ✓ Compiled in 226ms (403 modules)
+ ✓ Compiled in 256ms (403 modules)
+ ✓ Compiled in 211ms (403 modules)
+ ✓ Compiled in 246ms (403 modules)
+ ✓ Compiled in 463ms (403 modules)
+ ✓ Compiled in 322ms (403 modules)
+ ✓ Compiled in 253ms (403 modules)
+ ✓ Compiled in 315ms (403 modules)
+ ✓ Compiled in 394ms (403 modules)
+ ✓ Compiled in 288ms (403 modules)
+ ✓ Compiled in 467ms (403 modules)
+ ✓ Compiled in 244ms (403 modules)
+ ✓ Compiled in 239ms (403 modules)
+ ✓ Compiled in 215ms (403 modules)
+ ✓ Compiled in 247ms (403 modules)
+ ✓ Compiled in 250ms (403 modules)
+ ✓ Compiled in 337ms (403 modules)
+ ✓ Compiled in 373ms (403 modules)
+ ✓ Compiled in 277ms (403 modules)
+ ✓ Compiled in 272ms (403 modules)
+ ✓ Compiled in 325ms (403 modules)
+ ✓ Compiled in 455ms (403 modules)
+ ✓ Compiled in 339ms (403 modules)
+ ✓ Compiled in 239ms (403 modules)
+ ✓ Compiled in 227ms (403 modules)
+ ✓ Compiled in 208ms (403 modules)
+ ✓ Compiled in 224ms (403 modules)
+ ✓ Compiled in 230ms (403 modules)
+ ✓ Compiled in 206ms (403 modules)
+ ✓ Compiled in 312ms (403 modules)
+ ✓ Compiled in 325ms (403 modules)
+ ✓ Compiled in 345ms (403 modules)
+ ✓ Compiled in 283ms (403 modules)
+ ✓ Compiled in 334ms (403 modules)
+ ✓ Compiled in 351ms (403 modules)
+ ✓ Compiled in 376ms (403 modules)
+ ✓ Compiled in 292ms (403 modules)
+ ✓ Compiled in 267ms (403 modules)
+ ✓ Compiled in 294ms (403 modules)
+ ✓ Compiled in 261ms (403 modules)
+ ✓ Compiled in 240ms (403 modules)
+ ✓ Compiled in 346ms (403 modules)
+ ✓ Compiled in 537ms (403 modules)
+ ✓ Compiled in 524ms (403 modules)
+ ✓ Compiled in 425ms (403 modules)
+ ✓ Compiled in 791ms (403 modules)
+ ✓ Compiled in 470ms (403 modules)
+ ✓ Compiled in 364ms (403 modules)
+ ✓ Compiled in 408ms (403 modules)
+ ✓ Compiled in 334ms (403 modules)
+ ✓ Compiled in 426ms (403 modules)
+ ✓ Compiled in 507ms (403 modules)
+ ✓ Compiled in 328ms (403 modules)
+ ✓ Compiled in 353ms (403 modules)
+ ✓ Compiled in 509ms (403 modules)
+ ✓ Compiled in 383ms (403 modules)
+ ✓ Compiled in 292ms (403 modules)
+ ✓ Compiled in 244ms (403 modules)
+ ✓ Compiled in 315ms (403 modules)
+ ✓ Compiled in 259ms (403 modules)
+ ✓ Compiled in 618ms (403 modules)
+ ✓ Compiled in 385ms (403 modules)
+ ✓ Compiled in 414ms (403 modules)
+ ✓ Compiled in 578ms (403 modules)
+ ✓ Compiled in 353ms (403 modules)
+ ✓ Compiled in 401ms (403 modules)
+ ✓ Compiled in 317ms (403 modules)
+ ✓ Compiled in 348ms (403 modules)
+ ✓ Compiled in 307ms (403 modules)
+ ✓ Compiled in 425ms (403 modules)
+ ✓ Compiled in 559ms (403 modules)
+ ✓ Compiled in 271ms (403 modules)
+ ✓ Compiled in 322ms (403 modules)
+ ✓ Compiled in 342ms (403 modules)
+ ✓ Compiled in 307ms (403 modules)
+ ✓ Compiled in 230ms (403 modules)
+ ✓ Compiled in 217ms (403 modules)
+ ✓ Compiled in 202ms (403 modules)
+ ✓ Compiled in 199ms (403 modules)
+ ✓ Compiled in 193ms (403 modules)
+ ✓ Compiled in 206ms (403 modules)
+ ✓ Compiled in 218ms (403 modules)
+ ✓ Compiled in 237ms (403 modules)
+ ✓ Compiled in 344ms (403 modules)
+ ✓ Compiled in 433ms (403 modules)
+ ✓ Compiled in 311ms (403 modules)
+ ✓ Compiled in 343ms (403 modules)
+ ✓ Compiled in 652ms (403 modules)
+ ✓ Compiled in 357ms (403 modules)
+ ✓ Compiled in 220ms (403 modules)
+ ✓ Compiled in 297ms (403 modules)
+ ✓ Compiled in 379ms (403 modules)
+ ✓ Compiled in 318ms (403 modules)
+ ✓ Compiled in 351ms (403 modules)
+ ✓ Compiled in 743ms (403 modules)
+ ✓ Compiled in 520ms (403 modules)
+ ✓ Compiled in 492ms (403 modules)
+ ✓ Compiled in 257ms (403 modules)
+ ✓ Compiled in 345ms (403 modules)
+ ✓ Compiled in 427ms (403 modules)
+ ✓ Compiled in 241ms (403 modules)
+ ✓ Compiled in 213ms (403 modules)
+ ✓ Compiled in 222ms (403 modules)
+ ✓ Compiled in 211ms (403 modules)
+ ✓ Compiled in 229ms (403 modules)
+ ✓ Compiled in 211ms (403 modules)
+ ✓ Compiled in 216ms (403 modules)
+ ✓ Compiled in 251ms (403 modules)
+ ✓ Compiled in 297ms (403 modules)
+ ✓ Compiled in 355ms (403 modules)
+ ✓ Compiled in 275ms (403 modules)
+ ✓ Compiled in 230ms (403 modules)
+ ✓ Compiled in 313ms (403 modules)
+ ✓ Compiled in 495ms (403 modules)
+ ✓ Compiled in 285ms (403 modules)
+ ✓ Compiled in 215ms (403 modules)
+ ✓ Compiled in 432ms (403 modules)
+ ✓ Compiled in 338ms (403 modules)
+ ✓ Compiled in 375ms (403 modules)
+ ✓ Compiled in 596ms (403 modules)
+ ✓ Compiled in 658ms (403 modules)
+ ✓ Compiled in 519ms (403 modules)
+ ✓ Compiled in 406ms (403 modules)
+ ✓ Compiled in 382ms (403 modules)
+ ✓ Compiled in 547ms (403 modules)
+ ✓ Compiled in 341ms (403 modules)
+ ✓ Compiled in 295ms (403 modules)
+ ✓ Compiled in 346ms (403 modules)
+ ✓ Compiled in 370ms (403 modules)
+ ✓ Compiled in 294ms (403 modules)
+ ✓ Compiled in 515ms (403 modules)
+ ✓ Compiled in 675ms (403 modules)
+ ✓ Compiled in 403ms (403 modules)
+ ✓ Compiled in 366ms (403 modules)
+ ✓ Compiled in 393ms (403 modules)
+ ✓ Compiled in 291ms (403 modules)
+ ✓ Compiled in 243ms (403 modules)
+ ✓ Compiled in 365ms (403 modules)
+ ✓ Compiled in 278ms (403 modules)
+ ✓ Compiled in 231ms (403 modules)
+ ✓ Compiled in 227ms (403 modules)
+ ✓ Compiled in 279ms (403 modules)
+ ✓ Compiled in 389ms (403 modules)
+ ✓ Compiled in 329ms (403 modules)
+ ✓ Compiled in 287ms (403 modules)
+ ✓ Compiled in 351ms (403 modules)
+ ✓ Compiled in 408ms (403 modules)
+ ✓ Compiled in 294ms (403 modules)
+ ✓ Compiled in 240ms (403 modules)
+ ✓ Compiled in 251ms (403 modules)
+ ✓ Compiled in 255ms (403 modules)
+ ✓ Compiled in 251ms (403 modules)
+ ✓ Compiled in 261ms (403 modules)
+ ✓ Compiled in 270ms (403 modules)
+ ✓ Compiled in 396ms (403 modules)
+ ✓ Compiled in 378ms (403 modules)
+ ✓ Compiled in 311ms (403 modules)
+ ✓ Compiled in 296ms (403 modules)
+ ✓ Compiled in 364ms (403 modules)
+ ✓ Compiled in 424ms (403 modules)
+ ✓ Compiled in 269ms (403 modules)
+ ✓ Compiled in 261ms (403 modules)
+ ✓ Compiled in 251ms (403 modules)
+ ✓ Compiled in 229ms (403 modules)
+ ✓ Compiled in 230ms (403 modules)
+ ✓ Compiled in 220ms (403 modules)
+ ✓ Compiled in 227ms (403 modules)
+ ✓ Compiled in 336ms (403 modules)
+ ✓ Compiled in 435ms (403 modules)
+ ✓ Compiled in 599ms (403 modules)
+ ✓ Compiled in 374ms (403 modules)
