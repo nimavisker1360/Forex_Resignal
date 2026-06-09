@@ -9,6 +9,10 @@ import {
   parseTradeDirection,
   parseTradeStatus,
 } from "@/lib/journal/api-utils";
+import {
+  isImportedTradeSource,
+  stripBrokerDataFields,
+} from "@/lib/journal/trade-source";
 
 export const dynamic = "force-dynamic";
 
@@ -56,6 +60,15 @@ export async function PATCH(request: Request, context: RouteContext) {
 
     // TODO: Replace body/query userId with the authenticated session user id.
     const requestedUserId = body.userId;
+
+    if (body.accountId !== undefined) {
+      data.accountId = String(body.accountId || "").trim();
+    }
+
+    if (body.mt5Ticket !== undefined) {
+      const mt5Ticket = String(body.mt5Ticket || "").trim();
+      data.mt5Ticket = mt5Ticket || null;
+    }
 
     if (body.status !== undefined) {
       const status = parseTradeStatus(body.status);
@@ -110,6 +123,8 @@ export async function PATCH(request: Request, context: RouteContext) {
       "lotSize",
       "riskAmount",
       "profitLoss",
+      "commission",
+      "swap",
       "rr",
     ] as const) {
       if (body[field] !== undefined) {
@@ -128,29 +143,34 @@ export async function PATCH(request: Request, context: RouteContext) {
         });
       }
 
-      const merged = { ...existing, ...data };
-      const metrics = calculateTradeMetrics({
-        status: merged.status,
-        direction: merged.direction,
-        entryPrice: merged.entryPrice,
-        exitPrice: merged.exitPrice,
-        stopLoss: merged.stopLoss,
-        lotSize: merged.lotSize,
-        profitLoss: body.profitLoss,
-        rr: body.rr,
-      });
+      const brokerDataLocked = isImportedTradeSource(existing.source, existing.setup);
+      const updateData = brokerDataLocked ? stripBrokerDataFields(data) : data;
 
-      if (metrics.profitLoss !== undefined && body.profitLoss === undefined) {
-        data.profitLoss = metrics.profitLoss;
-      }
+      if (!brokerDataLocked) {
+        const merged = { ...existing, ...updateData };
+        const metrics = calculateTradeMetrics({
+          status: merged.status,
+          direction: merged.direction,
+          entryPrice: merged.entryPrice,
+          exitPrice: merged.exitPrice,
+          stopLoss: merged.stopLoss,
+          lotSize: merged.lotSize,
+          profitLoss: body.profitLoss,
+          rr: body.rr,
+        });
 
-      if (metrics.rr !== undefined && body.rr === undefined) {
-        data.rr = metrics.rr;
+        if (metrics.profitLoss !== undefined && body.profitLoss === undefined) {
+          updateData.profitLoss = metrics.profitLoss;
+        }
+
+        if (metrics.rr !== undefined && body.rr === undefined) {
+          updateData.rr = metrics.rr;
+        }
       }
 
       const updated = await txDb.trade.update({
         where: { id },
-        data,
+        data: updateData,
       });
 
       if (Array.isArray(body.tagIds)) {

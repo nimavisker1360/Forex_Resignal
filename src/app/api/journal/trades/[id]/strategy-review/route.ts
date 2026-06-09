@@ -1,0 +1,319 @@
+import { Prisma } from "@prisma/client";
+import { NextResponse } from "next/server";
+import { calculateStrategyCompliance } from "@/lib/playbooks/calculateStrategyCompliance";
+import {
+  normalizeFollowedPlan,
+  normalizeRuleReviewStatus,
+  optionalString,
+  serializeTradeStrategyReview,
+  tradeStrategyReviewInclude,
+} from "@/lib/playbooks/api";
+import { prisma } from "@/lib/prisma";
+
+export const dynamic = "force-dynamic";
+
+type RouteContext = {
+  params: Promise<{ id: string }>;
+};
+
+function validationResponse(errors: string[]) {
+  return NextResponse.json(
+    { success: false, message: "Validation failed", errors },
+    { status: 400 }
+  );
+}
+
+async function loadReview(tradeId: string) {
+  return prisma.tradeStrategyReview.findUnique({
+    where: { tradeId },
+    include: tradeStrategyReviewInclude,
+  });
+}
+
+export async function GET(_request: Request, context: RouteContext) {
+  try {
+    const { id } = await context.params;
+    const review = await loadReview(id);
+
+    return NextResponse.json({
+      success: true,
+      review: review ? serializeTradeStrategyReview(review) : null,
+    });
+  } catch (error) {
+    console.error("Trade strategy review GET error:", error);
+
+    return NextResponse.json(
+      { success: false, message: "Failed to load strategy review" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function POST(request: Request, context: RouteContext) {
+  try {
+    const { id } = await context.params;
+    const body = (await request.json()) as Record<string, unknown>;
+    const strategyId = optionalString(body.strategyId);
+    const followedPlan = normalizeFollowedPlan(body.followedPlan);
+
+    if (!strategyId) {
+      return validationResponse(["strategyId is required"]);
+    }
+
+    if (!followedPlan) {
+      return validationResponse(["followedPlan must be YES, PARTIAL, NO, or NOT_REVIEWED"]);
+    }
+
+    const review = await prisma.$transaction(async (tx) => {
+      const [trade, strategy] = await Promise.all([
+        tx.trade.findUnique({ where: { id } }),
+        tx.playbookStrategy.findUnique({
+          where: { id: strategyId },
+          include: {
+            rules: {
+              orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+            },
+          },
+        }),
+      ]);
+
+      if (!trade) {
+        throw new Error("TRADE_NOT_FOUND");
+      }
+
+      if (!strategy) {
+        throw new Error("STRATEGY_NOT_FOUND");
+      }
+
+      const ruleSnapshots = strategy.rules.map((rule, index) => ({
+        originalRuleId: rule.id,
+        ruleTitleSnapshot: rule.title,
+        ruleDescriptionSnapshot: rule.description,
+        ruleSectionSnapshot: rule.section,
+        isRequiredSnapshot: rule.isRequired,
+        status: "NOT_REVIEWED",
+        sortOrder: rule.sortOrder ?? index,
+      }));
+      const compliance = calculateStrategyCompliance(ruleSnapshots);
+      const existing = await tx.tradeStrategyReview.findUnique({
+        where: { tradeId: id },
+        select: { id: true },
+      });
+
+      await tx.trade.update({
+        where: { id },
+        data: { session: strategy.name },
+      });
+
+      if (existing) {
+        await tx.tradeStrategyRuleReview.deleteMany({
+          where: { tradeStrategyReviewId: existing.id },
+        });
+
+        return tx.tradeStrategyReview.update({
+          where: { id: existing.id },
+          data: {
+            strategyId: strategy.id,
+            strategyNameSnapshot: strategy.name,
+            followedPlan,
+            notes: optionalString(body.notes),
+            ...compliance,
+            ruleReviews: {
+              create: ruleSnapshots,
+            },
+          },
+          include: tradeStrategyReviewInclude,
+        });
+      }
+
+      return tx.tradeStrategyReview.create({
+        data: {
+          tradeId: id,
+          strategyId: strategy.id,
+          strategyNameSnapshot: strategy.name,
+          followedPlan,
+          notes: optionalString(body.notes),
+          ...compliance,
+          ruleReviews: {
+            create: ruleSnapshots,
+          },
+        },
+        include: tradeStrategyReviewInclude,
+      });
+    });
+
+    return NextResponse.json(
+      {
+        success: true,
+        review: serializeTradeStrategyReview(review),
+      },
+      { status: 201 }
+    );
+  } catch (error) {
+    console.error("Trade strategy review POST error:", error);
+
+    if (error instanceof Error && error.message === "TRADE_NOT_FOUND") {
+      return NextResponse.json(
+        { success: false, message: "Trade not found" },
+        { status: 404 }
+      );
+    }
+
+    if (error instanceof Error && error.message === "STRATEGY_NOT_FOUND") {
+      return validationResponse(["strategyId does not match an existing playbook"]);
+    }
+
+    return NextResponse.json(
+      { success: false, message: "Failed to create strategy review" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PATCH(request: Request, context: RouteContext) {
+  try {
+    const { id } = await context.params;
+    const body = (await request.json()) as Record<string, unknown>;
+    const followedPlan = normalizeFollowedPlan(body.followedPlan);
+    const rawRuleReviews = Array.isArray(body.ruleReviews) ? body.ruleReviews : [];
+    const errors: string[] = [];
+
+    if (!followedPlan) {
+      errors.push("followedPlan must be YES, PARTIAL, NO, or NOT_REVIEWED");
+    }
+
+    const updates = rawRuleReviews.flatMap((rawReview) => {
+      const review =
+        rawReview && typeof rawReview === "object"
+          ? (rawReview as Record<string, unknown>)
+          : {};
+      const reviewId = optionalString(review.id);
+      const status = normalizeRuleReviewStatus(review.status);
+
+      if (!reviewId) {
+        return [];
+      }
+
+      if (!status) {
+        errors.push("Rule review status must be FOLLOWED, VIOLATED, NOT_APPLICABLE, or NOT_REVIEWED");
+        return [];
+      }
+
+      return [
+        {
+          id: reviewId,
+          status,
+          note: optionalString(review.note),
+        },
+      ];
+    });
+
+    if (errors.length > 0 || !followedPlan) {
+      return validationResponse(errors);
+    }
+
+    const review = await prisma.$transaction(async (tx) => {
+      const existing = await tx.tradeStrategyReview.findUnique({
+        where: { tradeId: id },
+        include: {
+          ruleReviews: true,
+        },
+      });
+
+      if (!existing) {
+        throw new Error("REVIEW_NOT_FOUND");
+      }
+
+      await Promise.all(
+        updates.map((update) =>
+          tx.tradeStrategyRuleReview.updateMany({
+            where: {
+              id: update.id,
+              tradeStrategyReviewId: existing.id,
+            },
+            data: {
+              status: update.status,
+              note: update.note,
+            },
+          })
+        )
+      );
+
+      const refreshedRules = await tx.tradeStrategyRuleReview.findMany({
+        where: { tradeStrategyReviewId: existing.id },
+      });
+      const compliance = calculateStrategyCompliance(refreshedRules);
+
+      return tx.tradeStrategyReview.update({
+        where: { id: existing.id },
+        data: {
+          followedPlan,
+          notes: optionalString(body.notes),
+          ...compliance,
+        },
+        include: tradeStrategyReviewInclude,
+      });
+    });
+
+    return NextResponse.json({
+      success: true,
+      review: serializeTradeStrategyReview(review),
+    });
+  } catch (error) {
+    console.error("Trade strategy review PATCH error:", error);
+
+    if (error instanceof Error && error.message === "REVIEW_NOT_FOUND") {
+      return NextResponse.json(
+        { success: false, message: "Strategy review not found" },
+        { status: 404 }
+      );
+    }
+
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2025"
+    ) {
+      return NextResponse.json(
+        { success: false, message: "Strategy review not found" },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(
+      { success: false, message: "Failed to update strategy review" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(_request: Request, context: RouteContext) {
+  try {
+    const { id } = await context.params;
+
+    await prisma.tradeStrategyReview.delete({
+      where: { tradeId: id },
+    });
+
+    return NextResponse.json({
+      success: true,
+      message: "Strategy review removed",
+    });
+  } catch (error) {
+    console.error("Trade strategy review DELETE error:", error);
+
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2025"
+    ) {
+      return NextResponse.json(
+        { success: false, message: "Strategy review not found" },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(
+      { success: false, message: "Failed to remove strategy review" },
+      { status: 500 }
+    );
+  }
+}

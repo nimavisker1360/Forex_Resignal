@@ -1,77 +1,203 @@
-import Link from "next/link";
-import type { ReactNode } from "react";
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
+import type { FormEvent, ReactNode } from "react";
 import {
+  AlertTriangle,
+  Activity,
+  ArrowDown,
+  ArrowUp,
+  ArrowUpDown,
   BarChart3,
+  Brain,
+  CalendarDays,
   CircleDollarSign,
-  Percent,
+  ClipboardCheck,
+  Filter,
+  LineChart as LineChartIcon,
+  Loader2,
+  Plus,
   RotateCcw,
-  Table2,
-  TrendingDown,
-  TrendingUp,
+  Search,
+  Star,
+  Tags,
+  Target,
+  X,
+  Zap,
 } from "lucide-react";
 import {
-  fetchJournalApi,
-  type PrismaTradingAccountsResponse,
-} from "@/app/journal/_lib/journal-api";
+  Area,
+  AreaChart,
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 import { cn } from "@/lib/utils";
+import type {
+  AnalyticsDirectionalStats,
+  HourlyAnalyticsRow,
+  JournalAnalyticsResponse,
+  StrategyAnalyticsRow,
+  SymbolAnalyticsRow,
+  TagAnalyticsRow,
+} from "@/types/analytics";
 
-export const dynamic = "force-dynamic";
+type DateRange = "all" | "today" | "thisWeek" | "thisMonth" | "thisYear" | "custom";
+type DirectionFilter = "" | "BUY" | "SELL";
+type SortKey = keyof Pick<
+  SymbolAnalyticsRow,
+  "symbol" | "totalTrades" | "winRate" | "netPnl" | "averagePnl" | "profitFactor" | "bestTrade" | "worstTrade"
+>;
 
-const DEFAULT_USER_ID = "demo-user";
-
-type AnalyticsPageProps = {
-  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+type Filters = {
+  dateRange: DateRange;
+  dateFrom: string;
+  dateTo: string;
+  symbol: string;
+  direction: DirectionFilter;
+  strategy: string;
 };
 
-type Summary = {
-  totalTrades: number;
-  winRate: number;
-  totalPnL: number;
-  averagePnL: number;
-  averageWin: number;
-  averageLoss: number;
-  profitFactor: number;
-  bestTrade: number;
-  worstTrade: number;
-  maxWinStreak: number;
-  maxLossStreak: number;
-  averageRR: number;
-  totalVolume: number;
+type ChartPayloadItem = {
+  name?: string;
+  value?: number;
+  color?: string;
 };
 
-type PnlPoint = {
-  date: string;
-  pnl: number;
-  totalTrades: number;
-  winRate: number;
+type ChartTooltipProps = {
+  active?: boolean;
+  payload?: ChartPayloadItem[];
+  label?: string;
 };
 
-type PnlMetric = {
-  pnl: number;
-  totalTrades: number;
-  winningTrades: number;
-  losingTrades: number;
-  winRate: number;
+type ReviewTone = "neutral" | "profit" | "loss";
+
+type ReviewListItem = {
+  label: string;
+  detail: string;
+  tone: ReviewTone;
 };
 
-type AnalyticsResponse = {
-  success: boolean;
-  summary: Summary;
-  charts: {
-    pnlByDay: PnlPoint[];
-    pnlBySymbol: Array<PnlMetric & { symbol: string }>;
-    winRateBySymbol: Array<Pick<PnlMetric, "totalTrades" | "winningTrades" | "losingTrades" | "winRate"> & { symbol: string }>;
-    pnlByStrategy: Array<PnlMetric & { strategy: string }>;
-    pnlByDirection: Array<PnlMetric & { direction: string }>;
-    pnlByAccount: Array<PnlMetric & { account: string }>;
-    pnlByTag: Array<PnlMetric & { tag: string }>;
-    emotionPerformance: Array<PnlMetric & { emotion: string }>;
-  };
+type EditableMetric = {
+  id: string;
+  label: string;
+  value: string;
+  tone: "neutral" | "profit" | "loss" | "blue" | "amber";
 };
 
-function first(value: string | string[] | undefined) {
-  return Array.isArray(value) ? value[0] : value;
-}
+type JournalTradeOption = {
+  id: string;
+  symbol: string;
+  direction: "BUY" | "SELL";
+  profitLoss: number | string | null;
+  rr: number | string | null;
+  setup: string | null;
+  emotion: string | null;
+  mistake: string | null;
+  notes: string | null;
+  openedAt: string | null;
+  closedAt: string | null;
+  entryScreenshotUrl?: string | null;
+  exitScreenshotUrl?: string | null;
+  status?: string | null;
+  tags?: Array<{ tag?: { name?: string | null }; name?: string | null }>;
+  screenshots?: Array<{ id?: string; type: string; url: string }>;
+};
+
+type TradeMetadata = {
+  rating: number | null;
+  mistakes: string[];
+  setups: string[];
+  emotions: string[];
+  customTags: string[];
+  tradeNote: string;
+  dailyJournal: string;
+  checklistResults: string[];
+  psychologyStatus: string;
+  exitReason: string;
+};
+
+type SaveStatus = "idle" | "loading" | "saving" | "saved" | "error";
+type ReviewPanelTab = "entry" | "exit" | "trade" | "daily";
+
+const EMPTY_FILTERS: Filters = {
+  dateRange: "all",
+  dateFrom: "",
+  dateTo: "",
+  symbol: "",
+  direction: "",
+  strategy: "",
+};
+
+const EMPTY_ANALYTICS: JournalAnalyticsResponse = {
+  success: true,
+  overview: {
+    totalNetPnl: 0,
+    grossProfit: 0,
+    grossLoss: 0,
+    winRate: 0,
+    lossRate: 0,
+    totalTrades: 0,
+    winningTrades: 0,
+    losingTrades: 0,
+    breakEvenTrades: 0,
+    averageWin: 0,
+    averageLoss: 0,
+    profitFactor: null,
+    averageRR: 0,
+    bestTrade: null,
+    worstTrade: null,
+    maxDrawdown: 0,
+    currentDrawdown: 0,
+    expectancyPerTrade: 0,
+  },
+  longShort: {
+    buy: {
+      direction: "BUY",
+      totalTrades: 0,
+      winRate: 0,
+      netPnl: 0,
+      averagePnl: 0,
+      bestTrade: 0,
+      worstTrade: 0,
+    },
+    sell: {
+      direction: "SELL",
+      totalTrades: 0,
+      winRate: 0,
+      netPnl: 0,
+      averagePnl: 0,
+      bestTrade: 0,
+      worstTrade: 0,
+    },
+  },
+  bySymbol: [],
+  bySession: [],
+  byWeekday: [],
+  byHour: [],
+  byStrategy: [],
+  byPsychology: [],
+  byMistake: [],
+  byEmotion: [],
+  bySetup: [],
+  byTag: [],
+  equityCurve: [],
+  drawdownCurve: [],
+  metadata: {
+    symbols: [],
+    strategies: [],
+    hasStrategyData: false,
+    hasPsychologyData: false,
+    hasTagData: false,
+  },
+};
 
 function formatMoney(value: number | null | undefined) {
   return Number(value || 0).toLocaleString("en-US", {
@@ -82,15 +208,51 @@ function formatMoney(value: number | null | undefined) {
 }
 
 function formatNumber(value: number | null | undefined, digits = 2) {
-  return Number(value || 0).toLocaleString("en-US", {
+  if (value === null || value === undefined || !Number.isFinite(value)) {
+    return "N/A";
+  }
+
+  return value.toLocaleString("en-US", {
     maximumFractionDigits: digits,
   });
 }
 
-function appendParam(params: URLSearchParams, name: string, value: string | undefined) {
-  if (value && value.trim()) {
-    params.set(name, value.trim());
+function formatPercent(value: number | null | undefined) {
+  return `${formatNumber(value, 1)}%`;
+}
+
+function valueTone(value: number | null | undefined): "profit" | "loss" | "neutral" {
+  const number = Number(value || 0);
+  return number > 0 ? "profit" : number < 0 ? "loss" : "neutral";
+}
+
+function buildQuery(filters: Filters) {
+  const params = new URLSearchParams();
+  params.set("dateRange", filters.dateRange);
+
+  if (filters.dateRange === "custom") {
+    if (filters.dateFrom) {
+      params.set("dateFrom", filters.dateFrom);
+    }
+
+    if (filters.dateTo) {
+      params.set("dateTo", filters.dateTo);
+    }
   }
+
+  if (filters.symbol) {
+    params.set("symbol", filters.symbol);
+  }
+
+  if (filters.direction) {
+    params.set("direction", filters.direction);
+  }
+
+  if (filters.strategy) {
+    params.set("strategy", filters.strategy);
+  }
+
+  return params.toString();
 }
 
 function StatCard({
@@ -102,18 +264,19 @@ function StatCard({
   label: string;
   value: string;
   icon: ReactNode;
-  tone?: "neutral" | "profit" | "loss" | "blue";
+  tone?: "neutral" | "profit" | "loss" | "blue" | "amber";
 }) {
   return (
-    <div className="rounded-xl border border-slate-800 bg-[#0F172A] p-4 shadow-sm">
+    <div className="rounded-lg border border-slate-800 bg-[#0F172A] p-4 shadow-sm">
       <div className="flex items-center justify-between gap-3">
         <span className="text-xs font-medium uppercase text-slate-400">{label}</span>
         <span
           className={cn(
-            "inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-800 bg-[#111827] text-slate-500",
-            tone === "profit" && "text-[#10B981]",
-            tone === "loss" && "text-[#EF4444]",
-            tone === "blue" && "text-blue-300"
+            "inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-800 bg-[#111827] text-slate-500",
+            tone === "profit" && "text-emerald-300",
+            tone === "loss" && "text-red-300",
+            tone === "blue" && "text-sky-300",
+            tone === "amber" && "text-amber-300"
           )}
         >
           {icon}
@@ -122,9 +285,10 @@ function StatCard({
       <div
         className={cn(
           "mt-4 text-2xl font-semibold text-white",
-          tone === "profit" && "text-[#10B981]",
-          tone === "loss" && "text-[#EF4444]",
-          tone === "blue" && "text-blue-200"
+          tone === "profit" && "text-emerald-300",
+          tone === "loss" && "text-red-300",
+          tone === "blue" && "text-sky-200",
+          tone === "amber" && "text-amber-200"
         )}
       >
         {value}
@@ -133,417 +297,2096 @@ function StatCard({
   );
 }
 
-function EquityLineChart({ points }: { points: PnlPoint[] }) {
-  if (points.length === 0) {
-    return (
-      <div className="flex h-72 items-center justify-center rounded-xl border border-dashed border-slate-800 bg-[#111827] text-sm text-slate-400">
-        No trades found for this period
-      </div>
-    );
-  }
-
-  let cumulative = 0;
-  const values = points.map((point) => {
-    cumulative += point.pnl;
-    return cumulative;
-  });
-  const min = Math.min(...values, 0);
-  const max = Math.max(...values, 0);
-  const range = max - min || 1;
-  const width = 720;
-  const height = 260;
-  const padding = 24;
-  const innerWidth = width - padding * 2;
-  const innerHeight = height - padding * 2;
-  const coordinates = values.map((value, index) => {
-    const x =
-      values.length === 1
-        ? width / 2
-        : padding + (index / (values.length - 1)) * innerWidth;
-    const y = padding + ((max - value) / range) * innerHeight;
-    return `${x},${y}`;
-  });
-  const zeroY = padding + ((max - 0) / range) * innerHeight;
-
+function Section({
+  title,
+  description,
+  icon,
+  children,
+}: {
+  title: string;
+  description?: string;
+  icon: ReactNode;
+  children: ReactNode;
+}) {
   return (
-    <div className="overflow-hidden rounded-xl border border-slate-800 bg-[#111827]">
-      <svg
-        viewBox={`0 0 ${width} ${height}`}
-        className="h-72 w-full"
-        role="img"
-        aria-label="Equity by day line chart"
-      >
-        <line
-          x1={padding}
-          x2={width - padding}
-          y1={zeroY}
-          y2={zeroY}
-          stroke="#334155"
-          strokeDasharray="5 5"
-        />
-        <polyline
-          fill="none"
-          stroke="#60A5FA"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth="4"
-          points={coordinates.join(" ")}
-        />
-        {coordinates.map((coordinate, index) => {
-          const [x, y] = coordinate.split(",").map(Number);
-          return (
-            <circle
-              key={`${points[index].date}-${index}`}
-              cx={x}
-              cy={y}
-              r="5"
-              fill={values[index] >= 0 ? "#10B981" : "#EF4444"}
-              stroke="#020617"
-              strokeWidth="2"
-            />
-          );
-        })}
-      </svg>
+    <section className="rounded-lg border border-slate-800 bg-[#0F172A] p-4 shadow-sm">
+      <div className="mb-4 flex items-start justify-between gap-3">
+        <div>
+          <h2 className="text-sm font-semibold text-white">{title}</h2>
+          {description && <p className="mt-1 text-xs text-slate-400">{description}</p>}
+        </div>
+        <span className="text-slate-500">{icon}</span>
+      </div>
+      {children}
+    </section>
+  );
+}
+
+function EmptyPanel({ message }: { message: string }) {
+  return (
+    <div className="flex min-h-[220px] items-center justify-center rounded-lg border border-dashed border-slate-800 bg-[#111827] px-4 text-center text-sm text-slate-400">
+      {message}
     </div>
   );
 }
 
-function BarList<T extends PnlMetric>({
-  title,
-  items,
-  labelKey,
-}: {
-  title: string;
-  items: T[];
-  labelKey: keyof T;
-}) {
-  const maxAbs = Math.max(...items.map((item) => Math.abs(item.pnl)), 1);
-
+function LoadingPanel() {
   return (
-    <section className="rounded-xl border border-slate-800 bg-[#0F172A] p-4 shadow-sm">
-      <div className="mb-4 flex items-center justify-between gap-3">
-        <h2 className="text-sm font-semibold text-white">{title}</h2>
-        <BarChart3 className="h-4 w-4 text-slate-500" />
-      </div>
-      <div className="space-y-3">
-        {items.slice(0, 8).map((item) => {
-          const label = String(item[labelKey] || "Unspecified");
-          const width = `${Math.max((Math.abs(item.pnl) / maxAbs) * 100, 6)}%`;
-
-          return (
-            <div key={label} className="space-y-1">
-              <div className="flex items-center justify-between gap-3 text-sm">
-                <span className="truncate font-medium text-slate-200">{label}</span>
-                <span
-                  className={cn(
-                    "font-semibold text-slate-300",
-                    item.pnl > 0 && "text-[#10B981]",
-                    item.pnl < 0 && "text-[#EF4444]"
-                  )}
-                >
-                  {formatMoney(item.pnl)}
-                </span>
-              </div>
-              <div className="h-2 overflow-hidden rounded-full bg-slate-800">
-                <div
-                  className={cn(
-                    "h-full rounded-full",
-                    item.pnl > 0 ? "bg-[#10B981]" : item.pnl < 0 ? "bg-[#EF4444]" : "bg-slate-500"
-                  )}
-                  style={{ width }}
-                />
-              </div>
-              <div className="text-xs text-slate-500">
-                {item.totalTrades} trades / {formatNumber(item.winRate, 1)}% win rate
-              </div>
-            </div>
-          );
-        })}
-
-        {items.length === 0 && (
-          <div className="rounded-xl border border-dashed border-slate-800 bg-[#111827] px-4 py-10 text-center text-sm text-slate-400">
-            No trades found for this period
-          </div>
-        )}
-      </div>
-    </section>
+    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      {Array.from({ length: 8 }, (_, index) => (
+        <div
+          key={index}
+          className="h-32 animate-pulse rounded-lg border border-slate-800 bg-[#0F172A]"
+        />
+      ))}
+    </div>
   );
 }
 
-function WinRateTable({
-  items,
-}: {
-  items: AnalyticsResponse["charts"]["winRateBySymbol"];
-}) {
-  return (
-    <section className="rounded-xl border border-slate-800 bg-[#0F172A] p-4 shadow-sm">
-      <div className="mb-4 flex items-center justify-between gap-3">
-        <h2 className="text-sm font-semibold text-white">Win Rate by Symbol</h2>
-        <Table2 className="h-4 w-4 text-slate-500" />
-      </div>
-      <div className="overflow-x-auto">
-        <table className="w-full min-w-[520px] text-left text-sm">
-          <thead className="text-xs uppercase text-slate-500">
-            <tr>
-              <th className="py-2">Symbol</th>
-              <th className="py-2">Trades</th>
-              <th className="py-2">Wins</th>
-              <th className="py-2">Losses</th>
-              <th className="py-2">Win Rate</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-800">
-            {items.map((item) => (
-              <tr key={item.symbol} className="text-slate-300">
-                <td className="py-3 font-semibold text-white">{item.symbol}</td>
-                <td className="py-3">{item.totalTrades}</td>
-                <td className="py-3 text-[#10B981]">{item.winningTrades}</td>
-                <td className="py-3 text-[#EF4444]">{item.losingTrades}</td>
-                <td className="py-3">{formatNumber(item.winRate, 1)}%</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      {items.length === 0 && (
-        <div className="rounded-xl border border-dashed border-slate-800 bg-[#111827] px-4 py-10 text-center text-sm text-slate-400">
-          No trades found for this period
-        </div>
-      )}
-    </section>
-  );
-}
-
-export default async function JournalAnalyticsPage({ searchParams }: AnalyticsPageProps) {
-  const params = (await searchParams) || {};
-  const filters = {
-    dateFrom: first(params.dateFrom) || "",
-    dateTo: first(params.dateTo) || "",
-    accountId: first(params.accountId) || "",
-    symbol: first(params.symbol) || "",
-    strategy: first(params.strategy) || "",
-    tag: first(params.tag) || "",
-  };
-  const query = new URLSearchParams();
-
-  for (const [name, value] of Object.entries(filters)) {
-    appendParam(query, name, value);
+function MoneyTooltip(props: ChartTooltipProps) {
+  if (!props.active || !props.payload?.length) {
+    return null;
   }
 
-  const [analyticsData, accountsData] = await Promise.all([
-    fetchJournalApi<AnalyticsResponse>(
-      `/api/journal/analytics${query.toString() ? `?${query.toString()}` : ""}`
-    ),
-    fetchJournalApi<PrismaTradingAccountsResponse>(
-      `/api/trading-accounts?userId=${DEFAULT_USER_ID}`
-    ).catch(
-      (): PrismaTradingAccountsResponse => ({ success: false, data: [] })
-    ),
-  ]);
-  const accounts = accountsData.data || accountsData.accounts || [];
-  const { summary, charts } = analyticsData;
-  const totalTone =
-    summary.totalPnL > 0 ? "profit" : summary.totalPnL < 0 ? "loss" : "neutral";
+  return (
+    <div className="rounded-lg border border-slate-700 bg-[#020617] px-3 py-2 text-xs shadow-xl">
+      <div className="mb-1 font-semibold text-white">{props.label}</div>
+      <div className="space-y-1">
+        {props.payload.map((item) => (
+          <div key={item.name} className="flex items-center justify-between gap-5 text-slate-300">
+            <span>{item.name}</span>
+            <span style={{ color: item.color }}>{formatMoney(item.value)}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function PnlBarChart({
+  data,
+  xKey,
+  height = 260,
+}: {
+  data: Array<Record<string, unknown>>;
+  xKey: string;
+  height?: number;
+}) {
+  if (data.length === 0) {
+    return <EmptyPanel message="No trades found for this report." />;
+  }
+
+  return (
+    <div style={{ height }}>
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+          <CartesianGrid stroke="#1E293B" vertical={false} />
+          <XAxis dataKey={xKey} stroke="#94A3B8" tickLine={false} axisLine={false} />
+          <YAxis stroke="#94A3B8" tickLine={false} axisLine={false} width={70} />
+          <Tooltip content={<MoneyTooltip />} cursor={{ fill: "#1E293B", opacity: 0.35 }} />
+          <Bar dataKey="netPnl" name="Net P&L" radius={[4, 4, 0, 0]}>
+            {data.map((item, index) => (
+              <Cell
+                key={index}
+                fill={Number(item.netPnl || 0) >= 0 ? "#10B981" : "#EF4444"}
+              />
+            ))}
+          </Bar>
+        </BarChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}
+
+function EquityChart({ data }: { data: JournalAnalyticsResponse["equityCurve"] }) {
+  if (data.length === 0) {
+    return <EmptyPanel message="No closed trades yet. Equity curve appears after realized trades exist." />;
+  }
+
+  return (
+    <div className="h-[320px]">
+      <ResponsiveContainer width="100%" height="100%">
+        <LineChart data={data} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
+          <CartesianGrid stroke="#1E293B" vertical={false} />
+          <XAxis dataKey="label" stroke="#94A3B8" tickLine={false} axisLine={false} minTickGap={24} />
+          <YAxis stroke="#94A3B8" tickLine={false} axisLine={false} width={72} />
+          <Tooltip content={<MoneyTooltip />} />
+          <Line
+            type="monotone"
+            dataKey="equity"
+            name="Equity"
+            stroke="#38BDF8"
+            strokeWidth={3}
+            dot={false}
+            activeDot={{ r: 5, fill: "#38BDF8" }}
+          />
+        </LineChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}
+
+function DrawdownChart({ data }: { data: JournalAnalyticsResponse["drawdownCurve"] }) {
+  if (data.length === 0) {
+    return <EmptyPanel message="No drawdown data available yet." />;
+  }
+
+  return (
+    <div className="h-[320px]">
+      <ResponsiveContainer width="100%" height="100%">
+        <AreaChart data={data} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
+          <CartesianGrid stroke="#1E293B" vertical={false} />
+          <XAxis dataKey="label" stroke="#94A3B8" tickLine={false} axisLine={false} minTickGap={24} />
+          <YAxis stroke="#94A3B8" tickLine={false} axisLine={false} width={72} />
+          <Tooltip content={<MoneyTooltip />} />
+          <Area
+            type="monotone"
+            dataKey="drawdown"
+            name="Drawdown"
+            stroke="#F97316"
+            fill="#F97316"
+            fillOpacity={0.2}
+          />
+        </AreaChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}
+
+function DirectionChart({ data }: { data: AnalyticsDirectionalStats[] }) {
+  return <PnlBarChart data={data} xKey="direction" height={230} />;
+}
+
+function DirectionStats({ items }: { items: AnalyticsDirectionalStats[] }) {
+  return (
+    <div className="grid gap-3 md:grid-cols-2">
+      {items.map((item) => (
+        <div key={item.direction} className="rounded-lg border border-slate-800 bg-[#111827] p-4">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-semibold text-white">
+              {item.direction === "BUY" ? "Long / BUY" : "Short / SELL"}
+            </span>
+            <span
+              className={cn(
+                "inline-flex rounded-md border px-2 py-1 text-xs font-semibold",
+                item.direction === "BUY"
+                  ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
+                  : "border-red-500/30 bg-red-500/10 text-red-300"
+              )}
+            >
+              {item.direction}
+            </span>
+          </div>
+          <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
+            <Metric label="Trades" value={formatNumber(item.totalTrades, 0)} />
+            <Metric label="Win Rate" value={formatPercent(item.winRate)} />
+            <Metric label="Net P&L" value={formatMoney(item.netPnl)} tone={valueTone(item.netPnl)} />
+            <Metric label="Average" value={formatMoney(item.averagePnl)} tone={valueTone(item.averagePnl)} />
+            <Metric label="Best" value={formatMoney(item.bestTrade)} tone={valueTone(item.bestTrade)} />
+            <Metric label="Worst" value={formatMoney(item.worstTrade)} tone={valueTone(item.worstTrade)} />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function Metric({
+  label,
+  value,
+  tone = "neutral",
+}: {
+  label: string;
+  value: string;
+  tone?: "neutral" | "profit" | "loss";
+}) {
+  return (
+    <div>
+      <div className="text-xs uppercase text-slate-500">{label}</div>
+      <div
+        className={cn(
+          "mt-1 font-semibold text-slate-200",
+          tone === "profit" && "text-emerald-300",
+          tone === "loss" && "text-red-300"
+        )}
+      >
+        {value}
+      </div>
+    </div>
+  );
+}
+
+function valueToneClass(value: number | null | undefined) {
+  const tone = valueTone(value);
+  return cn(tone === "profit" && "text-emerald-300", tone === "loss" && "text-red-300");
+}
+
+function toFiniteNumber(value: number | string | null | undefined) {
+  const parsed = Number(value || 0);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function normalizeStringArray(value: unknown): string[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return Array.from(new Set(value.map((item) => String(item || "").trim()).filter(Boolean)));
+}
+
+function tagNamesFromTrade(trade: JournalTradeOption | null) {
+  if (!trade?.tags) {
+    return [];
+  }
+
+  return Array.from(
+    new Set(
+      trade.tags
+        .map((item) => item.tag?.name || item.name || "")
+        .map((name) => String(name).trim())
+        .filter(Boolean)
+    )
+  );
+}
+
+function screenshotUrlFromTrade(
+  trade: JournalTradeOption | null,
+  type: "entry" | "exit"
+) {
+  if (!trade) {
+    return null;
+  }
+
+  const directUrl =
+    type === "entry" ? trade.entryScreenshotUrl : trade.exitScreenshotUrl;
+
+  if (directUrl) {
+    return directUrl;
+  }
+
+  return (
+    trade.screenshots?.find(
+      (screenshot) => screenshot.type.toLowerCase() === type
+    )?.url || null
+  );
+}
+
+function firstString(value: string | null | undefined) {
+  const text = String(value || "").trim();
+  return text ? [text] : [];
+}
+
+function normalizeMetadataPayload(value: Partial<TradeMetadata> | null | undefined): TradeMetadata {
+  return {
+    rating: typeof value?.rating === "number" ? value.rating : null,
+    mistakes: normalizeStringArray(value?.mistakes),
+    setups: normalizeStringArray(value?.setups),
+    emotions: normalizeStringArray(value?.emotions),
+    customTags: normalizeStringArray(value?.customTags),
+    tradeNote: String(value?.tradeNote || ""),
+    dailyJournal: String(value?.dailyJournal || ""),
+    checklistResults: normalizeStringArray(value?.checklistResults),
+    psychologyStatus: String(value?.psychologyStatus || ""),
+    exitReason: String(value?.exitReason || ""),
+  };
+}
+
+function metadataFromTrade(trade: JournalTradeOption | null): TradeMetadata {
+  return {
+    rating: null,
+    mistakes: firstString(trade?.mistake),
+    setups: firstString(trade?.setup),
+    emotions: firstString(trade?.emotion),
+    customTags: tagNamesFromTrade(trade),
+    tradeNote: trade?.notes || "",
+    dailyJournal: "",
+    checklistResults: [],
+    psychologyStatus: "",
+    exitReason: "",
+  };
+}
+
+function mergeMetadataWithTrade(
+  savedMetadata: Partial<TradeMetadata> | null | undefined,
+  trade: JournalTradeOption | null
+) {
+  const fallback = metadataFromTrade(trade);
+  const saved = normalizeMetadataPayload(savedMetadata);
+
+  return {
+    rating: saved.rating ?? fallback.rating,
+    mistakes: saved.mistakes.length > 0 ? saved.mistakes : fallback.mistakes,
+    setups: saved.setups.length > 0 ? saved.setups : fallback.setups,
+    emotions: saved.emotions.length > 0 ? saved.emotions : fallback.emotions,
+    customTags: saved.customTags.length > 0 ? saved.customTags : fallback.customTags,
+    tradeNote: saved.tradeNote || fallback.tradeNote,
+    dailyJournal: saved.dailyJournal,
+    checklistResults: saved.checklistResults,
+    psychologyStatus: saved.psychologyStatus,
+    exitReason: saved.exitReason,
+  };
+}
+
+function bestPnlRow(rows: TagAnalyticsRow[]) {
+  return rows
+    .filter((row) => row.totalTrades > 0)
+    .sort((a, b) => b.netPnl - a.netPnl)[0] || null;
+}
+
+function worstPnlRow(rows: TagAnalyticsRow[]) {
+  return rows
+    .filter((row) => row.totalTrades > 0)
+    .sort((a, b) => a.netPnl - b.netPnl)[0] || null;
+}
+
+function AnalyticsHero({
+  analytics,
+  loading,
+}: {
+  analytics: JournalAnalyticsResponse;
+  loading: boolean;
+}) {
+  const overview = analytics.overview;
+  const costlyMistake = worstPnlRow(analytics.byMistake) || worstPnlRow(analytics.byTag);
+  const bestSetup = bestPnlRow(analytics.bySetup) || bestPnlRow(analytics.byTag);
+  const activeHours = analytics.byHour.filter((row) => row.totalTrades > 0);
+  const weakHour = activeHours.sort((a, b) => a.netPnl - b.netPnl)[0] || null;
+
+  return (
+    <section className="overflow-hidden rounded-lg border border-slate-800 bg-[#0B1020] shadow-sm">
+      <div className="grid gap-0 xl:grid-cols-[1.08fr_0.92fr]">
+        <div className="p-5 sm:p-6 lg:p-7">
+          <div className="inline-flex items-center gap-2 rounded-full border border-violet-500/30 bg-violet-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-violet-200">
+            <Activity className="h-3.5 w-3.5" />
+            Trade Analysis
+          </div>
+          <h1 className="mt-5 max-w-3xl text-3xl font-semibold leading-tight text-white sm:text-4xl">
+            Analyze your trading <span className="text-violet-300">stats</span> and behavior.
+          </h1>
+          <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-400">
+            TradeZella-style reporting: performance, drawdown, playbook/setup quality,
+            costly mistakes, emotions, tags, symbols, and time windows in one workspace.
+          </p>
+
+          <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <MetricTile label="Net P&L" value={formatMoney(overview.totalNetPnl)} tone={valueTone(overview.totalNetPnl)} />
+            <MetricTile label="Win Rate" value={formatPercent(overview.winRate)} tone="blue" />
+            <MetricTile label="Profit Factor" value={formatNumber(overview.profitFactor, 2)} tone="amber" />
+            <MetricTile label="Expectancy" value={formatMoney(overview.expectancyPerTrade)} tone={valueTone(overview.expectancyPerTrade)} />
+          </div>
+        </div>
+
+        <div className="border-t border-slate-800 bg-[#111827] p-5 sm:p-6 xl:border-l xl:border-t-0">
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <div>
+              <div className="text-sm font-semibold text-white">Key insights</div>
+              <div className="mt-1 text-xs text-slate-400">
+                {loading ? "Updating report..." : `${formatNumber(overview.totalTrades, 0)} closed trades analyzed`}
+              </div>
+            </div>
+            {loading ? (
+              <Loader2 className="h-4 w-4 animate-spin text-violet-300" />
+            ) : (
+              <Zap className="h-4 w-4 text-violet-300" />
+            )}
+          </div>
+          <div className="space-y-3">
+            <InsightLine
+              icon={<AlertTriangle className="h-4 w-4" />}
+              label="Costliest mistake"
+              value={costlyMistake ? costlyMistake.label : "No mistake tags yet"}
+              detail={costlyMistake ? `${formatMoney(costlyMistake.netPnl)} across ${formatNumber(costlyMistake.totalTrades, 0)} trades` : "Tag losing trades to reveal this."}
+              tone="loss"
+            />
+            <InsightLine
+              icon={<ClipboardCheck className="h-4 w-4" />}
+              label="Best setup"
+              value={bestSetup ? bestSetup.label : "No setup data yet"}
+              detail={bestSetup ? `${formatMoney(bestSetup.netPnl)} / ${formatPercent(bestSetup.winRate)} win rate` : "Add setup or playbook names to trades."}
+              tone="profit"
+            />
+            <InsightLine
+              icon={<CalendarDays className="h-4 w-4" />}
+              label="Weak time window"
+              value={weakHour ? weakHour.label : "No hour data yet"}
+              detail={weakHour ? `${formatMoney(weakHour.netPnl)} from opened trades` : "Closed trades with open time are needed."}
+              tone="amber"
+            />
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function MetricTile({
+  label,
+  value,
+  tone = "neutral",
+}: {
+  label: string;
+  value: string;
+  tone?: "neutral" | "profit" | "loss" | "blue" | "amber";
+}) {
+  return (
+    <div className="rounded-lg border border-slate-800 bg-[#0F172A] p-3">
+      <div className="text-xs font-medium uppercase text-slate-500">{label}</div>
+      <div
+        className={cn(
+          "mt-2 text-lg font-semibold text-white",
+          tone === "profit" && "text-emerald-300",
+          tone === "loss" && "text-red-300",
+          tone === "blue" && "text-sky-300",
+          tone === "amber" && "text-amber-300"
+        )}
+      >
+        {value}
+      </div>
+    </div>
+  );
+}
+
+function InsightLine({
+  icon,
+  label,
+  value,
+  detail,
+  tone,
+}: {
+  icon: ReactNode;
+  label: string;
+  value: string;
+  detail: string;
+  tone: "profit" | "loss" | "amber";
+}) {
+  return (
+    <div className="rounded-lg border border-slate-800 bg-[#0B1020] p-4">
+      <div className="flex items-start gap-3">
+        <span
+          className={cn(
+            "mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border",
+            tone === "profit" && "border-emerald-500/30 bg-emerald-500/10 text-emerald-300",
+            tone === "loss" && "border-red-500/30 bg-red-500/10 text-red-300",
+            tone === "amber" && "border-amber-500/30 bg-amber-500/10 text-amber-300"
+          )}
+        >
+          {icon}
+        </span>
+        <div className="min-w-0">
+          <div className="text-xs font-medium uppercase text-slate-500">{label}</div>
+          <div className="mt-1 truncate text-sm font-semibold text-white">{value}</div>
+          <div className="mt-1 text-xs text-slate-400">{detail}</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function StrategyTable({ rows }: { rows: StrategyAnalyticsRow[] }) {
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full min-w-[620px] text-left text-sm">
+        <thead className="text-xs uppercase text-slate-500">
+          <tr>
+            <th className="py-2 pr-3">Strategy</th>
+            <th className="py-2 pr-3">Trades</th>
+            <th className="py-2 pr-3">Win Rate</th>
+            <th className="py-2 pr-3">Net P&L</th>
+            <th className="py-2 pr-3">Profit Factor</th>
+            <th className="py-2">Average</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-slate-800">
+          {rows.map((row) => (
+            <tr key={row.strategy} className="text-slate-300">
+              <td className="py-3 pr-3 font-semibold text-white">{row.strategy}</td>
+              <td className="py-3 pr-3">{formatNumber(row.totalTrades, 0)}</td>
+              <td className="py-3 pr-3">{formatPercent(row.winRate)}</td>
+              <td className={cn("py-3 pr-3 font-semibold", valueToneClass(row.netPnl))}>
+                {formatMoney(row.netPnl)}
+              </td>
+              <td className="py-3 pr-3">{formatNumber(row.profitFactor, 2)}</td>
+              <td className={cn("py-3", valueToneClass(row.averagePnl))}>
+                {formatMoney(row.averagePnl)}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      {rows.length === 0 && (
+        <EmptyPanel message="No strategy analytics match the active filters." />
+      )}
+    </div>
+  );
+}
+
+function TradeZellaMetricRow({
+  label,
+  value,
+  tone = "neutral",
+}: {
+  label: string;
+  value: string;
+  tone?: "neutral" | "profit" | "loss" | "blue" | "amber";
+}) {
+  return (
+    <div className="flex items-center justify-between gap-3 rounded-md border border-slate-800 bg-[#0F172A] px-3 py-2 text-xs">
+      <span className="text-slate-400">{label}</span>
+      <span
+        className={cn(
+          "font-semibold text-slate-100",
+          tone === "profit" && "text-emerald-300",
+          tone === "loss" && "text-red-300",
+          tone === "blue" && "text-sky-300",
+          tone === "amber" && "text-amber-300"
+        )}
+      >
+        {value}
+      </span>
+    </div>
+  );
+}
+
+function ReviewCategory({
+  title,
+  icon,
+  items,
+  draft,
+  onDraftChange,
+  onAdd,
+  onRemove,
+  onRename,
+}: {
+  title: string;
+  icon: ReactNode;
+  items: ReviewListItem[];
+  draft: string;
+  onDraftChange: (value: string) => void;
+  onAdd: () => void;
+  onRemove: (index: number) => void;
+  onRename: (index: number, value: string) => void;
+}) {
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center gap-2 text-xs font-semibold text-slate-300">
+        <span className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-violet-500/30 bg-violet-500/10 text-violet-300">
+          {icon}
+        </span>
+        {title}
+      </div>
+      <div className="flex gap-2">
+        <input
+          value={draft}
+          onChange={(event) => onDraftChange(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key === "Enter") {
+              event.preventDefault();
+              onAdd();
+            }
+          }}
+          placeholder={`Add ${title.toLowerCase()}`}
+          className="h-9 min-w-0 flex-1 rounded-md border border-slate-800 bg-[#0F172A] px-3 text-xs text-slate-100 outline-none placeholder:text-slate-500 focus:border-violet-500 focus:ring-2 focus:ring-violet-500/10"
+        />
+        <button
+          type="button"
+          onClick={onAdd}
+          className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-slate-800 bg-[#0F172A] text-slate-400 hover:border-violet-500/50 hover:text-violet-300"
+          title={`Add ${title}`}
+        >
+          <Plus className="h-4 w-4" />
+        </button>
+      </div>
+      <div className="space-y-2">
+        {items.length === 0 && (
+          <div className="rounded-md border border-dashed border-slate-700 bg-[#0F172A]/70 px-3 py-3 text-xs text-slate-500">
+            No items yet.
+          </div>
+        )}
+        {items.map((item) => (
+          <div
+            key={`${title}-${item.label}`}
+            className="flex min-h-10 items-center justify-between gap-3 rounded-md border border-slate-800 bg-[#0F172A] px-3 py-2"
+          >
+            <div className="min-w-0">
+              <input
+                value={item.label}
+                onChange={(event) => onRename(items.indexOf(item), event.target.value)}
+                className="w-full truncate bg-transparent text-xs font-semibold text-slate-100 outline-none"
+              />
+              <div className="mt-0.5 text-[11px] text-slate-500">{item.detail}</div>
+            </div>
+            <div className="flex shrink-0 items-center gap-2">
+              <span
+                className={cn(
+                  "h-2 w-2 rounded-full bg-slate-300",
+                  item.tone === "profit" && "bg-emerald-400",
+                  item.tone === "loss" && "bg-red-400"
+                )}
+              />
+              <button
+                type="button"
+                onClick={() => onRemove(items.indexOf(item))}
+                className="inline-flex h-6 w-6 items-center justify-center rounded-md text-slate-500 hover:bg-red-500/10 hover:text-red-300"
+                title={`Remove ${item.label}`}
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function TradeZellaChartPanel({
+  analytics,
+  selectedTrade,
+  tradeNote,
+  dailyJournal,
+  activeNoteTab,
+  saving,
+  notesDirty,
+  onActiveNoteTabChange,
+  onTradeNoteChange,
+  onDailyJournalChange,
+  onSaveNotes,
+}: {
+  analytics: JournalAnalyticsResponse;
+  selectedTrade: JournalTradeOption | null;
+  tradeNote: string;
+  dailyJournal: string;
+  activeNoteTab: ReviewPanelTab;
+  saving: boolean;
+  notesDirty: boolean;
+  onActiveNoteTabChange: (tab: ReviewPanelTab) => void;
+  onTradeNoteChange: (value: string) => void;
+  onDailyJournalChange: (value: string) => void;
+  onSaveNotes: () => void;
+}) {
+  const [expandedScreenshotUrl, setExpandedScreenshotUrl] = useState<string | null>(null);
+  const chartData = (analytics.equityCurve.length > 0
+    ? analytics.equityCurve
+    : [{ label: "No data", equity: 0, pnl: 0 }]
+  ).map((point) => {
+    const equity = toFiniteNumber(point.equity);
+    const pnl = toFiniteNumber(point.pnl);
+
+    return {
+      ...point,
+      equity,
+      pnl,
+      positiveEquity: equity >= 0 ? equity : null,
+      negativeEquity: equity < 0 ? equity : null,
+    };
+  });
+  const runningData = chartData.map((point) => ({
+    label: point.label,
+    equity: point.equity,
+    pnl: point.pnl,
+    positiveEquity: point.positiveEquity,
+    negativeEquity: point.negativeEquity,
+  }));
+  const entryScreenshotUrl = screenshotUrlFromTrade(selectedTrade, "entry");
+  const exitScreenshotUrl = screenshotUrlFromTrade(selectedTrade, "exit");
+  const activeScreenshotUrl =
+    activeNoteTab === "entry"
+      ? entryScreenshotUrl
+      : activeNoteTab === "exit"
+        ? exitScreenshotUrl
+        : null;
+  const activeScreenshotAlt =
+    activeNoteTab === "entry" ? "Entry screenshot" : "Exit screenshot";
+  const reviewTabs: Array<{ id: ReviewPanelTab; label: string }> = [
+    { id: "entry", label: "Entry Screenshot" },
+    { id: "exit", label: "Exit Screenshot" },
+    { id: "trade", label: "Trade Note" },
+    { id: "daily", label: "Daily Journal" },
+  ];
+
+  return (
+    <div className="min-w-0 flex-1 bg-[#020617]">
+      <div className="flex min-h-12 flex-wrap items-center justify-between gap-3 border-b border-slate-800 bg-[#0F172A] px-4 py-3">
+        <div className="flex items-center gap-2 overflow-x-auto text-xs font-semibold text-slate-400">
+          {["1m", "5m", "1h", "Indicators"].map((label) => (
+            <span key={label} className="shrink-0 rounded-md border border-slate-800 bg-[#111827] px-2 py-1">
+              {label}
+            </span>
+          ))}
+        </div>
+        <div className={cn("text-xs font-semibold", valueToneClass(analytics.overview.totalNetPnl))}>
+          {formatMoney(analytics.overview.totalNetPnl)}
+        </div>
+      </div>
+
+      <div className="flex min-h-[640px] flex-col">
+        <div className="grid gap-3 border-b border-slate-800 bg-[#020617] p-4 xl:grid-cols-[minmax(0,1.35fr)_minmax(280px,0.65fr)]">
+          <div className="relative h-[320px] overflow-hidden rounded-lg border border-slate-800 bg-[#0F172A] shadow-sm">
+            <div className="absolute left-3 top-3 z-10 rounded-md border border-slate-800 bg-[#111827]/95 px-2 py-1 text-xs font-semibold text-slate-300 shadow-sm">
+              Equity chart
+            </div>
+            <div className="absolute bottom-3 left-3 z-10 flex gap-2 text-[11px] font-semibold text-slate-500">
+              <span>3m</span>
+              <span>1m</span>
+              <span>5d</span>
+              <span>1d</span>
+            </div>
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={chartData} margin={{ top: 36, right: 24, left: 8, bottom: 24 }}>
+                <CartesianGrid stroke="#1E293B" strokeDasharray="3 3" />
+                <XAxis
+                  dataKey="label"
+                  stroke="#64748B"
+                  tickLine={false}
+                  axisLine={false}
+                  minTickGap={24}
+                  fontSize={11}
+                />
+                <YAxis stroke="#64748B" tickLine={false} axisLine={false} width={56} fontSize={11} />
+                <Tooltip content={<MoneyTooltip />} cursor={{ stroke: "#475569", strokeDasharray: "4 4" }} />
+                <Area
+                  type="monotone"
+                  dataKey="positiveEquity"
+                  name="Equity"
+                  stroke="#10B981"
+                  fill="#10B981"
+                  fillOpacity={0.18}
+                  strokeWidth={2}
+                  connectNulls
+                />
+                <Area
+                  type="monotone"
+                  dataKey="negativeEquity"
+                  name="Equity"
+                  stroke="#EF4444"
+                  fill="#EF4444"
+                  fillOpacity={0.16}
+                  strokeWidth={2}
+                  connectNulls
+                />
+                <Bar dataKey="pnl" name="Trade P&L" radius={[3, 3, 0, 0]}>
+                  {chartData.map((item, index) => (
+                    <Cell
+                      key={index}
+                      fill={Number(item.pnl || 0) >= 0 ? "#10B981" : "#EF4444"}
+                      opacity={0.38}
+                    />
+                  ))}
+                </Bar>
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+
+          <div className="overflow-hidden rounded-lg border border-slate-800 bg-[#0F172A] shadow-sm">
+            <div className="flex h-10 items-center border-b border-slate-800 px-4 text-xs font-semibold text-slate-400">
+              CHARTS & RUNNING P/L
+            </div>
+            <div className="h-[280px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={runningData} margin={{ top: 20, right: 22, left: 2, bottom: 14 }}>
+                  <CartesianGrid stroke="#1E293B" strokeDasharray="3 3" vertical={false} />
+                  <XAxis
+                    dataKey="label"
+                    stroke="#64748B"
+                    tickLine={false}
+                    axisLine={false}
+                    minTickGap={20}
+                    fontSize={11}
+                  />
+                  <YAxis stroke="#64748B" tickLine={false} axisLine={false} width={56} fontSize={11} />
+                  <Tooltip content={<MoneyTooltip />} cursor={{ stroke: "#475569", strokeDasharray: "4 4" }} />
+                  <Area
+                    type="monotone"
+                    dataKey="positiveEquity"
+                    name="Running P&L"
+                    stroke="#10B981"
+                    fill="#10B981"
+                    fillOpacity={0.2}
+                    strokeWidth={2}
+                    connectNulls
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="negativeEquity"
+                    name="Running P&L"
+                    stroke="#EF4444"
+                    fill="#EF4444"
+                    fillOpacity={0.18}
+                    strokeWidth={2}
+                    connectNulls
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        </div>
+
+        <div className="border-b border-slate-800 bg-[#0F172A]">
+          <div className="flex min-h-14 items-center gap-2 overflow-x-auto px-4 py-2">
+            {reviewTabs.map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => onActiveNoteTabChange(tab.id)}
+                className={cn(
+                  "h-9 shrink-0 rounded-md border px-3 text-xs font-semibold transition",
+                  activeNoteTab === tab.id
+                    ? "border-violet-500/60 bg-violet-600 text-white shadow-sm shadow-violet-950/30"
+                    : "border-slate-800 bg-[#111827] text-slate-400 hover:border-slate-700 hover:text-slate-100"
+                )}
+              >
+                {tab.label}
+              </button>
+            ))}
+            <button
+              type="button"
+              onClick={onSaveNotes}
+              disabled={saving || !notesDirty || !["trade", "daily"].includes(activeNoteTab)}
+              className="ml-auto h-9 shrink-0 rounded-md bg-violet-600 px-3 text-xs font-semibold text-white hover:bg-violet-500 disabled:cursor-not-allowed disabled:bg-slate-800 disabled:text-slate-500"
+            >
+              {saving ? "Saving..." : notesDirty ? "Save" : "Saved"}
+            </button>
+          </div>
+        </div>
+
+        <div className="bg-[#020617] p-4">
+          {activeNoteTab === "entry" || activeNoteTab === "exit" ? (
+            <div className="flex h-[280px] items-center justify-center rounded-lg border border-slate-800 bg-[#0F172A] p-3 shadow-lg shadow-black/20 sm:h-[360px] xl:h-[480px] 2xl:h-[540px]">
+              {activeScreenshotUrl ? (
+                <button
+                  type="button"
+                  onClick={() => setExpandedScreenshotUrl(activeScreenshotUrl)}
+                  className="flex h-full w-full items-center justify-center rounded-md border border-slate-700 bg-[#020617] p-2 shadow-inner shadow-black/30 outline-none transition hover:border-violet-500/60 focus:border-violet-500"
+                  title="Open screenshot preview"
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={activeScreenshotUrl}
+                    alt={activeScreenshotAlt}
+                    className="h-full w-full object-contain"
+                  />
+                </button>
+              ) : (
+                <div className="flex h-full w-full items-center justify-center rounded-md border border-dashed border-slate-700 bg-[#111827] px-4 text-center text-sm text-slate-400">
+                  No screenshot saved for this trade yet.
+                </div>
+              )}
+            </div>
+          ) : (
+            <textarea
+              value={activeNoteTab === "trade" ? tradeNote : dailyJournal}
+              onChange={(event) => {
+                if (activeNoteTab === "trade") {
+                  onTradeNoteChange(event.target.value);
+                } else {
+                  onDailyJournalChange(event.target.value);
+                }
+              }}
+              placeholder={
+                activeNoteTab === "trade"
+                  ? "Write trade notes, checklist results, and execution comments..."
+                  : "Write daily context, mood, market plan, and lessons..."
+              }
+              className="h-[280px] w-full resize-none rounded-lg border border-slate-800 bg-[#0F172A] px-4 py-3 text-sm leading-6 text-slate-100 outline-none placeholder:text-slate-500 focus:border-violet-500 sm:h-[340px]"
+            />
+          )}
+        </div>
+      </div>
+
+      {expandedScreenshotUrl && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/90 p-4 backdrop-blur-sm"
+          role="dialog"
+          aria-modal="true"
+          onClick={() => setExpandedScreenshotUrl(null)}
+        >
+          <div
+            className="relative flex max-h-[92vh] w-full max-w-7xl items-center justify-center rounded-lg border border-slate-700 bg-[#020617] p-3 shadow-2xl"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <button
+              type="button"
+              onClick={() => setExpandedScreenshotUrl(null)}
+              className="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-md border border-slate-700 bg-[#111827] text-slate-300 hover:border-violet-500 hover:text-white"
+              aria-label="Close screenshot preview"
+            >
+              <X className="h-4 w-4" />
+            </button>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={expandedScreenshotUrl}
+              alt={activeScreenshotAlt}
+              className="max-h-[86vh] w-full object-contain"
+            />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function buildWorkspaceMetrics(
+  overview: JournalAnalyticsResponse["overview"],
+  trade: JournalTradeOption | null
+): EditableMetric[] {
+  const tradePnl = trade ? toFiniteNumber(trade.profitLoss) : overview.totalNetPnl;
+  const tradeRR = trade ? toFiniteNumber(trade.rr) : overview.averageRR;
+
+  return [
+    { id: "netPnl", label: "Net P&L", value: formatMoney(tradePnl), tone: valueTone(tradePnl) },
+    {
+      id: "side",
+      label: "Side",
+      value: trade?.direction === "SELL" ? "SHORT" : trade?.direction === "BUY" ? "LONG" : "All trades",
+      tone: trade?.direction === "SELL" ? "loss" : "profit",
+    },
+    { id: "grossProfit", label: "Gross Profit", value: formatMoney(Math.max(tradePnl, 0) || overview.grossProfit), tone: "profit" },
+    { id: "grossLoss", label: "Gross Loss", value: formatMoney(trade ? Math.abs(Math.min(tradePnl, 0)) : overview.grossLoss), tone: "loss" },
+    { id: "winRate", label: "Win Rate", value: formatPercent(overview.winRate), tone: "blue" },
+    { id: "profitFactor", label: "Profit Factor", value: formatNumber(overview.profitFactor, 2), tone: "amber" },
+    { id: "plannedR", label: "Planned R-Multiple", value: formatNumber(overview.averageRR, 2), tone: "amber" },
+    { id: "realizedR", label: "Realized R-Multiple", value: formatNumber(tradeRR, 2), tone: valueTone(tradeRR) },
+    { id: "maxDrawdown", label: "Max Drawdown", value: formatMoney(overview.maxDrawdown), tone: "loss" },
+  ];
+}
+
+function TradeZellaAnalysisWorkspace({ analytics }: { analytics: JournalAnalyticsResponse }) {
+  const overview = analytics.overview;
+  const [closedTrades, setClosedTrades] = useState<JournalTradeOption[]>([]);
+  const [selectedTradeId, setSelectedTradeId] = useState("");
+  const [selectedTradeDetail, setSelectedTradeDetail] = useState<JournalTradeOption | null>(null);
+  const selectedTrade =
+    selectedTradeDetail ||
+    closedTrades.find((trade) => trade.id === selectedTradeId) ||
+    null;
+  const calculatedRating = Math.max(1, Math.min(5, Math.round((overview.winRate || 0) / 20)));
+  const [tradeRating, setTradeRating] = useState<number | null>(null);
+  const [activeNoteTab, setActiveNoteTab] = useState<ReviewPanelTab>("entry");
+  const [tradeNote, setTradeNote] = useState("");
+  const [dailyJournal, setDailyJournal] = useState("");
+  const [notesDirty, setNotesDirty] = useState(false);
+  const [status, setStatus] = useState<SaveStatus>("idle");
+  const [statusMessage, setStatusMessage] = useState("");
+  const [hydrated, setHydrated] = useState(false);
+  const editableMetrics = buildWorkspaceMetrics(overview, selectedTrade);
+  const [reviewItems, setReviewItems] = useState<{
+    mistakes: ReviewListItem[];
+    setups: ReviewListItem[];
+    emotions: ReviewListItem[];
+    tags: ReviewListItem[];
+    checklist: ReviewListItem[];
+  }>(() => ({
+    mistakes: [],
+    setups: [],
+    emotions: [],
+    tags: [],
+    checklist: [],
+  }));
+  const [drafts, setDrafts] = useState({
+    mistakes: "",
+    setups: "",
+    emotions: "",
+    tags: "",
+    checklist: "",
+  });
+  const [psychologyStatus, setPsychologyStatus] = useState("");
+  const [exitReason, setExitReason] = useState("");
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadClosedTrades() {
+      try {
+        const response = await fetch("/api/journal/trades?status=CLOSED&limit=100", {
+          cache: "no-store",
+        });
+        const data = (await response.json()) as {
+          success: boolean;
+          trades?: JournalTradeOption[];
+          message?: string;
+        };
+
+        if (!response.ok || !data.success) {
+          throw new Error(data.message || "Failed to load closed trades");
+        }
+
+        if (!cancelled) {
+          const trades = data.trades || [];
+          setClosedTrades(trades);
+          setSelectedTradeId((current) => current || trades[0]?.id || "");
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setStatus("error");
+          setStatusMessage((error as Error).message || "Failed to load closed trades");
+        }
+      }
+    }
+
+    loadClosedTrades();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!selectedTradeId) {
+      return;
+    }
+
+    const controller = new AbortController();
+
+    async function loadSelectedTradeAndMetadata() {
+      setHydrated(false);
+      setStatus("loading");
+      setStatusMessage("Loading journal metadata...");
+
+      try {
+        const [tradeResponse, metadataResponse] = await Promise.all([
+          fetch(`/api/journal/trades/${selectedTradeId}`, {
+            signal: controller.signal,
+            cache: "no-store",
+          }),
+          fetch(`/api/journal/trades/${selectedTradeId}/metadata`, {
+            signal: controller.signal,
+            cache: "no-store",
+          }),
+        ]);
+        const tradeData = (await tradeResponse.json()) as {
+          success: boolean;
+          trade?: JournalTradeOption;
+          message?: string;
+        };
+        const metadataData = (await metadataResponse.json()) as {
+          success: boolean;
+          metadata?: Partial<TradeMetadata>;
+          message?: string;
+        };
+
+        if (!tradeResponse.ok || !tradeData.success || !tradeData.trade) {
+          throw new Error(tradeData.message || "Failed to load selected trade");
+        }
+
+        if (!metadataResponse.ok || !metadataData.success) {
+          throw new Error(metadataData.message || "Failed to load journal metadata");
+        }
+
+        setSelectedTradeDetail(tradeData.trade);
+        const merged = mergeMetadataWithTrade(metadataData.metadata, tradeData.trade);
+        setTradeRating(merged.rating ?? calculatedRating);
+        setReviewItems({
+          mistakes: merged.mistakes.map((label) => ({ label, detail: "Saved metadata", tone: "neutral" })),
+          setups: merged.setups.map((label) => ({ label, detail: "Saved metadata", tone: "neutral" })),
+          emotions: merged.emotions.map((label) => ({ label, detail: "Saved metadata", tone: "neutral" })),
+          tags: merged.customTags.map((label) => ({ label, detail: "Saved metadata", tone: "neutral" })),
+          checklist: merged.checklistResults.map((label) => ({ label, detail: "Checklist result", tone: "neutral" })),
+        });
+        setTradeNote(merged.tradeNote);
+        setDailyJournal(merged.dailyJournal);
+        setPsychologyStatus(merged.psychologyStatus);
+        setExitReason(merged.exitReason);
+        setNotesDirty(false);
+        setHydrated(true);
+        setStatus("idle");
+        setStatusMessage("");
+      } catch (error) {
+        if ((error as Error).name !== "AbortError") {
+          setStatus("error");
+          setStatusMessage((error as Error).message || "Failed to load journal metadata");
+        }
+      }
+    }
+
+    loadSelectedTradeAndMetadata();
+
+    return () => controller.abort();
+  }, [calculatedRating, selectedTradeId]);
+
+  function currentMetadataPayload(): TradeMetadata {
+    return {
+      rating: tradeRating,
+      mistakes: reviewItems.mistakes.map((item) => item.label).filter(Boolean),
+      setups: reviewItems.setups.map((item) => item.label).filter(Boolean),
+      emotions: reviewItems.emotions.map((item) => item.label).filter(Boolean),
+      customTags: reviewItems.tags.map((item) => item.label).filter(Boolean),
+      tradeNote,
+      dailyJournal,
+      checklistResults: reviewItems.checklist.map((item) => item.label).filter(Boolean),
+      psychologyStatus,
+      exitReason,
+    };
+  }
+
+  async function saveMetadata() {
+    if (!selectedTradeId || !hydrated) {
+      return;
+    }
+
+    setStatus("saving");
+    setStatusMessage("Saving journal metadata...");
+
+    try {
+      const response = await fetch(`/api/journal/trades/${selectedTradeId}/metadata`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(currentMetadataPayload()),
+      });
+      const data = (await response.json()) as { success: boolean; message?: string; errors?: string[] };
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.errors?.join(", ") || data.message || "Failed to save journal metadata");
+      }
+
+      setStatus("saved");
+      setStatusMessage("Saved");
+      setNotesDirty(false);
+    } catch (error) {
+      setStatus("error");
+      setStatusMessage((error as Error).message || "Failed to save journal metadata");
+    }
+  }
+
+  function updateDraft(category: keyof typeof drafts, value: string) {
+    setDrafts((current) => ({ ...current, [category]: value }));
+  }
+
+  function addReviewItem(category: keyof typeof drafts) {
+    const label = drafts[category].trim();
+
+    if (!label) {
+      return;
+    }
+
+    setReviewItems((current) => ({
+      ...current,
+      [category]: [
+        ...current[category],
+        { label, detail: "Manual item", tone: "neutral" },
+      ],
+    }));
+    updateDraft(category, "");
+  }
+
+  function removeReviewItem(category: keyof typeof drafts, index: number) {
+    setReviewItems((current) => ({
+      ...current,
+      [category]: current[category].filter((_, itemIndex) => itemIndex !== index),
+    }));
+  }
+
+  function renameReviewItem(category: keyof typeof drafts, index: number, value: string) {
+    setReviewItems((current) => ({
+      ...current,
+      [category]: current[category].map((item, itemIndex) =>
+        itemIndex === index ? { ...item, label: value } : item
+      ),
+    }));
+  }
+
+  useEffect(() => {
+    if (!hydrated || !selectedTradeId) {
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      saveMetadata();
+    }, 700);
+
+    return () => window.clearTimeout(timer);
+    // Notes are intentionally saved by the explicit Save button in the chart panel.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tradeRating, reviewItems, psychologyStatus, exitReason, hydrated, selectedTradeId]);
+
+  return (
+    <section className="overflow-hidden rounded-lg border border-slate-800 bg-[#111827] shadow-xl">
+      <div className="grid lg:grid-cols-[320px_minmax(0,1fr)]">
+        <div className="flex min-h-[640px] bg-[#0F172A] text-slate-100">
+          <div className="flex w-14 shrink-0 flex-col items-center justify-between border-r border-slate-800 bg-gradient-to-b from-violet-700 via-indigo-950 to-slate-950 py-5">
+            <div className="space-y-4 text-white/75">
+              <BarChart3 className="h-4 w-4" />
+              <Tags className="h-4 w-4" />
+              <Brain className="h-4 w-4" />
+              <Target className="h-4 w-4" />
+              <CalendarDays className="h-4 w-4" />
+            </div>
+            <div className="h-8 w-8 rounded-full border border-white/20 bg-white/10" />
+          </div>
+
+          <div className="min-w-0 flex-1 overflow-y-auto border-r border-slate-800 p-4">
+            <div className="mb-4 flex items-center justify-between">
+              <div>
+                <div className="text-xs font-semibold uppercase text-slate-400">Trade Review</div>
+                <div className="mt-1 text-sm font-semibold text-white">
+                  {selectedTrade
+                    ? `${selectedTrade.symbol} / ${selectedTrade.direction}`
+                    : `${formatNumber(overview.totalTrades, 0)} closed trades`}
+                </div>
+              </div>
+              <div className="flex gap-1 text-amber-400">
+                {Array.from({ length: 5 }, (_, index) => (
+                  <button
+                    key={index}
+                    type="button"
+                    onClick={() => setTradeRating(index + 1)}
+                    className="rounded p-0.5 hover:bg-amber-400/10"
+                    title={`Rate ${index + 1}`}
+                  >
+                    <Star
+                      className={cn(
+                        "h-4 w-4",
+                        index < Number(tradeRating || 0) ? "fill-amber-400 text-amber-400" : "text-slate-600"
+                      )}
+                    />
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <label className="mb-4 block text-xs font-semibold uppercase text-slate-400">
+              Selected Trade
+              <select
+                value={selectedTradeId}
+                onChange={(event) => {
+                  setSelectedTradeDetail(null);
+                  setSelectedTradeId(event.target.value);
+                }}
+                className="mt-1 h-10 w-full rounded-md border border-slate-800 bg-[#111827] px-3 text-sm normal-case text-slate-100 outline-none focus:border-violet-500"
+              >
+                {closedTrades.map((trade) => (
+                  <option key={trade.id} value={trade.id}>
+                    {trade.symbol} / {trade.direction} / {formatMoney(toFiniteNumber(trade.profitLoss))}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <div className="mb-4 max-h-28 space-y-2 overflow-y-auto pr-1">
+              {closedTrades.slice(0, 8).map((trade) => (
+                <button
+                  type="button"
+                  key={trade.id}
+                  onClick={() => {
+                    setSelectedTradeDetail(null);
+                    setSelectedTradeId(trade.id);
+                  }}
+                  className={cn(
+                    "flex w-full items-center justify-between gap-3 rounded-md border px-3 py-2 text-left text-xs",
+                    trade.id === selectedTradeId
+                      ? "border-violet-500/60 bg-violet-500/15 text-violet-100"
+                      : "border-slate-800 bg-[#111827] text-slate-300 hover:border-violet-500/40"
+                  )}
+                >
+                  <span className="min-w-0 truncate font-semibold">
+                    {trade.symbol} / {trade.direction}
+                  </span>
+                  <span className={cn("shrink-0 font-semibold", valueToneClass(toFiniteNumber(trade.profitLoss)))}>
+                    {formatMoney(toFiniteNumber(trade.profitLoss))}
+                  </span>
+                </button>
+              ))}
+            </div>
+
+            <div className="mb-4 rounded-md border border-slate-800 bg-[#111827] px-3 py-2 text-xs text-slate-400">
+              {status === "loading" && "Loading metadata..."}
+              {status === "saving" && "Saving changes..."}
+              {status === "saved" && "Saved permanently"}
+              {status === "error" && <span className="text-red-300">{statusMessage}</span>}
+              {status === "idle" && "Calculated fields are read-only. Journal metadata is editable."}
+            </div>
+
+            <div className="space-y-2">
+              {editableMetrics.map((metric) => (
+                <TradeZellaMetricRow
+                  key={metric.id}
+                  label={metric.label}
+                  value={metric.value}
+                  tone={metric.tone}
+                />
+              ))}
+            </div>
+
+            <div className="mt-5 grid gap-3">
+              <label className="space-y-1 text-xs font-semibold text-slate-300">
+                Psychology Status
+                <select
+                  value={psychologyStatus}
+                  onChange={(event) => setPsychologyStatus(event.target.value)}
+                  className="h-9 w-full rounded-md border border-slate-800 bg-[#111827] px-3 text-xs font-medium text-slate-100 outline-none focus:border-violet-500"
+                >
+                  <option value="">Select status</option>
+                  <option value="DISCIPLINED">Disciplined</option>
+                  <option value="PARTIAL">Partially followed plan</option>
+                  <option value="IMPULSIVE">Impulsive</option>
+                  <option value="REVENGE">Revenge trade</option>
+                  <option value="FOMO">FOMO</option>
+                </select>
+              </label>
+              <label className="space-y-1 text-xs font-semibold text-slate-300">
+                Exit Reason
+                <input
+                  value={exitReason}
+                  onChange={(event) => setExitReason(event.target.value)}
+                  placeholder="TP, SL, manual close, news, invalidation..."
+                  className="h-9 w-full rounded-md border border-slate-800 bg-[#111827] px-3 text-xs font-medium text-slate-100 outline-none placeholder:text-slate-500 focus:border-violet-500"
+                />
+              </label>
+            </div>
+
+            <div className="mt-5 space-y-5">
+              <ReviewCategory
+                title="Mistakes"
+                icon={<AlertTriangle className="h-3 w-3" />}
+                items={reviewItems.mistakes}
+                draft={drafts.mistakes}
+                onDraftChange={(value) => updateDraft("mistakes", value)}
+                onAdd={() => addReviewItem("mistakes")}
+                onRemove={(index) => removeReviewItem("mistakes", index)}
+                onRename={(index, value) => renameReviewItem("mistakes", index, value)}
+              />
+              <ReviewCategory
+                title="Setups"
+                icon={<ClipboardCheck className="h-3 w-3" />}
+                items={reviewItems.setups}
+                draft={drafts.setups}
+                onDraftChange={(value) => updateDraft("setups", value)}
+                onAdd={() => addReviewItem("setups")}
+                onRemove={(index) => removeReviewItem("setups", index)}
+                onRename={(index, value) => renameReviewItem("setups", index, value)}
+              />
+              <ReviewCategory
+                title="Emotions"
+                icon={<Brain className="h-3 w-3" />}
+                items={reviewItems.emotions}
+                draft={drafts.emotions}
+                onDraftChange={(value) => updateDraft("emotions", value)}
+                onAdd={() => addReviewItem("emotions")}
+                onRemove={(index) => removeReviewItem("emotions", index)}
+                onRename={(index, value) => renameReviewItem("emotions", index, value)}
+              />
+              <ReviewCategory
+                title="Custom Tags"
+                icon={<Tags className="h-3 w-3" />}
+                items={reviewItems.tags}
+                draft={drafts.tags}
+                onDraftChange={(value) => updateDraft("tags", value)}
+                onAdd={() => addReviewItem("tags")}
+                onRemove={(index) => removeReviewItem("tags", index)}
+                onRename={(index, value) => renameReviewItem("tags", index, value)}
+              />
+              <ReviewCategory
+                title="Checklist Results"
+                icon={<ClipboardCheck className="h-3 w-3" />}
+                items={reviewItems.checklist}
+                draft={drafts.checklist}
+                onDraftChange={(value) => updateDraft("checklist", value)}
+                onAdd={() => addReviewItem("checklist")}
+                onRemove={(index) => removeReviewItem("checklist", index)}
+                onRename={(index, value) => renameReviewItem("checklist", index, value)}
+              />
+            </div>
+          </div>
+        </div>
+
+        <TradeZellaChartPanel
+          analytics={analytics}
+          selectedTrade={selectedTrade}
+          tradeNote={tradeNote}
+          dailyJournal={dailyJournal}
+          activeNoteTab={activeNoteTab}
+          saving={status === "saving"}
+          notesDirty={notesDirty}
+          onActiveNoteTabChange={setActiveNoteTab}
+          onTradeNoteChange={(value) => {
+            setTradeNote(value);
+            setNotesDirty(true);
+          }}
+          onDailyJournalChange={(value) => {
+            setDailyJournal(value);
+            setNotesDirty(true);
+          }}
+          onSaveNotes={() => saveMetadata()}
+        />
+      </div>
+    </section>
+  );
+}
+
+function HourlyHighlightCard({
+  label,
+  title,
+  row,
+  helper,
+  tone,
+}: {
+  label: string;
+  title: string;
+  row: HourlyAnalyticsRow | null;
+  helper: string;
+  tone: "profit" | "loss" | "neutral";
+}) {
+  return (
+    <div className="rounded-lg border border-slate-800 bg-[#111827] p-4">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <div className="text-xs font-medium uppercase text-slate-500">{label}</div>
+          <div className="mt-1 text-sm font-semibold text-white">{title}</div>
+        </div>
+        <span
+          className={cn(
+            "rounded-md border px-2 py-1 text-xs font-semibold",
+            tone === "profit" && "border-emerald-500/30 bg-emerald-500/10 text-emerald-300",
+            tone === "loss" && "border-red-500/30 bg-red-500/10 text-red-300",
+            tone === "neutral" && "border-slate-700 bg-slate-800 text-slate-300"
+          )}
+        >
+          {row ? row.label : "N/A"}
+        </span>
+      </div>
+      {row ? (
+        <div className="mt-4 grid grid-cols-3 gap-3">
+          <Metric label="Trades" value={formatNumber(row.totalTrades, 0)} />
+          <Metric label="Win Rate" value={formatPercent(row.winRate)} />
+          <Metric label="Net P&L" value={formatMoney(row.netPnl)} tone={valueTone(row.netPnl)} />
+        </div>
+      ) : (
+        <div className="mt-4 text-sm text-slate-400">No closed trades in this bucket.</div>
+      )}
+      <p className="mt-4 text-xs leading-5 text-slate-400">{helper}</p>
+    </div>
+  );
+}
+
+function HourlyMiniList({
+  title,
+  rows,
+  emptyMessage,
+}: {
+  title: string;
+  rows: HourlyAnalyticsRow[];
+  emptyMessage: string;
+}) {
+  return (
+    <div className="rounded-lg border border-slate-800 bg-[#111827] p-4">
+      <div className="text-sm font-semibold text-white">{title}</div>
+      <div className="mt-3 space-y-2">
+        {rows.map((row) => (
+          <div key={row.label} className="flex items-center justify-between gap-3 text-sm">
+            <div className="min-w-0">
+              <div className="font-semibold text-slate-200">{row.label}</div>
+              <div className="text-xs text-slate-500">
+                {formatNumber(row.totalTrades, 0)} trades / {formatPercent(row.winRate)}
+              </div>
+            </div>
+            <div className={cn("shrink-0 font-semibold", valueToneClass(row.netPnl))}>
+              {formatMoney(row.netPnl)}
+            </div>
+          </div>
+        ))}
+        {rows.length === 0 && <div className="text-sm text-slate-400">{emptyMessage}</div>}
+      </div>
+    </div>
+  );
+}
+
+function getHourlyTileClass(row: HourlyAnalyticsRow) {
+  if (row.totalTrades === 0) {
+    return "border-slate-800 bg-slate-900/50 text-slate-500";
+  }
+
+  if (row.netPnl > 0) {
+    return "border-emerald-500/30 bg-emerald-500/10 text-emerald-200";
+  }
+
+  if (row.netPnl < 0) {
+    return "border-red-500/30 bg-red-500/10 text-red-200";
+  }
+
+  return "border-slate-700 bg-slate-800/70 text-slate-300";
+}
+
+function HourlyDecisionPanel({ rows }: { rows: HourlyAnalyticsRow[] }) {
+  const activeRows = rows.filter((row) => row.totalTrades > 0);
+  const totalTrades = activeRows.reduce((sum, row) => sum + row.totalTrades, 0);
+  const bestHour = activeRows.reduce<HourlyAnalyticsRow | null>(
+    (best, row) => (!best || row.netPnl > best.netPnl ? row : best),
+    null
+  );
+  const worstHour = activeRows.reduce<HourlyAnalyticsRow | null>(
+    (worst, row) => (!worst || row.netPnl < worst.netPnl ? row : worst),
+    null
+  );
+  const volumeHour = activeRows.reduce<HourlyAnalyticsRow | null>(
+    (largest, row) => (!largest || row.totalTrades > largest.totalTrades ? row : largest),
+    null
+  );
+  const opportunityRows = activeRows
+    .filter((row) => row.netPnl > 0)
+    .sort((a, b) => b.netPnl - a.netPnl)
+    .slice(0, 3);
+  const riskRows = activeRows
+    .filter((row) => row.netPnl < 0)
+    .sort((a, b) => a.netPnl - b.netPnl)
+    .slice(0, 3);
+  const sampleLabel =
+    totalTrades >= 50 ? "Strong sample" : totalTrades >= 20 ? "Building sample" : "Early sample";
+  const sampleTone = totalTrades >= 20 ? "text-sky-300" : "text-amber-300";
+
+  if (activeRows.length === 0) {
+    return <EmptyPanel message="No closed trades have an opening hour in the active filters." />;
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="grid gap-3 lg:grid-cols-3">
+        <HourlyHighlightCard
+          label="Best window"
+          title="Focus candidate"
+          row={bestHour}
+          helper="Highest realized net P&L by opening hour."
+          tone={bestHour && bestHour.netPnl > 0 ? "profit" : "neutral"}
+        />
+        <HourlyHighlightCard
+          label="Weak window"
+          title="Review or reduce size"
+          row={worstHour}
+          helper="Lowest realized net P&L by opening hour."
+          tone={worstHour && worstHour.netPnl < 0 ? "loss" : "neutral"}
+        />
+        <HourlyHighlightCard
+          label="Most activity"
+          title="Behavior hotspot"
+          row={volumeHour}
+          helper="Largest share of trades, useful for spotting overtrading."
+          tone="neutral"
+        />
+      </div>
+
+      <div className="rounded-lg border border-slate-800 bg-[#111827] p-4">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <div className="text-sm font-semibold text-white">24-hour heatmap</div>
+            <div className="mt-2 flex flex-wrap gap-2 text-xs text-slate-400">
+              <span className="inline-flex items-center gap-1">
+                <span className="h-2 w-2 rounded-full bg-emerald-400" />
+                Profitable
+              </span>
+              <span className="inline-flex items-center gap-1">
+                <span className="h-2 w-2 rounded-full bg-red-400" />
+                Losing
+              </span>
+              <span className="inline-flex items-center gap-1">
+                <span className="h-2 w-2 rounded-full bg-slate-600" />
+                No trades
+              </span>
+            </div>
+          </div>
+          <div className={cn("text-xs font-semibold uppercase", sampleTone)}>
+            {sampleLabel}: {formatNumber(totalTrades, 0)} trades
+          </div>
+        </div>
+        <div className="mt-4 grid grid-cols-4 gap-2 sm:grid-cols-6 lg:grid-cols-12">
+          {rows.map((row) => (
+            <div
+              key={row.label}
+              className={cn("min-h-[82px] rounded-lg border p-2", getHourlyTileClass(row))}
+              title={`${row.label}: ${formatNumber(row.totalTrades, 0)} trades, ${formatMoney(
+                row.netPnl
+              )}`}
+            >
+              <div className="text-xs font-semibold">{row.label}</div>
+              <div className="mt-2 text-sm font-semibold">{formatMoney(row.netPnl)}</div>
+              <div className="mt-1 text-[11px] text-slate-400">
+                {formatNumber(row.totalTrades, 0)} trades
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="grid gap-3 lg:grid-cols-3">
+        <HourlyMiniList
+          title="Opportunity shortlist"
+          rows={opportunityRows}
+          emptyMessage="No profitable hour yet."
+        />
+        <HourlyMiniList title="Risk shortlist" rows={riskRows} emptyMessage="No losing hour yet." />
+        <div className="rounded-lg border border-slate-800 bg-[#111827] p-4">
+          <div className="text-sm font-semibold text-white">Decision rule</div>
+          <div className="mt-3 space-y-3 text-sm leading-6 text-slate-300">
+            <p>
+              Start with the top positive hour and the weakest negative hour. Treat the edge as
+              provisional until the filter has at least 20 closed trades.
+            </p>
+            {bestHour && worstHour && (
+              <p>
+                Current read: prioritize {bestHour.label} and inspect {worstHour.label} before
+                adding risk.
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function CompactTable<T>({
+  rows,
+  labelHeader,
+  getLabel,
+  emptyMessage,
+}: {
+  rows: T[];
+  labelHeader: string;
+  getLabel: (row: T) => string;
+  emptyMessage: string;
+}) {
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full min-w-[560px] text-left text-sm">
+        <thead className="text-xs uppercase text-slate-500">
+          <tr>
+            <th className="py-2 pr-3">{labelHeader}</th>
+            <th className="py-2 pr-3">Trades</th>
+            <th className="py-2 pr-3">Win Rate</th>
+            <th className="py-2 pr-3">Net P&L</th>
+            <th className="py-2">Average</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-slate-800">
+          {rows.map((row) => {
+            const data = row as {
+              totalTrades: number;
+              winRate: number;
+              netPnl: number;
+              averagePnl: number;
+            };
+
+            return (
+              <tr key={getLabel(row)} className="text-slate-300">
+                <td className="py-3 pr-3 font-semibold text-white">{getLabel(row)}</td>
+                <td className="py-3 pr-3">{formatNumber(data.totalTrades, 0)}</td>
+                <td className="py-3 pr-3">{formatPercent(data.winRate)}</td>
+                <td className={cn("py-3 pr-3 font-semibold", valueToneClass(data.netPnl))}>
+                  {formatMoney(data.netPnl)}
+                </td>
+                <td className={cn("py-3", valueToneClass(data.averagePnl))}>
+                  {formatMoney(data.averagePnl)}
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+      {rows.length === 0 && <EmptyPanel message={emptyMessage} />}
+    </div>
+  );
+}
+
+export default function JournalAnalyticsPage() {
+  const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS);
+  const [appliedFilters, setAppliedFilters] = useState<Filters>(EMPTY_FILTERS);
+  const [analytics, setAnalytics] = useState<JournalAnalyticsResponse>(EMPTY_ANALYTICS);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [sortKey, setSortKey] = useState<SortKey>("netPnl");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    async function loadAnalytics() {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const query = buildQuery(appliedFilters);
+        const response = await fetch(`/api/journal/analytics?${query}`, {
+          signal: controller.signal,
+          cache: "no-store",
+        });
+        const data = (await response.json()) as JournalAnalyticsResponse & {
+          message?: string;
+          errors?: string[];
+        };
+
+        if (!response.ok || !data.success) {
+          throw new Error(data.errors?.join(", ") || data.message || "Failed to load analytics");
+        }
+
+        setAnalytics(data);
+      } catch (loadError) {
+        if ((loadError as Error).name !== "AbortError") {
+          setError((loadError as Error).message || "Failed to load analytics");
+          setAnalytics(EMPTY_ANALYTICS);
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
+      }
+    }
+
+    loadAnalytics();
+
+    return () => controller.abort();
+  }, [appliedFilters]);
+
+  const overview = analytics.overview;
+  const directionData = [analytics.longShort.buy, analytics.longShort.sell];
+  const sortedSymbols = useMemo(() => {
+    return [...analytics.bySymbol].sort((a, b) => {
+      const aValue = a[sortKey];
+      const bValue = b[sortKey];
+      const multiplier = sortDirection === "asc" ? 1 : -1;
+
+      if (typeof aValue === "string" || typeof bValue === "string") {
+        return String(aValue).localeCompare(String(bValue)) * multiplier;
+      }
+
+      return (Number(aValue || 0) - Number(bValue || 0)) * multiplier;
+    });
+  }, [analytics.bySymbol, sortDirection, sortKey]);
+  const hourlyChartData = analytics.byHour.filter((row) => row.totalTrades > 0);
+  const hasTrades = overview.totalTrades > 0;
+
+  function updateFilter<K extends keyof Filters>(name: K, value: Filters[K]) {
+    setFilters((current) => ({ ...current, [name]: value }));
+  }
+
+  function submitFilters(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setAppliedFilters(filters);
+  }
+
+  function clearFilters() {
+    setFilters(EMPTY_FILTERS);
+    setAppliedFilters(EMPTY_FILTERS);
+  }
+
+  function toggleSymbolSort(key: SortKey) {
+    if (sortKey === key) {
+      setSortDirection((current) => (current === "asc" ? "desc" : "asc"));
+      return;
+    }
+
+    setSortKey(key);
+    setSortDirection(key === "symbol" ? "asc" : "desc");
+  }
+
+  const overviewCards: Array<{
+    label: string;
+    value: string;
+    icon: ReactNode;
+    tone: "neutral" | "profit" | "loss" | "blue" | "amber";
+  }> = [
+    { label: "Total Net P&L", value: formatMoney(overview.totalNetPnl), icon: <CircleDollarSign className="h-4 w-4" />, tone: valueTone(overview.totalNetPnl) },
+    { label: "Gross Profit", value: formatMoney(overview.grossProfit), icon: <ArrowUp className="h-4 w-4" />, tone: "profit" },
+    { label: "Gross Loss", value: formatMoney(overview.grossLoss), icon: <ArrowDown className="h-4 w-4" />, tone: "loss" },
+    { label: "Win Rate", value: formatPercent(overview.winRate), icon: <Target className="h-4 w-4" />, tone: "blue" },
+    { label: "Loss Rate", value: formatPercent(overview.lossRate), icon: <Target className="h-4 w-4" />, tone: "amber" },
+    { label: "Total Trades", value: formatNumber(overview.totalTrades, 0), icon: <BarChart3 className="h-4 w-4" />, tone: "blue" },
+    { label: "Winning Trades", value: formatNumber(overview.winningTrades, 0), icon: <ArrowUp className="h-4 w-4" />, tone: "profit" },
+    { label: "Losing Trades", value: formatNumber(overview.losingTrades, 0), icon: <ArrowDown className="h-4 w-4" />, tone: "loss" },
+    { label: "Break-even Trades", value: formatNumber(overview.breakEvenTrades, 0), icon: <Target className="h-4 w-4" />, tone: "neutral" },
+    { label: "Average Win", value: formatMoney(overview.averageWin), icon: <ArrowUp className="h-4 w-4" />, tone: "profit" },
+    { label: "Average Loss", value: formatMoney(overview.averageLoss), icon: <ArrowDown className="h-4 w-4" />, tone: "loss" },
+    { label: "Profit Factor", value: formatNumber(overview.profitFactor, 2), icon: <BarChart3 className="h-4 w-4" />, tone: "blue" },
+    { label: "Average R:R", value: formatNumber(overview.averageRR, 2), icon: <Target className="h-4 w-4" />, tone: "amber" },
+    { label: "Best Trade", value: overview.bestTrade ? formatMoney(overview.bestTrade.pnl) : "$0.00", icon: <ArrowUp className="h-4 w-4" />, tone: "profit" },
+    { label: "Worst Trade", value: overview.worstTrade ? formatMoney(overview.worstTrade.pnl) : "$0.00", icon: <ArrowDown className="h-4 w-4" />, tone: "loss" },
+    { label: "Max Drawdown", value: formatMoney(overview.maxDrawdown), icon: <ArrowDown className="h-4 w-4" />, tone: "loss" },
+    { label: "Expectancy / Trade", value: formatMoney(overview.expectancyPerTrade), icon: <CircleDollarSign className="h-4 w-4" />, tone: valueTone(overview.expectancyPerTrade) },
+  ];
 
   return (
     <div className="space-y-5">
-      <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold text-white">Analytics Dashboard</h1>
-          <p className="mt-1 text-sm text-slate-400">
-            Professional journal performance analytics from saved trades.
-          </p>
-        </div>
-      </div>
+      <AnalyticsHero analytics={analytics} loading={loading} />
 
-      <div className="rounded-xl border border-slate-800 bg-[#0F172A] p-4 shadow-sm">
-        <form className="grid gap-3 md:grid-cols-7">
+      <div className="rounded-lg border border-slate-800 bg-[#0F172A] p-4 shadow-sm">
+        <form className="grid gap-3 lg:grid-cols-6" onSubmit={submitFilters}>
+          <label className="space-y-1 text-xs font-medium uppercase text-slate-400">
+            Date Range
+            <select
+              value={filters.dateRange}
+              onChange={(event) => updateFilter("dateRange", event.target.value as DateRange)}
+              className="h-11 w-full rounded-lg border border-slate-800 bg-[#111827] px-3 text-sm normal-case text-[#E5E7EB] outline-none focus:border-sky-600"
+            >
+              <option value="all">All time</option>
+              <option value="today">Today</option>
+              <option value="thisWeek">This week</option>
+              <option value="thisMonth">This month</option>
+              <option value="thisYear">This year</option>
+              <option value="custom">Custom</option>
+            </select>
+          </label>
           <label className="space-y-1 text-xs font-medium uppercase text-slate-400">
             From
             <input
-              name="dateFrom"
               type="date"
-              defaultValue={filters.dateFrom}
-              className="h-11 w-full rounded-xl border border-slate-800 bg-[#111827] px-3 text-sm normal-case text-[#E5E7EB] outline-none focus:border-blue-600"
+              value={filters.dateFrom}
+              disabled={filters.dateRange !== "custom"}
+              onChange={(event) => updateFilter("dateFrom", event.target.value)}
+              className="h-11 w-full rounded-lg border border-slate-800 bg-[#111827] px-3 text-sm normal-case text-[#E5E7EB] outline-none focus:border-sky-600 disabled:opacity-40"
             />
           </label>
           <label className="space-y-1 text-xs font-medium uppercase text-slate-400">
             To
             <input
-              name="dateTo"
               type="date"
-              defaultValue={filters.dateTo}
-              className="h-11 w-full rounded-xl border border-slate-800 bg-[#111827] px-3 text-sm normal-case text-[#E5E7EB] outline-none focus:border-blue-600"
+              value={filters.dateTo}
+              disabled={filters.dateRange !== "custom"}
+              onChange={(event) => updateFilter("dateTo", event.target.value)}
+              className="h-11 w-full rounded-lg border border-slate-800 bg-[#111827] px-3 text-sm normal-case text-[#E5E7EB] outline-none focus:border-sky-600 disabled:opacity-40"
             />
           </label>
           <label className="space-y-1 text-xs font-medium uppercase text-slate-400">
-            Account
+            Symbol
             <select
-              name="accountId"
-              defaultValue={filters.accountId}
-              className="h-11 w-full rounded-xl border border-slate-800 bg-[#111827] px-3 text-sm normal-case text-[#E5E7EB] outline-none focus:border-blue-600"
+              value={filters.symbol}
+              onChange={(event) => updateFilter("symbol", event.target.value)}
+              className="h-11 w-full rounded-lg border border-slate-800 bg-[#111827] px-3 text-sm text-[#E5E7EB] outline-none focus:border-sky-600"
             >
-              <option value="">All</option>
-              {accounts.map((account) => (
-                <option key={account.id} value={account.id}>
-                  {account.name}
+              <option value="">All symbols</option>
+              {analytics.metadata.symbols.map((symbol) => (
+                <option key={symbol} value={symbol}>
+                  {symbol}
                 </option>
               ))}
             </select>
           </label>
           <label className="space-y-1 text-xs font-medium uppercase text-slate-400">
-            Symbol
-            <input
-              name="symbol"
-              defaultValue={filters.symbol}
-              placeholder="EURUSD"
-              className="h-11 w-full rounded-xl border border-slate-800 bg-[#111827] px-3 text-sm uppercase text-[#E5E7EB] outline-none focus:border-blue-600"
-            />
+            Direction
+            <select
+              value={filters.direction}
+              onChange={(event) => updateFilter("direction", event.target.value as DirectionFilter)}
+              className="h-11 w-full rounded-lg border border-slate-800 bg-[#111827] px-3 text-sm normal-case text-[#E5E7EB] outline-none focus:border-sky-600"
+            >
+              <option value="">All</option>
+              <option value="BUY">Buy</option>
+              <option value="SELL">Sell</option>
+            </select>
           </label>
           <label className="space-y-1 text-xs font-medium uppercase text-slate-400">
             Strategy
-            <input
-              name="strategy"
-              defaultValue={filters.strategy}
-              placeholder="London"
-              className="h-11 w-full rounded-xl border border-slate-800 bg-[#111827] px-3 text-sm text-[#E5E7EB] outline-none focus:border-blue-600"
-            />
+            <select
+              value={filters.strategy}
+              disabled={!analytics.metadata.hasStrategyData}
+              onChange={(event) => updateFilter("strategy", event.target.value)}
+              className="h-11 w-full rounded-lg border border-slate-800 bg-[#111827] px-3 text-sm normal-case text-[#E5E7EB] outline-none focus:border-sky-600 disabled:opacity-40"
+            >
+              <option value="">All strategies</option>
+              {analytics.metadata.strategies.map((strategy) => (
+                <option key={strategy} value={strategy}>
+                  {strategy}
+                </option>
+              ))}
+            </select>
           </label>
-          <label className="space-y-1 text-xs font-medium uppercase text-slate-400">
-            Tag
-            <input
-              name="tag"
-              defaultValue={filters.tag}
-              placeholder="A+"
-              className="h-11 w-full rounded-xl border border-slate-800 bg-[#111827] px-3 text-sm text-[#E5E7EB] outline-none focus:border-blue-600"
-            />
-          </label>
-          <div className="flex gap-2 self-end">
+          <div className="flex gap-2 lg:col-span-6">
             <button
               type="submit"
-              className="inline-flex h-11 flex-1 items-center justify-center rounded-xl bg-[#2563EB] px-4 text-sm font-semibold text-white hover:bg-blue-500"
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-[#2563EB] px-4 text-sm font-semibold text-white hover:bg-blue-500"
             >
-              Apply
+              <Search className="h-4 w-4" />
+              Apply Filters
             </button>
-            <Link
-              href="/journal/analytics"
-              className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-slate-800 text-slate-300 hover:bg-slate-800"
-              aria-label="Clear filters"
-              title="Clear filters"
+            <button
+              type="button"
+              onClick={clearFilters}
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-slate-800 px-4 text-sm font-semibold text-slate-300 hover:bg-slate-800"
             >
               <RotateCcw className="h-4 w-4" />
-            </Link>
+              Reset
+            </button>
           </div>
         </form>
       </div>
 
-      {summary.totalTrades === 0 && (
-        <div className="rounded-xl border border-dashed border-slate-800 bg-[#0F172A] px-4 py-5 text-sm text-slate-400">
-          No trades found for this period
-        </div>
-      )}
-
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard
-          label="Total PnL"
-          value={formatMoney(summary.totalPnL)}
-          icon={<CircleDollarSign className="h-4 w-4" />}
-          tone={totalTone}
-        />
-        <StatCard
-          label="Win Rate"
-          value={`${formatNumber(summary.winRate, 1)}%`}
-          icon={<Percent className="h-4 w-4" />}
-          tone="blue"
-        />
-        <StatCard
-          label="Profit Factor"
-          value={formatNumber(summary.profitFactor, 2)}
-          icon={<BarChart3 className="h-4 w-4" />}
-        />
-        <StatCard
-          label="Total Trades"
-          value={formatNumber(summary.totalTrades, 0)}
-          icon={<Table2 className="h-4 w-4" />}
-          tone="blue"
-        />
-        <StatCard
-          label="Average Win"
-          value={formatMoney(summary.averageWin)}
-          icon={<TrendingUp className="h-4 w-4" />}
-          tone="profit"
-        />
-        <StatCard
-          label="Average Loss"
-          value={formatMoney(summary.averageLoss)}
-          icon={<TrendingDown className="h-4 w-4" />}
-          tone="loss"
-        />
-        <StatCard
-          label="Best Trade"
-          value={formatMoney(summary.bestTrade)}
-          icon={<TrendingUp className="h-4 w-4" />}
-          tone={summary.bestTrade > 0 ? "profit" : "neutral"}
-        />
-        <StatCard
-          label="Worst Trade"
-          value={formatMoney(summary.worstTrade)}
-          icon={<TrendingDown className="h-4 w-4" />}
-          tone={summary.worstTrade < 0 ? "loss" : "neutral"}
-        />
-      </div>
-
-      <section className="rounded-xl border border-slate-800 bg-[#0F172A] p-4 shadow-sm">
-        <div className="mb-4 flex items-center justify-between gap-3">
+      {error && (
+        <div className="flex items-start gap-3 rounded-lg border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-200">
+          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
           <div>
-            <h2 className="text-sm font-semibold text-white">Equity / PnL by Day</h2>
-            <p className="mt-1 text-xs text-slate-400">
-              Cumulative curve based on daily realized PnL.
-            </p>
+            <div className="font-semibold text-red-100">Analytics failed to load</div>
+            <div className="mt-1">{error}</div>
           </div>
-          <BarChart3 className="h-4 w-4 text-slate-500" />
         </div>
-        <EquityLineChart points={charts.pnlByDay} />
-      </section>
-
-      <div className="grid gap-5 xl:grid-cols-2">
-        <BarList title="PnL by Symbol" items={charts.pnlBySymbol} labelKey="symbol" />
-        <WinRateTable items={charts.winRateBySymbol} />
-        <BarList title="BUY vs SELL Performance" items={charts.pnlByDirection} labelKey="direction" />
-        <BarList title="Strategy Performance" items={charts.pnlByStrategy} labelKey="strategy" />
-        <BarList title="Account Performance" items={charts.pnlByAccount} labelKey="account" />
-        <BarList title="Emotion / Psychology Performance" items={charts.emotionPerformance} labelKey="emotion" />
-      </div>
-
-      {charts.pnlByTag.length > 0 && (
-        <BarList title="Tag Performance" items={charts.pnlByTag} labelKey="tag" />
       )}
 
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard
-          label="Average PnL"
-          value={formatMoney(summary.averagePnL)}
-          icon={<CircleDollarSign className="h-4 w-4" />}
-          tone={summary.averagePnL > 0 ? "profit" : summary.averagePnL < 0 ? "loss" : "neutral"}
-        />
-        <StatCard
-          label="Average RR"
-          value={formatNumber(summary.averageRR, 2)}
-          icon={<BarChart3 className="h-4 w-4" />}
-        />
-        <StatCard
-          label="Max Win Streak"
-          value={formatNumber(summary.maxWinStreak, 0)}
-          icon={<TrendingUp className="h-4 w-4" />}
-          tone="profit"
-        />
-        <StatCard
-          label="Max Loss Streak"
-          value={formatNumber(summary.maxLossStreak, 0)}
-          icon={<TrendingDown className="h-4 w-4" />}
-          tone="loss"
-        />
-      </div>
+      {loading ? (
+        <LoadingPanel />
+      ) : (
+        <>
+          {!hasTrades && (
+            <div className="rounded-lg border border-dashed border-slate-800 bg-[#0F172A] p-6 text-sm text-slate-400">
+              No closed trades found. Import or close trades to populate advanced analytics.
+            </div>
+          )}
+
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            {overviewCards.map(({ label, value, icon, tone }) => (
+              <StatCard key={label} label={label} value={value} icon={icon} tone={tone} />
+            ))}
+          </div>
+
+          <TradeZellaAnalysisWorkspace analytics={analytics} />
+
+          <div className="grid gap-5 xl:grid-cols-2">
+            <Section
+              title="Equity Curve"
+              description="Cumulative net P&L ordered by close time."
+              icon={<LineChartIcon className="h-4 w-4" />}
+            >
+              <EquityChart data={analytics.equityCurve} />
+            </Section>
+            <Section
+              title="Drawdown"
+              description={`Current drawdown: ${formatMoney(overview.currentDrawdown)} / Max drawdown: ${formatMoney(overview.maxDrawdown)}`}
+              icon={<ArrowDown className="h-4 w-4" />}
+            >
+              <DrawdownChart data={analytics.drawdownCurve} />
+            </Section>
+          </div>
+
+          <div className="grid gap-5 xl:grid-cols-2">
+            <Section
+              title="Long vs Short Analytics"
+              description="BUY and SELL realized performance compared side by side."
+              icon={<Filter className="h-4 w-4" />}
+            >
+              <div className="space-y-4">
+                <DirectionStats items={directionData} />
+                <DirectionChart data={directionData} />
+              </div>
+            </Section>
+            <Section
+              title="Session Performance"
+              description="Open time grouped by approximate UTC trading session."
+              icon={<CalendarDays className="h-4 w-4" />}
+            >
+              <PnlBarChart data={analytics.bySession} xKey="session" height={300} />
+            </Section>
+          </div>
+
+          <div className="grid gap-5 xl:grid-cols-2">
+            <Section title="Weekday P&L" icon={<CalendarDays className="h-4 w-4" />}>
+              <PnlBarChart data={analytics.byWeekday} xKey="weekday" height={280} />
+            </Section>
+            <Section title="Hourly P&L" icon={<BarChart3 className="h-4 w-4" />}>
+              <PnlBarChart
+                data={hourlyChartData.length > 0 ? hourlyChartData : analytics.byHour}
+                xKey="label"
+                height={280}
+              />
+            </Section>
+          </div>
+
+          <Section
+            title="Symbol Analytics"
+            description="Click a column header to sort symbol performance."
+            icon={<ArrowUpDown className="h-4 w-4" />}
+          >
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[900px] text-left text-sm">
+                <thead className="text-xs uppercase text-slate-500">
+                  <tr>
+                    {[
+                      ["symbol", "Symbol"],
+                      ["totalTrades", "Trades"],
+                      ["winRate", "Win Rate"],
+                      ["netPnl", "Net P&L"],
+                      ["averagePnl", "Average"],
+                      ["profitFactor", "Profit Factor"],
+                      ["bestTrade", "Best"],
+                      ["worstTrade", "Worst"],
+                    ].map(([key, label]) => (
+                      <th key={key} className="py-2 pr-3">
+                        <button
+                          type="button"
+                          onClick={() => toggleSymbolSort(key as SortKey)}
+                          className="inline-flex items-center gap-1 hover:text-white"
+                        >
+                          {label}
+                          <ArrowUpDown className="h-3 w-3" />
+                        </button>
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-800">
+                  {sortedSymbols.map((row) => (
+                    <tr key={row.symbol} className="text-slate-300">
+                      <td className="py-3 pr-3 font-semibold text-white">{row.symbol}</td>
+                      <td className="py-3 pr-3">{formatNumber(row.totalTrades, 0)}</td>
+                      <td className="py-3 pr-3">{formatPercent(row.winRate)}</td>
+                      <td className={cn("py-3 pr-3 font-semibold", valueToneClass(row.netPnl))}>
+                        {formatMoney(row.netPnl)}
+                      </td>
+                      <td className={cn("py-3 pr-3", valueToneClass(row.averagePnl))}>
+                        {formatMoney(row.averagePnl)}
+                      </td>
+                      <td className="py-3 pr-3">{formatNumber(row.profitFactor, 2)}</td>
+                      <td className="py-3 pr-3 text-emerald-300">{formatMoney(row.bestTrade)}</td>
+                      <td className="py-3 text-red-300">{formatMoney(row.worstTrade)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {sortedSymbols.length === 0 && <EmptyPanel message="No symbol analytics available." />}
+            </div>
+          </Section>
+
+          <div className="grid gap-5 xl:grid-cols-2">
+            <Section title="Session Analytics" icon={<CalendarDays className="h-4 w-4" />}>
+              <CompactTable
+                rows={analytics.bySession}
+                labelHeader="Session"
+                getLabel={(row) => row.session}
+                emptyMessage="No session analytics available."
+              />
+            </Section>
+            <Section title="Weekday Analytics" icon={<CalendarDays className="h-4 w-4" />}>
+              <CompactTable
+                rows={analytics.byWeekday}
+                labelHeader="Weekday"
+                getLabel={(row) => row.weekday}
+                emptyMessage="No weekday analytics available."
+              />
+            </Section>
+          </div>
+
+          <Section
+            title="Hourly Decision Board"
+            description="A quick read on when your journal is making or losing money."
+            icon={<BarChart3 className="h-4 w-4" />}
+          >
+            <HourlyDecisionPanel rows={analytics.byHour} />
+          </Section>
+
+          <div className="grid gap-5 xl:grid-cols-2">
+            <Section title="Strategy / Magic Number Analytics" icon={<Target className="h-4 w-4" />}>
+              {analytics.metadata.hasStrategyData ? (
+                <StrategyTable rows={analytics.byStrategy} />
+              ) : (
+                <EmptyPanel message="No strategy data available yet. Add strategyName or magicNumber to trades to enable strategy analytics." />
+              )}
+            </Section>
+            <Section title="Psychology Analytics" icon={<Brain className="h-4 w-4" />}>
+              {analytics.metadata.hasPsychologyData ? (
+                <CompactTable
+                  rows={analytics.byPsychology}
+                  labelHeader="Psychology Status"
+                  getLabel={(row) => row.psychologyStatus}
+                  emptyMessage="No psychology analytics match the active filters."
+                />
+              ) : (
+                <EmptyPanel message="No psychology data available yet. Add psychology tracking to trades to enable this report." />
+              )}
+            </Section>
+          </div>
+        </>
+      )}
     </div>
   );
 }

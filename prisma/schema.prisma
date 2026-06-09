@@ -45,48 +45,81 @@ model TradingAccount {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  trades    Trade[]
-  journals  DailyJournal[]
+  trades   Trade[]
+  journals DailyJournal[]
 }
 
 model Trade {
-  id          String         @id @default(cuid())
-  userId      String
-  accountId   String
-  symbol      String
-  direction   TradeDirection
-  status      TradeStatus    @default(OPEN)
+  id        String         @id @default(cuid())
+  userId    String
+  accountId String
+  symbol    String
+  direction TradeDirection
+  status    TradeStatus    @default(OPEN)
 
-  entryPrice  Decimal?       @db.Decimal(18, 5)
-  exitPrice   Decimal?       @db.Decimal(18, 5)
-  stopLoss    Decimal?       @db.Decimal(18, 5)
-  takeProfit  Decimal?       @db.Decimal(18, 5)
-  lotSize     Decimal?       @db.Decimal(18, 2)
-  riskAmount  Decimal?       @db.Decimal(18, 2)
-  profitLoss  Decimal?       @db.Decimal(18, 2)
-  rr          Decimal?       @db.Decimal(10, 2)
+  entryPrice Decimal? @db.Decimal(18, 5)
+  exitPrice  Decimal? @db.Decimal(18, 5)
+  stopLoss   Decimal? @db.Decimal(18, 5)
+  takeProfit Decimal? @db.Decimal(18, 5)
+  lotSize    Decimal? @db.Decimal(18, 2)
+  riskAmount Decimal? @db.Decimal(18, 2)
+  profitLoss Decimal? @db.Decimal(18, 2)
+  commission Decimal? @db.Decimal(18, 2)
+  swap       Decimal? @db.Decimal(18, 2)
+  rr         Decimal? @db.Decimal(10, 2)
 
-  setup       String?
-  session     String?
-  emotion     String?
-  mistake     String?
-  notes       String?
+  setup   String?
+  session String?
+  emotion String?
+  mistake String?
+  notes   String?
 
-  openedAt    DateTime?
-  closedAt    DateTime?
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
+  source    String  @default("MANUAL")
+  mt5Ticket String?
 
-  account     TradingAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  openedAt  DateTime?
+  closedAt  DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  account     TradingAccount    @relation(fields: [accountId], references: [id], onDelete: Cascade)
   screenshots TradeScreenshot[]
   voiceMemos  VoiceMemo[]
   tags        TradeTag[]
+  checklists  TradeChecklist[]
+  strategyReview TradeStrategyReview?
+  journalMetadata TradeJournalMetadata?
 
   @@index([userId])
   @@index([accountId])
   @@index([symbol])
+  @@index([source])
+  @@index([mt5Ticket])
   @@index([openedAt])
   @@index([closedAt])
+}
+
+model TradeJournalMetadata {
+  id                String   @id @default(cuid())
+  tradeId           String   @unique
+  userId            String
+  rating            Int?
+  mistakes          Json?
+  setups            Json?
+  emotions          Json?
+  customTags        Json?
+  tradeNote         String?
+  dailyJournal      String?
+  checklistResults  Json?
+  psychologyStatus  String?
+  exitReason        String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  trade Trade @relation(fields: [tradeId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([tradeId])
 }
 
 model TradeScreenshot {
@@ -97,7 +130,7 @@ model TradeScreenshot {
   url       String
   createdAt DateTime @default(now())
 
-  trade     Trade    @relation(fields: [tradeId], references: [id], onDelete: Cascade)
+  trade Trade @relation(fields: [tradeId], references: [id], onDelete: Cascade)
 
   @@index([tradeId])
   @@index([userId])
@@ -112,7 +145,7 @@ model VoiceMemo {
   transcript String?
   createdAt  DateTime @default(now())
 
-  trade      Trade?   @relation(fields: [tradeId], references: [id], onDelete: SetNull)
+  trade Trade? @relation(fields: [tradeId], references: [id], onDelete: SetNull)
 
   @@index([tradeId])
   @@index([userId])
@@ -131,7 +164,7 @@ model DailyJournal {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  account   TradingAccount? @relation(fields: [accountId], references: [id], onDelete: SetNull)
+  account TradingAccount? @relation(fields: [accountId], references: [id], onDelete: SetNull)
 
   @@index([userId])
   @@index([date])
@@ -150,19 +183,19 @@ model Playbook {
 }
 
 model PropFirmChallenge {
-  id              String   @id @default(cuid())
+  id              String    @id @default(cuid())
   userId          String
   accountId       String?
   name            String
-  startingBalance Decimal  @db.Decimal(18, 2)
-  profitTarget    Decimal? @db.Decimal(18, 2)
-  maxDailyLoss    Decimal? @db.Decimal(18, 2)
-  maxTotalLoss    Decimal? @db.Decimal(18, 2)
-  status          String   @default("ACTIVE")
+  startingBalance Decimal   @db.Decimal(18, 2)
+  profitTarget    Decimal?  @db.Decimal(18, 2)
+  maxDailyLoss    Decimal?  @db.Decimal(18, 2)
+  maxTotalLoss    Decimal?  @db.Decimal(18, 2)
+  status          String    @default("ACTIVE")
   startedAt       DateTime?
   endedAt         DateTime?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
   @@index([userId])
   @@index([accountId])
@@ -175,7 +208,7 @@ model Tag {
   color     String?
   createdAt DateTime @default(now())
 
-  trades    TradeTag[]
+  trades TradeTag[]
 
   @@unique([userId, name])
   @@index([userId])
@@ -185,10 +218,184 @@ model TradeTag {
   tradeId String
   tagId   String
 
-  trade   Trade @relation(fields: [tradeId], references: [id], onDelete: Cascade)
-  tag     Tag   @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  trade Trade @relation(fields: [tradeId], references: [id], onDelete: Cascade)
+  tag   Tag   @relation(fields: [tagId], references: [id], onDelete: Cascade)
 
   @@id([tradeId, tagId])
+}
+
+model ChecklistTemplate {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  category    String?
+  isActive    Boolean  @default(true)
+  isDefault   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  items           ChecklistItem[]
+  tradeChecklists TradeChecklist[]
+  playbookLinks   PlaybookChecklistLink[]
+
+  @@index([isActive])
+  @@index([category])
+}
+
+model PlaybookStrategy {
+  id             String   @id @default(cuid())
+  userId         String   @default("demo-user")
+  name           String
+  description    String?
+  marketType     String?
+  symbols        String?
+  timeframes     String?
+  riskPerTrade   Float?
+  minRiskReward  Float?
+  tags           String?
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  rules          PlaybookRule[]
+  checklistLinks PlaybookChecklistLink[]
+  strategyReviews TradeStrategyReview[]
+
+  @@index([userId])
+  @@index([isActive])
+  @@index([name])
+}
+
+model PlaybookRule {
+  id          String   @id @default(cuid())
+  strategyId  String
+  section     String
+  title       String
+  description String?
+  isRequired  Boolean  @default(false)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  strategy PlaybookStrategy @relation(fields: [strategyId], references: [id], onDelete: Cascade)
+
+  @@index([strategyId])
+  @@index([section])
+}
+
+model PlaybookChecklistLink {
+  id                  String   @id @default(cuid())
+  strategyId          String
+  checklistTemplateId String
+  createdAt           DateTime @default(now())
+
+  strategy          PlaybookStrategy @relation(fields: [strategyId], references: [id], onDelete: Cascade)
+  checklistTemplate ChecklistTemplate @relation(fields: [checklistTemplateId], references: [id], onDelete: Cascade)
+
+  @@unique([strategyId, checklistTemplateId])
+  @@index([checklistTemplateId])
+}
+
+model TradeStrategyReview {
+  id                         String   @id @default(cuid())
+  tradeId                    String   @unique
+  strategyId                 String?
+  strategyNameSnapshot       String?
+  followedPlan               String   @default("NOT_REVIEWED")
+  totalRules                 Int      @default(0)
+  followedRules              Int      @default(0)
+  violatedRules              Int      @default(0)
+  requiredRules              Int      @default(0)
+  requiredFollowedRules      Int      @default(0)
+  compliancePercent          Float    @default(0)
+  requiredCompliancePercent  Float    @default(0)
+  notes                      String?
+  createdAt                  DateTime @default(now())
+  updatedAt                  DateTime @updatedAt
+
+  trade       Trade @relation(fields: [tradeId], references: [id], onDelete: Cascade)
+  strategy    PlaybookStrategy? @relation(fields: [strategyId], references: [id], onDelete: SetNull)
+  ruleReviews TradeStrategyRuleReview[]
+
+  @@index([strategyId])
+  @@index([followedPlan])
+}
+
+model TradeStrategyRuleReview {
+  id                     String   @id @default(cuid())
+  tradeStrategyReviewId  String
+  originalRuleId         String?
+  ruleTitleSnapshot      String
+  ruleDescriptionSnapshot String?
+  ruleSectionSnapshot    String
+  isRequiredSnapshot     Boolean  @default(false)
+  status                 String   @default("NOT_REVIEWED")
+  note                   String?
+  sortOrder              Int      @default(0)
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+
+  review TradeStrategyReview @relation(fields: [tradeStrategyReviewId], references: [id], onDelete: Cascade)
+
+  @@index([tradeStrategyReviewId])
+  @@index([originalRuleId])
+  @@index([status])
+}
+
+model ChecklistItem {
+  id          String   @id @default(cuid())
+  checklistId String
+  title       String
+  description String?
+  isRequired  Boolean  @default(false)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  checklist ChecklistTemplate @relation(fields: [checklistId], references: [id], onDelete: Cascade)
+
+  @@index([checklistId])
+}
+
+model TradeChecklist {
+  id                     String   @id @default(cuid())
+  tradeId                String
+  checklistTemplateId    String?
+  titleSnapshot          String
+  categorySnapshot       String?
+  completedCount         Int      @default(0)
+  totalCount             Int      @default(0)
+  requiredCompletedCount Int      @default(0)
+  requiredTotalCount     Int      @default(0)
+  completionPercent      Float    @default(0)
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+
+  trade             Trade                  @relation(fields: [tradeId], references: [id], onDelete: Cascade)
+  checklistTemplate ChecklistTemplate?     @relation(fields: [checklistTemplateId], references: [id], onDelete: SetNull)
+  answers           TradeChecklistAnswer[]
+
+  @@index([tradeId])
+  @@index([checklistTemplateId])
+}
+
+model TradeChecklistAnswer {
+  id                  String   @id @default(cuid())
+  tradeChecklistId    String
+  checklistItemId     String?
+  titleSnapshot       String
+  descriptionSnapshot String?
+  isRequiredSnapshot  Boolean  @default(false)
+  checked             Boolean  @default(false)
+  note                String?
+  sortOrder           Int      @default(0)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  tradeChecklist TradeChecklist @relation(fields: [tradeChecklistId], references: [id], onDelete: Cascade)
+
+  @@index([tradeChecklistId])
+  @@index([checklistItemId])
 }
 
 model WebsiteSignal {

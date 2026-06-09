@@ -6,6 +6,13 @@ import {
   parseDate,
   parsePositiveInt,
 } from "@/lib/journal/api-utils";
+import {
+  EA_IMPORT_TRADE_SOURCE,
+  MANUAL_TRADE_SOURCE,
+  MT5_TRADE_SOURCE,
+  isImportedTradeSource,
+  stripBrokerDataFields,
+} from "@/lib/journal/trade-source";
 import type {
   JournalAccountPayload,
   JournalEventPayload,
@@ -19,6 +26,11 @@ export const journalTradeInclude = {
   tags: {
     include: {
       tag: true,
+    },
+  },
+  strategyReview: {
+    include: {
+      ruleReviews: true,
     },
   },
 } satisfies Prisma.TradeInclude;
@@ -51,6 +63,10 @@ type BuildUpdateResult =
 
 const DEFAULT_USER_ID = "demo-user";
 const MT5_SETUP_PREFIX = "MT5:";
+
+function mt5TicketValue(value: string | null) {
+  return value?.replace(MT5_SETUP_PREFIX, "").trim() || null;
+}
 
 function firstDefined(body: Record<string, unknown>, names: string[]) {
   for (const name of names) {
@@ -174,12 +190,19 @@ function parseOptionalDate(value: unknown, fieldName: string, errors: string[]) 
 }
 
 export function serializeJournalTrade(trade: JournalTradeWithRelations) {
+  const screenshotUrl = (type: string) =>
+    trade.screenshots.find(
+      (screenshot) => screenshot.type.toLowerCase() === type.toLowerCase()
+    )?.url || null;
+
   return {
     ...trade,
     tradingAccount: trade.account,
     side: trade.direction,
     entryTime: trade.openedAt,
     exitTime: trade.closedAt,
+    entryScreenshotUrl: screenshotUrl("ENTRY"),
+    exitScreenshotUrl: screenshotUrl("EXIT"),
     strategy: trade.session,
     mistakes: trade.mistake,
   };
@@ -261,14 +284,19 @@ async function ensureMt5TradingAccount(
 }
 
 async function findMt5Trade(accountId: string, sourceKey: string | null) {
-  if (!sourceKey) {
+  const ticket = mt5TicketValue(sourceKey);
+
+  if (!sourceKey && !ticket) {
     return null;
   }
 
   return prisma.trade.findFirst({
     where: {
       accountId,
-      setup: sourceKey,
+      OR: [
+        ...(ticket ? [{ mt5Ticket: ticket }] : []),
+        ...(sourceKey ? [{ setup: sourceKey }] : []),
+      ],
     },
     orderBy: { createdAt: "desc" },
   });
@@ -289,7 +317,10 @@ async function findFallbackOpenMt5Trade(
       accountId,
       symbol,
       status: TradeStatus.OPEN,
-      setup: { startsWith: MT5_SETUP_PREFIX },
+      OR: [
+        { source: { in: [MT5_TRADE_SOURCE, EA_IMPORT_TRADE_SOURCE, "MT5_EA"] } },
+        { setup: { startsWith: MT5_SETUP_PREFIX } },
+      ],
     },
     orderBy: { openedAt: "desc" },
   });
@@ -302,20 +333,22 @@ export async function processJournalEventPrisma(
   const account = await ensureMt5TradingAccount(userId, input.account);
   const event = input.event;
   const sourceKey = getMt5ExternalTradeKey(event);
+  const mt5Ticket = mt5TicketValue(sourceKey);
   const symbol = event.symbol?.trim().toUpperCase() || "UNKNOWN";
   const direction = toPrismaDirection(event.tradeType);
   const baseData = {
     userId,
     accountId: account.id,
+    source: MT5_TRADE_SOURCE,
+    mt5Ticket,
     symbol,
     direction,
     entryPrice: nullableDecimal(event.entryPrice),
     stopLoss: nullableDecimal(event.stopLoss),
     takeProfit: nullableDecimal(event.takeProfit),
     lotSize: nullableDecimal(event.lotSize),
-    session: event.session || undefined,
-    notes: event.comment || undefined,
-    setup: sourceKey || `${MT5_SETUP_PREFIX}${event.idempotencyKey}`,
+    commission: nullableDecimal(event.commission),
+    swap: nullableDecimal(event.swap),
   };
 
   if (
@@ -376,9 +409,11 @@ export async function processJournalEventPrisma(
     takeProfit: nullableDecimal(event.takeProfit),
     lotSize: nullableDecimal(event.lotSize),
     profitLoss: nullableDecimalOrNull(event.profit),
+    commission: nullableDecimal(event.commission),
+    swap: nullableDecimal(event.swap),
     rr: metrics.rr,
-    session: event.session || existing?.session || undefined,
-    notes: event.comment || existing?.notes || undefined,
+    source: MT5_TRADE_SOURCE,
+    mt5Ticket,
     closedAt: isFinalClose ? event.eventTime : null,
   };
 
@@ -581,6 +616,8 @@ export function buildManualTradeCreateData(
   const stopLoss = parseOptionalDecimal(body.stopLoss, "stopLoss", errors);
   const takeProfit = parseOptionalDecimal(body.takeProfit, "takeProfit", errors);
   const riskAmount = parseOptionalDecimal(body.riskAmount, "riskAmount", errors);
+  const commission = parseOptionalDecimal(body.commission, "commission", errors);
+  const swap = parseOptionalDecimal(body.swap, "swap", errors);
   const rrInput = parseOptionalDecimal(body.rr, "rr", errors);
 
   if (errors.length > 0 || !symbol || !direction || !status || !entryPrice || !openedAt) {
@@ -612,7 +649,11 @@ export function buildManualTradeCreateData(
       lotSize,
       riskAmount,
       profitLoss: profitLoss ?? metrics.profitLoss,
+      commission,
+      swap,
       rr: rrInput ?? metrics.rr,
+      source: MANUAL_TRADE_SOURCE,
+      mt5Ticket: optionalString(body.mt5Ticket),
       setup: optionalString(body.setup),
       session: optionalString(firstDefined(body, ["strategy", "session"])),
       emotion: optionalString(body.emotion),
@@ -671,6 +712,10 @@ export function buildManualTradeUpdateData(
     data.accountId = accountId || undefined;
   }
 
+  if (body.mt5Ticket !== undefined) {
+    data.mt5Ticket = optionalString(body.mt5Ticket);
+  }
+
   for (const [field, value] of [
     ["entryPrice", firstDefined(body, ["entryPrice", "entry"])],
     ["exitPrice", firstDefined(body, ["exitPrice", "exit"])],
@@ -679,6 +724,8 @@ export function buildManualTradeUpdateData(
     ["lotSize", firstDefined(body, ["lotSize", "volume"])],
     ["riskAmount", body.riskAmount],
     ["profitLoss", firstDefined(body, ["profitLoss", "pnl"])],
+    ["commission", body.commission],
+    ["swap", body.swap],
     ["rr", body.rr],
   ] as const) {
     if (value !== undefined) {
@@ -703,4 +750,13 @@ export function buildManualTradeUpdateData(
   }
 
   return { data };
+}
+
+export function lockImportedBrokerUpdate(
+  existing: { source?: string | null; setup?: string | null },
+  data: Prisma.TradeUncheckedUpdateInput
+) {
+  return isImportedTradeSource(existing.source, existing.setup)
+    ? (stripBrokerDataFields(data as Record<string, unknown>) as Prisma.TradeUncheckedUpdateInput)
+    : data;
 }

@@ -1,0 +1,42 @@
+Journal summary GET error: Error [PrismaClientInitializationError]: 
+Invalid `prisma.trade.findMany()` invocation:
+
+
+Can't reach database server at `ep-proud-leaf-agduw96y-pooler.c-2.eu-central-1.aws.neon.tech:5432`
+
+Please make sure your database server is running at `ep-proud-leaf-agduw96y-pooler.c-2.eu-central-1.aws.neon.tech:5432`.
+    at async GET (src\app\api\journal\summary\route.ts:36:19)
+  34 |     }
+  35 |
+> 36 |     const trades = await prisma.trade.findMany({
+     |                   ^
+  37 |       where,
+  38 |       include: journalTradeInclude,
+  39 |       orderBy: [{ openedAt: "desc" }, { createdAt: "desc" }], {
+  clientVersion: '6.19.3',
+  errorCode: undefined,
+  retryable: undefined
+}
+Journal trades GET error: [Error [PrismaClientInitializationError]: 
+Invalid `prisma.trade.count()` invocation:
+
+
+Can't reach database server at `ep-proud-leaf-agduw96y-pooler.c-2.eu-central-1.aws.neon.tech:5432`
+
+Please make sure your database server is running at `ep-proud-leaf-agduw96y-pooler.c-2.eu-central-1.aws.neon.tech:5432`.] {
+  clientVersion: '6.19.3',
+  errorCode: undefined,
+  retryable: undefined
+}
+ ⨯ Error: Journal API request failed: 500
+    at fetchJournalApi (src\app\journal\_lib\journal-api.ts:184:10)
+    at async JournalPage (src\app\journal\page.tsx:137:36)
+  182 |
+  183 |   if (!response.ok) {
+> 184 |     throw new Error(`Journal API request failed: ${response.status}`);
+      |          ^
+  185 |   }
+  186 |
+  187 |   return response.json() as Promise<T>; {
+  digest: '2197745484'
+}

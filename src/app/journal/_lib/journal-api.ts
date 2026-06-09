@@ -1,5 +1,6 @@
 import { headers } from "next/headers";
 import type { JournalEvent, JournalTrade, Psychology } from "@/lib/journal/types";
+import { isImportedTradeSource } from "@/lib/journal/trade-source";
 
 export type JournalTradeDto = Omit<
   JournalTrade,
@@ -12,6 +13,7 @@ export type JournalTradeDto = Omit<
   updatedAt: string;
   events: Array<Omit<JournalEvent, "eventTime"> & { eventTime: string }>;
   psychology: Psychology | null;
+  strategyReview?: PrismaTradeDto["strategyReview"];
 };
 
 export type JournalTradesResponse = {
@@ -103,7 +105,11 @@ export type PrismaTradeDto = {
   lotSize: string | number | null;
   riskAmount: string | number | null;
   profitLoss: string | number | null;
+  commission: string | number | null;
+  swap: string | number | null;
   rr: string | number | null;
+  source: string;
+  mt5Ticket: string | null;
   setup: string | null;
   session: string | null;
   emotion: string | null;
@@ -117,6 +123,21 @@ export type PrismaTradeDto = {
   tradingAccount?: PrismaTradingAccountDto | null;
   screenshots?: PrismaTradeScreenshotDto[];
   tags?: PrismaTradeTagDto[];
+  strategyReview?: {
+    id: string;
+    strategyId: string | null;
+    strategyNameSnapshot: string | null;
+    followedPlan: "YES" | "PARTIAL" | "NO" | "NOT_REVIEWED";
+    totalRules: number;
+    followedRules: number;
+    violatedRules: number;
+    compliancePercent: number;
+    requiredCompliancePercent: number;
+    ruleReviews?: Array<{
+      id: string;
+      status: string;
+    }>;
+  } | null;
   side?: "BUY" | "SELL";
   strategy?: string | null;
   entryTime?: string | null;
@@ -243,8 +264,8 @@ export function mapPrismaTradeToJournalTrade(trade: PrismaTradeDto): JournalTrad
     broker: account?.broker || "-",
     serverName: account?.platform || "-",
     symbol: trade.symbol,
-    ticket: null,
-    positionId: null,
+    ticket: trade.mt5Ticket,
+    positionId: trade.mt5Ticket,
     orderTicket: null,
     dealTicketOpen: null,
     dealTicketClose: null,
@@ -259,12 +280,16 @@ export function mapPrismaTradeToJournalTrade(trade: PrismaTradeDto): JournalTrad
     actualRR: toNumber(trade.rr),
     profit: profitLoss,
     profitPercent: null,
-    commission: null,
-    swap: null,
+    commission: toNumber(trade.commission),
+    swap: toNumber(trade.swap),
     magicNumber: null,
     comment: trade.notes,
-    sourceType: "manual",
-    entrySource: "manual_trade",
+    sourceType: isImportedTradeSource(trade.source, trade.setup)
+      ? "expert_advisor"
+      : "manual",
+    entrySource: isImportedTradeSource(trade.source, trade.setup)
+      ? "expert_advisor"
+      : "manual_trade",
     timeframe: null,
     spread: null,
     atr: null,
@@ -285,6 +310,7 @@ export function mapPrismaTradeToJournalTrade(trade: PrismaTradeDto): JournalTrad
     entryScreenshotStatus: entryScreenshotUrl ? "uploaded" : "pending",
     exitScreenshotStatus: exitScreenshotUrl ? "uploaded" : "pending",
     psychology,
+    strategyReview: trade.strategyReview,
     tags: trade.tags?.map((item) => item.tag.name) || [],
     events: [],
     createdAt: trade.createdAt,

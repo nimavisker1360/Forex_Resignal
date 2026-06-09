@@ -55,7 +55,11 @@ export type TradeDto = {
   lotSize: string | number | null;
   riskAmount: string | number | null;
   profitLoss: string | number | null;
+  commission: string | number | null;
+  swap: string | number | null;
   rr: string | number | null;
+  source: string;
+  mt5Ticket: string | null;
   setup: string | null;
   session: string | null;
   emotion: string | null;

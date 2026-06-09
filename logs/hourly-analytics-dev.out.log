@@ -1,0 +1,139 @@
+
+> signal-forex@0.1.0 dev
+> next dev --port 3001
+
+[32m✔[0m [33mConsole Ninja[0m extension is connected to [33mNext.js[0m, see [36mhttps://tinyurl.com/2vt8jxzw[0m
+   ▲ Next.js 15.3.0
+   - Local:        http://localhost:3001
+   - Network:      http://192.168.1.112:3001
+   - Environments: .env
+
+ ✓ Starting...
+ ✓ Ready in 6s
+ ○ Compiling /journal/analytics ...
+ ✓ Compiled /journal/analytics in 9.9s (1873 modules)
+ GET /journal/analytics 200 in 12244ms
+ ✓ Compiled in 2.4s (873 modules)
+ ✓ Compiled in 1171ms (873 modules)
+ ✓ Compiled in 648ms (873 modules)
+ ✓ Compiled in 626ms (873 modules)
+ ✓ Compiled in 704ms (873 modules)
+ ✓ Compiled in 802ms (873 modules)
+ ✓ Compiled in 887ms (873 modules)
+ ✓ Compiled in 597ms (873 modules)
+ ✓ Compiled in 907ms (873 modules)
+ ✓ Compiled in 652ms (873 modules)
+ ✓ Compiled in 833ms (873 modules)
+ ✓ Compiled in 704ms (873 modules)
+ ✓ Compiled in 511ms (873 modules)
+ ✓ Compiled in 438ms (873 modules)
+ ✓ Compiled in 814ms (873 modules)
+ ✓ Compiled in 504ms (873 modules)
+ ✓ Compiled in 404ms (873 modules)
+ ✓ Compiled in 494ms (873 modules)
+ ✓ Compiled in 767ms (873 modules)
+ ✓ Compiled in 455ms (873 modules)
+ ✓ Compiled in 474ms (873 modules)
+ ✓ Compiled in 749ms (873 modules)
+ ✓ Compiled in 511ms (873 modules)
+ ✓ Compiled in 895ms (873 modules)
+ ✓ Compiled in 948ms (873 modules)
+ ✓ Compiled in 666ms (873 modules)
+ ✓ Compiled in 819ms (873 modules)
+ ✓ Compiled in 647ms (873 modules)
+ ✓ Compiled in 517ms (873 modules)
+ ✓ Compiled in 464ms (873 modules)
+ ✓ Compiled in 478ms (873 modules)
+ ✓ Compiled in 831ms (873 modules)
+ ✓ Compiled in 548ms (873 modules)
+ ✓ Compiled in 867ms (873 modules)
+ ✓ Compiled in 780ms (873 modules)
+ ✓ Compiled in 567ms (873 modules)
+ ✓ Compiled in 399ms (873 modules)
+ ✓ Compiled in 696ms (873 modules)
+ ✓ Compiled in 409ms (873 modules)
+ ✓ Compiled in 574ms (873 modules)
+ ✓ Compiled in 831ms (873 modules)
+ ✓ Compiled in 972ms (873 modules)
+ ✓ Compiled in 723ms (873 modules)
+ ✓ Compiled in 685ms (873 modules)
+ ✓ Compiled in 537ms (873 modules)
+ ✓ Compiled in 4.2s (1873 modules)
+ ✓ Compiled in 1131ms (873 modules)
+ ✓ Compiled in 887ms (873 modules)
+ ✓ Compiled in 1600ms (873 modules)
+ GET /journal/analytics 200 in 1105ms
+ ✓ Compiled in 1894ms (873 modules)
+ ✓ Compiled in 1510ms (873 modules)
+ ✓ Compiled in 999ms (873 modules)
+ ✓ Compiled in 1271ms (873 modules)
+ ✓ Compiled in 1144ms (873 modules)
+ GET /journal/analytics 200 in 261ms
+ ○ Compiling /_not-found ...
+ ✓ Compiled /_not-found in 1454ms (1863 modules)
+ GET /_next/static/chunks/app/journal/page.js 404 in 2284ms
+ ✓ Compiled in 546ms (876 modules)
+ ✓ Compiled in 873ms (876 modules)
+ GET /journal/analytics 200 in 781ms
+ GET /_next/static/chunks/app/journal/page.js 404 in 143ms
+ ○ Compiling /favicon.ico ...
+ ✓ Compiled /favicon.ico in 512ms (1017 modules)
+ GET /favicon.ico 200 in 793ms
+ ○ Compiling /journal ...
+ ✓ Compiled /journal in 1230ms (1914 modules)
+ ○ Compiling /api/journal/summary ...
+ ✓ Compiled /api/journal/summary in 2.2s (1928 modules)
+prisma:error 
+Invalid `prisma.trade.findMany()` invocation:
+
+
+Can't reach database server at `ep-proud-leaf-agduw96y-pooler.c-2.eu-central-1.aws.neon.tech:5432`
+
+Please make sure your database server is running at `ep-proud-leaf-agduw96y-pooler.c-2.eu-central-1.aws.neon.tech:5432`.
+prisma:error 
+Invalid `prisma.trade.count()` invocation:
+
+
+Can't reach database server at `ep-proud-leaf-agduw96y-pooler.c-2.eu-central-1.aws.neon.tech:5432`
+
+Please make sure your database server is running at `ep-proud-leaf-agduw96y-pooler.c-2.eu-central-1.aws.neon.tech:5432`.
+prisma:error 
+Invalid `prisma.trade.findMany()` invocation:
+
+
+Can't reach database server at `ep-proud-leaf-agduw96y-pooler.c-2.eu-central-1.aws.neon.tech:5432`
+
+Please make sure your database server is running at `ep-proud-leaf-agduw96y-pooler.c-2.eu-central-1.aws.neon.tech:5432`.
+ GET /api/journal/summary?limit=50&page=1 500 in 8928ms
+ GET /api/journal/trades?limit=50&page=1 500 in 8930ms
+ ✓ Compiled in 1925ms (884 modules)
+ GET /journal 500 in 11455ms
+ GET /sw.js 404 in 323ms
+ ✓ Compiled in 719ms (884 modules)
+ ✓ Compiled in 1053ms (884 modules)
+ ✓ Compiled in 1573ms (884 modules)
+ ✓ Compiled in 1007ms (884 modules)
+ ✓ Compiled in 813ms (884 modules)
+ ✓ Compiled in 844ms (884 modules)
+ ✓ Compiled in 769ms (884 modules)
+ ✓ Compiled in 976ms (884 modules)
+ ✓ Compiled in 472ms (884 modules)
+ ✓ Compiled in 399ms (884 modules)
+ ✓ Compiled in 801ms (884 modules)
+ ✓ Compiled in 493ms (884 modules)
+ ✓ Compiled in 933ms (884 modules)
+ ✓ Compiled in 589ms (884 modules)
+ ✓ Compiled in 632ms (884 modules)
+ ✓ Compiled in 523ms (884 modules)
+ ✓ Compiled in 968ms (884 modules)
+ ✓ Compiled in 551ms (884 modules)
+ ✓ Compiled in 1024ms (884 modules)
+ ✓ Compiled in 500ms (884 modules)
+ ✓ Compiled in 767ms (884 modules)
+ ✓ Compiled in 1172ms (884 modules)
+ ✓ Compiled in 1002ms (884 modules)
+ ✓ Compiled in 663ms (884 modules)
+ ✓ Compiled in 1341ms (884 modules)
+ ✓ Compiled in 1020ms (884 modules)
+ ✓ Compiled in 900ms (884 modules)
+[?25h

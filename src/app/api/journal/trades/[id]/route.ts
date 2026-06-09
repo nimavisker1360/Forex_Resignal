@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import {
   buildManualTradeUpdateData,
   journalTradeInclude,
+  lockImportedBrokerUpdate,
   serializeJournalTrade,
 } from "@/lib/journal/prisma-trades";
 
@@ -63,10 +64,24 @@ export async function PATCH(request: Request, context: RouteContext) {
       return validationResponse(built.errors);
     }
 
-    const trade = await prisma.trade.update({
-      where: { id },
-      data: built.data,
-      include: journalTradeInclude,
+    const trade = await prisma.$transaction(async (tx) => {
+      const existing = await tx.trade.findUnique({
+        where: { id },
+        select: { source: true, setup: true },
+      });
+
+      if (!existing) {
+        throw new Prisma.PrismaClientKnownRequestError("Trade not found", {
+          code: "P2025",
+          clientVersion: Prisma.prismaVersion.client,
+        });
+      }
+
+      return tx.trade.update({
+        where: { id },
+        data: lockImportedBrokerUpdate(existing, built.data),
+        include: journalTradeInclude,
+      });
     });
 
     return NextResponse.json({

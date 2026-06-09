@@ -9,6 +9,7 @@ import {
   journalTradeInclude,
   serializeJournalTrade,
 } from "@/lib/journal/prisma-trades";
+import { attachDefaultChecklistsToTrade } from "@/lib/checklists/trade-checklists";
 
 export const dynamic = "force-dynamic";
 
@@ -77,12 +78,20 @@ export async function POST(request: Request) {
 
     const accountId =
       built.data.accountId || (await ensureManualTradingAccount(built.data.userId));
-    const trade = await prisma.trade.create({
-      data: {
-        ...built.data,
-        accountId,
-      },
-      include: journalTradeInclude,
+    const trade = await prisma.$transaction(async (tx) => {
+      const createdTrade = await tx.trade.create({
+        data: {
+          ...built.data,
+          accountId,
+        },
+      });
+
+      await attachDefaultChecklistsToTrade(tx, createdTrade.id);
+
+      return tx.trade.findUniqueOrThrow({
+        where: { id: createdTrade.id },
+        include: journalTradeInclude,
+      });
     });
 
     return NextResponse.json(

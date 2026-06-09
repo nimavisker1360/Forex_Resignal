@@ -21,6 +21,8 @@ import type {
   PrismaTradeDto,
   PrismaTradingAccountDto,
 } from "@/app/journal/_lib/journal-api";
+import { TradeChecklistPanel } from "@/components/journal/TradeChecklistPanel";
+import { TradeStrategyReviewPanel } from "@/components/journal/TradeStrategyReviewPanel";
 import { cn } from "@/lib/utils";
 
 type TradeDetailClientProps = {
@@ -661,6 +663,10 @@ export function TradeDetailClient({
           </div>
         </Section>
       </div>
+
+      <TradeChecklistPanel tradeId={trade.id} />
+
+      <TradeStrategyReviewPanel tradeId={trade.id} />
 
       <Section title="Screenshots">
         <div className="grid gap-4 lg:grid-cols-2">

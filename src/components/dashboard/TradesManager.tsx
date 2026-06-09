@@ -35,6 +35,7 @@ export function TradesManager({ userId }: { userId?: string }) {
   const [defaultStatus, setDefaultStatus] = useState<"OPEN" | "CLOSED" | "CANCELLED">("OPEN");
   const [showForm, setShowForm] = useState(false);
   const [message, setMessage] = useState("");
+  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
 
   const query = useMemo(() => {
     const params = new URLSearchParams();
@@ -78,25 +79,39 @@ export function TradesManager({ userId }: { userId?: string }) {
 
   async function saveTrade(payload: Record<string, string | string[]>) {
     const isEditing = Boolean(editingTrade);
-    const response = await fetch(
-      isEditing ? `/api/trades/${editingTrade?.id}` : "/api/trades",
-      {
-        method: isEditing ? "PATCH" : "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...payload, userId: activeUserId }),
+    setSaveStatus("saving");
+
+    try {
+      const response = await fetch(
+        isEditing ? `/api/trades/${editingTrade?.id}` : "/api/trades",
+        {
+          method: isEditing ? "PATCH" : "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...payload, userId: activeUserId }),
+        }
+      );
+      const json = (await response.json()) as ApiResult<TradeDto>;
+
+      if (!json.success) {
+        setSaveStatus("error");
+        setMessage(json.message || "Error saving changes");
+        return false;
       }
-    );
-    const json = (await response.json()) as ApiResult<TradeDto>;
 
-    if (!json.success) {
-      setMessage(json.message || "Failed to save trade");
-      return;
+      setMessage("");
+      setSaveStatus("saved");
+      await loadTrades();
+      window.setTimeout(() => {
+        setShowForm(false);
+        setEditingTrade(null);
+        setSaveStatus("idle");
+      }, 500);
+      return true;
+    } catch {
+      setSaveStatus("error");
+      setMessage("Error saving changes");
+      return false;
     }
-
-    setMessage("");
-    setShowForm(false);
-    setEditingTrade(null);
-    await loadTrades();
   }
 
   async function deleteTrade(trade: TradeDto) {
@@ -178,6 +193,7 @@ export function TradesManager({ userId }: { userId?: string }) {
             onClick={() => {
               setEditingTrade(null);
               setDefaultStatus("OPEN");
+              setSaveStatus("idle");
               setShowForm(true);
             }}
             disabled={accounts.length === 0}
@@ -229,10 +245,12 @@ export function TradesManager({ userId }: { userId?: string }) {
             accounts={accounts}
             tags={tags}
             defaultStatus={defaultStatus}
+            saveStatus={saveStatus}
             onSubmit={saveTrade}
             onCancel={() => {
               setShowForm(false);
               setEditingTrade(null);
+              setSaveStatus("idle");
             }}
           />
         </div>
@@ -243,11 +261,13 @@ export function TradesManager({ userId }: { userId?: string }) {
         onEdit={(trade) => {
           setEditingTrade(trade);
           setDefaultStatus(trade.status);
+          setSaveStatus("idle");
           setShowForm(true);
         }}
         onClose={(trade) => {
           setEditingTrade(trade);
           setDefaultStatus("CLOSED");
+          setSaveStatus("idle");
           setShowForm(true);
         }}
         onDelete={deleteTrade}

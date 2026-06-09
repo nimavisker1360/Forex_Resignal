@@ -1,0 +1,30 @@
+Trade PATCH error: Error [PrismaClientInitializationError]: Can't reach database server at `ep-proud-leaf-agduw96y-pooler.c-2.eu-central-1.aws.neon.tech:5432`
+
+Please make sure your database server is running at `ep-proud-leaf-agduw96y-pooler.c-2.eu-central-1.aws.neon.tech:5432`.
+    at async PATCH (src\app\api\trades\[id]\route.ts:135:18)
+  133 |     }
+  134 |
+> 135 |     const trade = await prisma.$transaction(async (tx) => {
+      |                  ^
+  136 |       const txDb = tx as any;
+  137 |       const existing = await txDb.trade.findUnique({ where: { id } });
+  138 | {
+  clientVersion: '6.19.3',
+  errorCode: 'P1001',
+  retryable: undefined
+}
+Trade PATCH error: Error [PrismaClientInitializationError]: Can't reach database server at `ep-proud-leaf-agduw96y-pooler.c-2.eu-central-1.aws.neon.tech:5432`
+
+Please make sure your database server is running at `ep-proud-leaf-agduw96y-pooler.c-2.eu-central-1.aws.neon.tech:5432`.
+    at async PATCH (src\app\api\trades\[id]\route.ts:135:18)
+  133 |     }
+  134 |
+> 135 |     const trade = await prisma.$transaction(async (tx) => {
+      |                  ^
+  136 |       const txDb = tx as any;
+  137 |       const existing = await txDb.trade.findUnique({ where: { id } });
+  138 | {
+  clientVersion: '6.19.3',
+  errorCode: 'P1001',
+  retryable: undefined
+}

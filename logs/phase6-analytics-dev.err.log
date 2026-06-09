@@ -1,0 +1,22 @@
+ ⚠ Failed to reload dynamic routes: Error: You cannot use different slug names for the same dynamic path ('id' !== 'tradeId').
+    at Array.forEach (<anonymous>)
+Error: You cannot use different slug names for the same dynamic path ('id' !== 'tradeId').
+    at Array.forEach (<anonymous>)
+ ⨯ unhandledRejection: Error: You cannot use different slug names for the same dynamic path ('id' !== 'tradeId').
+    at Array.forEach (<anonymous>)
+ ⨯ unhandledRejection:  Error: You cannot use different slug names for the same dynamic path ('id' !== 'tradeId').
+    at Array.forEach (<anonymous>)
+ ⚠ Failed to reload dynamic routes: Error: You cannot use different slug names for the same dynamic path ('id' !== 'tradeId').
+    at Array.forEach (<anonymous>)
+ ⚠ Failed to reload dynamic routes: Error: You cannot use different slug names for the same dynamic path ('id' !== 'tradeId').
+    at Array.forEach (<anonymous>)
+Error: You cannot use different slug names for the same dynamic path ('id' !== 'tradeId').
+    at Array.forEach (<anonymous>)
+ ⨯ unhandledRejection: Error: You cannot use different slug names for the same dynamic path ('id' !== 'tradeId').
+    at Array.forEach (<anonymous>)
+ ⨯ unhandledRejection:  Error: You cannot use different slug names for the same dynamic path ('id' !== 'tradeId').
+    at Array.forEach (<anonymous>)
+ ⚠ Failed to reload dynamic routes: Error: You cannot use different slug names for the same dynamic path ('id' !== 'tradeId').
+    at Array.forEach (<anonymous>)
+ ⚠ Failed to reload dynamic routes: Error: You cannot use different slug names for the same dynamic path ('id' !== 'tradeId').
+    at Array.forEach (<anonymous>)

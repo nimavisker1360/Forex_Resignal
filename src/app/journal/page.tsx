@@ -7,6 +7,7 @@ import {
   type PrismaTradesResponse,
 } from "@/app/journal/_lib/journal-api";
 import { ManualTradeForm } from "@/app/journal/manual-trade-form";
+import { StrategyComplianceBadge } from "@/components/journal/StrategyComplianceBadge";
 import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -70,6 +71,22 @@ function badgeClass(kind: "status" | "side", value: string | null | undefined) {
 
   if (normalized === "open") {
     return "border-blue-500/30 bg-blue-500/10 text-blue-300";
+  }
+
+  return "border-slate-700 bg-slate-900 text-slate-300";
+}
+
+function planBadgeClass(value: string | null | undefined) {
+  if (value === "YES") {
+    return "border-emerald-500/30 bg-emerald-500/10 text-emerald-300";
+  }
+
+  if (value === "PARTIAL") {
+    return "border-blue-500/30 bg-blue-500/10 text-blue-300";
+  }
+
+  if (value === "NO") {
+    return "border-red-500/30 bg-red-500/10 text-red-300";
   }
 
   return "border-slate-700 bg-slate-900 text-slate-300";
@@ -287,13 +304,16 @@ export default async function JournalPage({ searchParams }: JournalPageProps) {
 
       <div className="overflow-hidden rounded-xl border border-slate-800 bg-[#0F172A] shadow-sm">
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[1040px] text-left text-sm">
+          <table className="w-full min-w-[1280px] text-left text-sm">
             <thead className="border-b border-slate-800 bg-[#111827] text-xs uppercase text-slate-400">
               <tr>
                 <th className="px-4 py-3">Open Time</th>
                 <th className="px-3 py-3">Symbol</th>
                 <th className="px-3 py-3">Direction</th>
                 <th className="px-3 py-3">Account</th>
+                <th className="px-3 py-3">Strategy</th>
+                <th className="px-3 py-3">Plan</th>
+                <th className="px-3 py-3">Compliance</th>
                 <th className="px-3 py-3">Entry</th>
                 <th className="px-3 py-3">Exit</th>
                 <th className="px-3 py-3">PnL</th>
@@ -329,6 +349,26 @@ export default async function JournalPage({ searchParams }: JournalPageProps) {
                     </span>
                   </td>
                   <td className="px-3 py-4 text-slate-300">{trade.accountNumber || "-"}</td>
+                  <td className="px-3 py-4 text-slate-300">
+                    {trade.strategyReview?.strategyNameSnapshot || trade.session || "-"}
+                  </td>
+                  <td className="px-3 py-4">
+                    <span
+                      className={cn(
+                        "inline-flex rounded-lg border px-2.5 py-1 text-xs font-semibold",
+                        planBadgeClass(trade.strategyReview?.followedPlan)
+                      )}
+                    >
+                      {trade.strategyReview?.followedPlan?.replace("_", " ") || "Not Reviewed"}
+                    </span>
+                  </td>
+                  <td className="px-3 py-4">
+                    <StrategyComplianceBadge
+                      percent={trade.strategyReview?.compliancePercent}
+                      violatedRules={trade.strategyReview?.violatedRules || 0}
+                      reviewed={Boolean(trade.strategyReview)}
+                    />
+                  </td>
                   <td className="px-3 py-4">{formatNumber(trade.entryPrice, 5)}</td>
                   <td className="px-3 py-4">{formatNumber(trade.closePrice, 5)}</td>
                   <td
