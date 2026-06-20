@@ -197,8 +197,11 @@ async function getBaseUrl() {
 
 export async function fetchJournalApi<T>(path: string): Promise<T> {
   const baseUrl = await getBaseUrl();
+  const headerList = await headers();
+  const cookie = headerList.get("cookie");
   const response = await fetch(`${baseUrl}${path}`, {
     cache: "no-store",
+    headers: cookie ? { cookie } : undefined,
   });
 
   if (!response.ok) {

@@ -1,27 +1,2 @@
- ⨯ SyntaxError: Unexpected end of JSON input
-    at JSON.parse (<anonymous>) {
-  page: '/signals'
-}
- ⚠ The "images.domains" configuration is deprecated. Please use "images.remotePatterns" configuration instead.
- ⨯ SyntaxError: Unexpected end of JSON input
-    at JSON.parse (<anonymous>) {
-  page: '/journal'
-}
- ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
- ⨯ SyntaxError: Unexpected end of JSON input
-    at JSON.parse (<anonymous>) {
-  page: '/journal'
-}
- ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
- ⨯ SyntaxError: Unexpected end of JSON input
-    at JSON.parse (<anonymous>) {
-  page: '/journal'
-}
- ⨯ SyntaxError: Unexpected end of JSON input
-    at JSON.parse (<anonymous>) {
-  page: '/journal'
-}
- ⨯ SyntaxError: Unexpected end of JSON input
-    at JSON.parse (<anonymous>) {
-  page: '/journal'
-}
+2026-06-14T08:08:49.814Z WARN [Better Auth]: User already exist but account isn't linked to google. To read more about how account linking works in Better Auth see https://www.better-auth.com/docs/concepts/users-accounts#account-linking.
+2026-06-14T08:08:49.817Z ERROR [Better Auth]: account_not_linked

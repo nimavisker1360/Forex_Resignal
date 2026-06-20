@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { resolveJournalUploadConnection } from "@/lib/journal/connections";
 import { journalScreenshotRequestSchema } from "@/lib/journal/validators";
 
 export const runtime = "nodejs";
@@ -10,6 +11,10 @@ function jsonError(message: string, status: number) {
 
 function isJournalScreenshotUploadEnabled() {
   return process.env.JOURNAL_UPLOAD_ENABLED?.trim().toLowerCase() === "true";
+}
+
+function screenshotBeforeConnection(capturedAt: Date, connectedAt: Date | null) {
+  return Boolean(connectedAt && capturedAt.getTime() < connectedAt.getTime());
 }
 
 export async function POST(request: Request) {
@@ -39,18 +44,31 @@ export async function POST(request: Request) {
       );
     }
 
-    const expectedSecret = process.env.JOURNAL_UPLOAD_SECRET?.trim();
+    const connection = await resolveJournalUploadConnection(parsed.data.uploadSecret);
 
-    if (!expectedSecret || parsed.data.uploadSecret !== expectedSecret) {
+    if (!connection) {
       return jsonError("Unauthorized", 401);
+    }
+
+    if (screenshotBeforeConnection(parsed.data.capturedAt, connection.connectedAt)) {
+      return NextResponse.json({
+        success: true,
+        ignored: true,
+        reason: "screenshot_before_journal_connection",
+        imageUrl: null,
+      });
     }
 
     const { uploadJournalScreenshot } = await import(
       "@/lib/journal/screenshot-service"
     );
-    const { imageUrl } = await uploadJournalScreenshot(parsed.data);
+    const { imageUrl } = await uploadJournalScreenshot(parsed.data, connection.userId);
 
-    return NextResponse.json({ success: true, imageUrl });
+    return NextResponse.json({
+      success: true,
+      imageUrl,
+      legacyConnection: connection.legacy,
+    });
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Failed to upload screenshot";

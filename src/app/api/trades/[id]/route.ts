@@ -1,5 +1,7 @@
 import { Prisma } from "@prisma/client";
+import { deleteUserTrade } from "@/lib/journal/delete-trades";
 import { prisma } from "@/lib/prisma";
+import { getCurrentUserId, unauthorizedResponse } from "@/lib/server-auth";
 import {
   apiResponse,
   calculateTradeMetrics,
@@ -33,10 +35,16 @@ const tradeInclude = {
 
 export async function GET(_request: Request, context: RouteContext) {
   try {
+    const userId = await getCurrentUserId();
+
+    if (!userId) {
+      return unauthorizedResponse();
+    }
+
     const { id } = await context.params;
     const db = prisma as any;
-    const trade = await db.trade.findUnique({
-      where: { id },
+    const trade = await db.trade.findFirst({
+      where: { id, userId },
       include: tradeInclude,
     });
 
@@ -54,12 +62,15 @@ export async function GET(_request: Request, context: RouteContext) {
 
 export async function PATCH(request: Request, context: RouteContext) {
   try {
+    const userId = await getCurrentUserId();
+
+    if (!userId) {
+      return unauthorizedResponse();
+    }
+
     const { id } = await context.params;
     const body = await request.json();
     const data: Record<string, unknown> = {};
-
-    // TODO: Replace body/query userId with the authenticated session user id.
-    const requestedUserId = body.userId;
 
     if (body.accountId !== undefined) {
       data.accountId = String(body.accountId || "").trim();
@@ -136,7 +147,7 @@ export async function PATCH(request: Request, context: RouteContext) {
       const txDb = tx as any;
       const existing = await txDb.trade.findUnique({ where: { id } });
 
-      if (!existing || (requestedUserId && existing.userId !== requestedUserId)) {
+      if (!existing || existing.userId !== userId) {
         throw new Prisma.PrismaClientKnownRequestError("Trade not found", {
           code: "P2025",
           clientVersion: Prisma.prismaVersion.client,
@@ -175,6 +186,19 @@ export async function PATCH(request: Request, context: RouteContext) {
 
       if (Array.isArray(body.tagIds)) {
         const tagIds = normalizeTagIds(body.tagIds);
+        if (tagIds.length > 0) {
+          const ownedTagCount = await txDb.tag.count({
+            where: { userId, id: { in: tagIds } },
+          });
+
+          if (ownedTagCount !== tagIds.length) {
+            throw new Prisma.PrismaClientKnownRequestError("Invalid tagId", {
+              code: "P2003",
+              clientVersion: Prisma.prismaVersion.client,
+            });
+          }
+        }
+
         await txDb.tradeTag.deleteMany({ where: { tradeId: id } });
 
         if (tagIds.length > 0) {
@@ -215,14 +239,19 @@ export async function PATCH(request: Request, context: RouteContext) {
 
 export async function DELETE(request: Request, context: RouteContext) {
   try {
-    const { id } = await context.params;
-    const { searchParams } = new URL(request.url);
-    // TODO: Replace query-param userId with the authenticated session user id.
-    const userId = searchParams.get("userId");
+    const userId = await getCurrentUserId();
 
-    await prisma.trade.delete({
-      where: userId ? { id, userId } : { id },
-    });
+    if (!userId) {
+      return unauthorizedResponse();
+    }
+
+    const { id } = await context.params;
+
+    const result = await deleteUserTrade(userId, id);
+
+    if (result.deletedTrades === 0) {
+      return apiResponse({ success: false, message: "Trade not found" }, 404);
+    }
 
     return apiResponse({ success: true });
   } catch (error) {

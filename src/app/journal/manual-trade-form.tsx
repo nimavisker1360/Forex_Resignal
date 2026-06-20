@@ -5,6 +5,7 @@ import type { FormEvent, ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { Check, Plus, Save, X } from "lucide-react";
 import { toast } from "sonner";
+import { useLanguage } from "@/lib/language-context";
 
 function Field({
   label,
@@ -33,6 +34,7 @@ function formValue(value: FormDataEntryValue | null) {
 
 export function ManualTradeForm() {
   const router = useRouter();
+  const { t } = useLanguage();
   const formRef = useRef<HTMLFormElement>(null);
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -77,12 +79,12 @@ export function ManualTradeForm() {
         return;
       }
 
-      toast.success("Trade created");
+      toast.success(t("journal.manualTrade.created"));
       formRef.current?.reset();
       setOpen(false);
       router.refresh();
     } catch {
-      toast.error("Failed to create trade");
+      toast.error(t("journal.manualTrade.createFailed"));
     } finally {
       setSaving(false);
     }
@@ -96,7 +98,7 @@ export function ManualTradeForm() {
         className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-[#2563EB] px-4 text-sm font-semibold text-white hover:bg-blue-500"
       >
         {open ? <X className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
-        {open ? "Close" : "New Trade"}
+        {open ? t("journal.manualTrade.close") : t("journal.manualTrade.newTrade")}
       </button>
 
       {open && (
@@ -106,64 +108,64 @@ export function ManualTradeForm() {
           className="rounded-lg border border-slate-800 bg-[#0F172A] p-4 shadow-sm"
         >
           <div className="grid gap-3 md:grid-cols-4">
-            <Field label="Symbol">
+            <Field label={t("journal.tradeDetail.symbol")}>
               <input name="symbol" required placeholder="XAUUSD" className={inputClass} />
             </Field>
-            <Field label="Side">
+            <Field label={t("journal.tradeDetail.side")}>
               <select name="side" required defaultValue="BUY" className={inputClass}>
-                <option value="BUY">BUY</option>
-                <option value="SELL">SELL</option>
+                <option value="BUY">{t("journal.tradeDetail.buy")}</option>
+                <option value="SELL">{t("journal.tradeDetail.sell")}</option>
               </select>
             </Field>
-            <Field label="Entry Price">
+            <Field label={t("journal.tradeDetail.entryPrice")}>
               <input name="entryPrice" required type="number" step="any" className={inputClass} />
             </Field>
-            <Field label="Exit Price">
+            <Field label={t("journal.tradeDetail.exitPrice")}>
               <input name="exitPrice" type="number" step="any" className={inputClass} />
             </Field>
-            <Field label="Stop Loss">
+            <Field label={t("journal.tradeDetail.stopLoss")}>
               <input name="stopLoss" type="number" step="any" className={inputClass} />
             </Field>
-            <Field label="Take Profit">
+            <Field label={t("journal.tradeDetail.takeProfit")}>
               <input name="takeProfit" type="number" step="any" className={inputClass} />
             </Field>
-            <Field label="Lot Size">
+            <Field label={t("journal.tradeDetail.lotSize")}>
               <input name="lotSize" type="number" step="any" className={inputClass} />
             </Field>
-            <Field label="Risk Amount">
+            <Field label={t("journal.tradeDetail.riskAmount")}>
               <input name="riskAmount" type="number" step="any" className={inputClass} />
             </Field>
             <Field label="PnL">
               <input name="profitLoss" type="number" step="any" className={inputClass} />
             </Field>
-            <Field label="Entry Time">
+            <Field label={t("journal.tradeDetail.entryTime")}>
               <input name="entryTime" required type="datetime-local" className={inputClass} />
             </Field>
-            <Field label="Exit Time">
+            <Field label={t("journal.tradeDetail.exitTime")}>
               <input name="exitTime" type="datetime-local" className={inputClass} />
             </Field>
-            <Field label="Status">
+            <Field label={t("journal.tradeDetail.status")}>
               <select name="status" defaultValue="OPEN" className={inputClass}>
-                <option value="OPEN">OPEN</option>
-                <option value="CLOSED">CLOSED</option>
+                <option value="OPEN">{t("journal.tradeDetail.open")}</option>
+                <option value="CLOSED">{t("journal.tradeDetail.closed")}</option>
               </select>
             </Field>
-            <Field label="Strategy">
+            <Field label={t("journal.tradeDetail.strategy")}>
               <input name="strategy" placeholder="SMC + EMA" className={inputClass} />
             </Field>
-            <Field label="Setup">
+            <Field label={t("journal.tradeDetail.setup")}>
               <input name="setup" placeholder="Order Block" className={inputClass} />
             </Field>
-            <Field label="Emotion">
+            <Field label={t("journal.tradeDetail.emotion")}>
               <input name="emotion" placeholder="Calm" className={inputClass} />
             </Field>
-            <Field label="Mistakes">
+            <Field label={t("journal.tradeDetail.mistakes")}>
               <input name="mistakes" placeholder="None" className={inputClass} />
             </Field>
           </div>
 
           <div className="mt-3">
-            <Field label="Notes">
+            <Field label={t("journal.tradeDetail.notes")}>
               <textarea name="notes" rows={3} className={textareaClass} />
             </Field>
           </div>
@@ -175,7 +177,7 @@ export function ManualTradeForm() {
               className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-slate-800 px-4 text-sm font-semibold text-slate-300 hover:bg-slate-800"
             >
               <X className="h-4 w-4" />
-              Cancel
+              {t("journal.tradeDetail.cancel")}
             </button>
             <button
               type="submit"
@@ -183,7 +185,7 @@ export function ManualTradeForm() {
               className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-[#2563EB] px-4 text-sm font-semibold text-white hover:bg-blue-500 disabled:opacity-60"
             >
               {saving ? <Check className="h-4 w-4" /> : <Save className="h-4 w-4" />}
-              {saving ? "Saving" : "Save Trade"}
+              {saving ? t("journal.tradeDetail.saving") : t("journal.manualTrade.saveTrade")}
             </button>
           </div>
         </form>

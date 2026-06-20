@@ -20,7 +20,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     // Load translations based on selected language
-    fetch(`/locales/${language}/common.json`)
+    fetch(`/locales/${language}/common.json`, { cache: "no-store" })
       .then((response) => response.json())
       .then((data) => {
         setTranslations(data);

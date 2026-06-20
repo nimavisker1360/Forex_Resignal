@@ -1,8 +1,12 @@
+"use client";
+
 import { ArrowDown, ArrowUp } from "lucide-react";
+import { useLanguage } from "@/lib/language-context";
 import { cn } from "@/lib/utils";
 
 export function TradeDirectionBadge({ direction }: { direction: "BUY" | "SELL" }) {
   const Icon = direction === "BUY" ? ArrowUp : ArrowDown;
+  const { t } = useLanguage();
 
   return (
     <span
@@ -14,7 +18,7 @@ export function TradeDirectionBadge({ direction }: { direction: "BUY" | "SELL" }
       )}
     >
       <Icon className="h-3 w-3" />
-      {direction}
+      {direction === "BUY" ? t("dashboard.common.buy") : t("dashboard.common.sell")}
     </span>
   );
 }

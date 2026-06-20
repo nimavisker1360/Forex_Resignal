@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Plus } from "lucide-react";
+import { useLanguage } from "@/lib/language-context";
 import {
   DEFAULT_DASHBOARD_USER_ID,
   type ApiResult,
@@ -20,6 +21,7 @@ export function TradeTagsCard({
 }) {
   const router = useRouter();
   const [tags, setTags] = useState<TagDto[]>([]);
+  const { t } = useLanguage();
   const currentTagIds = useMemo(
     () => new Set(currentTags.map((item) => item.tagId)),
     [currentTags]
@@ -54,15 +56,15 @@ export function TradeTagsCard({
     <div className="rounded-xl border border-slate-800 bg-[#0F172A] p-5 shadow-sm">
       <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div>
-          <h3 className="text-lg font-semibold text-white">Tags</h3>
-          <p className="text-sm text-slate-400">Classify setup, behavior, and market context.</p>
+          <h3 className="text-lg font-semibold text-white">{t("dashboard.form.tags")}</h3>
+          <p className="text-sm text-slate-400">{t("dashboard.tags.subtitle")}</p>
         </div>
         <form action={addTag} className="flex gap-2">
           <select
             name="tagId"
             className="h-10 rounded-xl border border-slate-800 bg-[#111827] px-3 text-sm text-[#E5E7EB] outline-none focus:border-blue-600"
           >
-            <option value="">Add tag</option>
+            <option value="">{t("dashboard.trades.addTag")}</option>
             {tags
               .filter((tag) => !currentTagIds.has(tag.id))
               .map((tag) => (
@@ -74,8 +76,8 @@ export function TradeTagsCard({
           <button
             type="submit"
             className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[#2563EB] text-white hover:bg-blue-500"
-            aria-label="Add tag"
-            title="Add tag"
+            aria-label={t("dashboard.trades.addTag")}
+            title={t("dashboard.trades.addTag")}
           >
             <Plus className="h-4 w-4" />
           </button>
@@ -95,7 +97,7 @@ export function TradeTagsCard({
           </span>
         ))}
         {currentTags.length === 0 ? (
-          <span className="text-sm text-slate-400">No tags assigned.</span>
+          <span className="text-sm text-slate-400">{t("dashboard.tags.noneAssigned")}</span>
         ) : null}
       </div>
     </div>

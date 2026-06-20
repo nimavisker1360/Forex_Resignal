@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { ArrowDown, ArrowLeft, ArrowUp, Plus, Save, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { RULE_SECTION_LABELS, RULE_SECTION_ORDER } from "@/components/journal/PlaybookRuleSection";
+import { useLanguage } from "@/lib/language-context";
 import { cn } from "@/lib/utils";
 import type {
   PlaybookChecklistDto,
@@ -114,12 +115,13 @@ export function LinkedChecklistSelector({
   onChange: (ids: string[]) => void;
   loading: boolean;
 }) {
+  const { t } = useLanguage();
   const selected = new Set(selectedIds);
 
   if (loading) {
     return (
       <div className="rounded-lg border border-slate-800 bg-[#111827] p-4 text-sm text-slate-400">
-        Loading checklist templates...
+        {t("journal.playbooks.loadingChecklistTemplates")}
       </div>
     );
   }
@@ -127,7 +129,7 @@ export function LinkedChecklistSelector({
   if (templates.length === 0) {
     return (
       <div className="rounded-lg border border-slate-800 bg-[#111827] p-4 text-sm text-slate-400">
-        No checklist templates available yet. Create a checklist first.
+        {t("journal.playbooks.noChecklistTemplates")}
       </div>
     );
   }
@@ -153,7 +155,7 @@ export function LinkedChecklistSelector({
           <span>
             <span className="block text-sm font-semibold text-white">{template.title}</span>
             <span className="mt-1 block text-xs text-slate-400">
-              {template.category || "Custom"} / {template.itemCount} items
+              {template.category || t("journal.playbooks.customMarket")} / {t("journal.playbooks.itemsCount").replace("{count}", String(template.itemCount))}
             </span>
           </span>
         </label>
@@ -169,6 +171,8 @@ export function PlaybookRuleEditor({
   rules: PlaybookRuleDto[];
   onChange: (rules: PlaybookRuleDto[]) => void;
 }) {
+  const { t } = useLanguage();
+
   function updateRule(index: number, patch: Partial<PlaybookRuleDto>) {
     onChange(
       rules.map((rule, ruleIndex) =>
@@ -208,7 +212,7 @@ export function PlaybookRuleEditor({
         <div key={`${rule.id || "new"}-${index}`} className="rounded-lg border border-slate-800 bg-[#111827] p-3">
           <div className="grid gap-3 lg:grid-cols-[180px_1fr_1fr_auto]">
             <label className="space-y-1 text-xs font-medium uppercase text-slate-400">
-              Section
+              {t("journal.playbooks.section")}
               <select
                 value={rule.section}
                 onChange={(event) =>
@@ -224,7 +228,7 @@ export function PlaybookRuleEditor({
               </select>
             </label>
             <label className="space-y-1 text-xs font-medium uppercase text-slate-400">
-              Rule Title
+              {t("journal.playbooks.ruleTitle")}
               <input
                 value={rule.title}
                 onChange={(event) => updateRule(index, { title: event.target.value })}
@@ -233,7 +237,7 @@ export function PlaybookRuleEditor({
               />
             </label>
             <label className="space-y-1 text-xs font-medium uppercase text-slate-400">
-              Description
+              {t("journal.playbooks.description")}
               <input
                 value={rule.description || ""}
                 onChange={(event) => updateRule(index, { description: event.target.value })}
@@ -247,8 +251,8 @@ export function PlaybookRuleEditor({
                 onClick={() => moveRule(index, -1)}
                 disabled={index === 0}
                 className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-slate-800 text-slate-300 hover:bg-slate-800 disabled:opacity-40"
-                aria-label="Move rule up"
-                title="Move rule up"
+                aria-label={t("journal.playbooks.moveRuleUp")}
+                title={t("journal.playbooks.moveRuleUp")}
               >
                 <ArrowUp className="h-4 w-4" />
               </button>
@@ -257,8 +261,8 @@ export function PlaybookRuleEditor({
                 onClick={() => moveRule(index, 1)}
                 disabled={index === rules.length - 1}
                 className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-slate-800 text-slate-300 hover:bg-slate-800 disabled:opacity-40"
-                aria-label="Move rule down"
-                title="Move rule down"
+                aria-label={t("journal.playbooks.moveRuleDown")}
+                title={t("journal.playbooks.moveRuleDown")}
               >
                 <ArrowDown className="h-4 w-4" />
               </button>
@@ -267,8 +271,8 @@ export function PlaybookRuleEditor({
                 onClick={() => removeRule(index)}
                 disabled={rules.length === 1}
                 className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-red-500/30 text-[#EF4444] hover:bg-red-500/10 disabled:opacity-40"
-                aria-label="Delete rule"
-                title="Delete rule"
+                aria-label={t("journal.playbooks.deleteRule")}
+                title={t("journal.playbooks.deleteRule")}
               >
                 <Trash2 className="h-4 w-4" />
               </button>
@@ -281,7 +285,7 @@ export function PlaybookRuleEditor({
               onChange={(event) => updateRule(index, { isRequired: event.target.checked })}
               className="h-4 w-4 rounded border-slate-700 bg-[#0F172A]"
             />
-            Required rule
+            {t("journal.playbooks.requiredRule")}
           </label>
         </div>
       ))}
@@ -291,11 +295,13 @@ export function PlaybookRuleEditor({
 
 export function PlaybookForm({ playbook }: { playbook?: PlaybookStrategyDto }) {
   const router = useRouter();
+  const { t } = useLanguage();
+  const loadChecklistFailedText = t("journal.playbooks.loadChecklistTemplatesFailed");
   const [form, setForm] = useState<FormState>(() => initialForm(playbook));
   const [templates, setTemplates] = useState<ChecklistTemplate[]>([]);
   const [loadingTemplates, setLoadingTemplates] = useState(true);
   const [saving, setSaving] = useState(false);
-  const formTitle = playbook ? "Edit Playbook" : "Create Playbook";
+  const formTitle = playbook ? t("journal.playbooks.editTitle") : t("journal.playbooks.createTitle");
   const validRules = useMemo(() => normalizeRules(form.rules), [form.rules]);
 
   useEffect(() => {
@@ -309,7 +315,7 @@ export function PlaybookForm({ playbook }: { playbook?: PlaybookStrategyDto }) {
         const data = await response.json();
 
         if (!response.ok) {
-          toast.error(data.message || "Failed to load checklist templates");
+          toast.error(data.message || loadChecklistFailedText);
           return;
         }
 
@@ -317,7 +323,7 @@ export function PlaybookForm({ playbook }: { playbook?: PlaybookStrategyDto }) {
           setTemplates(data.checklists || []);
         }
       } catch {
-        toast.error("Failed to load checklist templates");
+        toast.error(loadChecklistFailedText);
       } finally {
         if (!cancelled) {
           setLoadingTemplates(false);
@@ -330,7 +336,7 @@ export function PlaybookForm({ playbook }: { playbook?: PlaybookStrategyDto }) {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [loadChecklistFailedText]);
 
   function setField<K extends keyof FormState>(field: K, value: FormState[K]) {
     setForm((current) => ({ ...current, [field]: value }));
@@ -368,12 +374,12 @@ export function PlaybookForm({ playbook }: { playbook?: PlaybookStrategyDto }) {
     event.preventDefault();
 
     if (!form.name.trim()) {
-      toast.error("Strategy name is required");
+      toast.error(t("journal.playbooks.strategyNameRequired"));
       return;
     }
 
     if (validRules.length === 0) {
-      toast.error("Add at least one strategy rule");
+      toast.error(t("journal.playbooks.addRuleRequired"));
       return;
     }
 
@@ -400,11 +406,11 @@ export function PlaybookForm({ playbook }: { playbook?: PlaybookStrategyDto }) {
         return;
       }
 
-      toast.success(playbook ? "Playbook updated" : "Playbook created");
+      toast.success(playbook ? t("journal.playbooks.updated") : t("journal.playbooks.created"));
       router.push(`/journal/playbooks/${data.playbook.id}`);
       router.refresh();
     } catch {
-      toast.error("Failed to save playbook");
+      toast.error(t("journal.playbooks.saveFailed"));
     } finally {
       setSaving(false);
     }
@@ -418,7 +424,7 @@ export function PlaybookForm({ playbook }: { playbook?: PlaybookStrategyDto }) {
         className="inline-flex items-center gap-2 text-sm text-gray-300 hover:text-white"
       >
         <ArrowLeft className="h-4 w-4" />
-        Back to playbooks
+        {t("journal.playbooks.back")}
       </button>
 
       <form onSubmit={submitForm} className="space-y-5">
@@ -427,7 +433,7 @@ export function PlaybookForm({ playbook }: { playbook?: PlaybookStrategyDto }) {
             <div>
               <h1 className="text-2xl font-semibold text-white">{formTitle}</h1>
               <p className="mt-1 text-sm text-slate-400">
-                Define a reusable strategy plan and snapshot its rules into trade reviews.
+                {t("journal.playbooks.formSubtitle")}
               </p>
             </div>
             <button
@@ -436,13 +442,13 @@ export function PlaybookForm({ playbook }: { playbook?: PlaybookStrategyDto }) {
               className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-[#2563EB] px-4 text-sm font-semibold text-white hover:bg-blue-500 disabled:opacity-60"
             >
               <Save className="h-4 w-4" />
-              {saving ? "Saving" : "Save Playbook"}
+              {saving ? t("journal.playbooks.saving") : t("journal.playbooks.save")}
             </button>
           </div>
 
           <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
             <label className="space-y-1 text-xs font-medium uppercase text-slate-400 md:col-span-2">
-              Strategy Name
+              {t("journal.playbooks.strategyName")}
               <input
                 value={form.name}
                 onChange={(event) => setField("name", event.target.value)}
@@ -452,7 +458,7 @@ export function PlaybookForm({ playbook }: { playbook?: PlaybookStrategyDto }) {
               />
             </label>
             <label className="space-y-1 text-xs font-medium uppercase text-slate-400">
-              Market
+              {t("journal.playbooks.market")}
               <select
                 value={form.marketType}
                 onChange={(event) => setField("marketType", event.target.value)}
@@ -472,10 +478,10 @@ export function PlaybookForm({ playbook }: { playbook?: PlaybookStrategyDto }) {
                 onChange={(event) => setField("isActive", event.target.checked)}
                 className="h-4 w-4 rounded border-slate-700 bg-[#111827]"
               />
-              Active strategy
+              {t("journal.playbooks.activeStrategy")}
             </label>
             <label className="space-y-1 text-xs font-medium uppercase text-slate-400 md:col-span-2">
-              Description
+              {t("journal.playbooks.description")}
               <textarea
                 value={form.description}
                 onChange={(event) => setField("description", event.target.value)}
@@ -484,7 +490,7 @@ export function PlaybookForm({ playbook }: { playbook?: PlaybookStrategyDto }) {
               />
             </label>
             <label className="space-y-1 text-xs font-medium uppercase text-slate-400">
-              Symbols
+              {t("journal.playbooks.symbols")}
               <input
                 value={form.symbols}
                 onChange={(event) => setField("symbols", event.target.value)}
@@ -493,7 +499,7 @@ export function PlaybookForm({ playbook }: { playbook?: PlaybookStrategyDto }) {
               />
             </label>
             <label className="space-y-1 text-xs font-medium uppercase text-slate-400">
-              Timeframes
+              {t("journal.playbooks.timeframes")}
               <input
                 value={form.timeframes}
                 onChange={(event) => setField("timeframes", event.target.value)}
@@ -502,7 +508,7 @@ export function PlaybookForm({ playbook }: { playbook?: PlaybookStrategyDto }) {
               />
             </label>
             <label className="space-y-1 text-xs font-medium uppercase text-slate-400">
-              Risk Per Trade
+              {t("journal.playbooks.riskPerTrade")}
               <input
                 type="number"
                 step="any"
@@ -513,7 +519,7 @@ export function PlaybookForm({ playbook }: { playbook?: PlaybookStrategyDto }) {
               />
             </label>
             <label className="space-y-1 text-xs font-medium uppercase text-slate-400">
-              Minimum R:R
+              {t("journal.playbooks.minimumRr")}
               <input
                 type="number"
                 step="any"
@@ -524,7 +530,7 @@ export function PlaybookForm({ playbook }: { playbook?: PlaybookStrategyDto }) {
               />
             </label>
             <label className="space-y-1 text-xs font-medium uppercase text-slate-400 md:col-span-2">
-              Tags
+              {t("dashboard.form.tags")}
               <input
                 value={form.tags}
                 onChange={(event) => setField("tags", event.target.value)}
@@ -538,9 +544,9 @@ export function PlaybookForm({ playbook }: { playbook?: PlaybookStrategyDto }) {
         <section className="rounded-lg border border-slate-800 bg-[#0F172A] p-5 shadow-sm">
           <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div>
-              <h2 className="text-lg font-semibold text-white">Strategy Rules</h2>
+              <h2 className="text-lg font-semibold text-white">{t("journal.playbooks.strategyRules")}</h2>
               <p className="mt-1 text-sm text-slate-400">
-                Add rules by section. These are snapshotted when a strategy is assigned to a trade.
+                {t("journal.playbooks.rulesSubtitle")}
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -555,14 +561,14 @@ export function PlaybookForm({ playbook }: { playbook?: PlaybookStrategyDto }) {
                 className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-slate-800 px-4 text-sm font-semibold text-slate-300 hover:bg-slate-800"
               >
                 <Plus className="h-4 w-4" />
-                Add Rule
+                {t("journal.playbooks.addRule")}
               </button>
               <button
                 type="button"
                 onClick={addTemplateRules}
                 className="inline-flex h-10 items-center justify-center rounded-lg border border-slate-800 px-4 text-sm font-semibold text-slate-300 hover:bg-slate-800"
               >
-                Add Example Rules
+                {t("journal.playbooks.addExampleRules")}
               </button>
             </div>
           </div>
@@ -571,9 +577,9 @@ export function PlaybookForm({ playbook }: { playbook?: PlaybookStrategyDto }) {
 
         <section className="rounded-lg border border-slate-800 bg-[#0F172A] p-5 shadow-sm">
           <div className="mb-4">
-            <h2 className="text-lg font-semibold text-white">Linked Checklist Templates</h2>
+            <h2 className="text-lg font-semibold text-white">{t("journal.playbooks.linkedChecklistTemplates")}</h2>
             <p className="mt-1 text-sm text-slate-400">
-              Optional checklist templates can be associated with this strategy.
+              {t("journal.playbooks.linkedChecklistSubtitle")}
             </p>
           </div>
           <LinkedChecklistSelector
@@ -593,7 +599,7 @@ export function PlaybookForm({ playbook }: { playbook?: PlaybookStrategyDto }) {
             )}
           >
             <Save className="h-4 w-4" />
-            {saving ? "Saving" : "Save Playbook"}
+            {saving ? t("journal.playbooks.saving") : t("journal.playbooks.save")}
           </button>
         </div>
       </form>

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { resolveJournalUploadConnection } from "@/lib/journal/connections";
 import { journalEventRequestSchema } from "@/lib/journal/validators";
 
 export const runtime = "nodejs";
@@ -34,6 +35,19 @@ function isTransientPrismaConnectionError(error: unknown) {
   );
 }
 
+function eventStartedBeforeConnection(
+  event: { eventTime: Date; openTime?: Date | null },
+  connectedAt: Date | null
+) {
+  if (!connectedAt) {
+    return false;
+  }
+
+  const eventStart = event.openTime || event.eventTime;
+
+  return eventStart.getTime() < connectedAt.getTime();
+}
+
 export async function POST(request: Request) {
   if (!isJournalEventIngestionEnabled()) {
     return NextResponse.json({
@@ -61,10 +75,18 @@ export async function POST(request: Request) {
       );
     }
 
-    const expectedSecret = process.env.JOURNAL_UPLOAD_SECRET?.trim();
+    const connection = await resolveJournalUploadConnection(parsed.data.uploadSecret);
 
-    if (!expectedSecret || parsed.data.uploadSecret !== expectedSecret) {
+    if (!connection) {
       return jsonError("Unauthorized", 401);
+    }
+
+    if (eventStartedBeforeConnection(parsed.data.event, connection.connectedAt)) {
+      return NextResponse.json({
+        success: true,
+        ignored: true,
+        reason: "event_before_journal_connection",
+      });
     }
 
     const { processJournalEventPrisma } = await import(
@@ -79,9 +101,9 @@ export async function POST(request: Request) {
 
     for (let attempt = 0; attempt <= retryDelays.length; attempt++) {
       try {
-        const result = await processJournalEventPrisma(input);
+        const result = await processJournalEventPrisma(input, connection.userId);
 
-        return NextResponse.json(result);
+        return NextResponse.json({ ...result, legacyConnection: connection.legacy });
       } catch (error) {
         lastError = error;
 

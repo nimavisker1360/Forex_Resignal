@@ -1,17 +1,16 @@
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { apiResponse } from "@/lib/journal/api-utils";
+import { getCurrentUserId, unauthorizedResponse } from "@/lib/server-auth";
 
 export const dynamic = "force-dynamic";
 
-export async function GET(request: Request) {
+export async function GET() {
   try {
-    const { searchParams } = new URL(request.url);
-    // TODO: Replace query-param userId with the authenticated session user id.
-    const userId = searchParams.get("userId");
+    const userId = await getCurrentUserId();
 
     if (!userId) {
-      return apiResponse({ success: false, message: "userId is required" }, 400);
+      return unauthorizedResponse();
     }
 
     const db = prisma as any;
@@ -30,13 +29,18 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
-    // TODO: Replace body userId with the authenticated session user id.
-    const { userId, name, color } = body;
+    const userId = await getCurrentUserId();
 
-    if (!userId || !name) {
+    if (!userId) {
+      return unauthorizedResponse();
+    }
+
+    const body = await request.json();
+    const { name, color } = body;
+
+    if (!name) {
       return apiResponse(
-        { success: false, message: "userId and name are required" },
+        { success: false, message: "name is required" },
         400
       );
     }

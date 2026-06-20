@@ -1,6 +1,9 @@
 import { Prisma } from "@prisma/client";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { deleteAllUserTrades } from "@/lib/journal/delete-trades";
+import { getCurrentUserId, unauthorizedResponse } from "@/lib/server-auth";
+import { requireFeatureAccess, subscriptionAccessResponse } from "@/lib/subscription";
 import {
   buildManualTradeCreateData,
   buildTradeWhere,
@@ -26,8 +29,15 @@ function validationResponse(errors: string[]) {
 
 export async function GET(request: Request) {
   try {
+    const userId = await getCurrentUserId();
+
+    if (!userId) {
+      return unauthorizedResponse();
+    }
+
     const { searchParams } = new URL(request.url);
     const { where, errors } = buildTradeWhere(searchParams);
+    where.userId = userId;
 
     if (errors.length > 0) {
       return validationResponse(errors);
@@ -69,15 +79,34 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
+    const userId = await getCurrentUserId();
+
+    if (!userId) {
+      return unauthorizedResponse();
+    }
+
+    await requireFeatureAccess(userId, "trades");
+
     const body = (await request.json()) as Record<string, unknown>;
-    const built = buildManualTradeCreateData(body);
+    const built = buildManualTradeCreateData({ ...body, userId });
 
     if (built.errors) {
       return validationResponse(built.errors);
     }
 
+    if (built.data.accountId) {
+      const account = await prisma.tradingAccount.findFirst({
+        where: { id: built.data.accountId, userId },
+        select: { id: true },
+      });
+
+      if (!account) {
+        return validationResponse(["accountId does not match an existing trading account"]);
+      }
+    }
+
     const accountId =
-      built.data.accountId || (await ensureManualTradingAccount(built.data.userId));
+      built.data.accountId || (await ensureManualTradingAccount(userId));
     const trade = await prisma.$transaction(async (tx) => {
       const createdTrade = await tx.trade.create({
         data: {
@@ -102,6 +131,12 @@ export async function POST(request: Request) {
       { status: 201 }
     );
   } catch (error) {
+    const accessResponse = subscriptionAccessResponse(error);
+
+    if (accessResponse) {
+      return accessResponse;
+    }
+
     console.error("Journal trades POST error:", error);
 
     if (
@@ -113,6 +148,30 @@ export async function POST(request: Request) {
 
     return NextResponse.json(
       { success: false, message: "Failed to create journal trade" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE() {
+  try {
+    const userId = await getCurrentUserId();
+
+    if (!userId) {
+      return unauthorizedResponse();
+    }
+
+    const result = await deleteAllUserTrades(userId);
+
+    return NextResponse.json({
+      success: true,
+      ...result,
+    });
+  } catch (error) {
+    console.error("Journal trades DELETE all error:", error);
+
+    return NextResponse.json(
+      { success: false, message: "Failed to delete all journal trades" },
       { status: 500 }
     );
   }

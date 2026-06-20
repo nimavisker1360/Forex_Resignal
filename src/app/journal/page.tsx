@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { ArrowDown, ArrowUp, Eye, Plus, RotateCcw, Search } from "lucide-react";
 import {
   fetchJournalApi,
@@ -7,6 +8,7 @@ import {
   type PrismaTradesResponse,
 } from "@/app/journal/_lib/journal-api";
 import { ManualTradeForm } from "@/app/journal/manual-trade-form";
+import { DashboardText } from "@/components/dashboard/DashboardText";
 import { StrategyComplianceBadge } from "@/components/journal/StrategyComplianceBadge";
 import { cn } from "@/lib/utils";
 
@@ -97,7 +99,7 @@ function SummaryCard({
   value,
   tone = "neutral",
 }: {
-  label: string;
+  label: ReactNode;
   value: string;
   tone?: "neutral" | "profit" | "loss" | "blue";
 }) {
@@ -176,9 +178,9 @@ export default async function JournalPage({ searchParams }: JournalPageProps) {
     <div className="space-y-5">
       <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-white">Trade Journal</h1>
+          <h1 className="text-2xl font-semibold text-white"><DashboardText k="journal.trades.title" /></h1>
           <p className="mt-1 text-sm text-slate-400">
-            Review trades, screenshots, psychology notes, and performance.
+            <DashboardText k="journal.trades.subtitle" />
           </p>
         </div>
       </div>
@@ -187,22 +189,22 @@ export default async function JournalPage({ searchParams }: JournalPageProps) {
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <SummaryCard
-          label="Total Trades"
+          label={<DashboardText k="journal.analytics.totalTrades" />}
           value={formatNumber(summary.totalTrades, 0)}
           tone="blue"
         />
         <SummaryCard
-          label="Win Rate"
+          label={<DashboardText k="journal.analytics.winRate" />}
           value={`${formatNumber(summary.winRate, 1)}%`}
           tone="profit"
         />
         <SummaryCard
-          label="Total PnL"
+          label={<DashboardText k="journal.analytics.totalNetPnl" />}
           value={formatNumber(summary.totalPnL, 2)}
           tone={summary.totalPnL > 0 ? "profit" : summary.totalPnL < 0 ? "loss" : "neutral"}
         />
         <SummaryCard
-          label="Profit Factor"
+          label={<DashboardText k="journal.analytics.profitFactor" />}
           value={formatNumber(summary.profitFactor, 2)}
         />
       </div>
@@ -210,14 +212,14 @@ export default async function JournalPage({ searchParams }: JournalPageProps) {
       <div className="rounded-xl border border-slate-800 bg-[#0F172A] p-4 shadow-sm">
         <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
-            <h2 className="text-sm font-semibold text-white">Filters</h2>
-            <p className="text-xs text-slate-400">Narrow the journal by symbol, status, result, direction, and date.</p>
+            <h2 className="text-sm font-semibold text-white"><DashboardText k="journal.trades.filters" /></h2>
+            <p className="text-xs text-slate-400"><DashboardText k="journal.trades.filtersDescription" /></p>
           </div>
         </div>
 
         <form className="grid gap-3 md:grid-cols-7">
           <label className="space-y-1 text-xs font-medium uppercase text-slate-400">
-            Symbol
+            <DashboardText k="journal.tradeDetail.symbol" />
             <input
               name="symbol"
               defaultValue={filters.symbol}
@@ -226,7 +228,7 @@ export default async function JournalPage({ searchParams }: JournalPageProps) {
             />
           </label>
           <label className="space-y-1 text-xs font-medium uppercase text-slate-400">
-            Status
+            <DashboardText k="journal.tradeDetail.status" />
             <select
               name="status"
               defaultValue={filters.status}
@@ -239,7 +241,7 @@ export default async function JournalPage({ searchParams }: JournalPageProps) {
             </select>
           </label>
           <label className="space-y-1 text-xs font-medium uppercase text-slate-400">
-            Result
+            <DashboardText k="journal.trades.result" />
             <select
               name="result"
               defaultValue={filters.result}
@@ -253,7 +255,7 @@ export default async function JournalPage({ searchParams }: JournalPageProps) {
             </select>
           </label>
           <label className="space-y-1 text-xs font-medium uppercase text-slate-400">
-            Buy/Sell
+            <DashboardText k="journal.trades.buySell" />
             <select
               name="tradeType"
               defaultValue={filters.tradeType}
@@ -265,7 +267,7 @@ export default async function JournalPage({ searchParams }: JournalPageProps) {
             </select>
           </label>
           <label className="space-y-1 text-xs font-medium uppercase text-slate-400">
-            From
+            <DashboardText k="journal.trades.from" />
             <input
               name="dateFrom"
               type="date"
@@ -274,7 +276,7 @@ export default async function JournalPage({ searchParams }: JournalPageProps) {
             />
           </label>
           <label className="space-y-1 text-xs font-medium uppercase text-slate-400">
-            To
+            <DashboardText k="journal.trades.to" />
             <input
               name="dateTo"
               type="date"
@@ -288,7 +290,7 @@ export default async function JournalPage({ searchParams }: JournalPageProps) {
               className="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-[#2563EB] px-4 text-sm font-semibold text-white hover:bg-blue-500"
             >
               <Search className="h-4 w-4" />
-              Filter
+              <DashboardText k="journal.trades.filter" />
             </button>
             <Link
               href="/journal"
@@ -307,19 +309,19 @@ export default async function JournalPage({ searchParams }: JournalPageProps) {
           <table className="w-full min-w-[1280px] text-left text-sm">
             <thead className="border-b border-slate-800 bg-[#111827] text-xs uppercase text-slate-400">
               <tr>
-                <th className="px-4 py-3">Open Time</th>
-                <th className="px-3 py-3">Symbol</th>
-                <th className="px-3 py-3">Direction</th>
-                <th className="px-3 py-3">Account</th>
-                <th className="px-3 py-3">Strategy</th>
-                <th className="px-3 py-3">Plan</th>
-                <th className="px-3 py-3">Compliance</th>
-                <th className="px-3 py-3">Entry</th>
-                <th className="px-3 py-3">Exit</th>
+                <th className="px-4 py-3"><DashboardText k="journal.trades.openTime" /></th>
+                <th className="px-3 py-3"><DashboardText k="journal.tradeDetail.symbol" /></th>
+                <th className="px-3 py-3"><DashboardText k="journal.trades.direction" /></th>
+                <th className="px-3 py-3"><DashboardText k="journal.tradeDetail.account" /></th>
+                <th className="px-3 py-3"><DashboardText k="journal.tradeDetail.strategy" /></th>
+                <th className="px-3 py-3"><DashboardText k="journal.strategyReview.plan" /></th>
+                <th className="px-3 py-3"><DashboardText k="journal.trades.compliance" /></th>
+                <th className="px-3 py-3"><DashboardText k="journal.tradeDetail.entry" /></th>
+                <th className="px-3 py-3"><DashboardText k="journal.tradeDetail.exit" /></th>
                 <th className="px-3 py-3">PnL</th>
                 <th className="px-3 py-3">R:R</th>
-                <th className="px-3 py-3">Status</th>
-                <th className="px-3 py-3">Actions</th>
+                <th className="px-3 py-3"><DashboardText k="journal.tradeDetail.status" /></th>
+                <th className="px-3 py-3"><DashboardText k="journal.trades.actions" /></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800">
@@ -345,7 +347,7 @@ export default async function JournalPage({ searchParams }: JournalPageProps) {
                       ) : (
                         <ArrowUp className="h-3 w-3" />
                       )}
-                      {trade.tradeType}
+                      <DashboardText k={trade.tradeType === "sell" ? "journal.tradeDetail.sell" : "journal.tradeDetail.buy"} />
                     </span>
                   </td>
                   <td className="px-3 py-4 text-slate-300">{trade.accountNumber || "-"}</td>
@@ -359,7 +361,17 @@ export default async function JournalPage({ searchParams }: JournalPageProps) {
                         planBadgeClass(trade.strategyReview?.followedPlan)
                       )}
                     >
-                      {trade.strategyReview?.followedPlan?.replace("_", " ") || "Not Reviewed"}
+                      <DashboardText
+                        k={
+                          trade.strategyReview?.followedPlan === "YES"
+                            ? "journal.strategyReview.yes"
+                            : trade.strategyReview?.followedPlan === "PARTIAL"
+                              ? "journal.strategyReview.partial"
+                              : trade.strategyReview?.followedPlan === "NO"
+                                ? "journal.strategyReview.no"
+                                : "journal.strategyReview.notReviewed"
+                        }
+                      />
                     </span>
                   </td>
                   <td className="px-3 py-4">
@@ -389,7 +401,15 @@ export default async function JournalPage({ searchParams }: JournalPageProps) {
                         badgeClass("status", trade.status)
                       )}
                     >
-                      {trade.status}
+                      <DashboardText
+                        k={
+                          trade.status === "closed"
+                            ? "journal.tradeDetail.closed"
+                            : trade.status === "open"
+                              ? "journal.tradeDetail.open"
+                              : "journal.tradeDetail.cancelled"
+                        }
+                      />
                     </span>
                   </td>
                   <td className="px-3 py-4">
@@ -412,15 +432,15 @@ export default async function JournalPage({ searchParams }: JournalPageProps) {
             <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-slate-800 bg-[#111827] text-slate-400">
               <Plus className="h-5 w-5" />
             </div>
-            <h3 className="mt-4 text-base font-semibold text-white">No trades found</h3>
-            <p className="mt-1 text-sm text-slate-400">Create your first trade or clear the active filters.</p>
+            <h3 className="mt-4 text-base font-semibold text-white"><DashboardText k="journal.trades.emptyTitle" /></h3>
+            <p className="mt-1 text-sm text-slate-400"><DashboardText k="journal.trades.emptyDescription" /></p>
           </div>
         )}
       </div>
 
       <div className="flex items-center justify-between text-sm text-slate-400">
         <span>
-          Page {pagination.page} of {pagination.totalPages} / {pagination.total} trades
+          <DashboardText k="journal.trades.page" /> {pagination.page} <DashboardText k="journal.trades.of" /> {pagination.totalPages} / {pagination.total} <DashboardText k="journal.analytics.trades" />
         </span>
         <div className="flex gap-2">
           <Link
@@ -430,7 +450,7 @@ export default async function JournalPage({ searchParams }: JournalPageProps) {
               pagination.page <= 1 && "pointer-events-none opacity-40"
             )}
           >
-            Previous
+            <DashboardText k="journal.trades.previous" />
           </Link>
           <Link
             href={buildPageHref(Math.min(pagination.page + 1, pagination.totalPages), filters)}
@@ -439,7 +459,7 @@ export default async function JournalPage({ searchParams }: JournalPageProps) {
               pagination.page >= pagination.totalPages && "pointer-events-none opacity-40"
             )}
           >
-            Next
+            <DashboardText k="journal.trades.next" />
           </Link>
         </div>
       </div>

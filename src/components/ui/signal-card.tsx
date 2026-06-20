@@ -104,9 +104,9 @@ function SignalCardComponent({
       ? "bg-green-500/10 border-green-500/30"
       : "bg-red-500/10 border-red-500/30";
   const stateClass = isTakeProfitClosed
-    ? "border-green-500/40 bg-green-950/30"
+    ? "border-green-500/40 bg-gray-950/90"
     : isStopLossClosed
-      ? "border-red-500/40 bg-red-950/30"
+      ? "border-red-500/40 bg-gray-950/90"
       : isOpen
         ? "border-green-500/25 bg-gray-950/90"
         : "border-gray-800 bg-gray-950/90";

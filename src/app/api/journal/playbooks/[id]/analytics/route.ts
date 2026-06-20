@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { calculateStrategyAnalytics } from "@/lib/playbooks/calculateStrategyAnalytics";
 import { prisma } from "@/lib/prisma";
+import { getCurrentUserId, unauthorizedResponse } from "@/lib/server-auth";
+import { requireFeatureAccess, subscriptionAccessResponse } from "@/lib/subscription";
 
 export const dynamic = "force-dynamic";
 
@@ -10,9 +12,17 @@ type RouteContext = {
 
 export async function GET(_request: Request, context: RouteContext) {
   try {
+    const userId = await getCurrentUserId();
+
+    if (!userId) {
+      return unauthorizedResponse();
+    }
+
+    await requireFeatureAccess(userId, "advancedAnalytics");
+
     const { id } = await context.params;
-    const strategy = await prisma.playbookStrategy.findUnique({
-      where: { id },
+    const strategy = await prisma.playbookStrategy.findFirst({
+      where: { id, userId },
       select: { id: true },
     });
 
@@ -24,7 +34,7 @@ export async function GET(_request: Request, context: RouteContext) {
     }
 
     const reviews = await prisma.tradeStrategyReview.findMany({
-      where: { strategyId: id },
+      where: { strategyId: id, trade: { userId } },
       include: {
         trade: true,
       },
@@ -41,6 +51,12 @@ export async function GET(_request: Request, context: RouteContext) {
       analytics,
     });
   } catch (error) {
+    const accessResponse = subscriptionAccessResponse(error);
+
+    if (accessResponse) {
+      return accessResponse;
+    }
+
     console.error("Playbook analytics GET error:", error);
 
     return NextResponse.json(

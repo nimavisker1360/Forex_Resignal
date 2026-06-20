@@ -23,6 +23,7 @@ import type {
 } from "@/app/journal/_lib/journal-api";
 import { TradeChecklistPanel } from "@/components/journal/TradeChecklistPanel";
 import { TradeStrategyReviewPanel } from "@/components/journal/TradeStrategyReviewPanel";
+import { useLanguage } from "@/lib/language-context";
 import { cn } from "@/lib/utils";
 
 type TradeDetailClientProps = {
@@ -180,6 +181,7 @@ export function TradeDetailClient({
   accounts,
 }: TradeDetailClientProps) {
   const router = useRouter();
+  const { t } = useLanguage();
   const [trade, setTrade] = useState(initialTrade);
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -200,6 +202,43 @@ export function TradeDetailClient({
     (screenshot) =>
       !["ENTRY", "EXIT"].includes(screenshot.type.toUpperCase())
   );
+  const directionLabel = (direction: string | null | undefined) => {
+    if (direction === "BUY") {
+      return t("journal.tradeDetail.buy");
+    }
+
+    if (direction === "SELL") {
+      return t("journal.tradeDetail.sell");
+    }
+
+    return direction || "-";
+  };
+  const statusLabel = (status: string | null | undefined) => {
+    if (status === "OPEN") {
+      return t("journal.tradeDetail.open");
+    }
+
+    if (status === "CLOSED") {
+      return t("journal.tradeDetail.closed");
+    }
+
+    if (status === "CANCELLED") {
+      return t("journal.tradeDetail.cancelled");
+    }
+
+    return status || "-";
+  };
+  const screenshotTypeLabel = (type: string) => {
+    if (type.toUpperCase() === "ENTRY") {
+      return t("journal.tradeDetail.entryScreenshot");
+    }
+
+    if (type.toUpperCase() === "EXIT") {
+      return t("journal.tradeDetail.exitScreenshot");
+    }
+
+    return t("journal.tradeDetail.additionalScreenshot");
+  };
 
   function refresh() {
     startTransition(() => {
@@ -252,11 +291,11 @@ export function TradeDetailClient({
         setTrade(data.trade);
       }
 
-      toast.success("Trade saved");
+      toast.success(t("journal.tradeDetail.tradeSaved"));
       setEditing(false);
       refresh();
     } catch {
-      toast.error("Failed to save trade");
+      toast.error(t("journal.tradeDetail.saveTradeFailed"));
     } finally {
       setSaving(false);
     }
@@ -293,11 +332,11 @@ export function TradeDetailClient({
         setTrade(data.trade);
       }
 
-      toast.success("Screenshot added");
+      toast.success(t("journal.tradeDetail.screenshotAdded"));
       form.reset();
       refresh();
     } catch {
-      toast.error("Failed to add screenshot");
+      toast.error(t("journal.tradeDetail.addScreenshotFailed"));
     } finally {
       setSavingScreenshot(false);
     }
@@ -329,7 +368,7 @@ export function TradeDetailClient({
       const data = await response.json();
 
       if (!response.ok) {
-        toast.error(data.message || "Failed to save tags");
+        toast.error(data.message || t("journal.tradeDetail.saveTagsFailed"));
         return;
       }
 
@@ -352,10 +391,10 @@ export function TradeDetailClient({
         }));
       }
 
-      toast.success("Tags saved");
+      toast.success(t("journal.tradeDetail.tagsSaved"));
       refresh();
     } catch {
-      toast.error("Failed to save tags");
+      toast.error(t("journal.tradeDetail.saveTagsFailed"));
     } finally {
       setSavingTags(false);
     }
@@ -363,7 +402,7 @@ export function TradeDetailClient({
 
   async function deleteTrade() {
     const confirmed = window.confirm(
-      `Delete ${trade.symbol} from the journal? This cannot be undone.`
+      t("journal.tradeDetail.confirmDelete").replace("{symbol}", trade.symbol)
     );
 
     if (!confirmed) {
@@ -377,15 +416,15 @@ export function TradeDetailClient({
       const data = await response.json();
 
       if (!response.ok) {
-        toast.error(data.message || "Failed to delete trade");
+        toast.error(data.message || t("journal.tradeDetail.deleteTradeFailed"));
         return;
       }
 
-      toast.success("Trade deleted");
+      toast.success(t("journal.tradeDetail.tradeDeleted"));
       router.push("/journal");
       router.refresh();
     } catch {
-      toast.error("Failed to delete trade");
+      toast.error(t("journal.tradeDetail.deleteTradeFailed"));
     }
   }
 
@@ -396,7 +435,7 @@ export function TradeDetailClient({
         className="inline-flex items-center gap-2 text-sm text-gray-300 hover:text-white"
       >
         <ArrowLeft className="h-4 w-4" />
-        Back to trades
+        {t("journal.tradeDetail.backToTrades")}
       </Link>
 
       <div className="rounded-lg border border-slate-800 bg-[#0F172A] p-5 shadow-sm">
@@ -415,7 +454,7 @@ export function TradeDetailClient({
                 ) : (
                   <ArrowUp className="h-3 w-3" />
                 )}
-                {trade.direction}
+                {directionLabel(trade.direction)}
               </span>
               <span
                 className={cn(
@@ -423,7 +462,7 @@ export function TradeDetailClient({
                   statusClass(trade.status)
                 )}
               >
-                {trade.status}
+                {statusLabel(trade.status)}
               </span>
             </div>
             <p className="mt-2 text-sm text-slate-400">
@@ -439,7 +478,7 @@ export function TradeDetailClient({
               className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-slate-800 px-4 text-sm font-semibold text-slate-300 hover:bg-slate-800"
             >
               {editing ? <X className="h-4 w-4" /> : <Edit3 className="h-4 w-4" />}
-              {editing ? "Cancel" : "Edit"}
+              {editing ? t("journal.tradeDetail.cancel") : t("journal.tradeDetail.edit")}
             </button>
             <button
               type="button"
@@ -447,7 +486,7 @@ export function TradeDetailClient({
               className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-red-500/30 px-4 text-sm font-semibold text-[#EF4444] hover:bg-red-500/10"
             >
               <Trash2 className="h-4 w-4" />
-              Delete
+              {t("journal.tradeDetail.delete")}
             </button>
           </div>
         </div>
@@ -455,7 +494,7 @@ export function TradeDetailClient({
 
       {editing ? (
         <Section
-          title="Edit Trade"
+          title={t("journal.tradeDetail.editTrade")}
           actions={
             <button
               type="submit"
@@ -464,29 +503,29 @@ export function TradeDetailClient({
               className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-[#2563EB] px-4 text-sm font-semibold text-white hover:bg-blue-500 disabled:opacity-60"
             >
               <Save className="h-4 w-4" />
-              {saving || isPending ? "Saving" : "Save"}
+              {saving || isPending ? t("journal.tradeDetail.saving") : t("journal.tradeDetail.save")}
             </button>
           }
         >
           <form id="journal-trade-edit-form" onSubmit={saveTrade} className="space-y-4">
             <div className="grid gap-3 md:grid-cols-4">
-              <Field label="Symbol">
+              <Field label={t("journal.tradeDetail.symbol")}>
                 <input name="symbol" defaultValue={trade.symbol} className={inputClass} />
               </Field>
-              <Field label="Side">
+              <Field label={t("journal.tradeDetail.side")}>
                 <select name="side" defaultValue={trade.direction} className={inputClass}>
-                  <option value="BUY">BUY</option>
-                  <option value="SELL">SELL</option>
+                  <option value="BUY">{t("journal.tradeDetail.buy")}</option>
+                  <option value="SELL">{t("journal.tradeDetail.sell")}</option>
                 </select>
               </Field>
-              <Field label="Status">
+              <Field label={t("journal.tradeDetail.status")}>
                 <select name="status" defaultValue={trade.status} className={inputClass}>
-                  <option value="OPEN">OPEN</option>
-                  <option value="CLOSED">CLOSED</option>
-                  <option value="CANCELLED">CANCELLED</option>
+                  <option value="OPEN">{t("journal.tradeDetail.open")}</option>
+                  <option value="CLOSED">{t("journal.tradeDetail.closed")}</option>
+                  <option value="CANCELLED">{t("journal.tradeDetail.cancelled")}</option>
                 </select>
               </Field>
-              <Field label="Account">
+              <Field label={t("journal.tradeDetail.account")}>
                 {accounts.length > 0 ? (
                   <select name="accountId" defaultValue={trade.accountId} className={inputClass}>
                     {accounts.map((item) => (
@@ -499,7 +538,7 @@ export function TradeDetailClient({
                   <input name="accountId" defaultValue={trade.accountId} className={inputClass} />
                 )}
               </Field>
-              <Field label="Entry Price">
+              <Field label={t("journal.tradeDetail.entryPrice")}>
                 <input
                   name="entryPrice"
                   type="number"
@@ -508,7 +547,7 @@ export function TradeDetailClient({
                   className={inputClass}
                 />
               </Field>
-              <Field label="Exit Price">
+              <Field label={t("journal.tradeDetail.exitPrice")}>
                 <input
                   name="exitPrice"
                   type="number"
@@ -517,7 +556,7 @@ export function TradeDetailClient({
                   className={inputClass}
                 />
               </Field>
-              <Field label="Stop Loss">
+              <Field label={t("journal.tradeDetail.stopLoss")}>
                 <input
                   name="stopLoss"
                   type="number"
@@ -526,7 +565,7 @@ export function TradeDetailClient({
                   className={inputClass}
                 />
               </Field>
-              <Field label="Take Profit">
+              <Field label={t("journal.tradeDetail.takeProfit")}>
                 <input
                   name="takeProfit"
                   type="number"
@@ -535,7 +574,7 @@ export function TradeDetailClient({
                   className={inputClass}
                 />
               </Field>
-              <Field label="Lot Size">
+              <Field label={t("journal.tradeDetail.lotSize")}>
                 <input
                   name="lotSize"
                   type="number"
@@ -544,7 +583,7 @@ export function TradeDetailClient({
                   className={inputClass}
                 />
               </Field>
-              <Field label="Risk Amount">
+              <Field label={t("journal.tradeDetail.riskAmount")}>
                 <input
                   name="riskAmount"
                   type="number"
@@ -562,7 +601,7 @@ export function TradeDetailClient({
                   className={inputClass}
                 />
               </Field>
-              <Field label="Entry Time">
+              <Field label={t("journal.tradeDetail.entryTime")}>
                 <input
                   name="entryTime"
                   type="datetime-local"
@@ -570,7 +609,7 @@ export function TradeDetailClient({
                   className={inputClass}
                 />
               </Field>
-              <Field label="Exit Time">
+              <Field label={t("journal.tradeDetail.exitTime")}>
                 <input
                   name="exitTime"
                   type="datetime-local"
@@ -578,20 +617,20 @@ export function TradeDetailClient({
                   className={inputClass}
                 />
               </Field>
-              <Field label="Strategy">
+              <Field label={t("journal.tradeDetail.strategy")}>
                 <input
                   name="strategy"
                   defaultValue={trade.strategy || trade.session || ""}
                   className={inputClass}
                 />
               </Field>
-              <Field label="Setup">
+              <Field label={t("journal.tradeDetail.setup")}>
                 <input name="setup" defaultValue={trade.setup || ""} className={inputClass} />
               </Field>
-              <Field label="Emotion">
+              <Field label={t("journal.tradeDetail.emotion")}>
                 <input name="emotion" defaultValue={trade.emotion || ""} className={inputClass} />
               </Field>
-              <Field label="Mistakes">
+              <Field label={t("journal.tradeDetail.mistakes")}>
                 <input
                   name="mistakes"
                   defaultValue={trade.mistakes || trade.mistake || ""}
@@ -599,7 +638,7 @@ export function TradeDetailClient({
                 />
               </Field>
             </div>
-            <Field label="Notes">
+            <Field label={t("journal.tradeDetail.notes")}>
               <textarea
                 name="notes"
                 rows={4}
@@ -611,51 +650,51 @@ export function TradeDetailClient({
         </Section>
       ) : null}
 
-      <Section title="Trade Overview">
+      <Section title={t("journal.tradeDetail.tradeOverview")}>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <Metric label="Symbol" value={trade.symbol} />
-          <Metric label="Direction / Side" value={trade.direction} />
-          <Metric label="Account" value={account?.name || trade.accountId} />
-          <Metric label="Status" value={trade.status} />
-          <Metric label="Entry Price" value={formatNumber(trade.entryPrice, 5)} />
-          <Metric label="Exit Price" value={formatNumber(trade.exitPrice, 5)} />
-          <Metric label="Stop Loss" value={formatNumber(trade.stopLoss, 5)} className="text-red-300" />
-          <Metric label="Take Profit" value={formatNumber(trade.takeProfit, 5)} className="text-emerald-300" />
-          <Metric label="Lot Size" value={formatNumber(trade.lotSize, 3)} />
-          <Metric label="Risk Amount" value={formatNumber(trade.riskAmount, 2)} />
+          <Metric label={t("journal.tradeDetail.symbol")} value={trade.symbol} />
+          <Metric label={t("journal.tradeDetail.directionSide")} value={directionLabel(trade.direction)} />
+          <Metric label={t("journal.tradeDetail.account")} value={account?.name || trade.accountId} />
+          <Metric label={t("journal.tradeDetail.status")} value={statusLabel(trade.status)} />
+          <Metric label={t("journal.tradeDetail.entryPrice")} value={formatNumber(trade.entryPrice, 5)} />
+          <Metric label={t("journal.tradeDetail.exitPrice")} value={formatNumber(trade.exitPrice, 5)} />
+          <Metric label={t("journal.tradeDetail.stopLoss")} value={formatNumber(trade.stopLoss, 5)} className="text-red-300" />
+          <Metric label={t("journal.tradeDetail.takeProfit")} value={formatNumber(trade.takeProfit, 5)} className="text-emerald-300" />
+          <Metric label={t("journal.tradeDetail.lotSize")} value={formatNumber(trade.lotSize, 3)} />
+          <Metric label={t("journal.tradeDetail.riskAmount")} value={formatNumber(trade.riskAmount, 2)} />
           <Metric
             label="PnL"
             value={formatNumber(trade.profitLoss, 2)}
             className={Number(trade.profitLoss || 0) >= 0 ? "text-emerald-300" : "text-red-300"}
           />
           <Metric label="R:R" value={formatNumber(trade.rr, 2)} />
-          <Metric label="Entry Time" value={formatDate(trade.openedAt || trade.entryTime)} />
-          <Metric label="Exit Time" value={formatDate(trade.closedAt || trade.exitTime)} />
+          <Metric label={t("journal.tradeDetail.entryTime")} value={formatDate(trade.openedAt || trade.entryTime)} />
+          <Metric label={t("journal.tradeDetail.exitTime")} value={formatDate(trade.closedAt || trade.exitTime)} />
         </div>
       </Section>
 
       <div className="grid gap-5 xl:grid-cols-[1.4fr_1fr]">
-        <Section title="Trade Review">
+        <Section title={t("journal.tradeDetail.tradeReview")}>
           <div className="grid gap-3 md:grid-cols-2">
-            <Metric label="Strategy" value={toDisplay(trade.strategy || trade.session)} />
-            <Metric label="Setup" value={toDisplay(trade.setup)} />
-            <Metric label="Mistakes" value={toDisplay(trade.mistakes || trade.mistake)} />
-            <Metric label="Emotion / Psychology State" value={toDisplay(trade.emotion)} />
+            <Metric label={t("journal.tradeDetail.strategy")} value={toDisplay(trade.strategy || trade.session)} />
+            <Metric label={t("journal.tradeDetail.setup")} value={toDisplay(trade.setup)} />
+            <Metric label={t("journal.tradeDetail.mistakes")} value={toDisplay(trade.mistakes || trade.mistake)} />
+            <Metric label={t("journal.tradeDetail.emotionPsychologyState")} value={toDisplay(trade.emotion)} />
           </div>
           <div className="mt-3 rounded-lg border border-slate-800 bg-[#111827] p-3">
-            <div className="text-xs font-medium uppercase text-slate-400">Notes</div>
+            <div className="text-xs font-medium uppercase text-slate-400">{t("journal.tradeDetail.notes")}</div>
             <p className="mt-2 whitespace-pre-wrap text-sm text-slate-200">
               {trade.notes || "-"}
             </p>
           </div>
         </Section>
 
-        <Section title="Psychology">
+        <Section title={t("journal.tradeDetail.psychology")}>
           <div className="grid gap-3">
-            <Metric label="Emotion" value={toDisplay(trade.emotion)} />
-            <Metric label="Mistake Type" value={toDisplay(trade.mistakes || trade.mistake)} />
+            <Metric label={t("journal.tradeDetail.emotion")} value={toDisplay(trade.emotion)} />
+            <Metric label={t("journal.tradeDetail.mistakeType")} value={toDisplay(trade.mistakes || trade.mistake)} />
             <div className="rounded-lg border border-slate-800 bg-[#111827] p-3">
-              <div className="text-xs font-medium uppercase text-slate-400">Psychology Notes</div>
+              <div className="text-xs font-medium uppercase text-slate-400">{t("journal.tradeDetail.psychologyNotes")}</div>
               <p className="mt-2 whitespace-pre-wrap text-sm text-slate-200">
                 {trade.notes || "-"}
               </p>
@@ -668,13 +707,13 @@ export function TradeDetailClient({
 
       <TradeStrategyReviewPanel tradeId={trade.id} />
 
-      <Section title="Screenshots">
+      <Section title={t("journal.tradeDetail.screenshots")}>
         <div className="grid gap-4 lg:grid-cols-2">
           {Object.entries(groupedScreenshots).map(([type, items]) => (
             <div key={type} className="overflow-hidden rounded-lg border border-slate-800 bg-[#111827]">
               <div className="flex items-center gap-2 border-b border-slate-800 px-4 py-3 text-sm font-semibold text-white">
                 <Camera className="h-4 w-4 text-blue-400" />
-                {type.charAt(0) + type.slice(1).toLowerCase()} Screenshot
+                {screenshotTypeLabel(type)}
               </div>
               {items.length > 0 ? (
                 <div className="grid gap-3 p-3">
@@ -688,7 +727,7 @@ export function TradeDetailClient({
                     >
                       <img
                         src={screenshot.url}
-                        alt={`${type.toLowerCase()} trade screenshot`}
+                        alt={screenshotTypeLabel(type)}
                         className="aspect-video w-full bg-[#020617] object-cover"
                       />
                     </a>
@@ -697,7 +736,7 @@ export function TradeDetailClient({
               ) : (
                 <div className="flex aspect-video flex-col items-center justify-center gap-2 bg-[#0F172A] p-6 text-center text-sm text-slate-400">
                   <ImageOff className="h-8 w-8 text-slate-600" />
-                  <div>No screenshot</div>
+                  <div>{t("journal.tradeDetail.noScreenshot")}</div>
                 </div>
               )}
             </div>
@@ -716,7 +755,7 @@ export function TradeDetailClient({
               >
                 <img
                   src={screenshot.url}
-                  alt="Additional trade screenshot"
+                  alt={t("journal.tradeDetail.additionalScreenshot")}
                   className="aspect-video w-full object-cover"
                 />
               </a>
@@ -725,7 +764,7 @@ export function TradeDetailClient({
         ) : null}
 
         <form onSubmit={addScreenshot} className="mt-4 grid gap-3 md:grid-cols-[1fr_160px_1fr_auto]">
-          <Field label="Screenshot URL">
+          <Field label={t("journal.tradeDetail.screenshotUrl")}>
             <input
               name="screenshotUrl"
               required
@@ -734,13 +773,13 @@ export function TradeDetailClient({
               className={inputClass}
             />
           </Field>
-          <Field label="Type">
+          <Field label={t("journal.tradeDetail.type")}>
             <select name="type" defaultValue="ENTRY" className={inputClass}>
-              <option value="ENTRY">ENTRY</option>
-              <option value="EXIT">EXIT</option>
+              <option value="ENTRY">{t("journal.tradeDetail.entry")}</option>
+              <option value="EXIT">{t("journal.tradeDetail.exit")}</option>
             </select>
           </Field>
-          <Field label="Caption">
+          <Field label={t("journal.tradeDetail.caption")}>
             <input name="caption" className={inputClass} />
           </Field>
           <button
@@ -749,14 +788,14 @@ export function TradeDetailClient({
             className="inline-flex h-10 items-center justify-center gap-2 self-end rounded-lg bg-[#2563EB] px-4 text-sm font-semibold text-white hover:bg-blue-500 disabled:opacity-60"
           >
             <Camera className="h-4 w-4" />
-            {savingScreenshot ? "Adding" : "Add"}
+            {savingScreenshot ? t("journal.tradeDetail.adding") : t("journal.tradeDetail.add")}
           </button>
         </form>
       </Section>
 
-      <Section title="Tags">
+      <Section title={t("journal.tradeDetail.tags")}>
         <form onSubmit={saveTags} className="flex flex-col gap-3 md:flex-row md:items-end">
-          <Field label="Connected Tags">
+          <Field label={t("journal.tradeDetail.connectedTags")}>
             <input
               name="tags"
               defaultValue={tags}
@@ -770,7 +809,7 @@ export function TradeDetailClient({
             className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-[#2563EB] px-4 text-sm font-semibold text-white hover:bg-blue-500 disabled:opacity-60"
           >
             <Save className="h-4 w-4" />
-            {savingTags ? "Saving" : "Save Tags"}
+            {savingTags ? t("journal.tradeDetail.saving") : t("journal.tradeDetail.saveTags")}
           </button>
         </form>
       </Section>

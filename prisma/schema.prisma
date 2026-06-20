@@ -34,6 +34,220 @@ enum WebsiteSignalCloseReason {
   SL
 }
 
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum PaymentStatus {
+  PENDING
+  WAITING_TXID
+  UNDER_REVIEW
+  CONFIRMED
+  REJECTED
+  EXPIRED
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  EXPIRED
+  CANCELED
+  TRIAL
+  FREE
+  MANUAL
+}
+
+enum PaymentNetwork {
+  TRC20
+  ERC20
+  BEP20
+}
+
+model User {
+  id            String   @id @default(cuid())
+  name          String
+  email         String   @unique
+  emailVerified Boolean  @default(false)
+  image         String?
+  role          UserRole @default(USER)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  sessions             Session[]
+  accounts             Account[]
+  tradingAccounts      TradingAccount[]
+  trades               Trade[]
+  journalConnections   JournalConnection[]
+  tradeJournalMetadata TradeJournalMetadata[]
+  tradeScreenshots     TradeScreenshot[]
+  voiceMemos           VoiceMemo[]
+  dailyJournals        DailyJournal[]
+  playbooks            Playbook[]
+  propFirmChallenges   PropFirmChallenge[]
+  tags                 Tag[]
+  playbookStrategies   PlaybookStrategy[]
+  subscriptions        Subscription[]
+  payments             Payment[]
+  adminNotes           AdminNote[]            @relation("UserAdminNotes")
+  authoredAdminNotes   AdminNote[]            @relation("AdminAuthoredNotes")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Account {
+  id                    String    @id @default(cuid())
+  accountId             String
+  providerId            String
+  userId                String
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+}
+
+model Plan {
+  id                String   @id @default(cuid())
+  name              String
+  slug              String   @unique
+  description       String?
+  priceUSDT         Decimal  @db.Decimal(18, 2)
+  durationDays      Int
+  maxTrades         Int?
+  maxScreenshots    Int?
+  maxPlaybooks      Int?
+  maxChecklists     Int?
+  aiAnalysis        Boolean  @default(false)
+  advancedAnalytics Boolean  @default(false)
+  exportEnabled     Boolean  @default(false)
+  isTrial           Boolean  @default(false)
+  isFree            Boolean  @default(false)
+  isActive          Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  payments      Payment[]
+  subscriptions Subscription[]
+
+  @@index([isActive])
+  @@index([priceUSDT])
+}
+
+model Payment {
+  id              String         @id @default(cuid())
+  userId          String
+  planId          String
+  amount          Decimal        @db.Decimal(18, 2)
+  currency        String         @default("USDT")
+  network         PaymentNetwork @default(TRC20)
+  walletAddress   String
+  txid            String?        @unique
+  status          PaymentStatus  @default(WAITING_TXID)
+  adminNote       String?
+  rejectionReason String?
+  createdAt       DateTime       @default(now())
+  submittedAt     DateTime?
+  confirmedAt     DateTime?
+  rejectedAt      DateTime?
+  expiresAt       DateTime?
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan         Plan          @relation(fields: [planId], references: [id], onDelete: Restrict)
+  subscription Subscription?
+
+  @@index([userId])
+  @@index([planId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model Subscription {
+  id         String             @id @default(cuid())
+  userId     String
+  planId     String
+  paymentId  String?            @unique
+  status     SubscriptionStatus
+  startedAt  DateTime
+  expiresAt  DateTime
+  canceledAt DateTime?
+  createdAt  DateTime           @default(now())
+  updatedAt  DateTime           @updatedAt
+
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan    Plan     @relation(fields: [planId], references: [id], onDelete: Restrict)
+  payment Payment? @relation(fields: [paymentId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([planId])
+  @@index([status])
+  @@index([expiresAt])
+}
+
+model AdminNote {
+  id        String   @id @default(cuid())
+  userId    String
+  adminId   String?
+  note      String
+  createdAt DateTime @default(now())
+
+  user  User  @relation("UserAdminNotes", fields: [userId], references: [id], onDelete: Cascade)
+  admin User? @relation("AdminAuthoredNotes", fields: [adminId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([adminId])
+}
+
+model JournalConnection {
+  id           String    @id @default(cuid())
+  userId       String
+  tokenHash    String    @unique
+  tokenPreview String
+  name         String?
+  isActive     Boolean   @default(true)
+  connectedAt  DateTime  @default(now())
+  lastUsedAt   DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([isActive])
+  @@index([connectedAt])
+}
+
 model TradingAccount {
   id        String   @id @default(cuid())
   userId    String
@@ -45,8 +259,10 @@ model TradingAccount {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  user     User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   trades   Trade[]
-  journals DailyJournal[]
+
+  @@index([userId])
 }
 
 model Trade {
@@ -82,12 +298,13 @@ model Trade {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
-  account     TradingAccount    @relation(fields: [accountId], references: [id], onDelete: Cascade)
-  screenshots TradeScreenshot[]
-  voiceMemos  VoiceMemo[]
-  tags        TradeTag[]
-  checklists  TradeChecklist[]
-  strategyReview TradeStrategyReview?
+  user            User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  account         TradingAccount        @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  screenshots     TradeScreenshot[]
+  voiceMemos      VoiceMemo[]
+  tags            TradeTag[]
+  checklists      TradeChecklist[]
+  strategyReview  TradeStrategyReview?
   journalMetadata TradeJournalMetadata?
 
   @@index([userId])
@@ -97,26 +314,29 @@ model Trade {
   @@index([mt5Ticket])
   @@index([openedAt])
   @@index([closedAt])
+  @@index([userId, createdAt])
+  @@index([userId, status])
 }
 
 model TradeJournalMetadata {
-  id                String   @id @default(cuid())
-  tradeId           String   @unique
-  userId            String
-  rating            Int?
-  mistakes          Json?
-  setups            Json?
-  emotions          Json?
-  customTags        Json?
-  tradeNote         String?
-  dailyJournal      String?
-  checklistResults  Json?
-  psychologyStatus  String?
-  exitReason        String?
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  id               String   @id @default(cuid())
+  tradeId          String   @unique
+  userId           String
+  rating           Int?
+  mistakes         Json?
+  setups           Json?
+  emotions         Json?
+  customTags       Json?
+  tradeNote        String?
+  dailyJournal     String?
+  checklistResults Json?
+  psychologyStatus String?
+  exitReason       String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
   trade Trade @relation(fields: [tradeId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([tradeId])
@@ -131,6 +351,7 @@ model TradeScreenshot {
   createdAt DateTime @default(now())
 
   trade Trade @relation(fields: [tradeId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([tradeId])
   @@index([userId])
@@ -146,26 +367,49 @@ model VoiceMemo {
   createdAt  DateTime @default(now())
 
   trade Trade? @relation(fields: [tradeId], references: [id], onDelete: SetNull)
+  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([tradeId])
   @@index([userId])
 }
 
 model DailyJournal {
-  id        String   @id @default(cuid())
-  userId    String
-  accountId String?
-  date      DateTime
-  mood      String?
-  notes     String?
-  plan      String?
-  mistakes  String?
-  lesson    String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                    String   @id @default(cuid())
+  userId                String
+  date                  DateTime
+  marketBias            String?
+  todayFocus            String?
+  maxTradesAllowed      Int?
+  maxDailyLoss          Float?
+  mainPlaybookId        String?
+  symbolsToTrade        String?
+  newsToWatch           String?
+  preMarketNotes        String?
+  mood                  String?
+  focusLevel            Int?
+  confidenceLevel       Int?
+  stressLevel           Int?
+  sleepQuality          String?
+  disciplineScore       Int?
+  checklistNotes        String?
+  respectedRisk         Boolean  @default(false)
+  waitedForConfirmation Boolean  @default(false)
+  avoidedRevengeTrading Boolean  @default(false)
+  stoppedAfterDailyLimit Boolean @default(false)
+  followedPlaybook      Boolean  @default(false)
+  avoidedOvertrading    Boolean  @default(false)
+  whatWentWell          String?
+  mistakesSummary       String?
+  followedPlanReview    String?
+  improvementPlan       String?
+  tomorrowPlan          String?
+  endOfDayNotes         String?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
 
-  account TradingAccount? @relation(fields: [accountId], references: [id], onDelete: SetNull)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@unique([userId, date])
   @@index([userId])
   @@index([date])
 }
@@ -178,6 +422,8 @@ model Playbook {
   rules       String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
 }
@@ -197,6 +443,8 @@ model PropFirmChallenge {
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@index([userId])
   @@index([accountId])
 }
@@ -208,6 +456,7 @@ model Tag {
   color     String?
   createdAt DateTime @default(now())
 
+  user   User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   trades TradeTag[]
 
   @@unique([userId, name])
@@ -243,23 +492,24 @@ model ChecklistTemplate {
 }
 
 model PlaybookStrategy {
-  id             String   @id @default(cuid())
-  userId         String   @default("demo-user")
-  name           String
-  description    String?
-  marketType     String?
-  symbols        String?
-  timeframes     String?
-  riskPerTrade   Float?
-  minRiskReward  Float?
-  tags           String?
-  isActive       Boolean  @default(true)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id            String   @id @default(cuid())
+  userId        String   @default("demo-user")
+  name          String
+  description   String?
+  marketType    String?
+  symbols       String?
+  timeframes    String?
+  riskPerTrade  Float?
+  minRiskReward Float?
+  tags          String?
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
-  rules          PlaybookRule[]
-  checklistLinks PlaybookChecklistLink[]
+  rules           PlaybookRule[]
+  checklistLinks  PlaybookChecklistLink[]
   strategyReviews TradeStrategyReview[]
+  user            User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([isActive])
@@ -289,7 +539,7 @@ model PlaybookChecklistLink {
   checklistTemplateId String
   createdAt           DateTime @default(now())
 
-  strategy          PlaybookStrategy @relation(fields: [strategyId], references: [id], onDelete: Cascade)
+  strategy          PlaybookStrategy  @relation(fields: [strategyId], references: [id], onDelete: Cascade)
   checklistTemplate ChecklistTemplate @relation(fields: [checklistTemplateId], references: [id], onDelete: Cascade)
 
   @@unique([strategyId, checklistTemplateId])
@@ -297,24 +547,24 @@ model PlaybookChecklistLink {
 }
 
 model TradeStrategyReview {
-  id                         String   @id @default(cuid())
-  tradeId                    String   @unique
-  strategyId                 String?
-  strategyNameSnapshot       String?
-  followedPlan               String   @default("NOT_REVIEWED")
-  totalRules                 Int      @default(0)
-  followedRules              Int      @default(0)
-  violatedRules              Int      @default(0)
-  requiredRules              Int      @default(0)
-  requiredFollowedRules      Int      @default(0)
-  compliancePercent          Float    @default(0)
-  requiredCompliancePercent  Float    @default(0)
-  notes                      String?
-  createdAt                  DateTime @default(now())
-  updatedAt                  DateTime @updatedAt
+  id                        String   @id @default(cuid())
+  tradeId                   String   @unique
+  strategyId                String?
+  strategyNameSnapshot      String?
+  followedPlan              String   @default("NOT_REVIEWED")
+  totalRules                Int      @default(0)
+  followedRules             Int      @default(0)
+  violatedRules             Int      @default(0)
+  requiredRules             Int      @default(0)
+  requiredFollowedRules     Int      @default(0)
+  compliancePercent         Float    @default(0)
+  requiredCompliancePercent Float    @default(0)
+  notes                     String?
+  createdAt                 DateTime @default(now())
+  updatedAt                 DateTime @updatedAt
 
-  trade       Trade @relation(fields: [tradeId], references: [id], onDelete: Cascade)
-  strategy    PlaybookStrategy? @relation(fields: [strategyId], references: [id], onDelete: SetNull)
+  trade       Trade                     @relation(fields: [tradeId], references: [id], onDelete: Cascade)
+  strategy    PlaybookStrategy?         @relation(fields: [strategyId], references: [id], onDelete: SetNull)
   ruleReviews TradeStrategyRuleReview[]
 
   @@index([strategyId])
@@ -322,18 +572,18 @@ model TradeStrategyReview {
 }
 
 model TradeStrategyRuleReview {
-  id                     String   @id @default(cuid())
-  tradeStrategyReviewId  String
-  originalRuleId         String?
-  ruleTitleSnapshot      String
+  id                      String   @id @default(cuid())
+  tradeStrategyReviewId   String
+  originalRuleId          String?
+  ruleTitleSnapshot       String
   ruleDescriptionSnapshot String?
-  ruleSectionSnapshot    String
-  isRequiredSnapshot     Boolean  @default(false)
-  status                 String   @default("NOT_REVIEWED")
-  note                   String?
-  sortOrder              Int      @default(0)
-  createdAt              DateTime @default(now())
-  updatedAt              DateTime @updatedAt
+  ruleSectionSnapshot     String
+  isRequiredSnapshot      Boolean  @default(false)
+  status                  String   @default("NOT_REVIEWED")
+  note                    String?
+  sortOrder               Int      @default(0)
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
 
   review TradeStrategyReview @relation(fields: [tradeStrategyReviewId], references: [id], onDelete: Cascade)
 

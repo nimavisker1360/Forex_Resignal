@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { AlertTriangle, Check, ListChecks, Plus, Save, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { useLanguage } from "@/lib/language-context";
 import { cn } from "@/lib/utils";
 
 type ChecklistTemplate = {
@@ -82,6 +83,7 @@ function progressTone(percent: number) {
 }
 
 export function TradeChecklistPanel({ tradeId }: TradeChecklistPanelProps) {
+  const { t } = useLanguage();
   const [templates, setTemplates] = useState<ChecklistTemplate[]>([]);
   const [checklists, setChecklists] = useState<TradeChecklist[]>([]);
   const [selectedTemplateId, setSelectedTemplateId] = useState("");
@@ -101,6 +103,9 @@ export function TradeChecklistPanel({ tradeId }: TradeChecklistPanelProps) {
   const availableTemplates = templates.filter(
     (template) => !attachedTemplateIds.has(template.id)
   );
+  const loadTemplatesFailedText = t("journal.checklistPanel.loadTemplatesFailed");
+  const loadTradeChecklistsFailedText = t("journal.checklistPanel.loadTradeChecklistsFailed");
+  const loadChecklistsFailedText = t("journal.checklistPanel.loadChecklistsFailed");
 
   const loadPanelData = useCallback(async () => {
     setLoading(true);
@@ -116,22 +121,22 @@ export function TradeChecklistPanel({ tradeId }: TradeChecklistPanelProps) {
       ]);
 
       if (!templatesResponse.ok) {
-        toast.error(templatesData.message || "Failed to load checklist templates");
+        toast.error(templatesData.message || loadTemplatesFailedText);
       } else {
         setTemplates(templatesData.checklists || []);
       }
 
       if (!tradeChecklistsResponse.ok) {
-        toast.error(tradeChecklistsData.message || "Failed to load trade checklists");
+        toast.error(tradeChecklistsData.message || loadTradeChecklistsFailedText);
       } else {
         setChecklists(tradeChecklistsData.checklists || []);
       }
     } catch {
-      toast.error("Failed to load checklists");
+      toast.error(loadChecklistsFailedText);
     } finally {
       setLoading(false);
     }
-  }, [tradeId]);
+  }, [loadChecklistsFailedText, loadTemplatesFailedText, loadTradeChecklistsFailedText, tradeId]);
 
   useEffect(() => {
     void loadPanelData();
@@ -139,7 +144,7 @@ export function TradeChecklistPanel({ tradeId }: TradeChecklistPanelProps) {
 
   async function addChecklist() {
     if (!selectedTemplateId) {
-      toast.error("Select a checklist template");
+      toast.error(t("journal.checklistPanel.selectTemplate"));
       return;
     }
 
@@ -154,15 +159,15 @@ export function TradeChecklistPanel({ tradeId }: TradeChecklistPanelProps) {
       const data = await response.json();
 
       if (!response.ok) {
-        toast.error(data.message || "Failed to add checklist");
+        toast.error(data.message || t("journal.checklistPanel.addFailed"));
         return;
       }
 
       setChecklists((current) => [...current, data.checklist]);
       setSelectedTemplateId("");
-      toast.success("Checklist added");
+      toast.success(t("journal.checklistPanel.added"));
     } catch {
-      toast.error("Failed to add checklist");
+      toast.error(t("journal.checklistPanel.addFailed"));
     } finally {
       setAdding(false);
     }
@@ -208,23 +213,25 @@ export function TradeChecklistPanel({ tradeId }: TradeChecklistPanelProps) {
       const data = await response.json();
 
       if (!response.ok) {
-        toast.error(data.message || "Failed to save checklist");
+        toast.error(data.message || t("journal.checklistPanel.saveFailed"));
         return;
       }
 
       setChecklists((current) =>
         current.map((item) => (item.id === checklist.id ? data.checklist : item))
       );
-      toast.success("Checklist saved");
+      toast.success(t("journal.checklistPanel.saved"));
     } catch {
-      toast.error("Failed to save checklist");
+      toast.error(t("journal.checklistPanel.saveFailed"));
     } finally {
       setSavingId(null);
     }
   }
 
   async function removeChecklist(checklist: TradeChecklist) {
-    const confirmed = window.confirm(`Remove "${checklist.titleSnapshot}" from this trade?`);
+    const confirmed = window.confirm(
+      t("journal.checklistPanel.confirmRemove").replace("{title}", checklist.titleSnapshot)
+    );
 
     if (!confirmed) {
       return;
@@ -238,16 +245,16 @@ export function TradeChecklistPanel({ tradeId }: TradeChecklistPanelProps) {
       const data = await response.json();
 
       if (!response.ok) {
-        toast.error(data.message || "Failed to remove checklist");
+        toast.error(data.message || t("journal.checklistPanel.removeFailed"));
         return;
       }
 
       setChecklists((current) =>
         current.filter((item) => item.id !== checklist.id)
       );
-      toast.success("Checklist removed");
+      toast.success(t("journal.checklistPanel.removed"));
     } catch {
-      toast.error("Failed to remove checklist");
+      toast.error(t("journal.checklistPanel.removeFailed"));
     }
   }
 
@@ -255,9 +262,9 @@ export function TradeChecklistPanel({ tradeId }: TradeChecklistPanelProps) {
     <section className="rounded-lg border border-slate-800 bg-[#0F172A] p-5 shadow-sm">
       <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <h2 className="text-lg font-semibold text-white">Checklists</h2>
+          <h2 className="text-lg font-semibold text-white">{t("journal.checklistPanel.title")}</h2>
           <p className="mt-1 text-sm text-slate-400">
-            Snapshot reusable templates into this trade and track execution quality.
+            {t("journal.checklistPanel.subtitle")}
           </p>
         </div>
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
@@ -269,8 +276,8 @@ export function TradeChecklistPanel({ tradeId }: TradeChecklistPanelProps) {
           >
             <option value="">
               {availableTemplates.length === 0
-                ? "No templates available"
-                : "Select checklist"}
+                ? t("journal.checklistPanel.noTemplatesAvailable")
+                : t("journal.checklistPanel.selectChecklist")}
             </option>
             {availableTemplates.map((template) => (
               <option key={template.id} value={template.id}>
@@ -286,23 +293,23 @@ export function TradeChecklistPanel({ tradeId }: TradeChecklistPanelProps) {
             className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-[#2563EB] px-4 text-sm font-semibold text-white hover:bg-blue-500 disabled:opacity-60"
           >
             <Plus className="h-4 w-4" />
-            {adding ? "Adding" : "Add Checklist"}
+            {adding ? t("journal.tradeDetail.adding") : t("journal.checklistPanel.addChecklist")}
           </button>
         </div>
       </div>
 
       {loading ? (
         <div className="rounded-lg border border-slate-800 bg-[#111827] p-4 text-sm text-slate-400">
-          Loading checklists...
+          {t("journal.checklistPanel.loading")}
         </div>
       ) : null}
 
       {!loading && checklists.length === 0 ? (
         <div className="rounded-lg border border-slate-800 bg-[#111827] px-4 py-10 text-center">
           <ListChecks className="mx-auto h-8 w-8 text-slate-500" />
-          <h3 className="mt-3 text-base font-semibold text-white">No checklist on this trade</h3>
+          <h3 className="mt-3 text-base font-semibold text-white">{t("journal.checklistPanel.emptyTitle")}</h3>
           <p className="mt-1 text-sm text-slate-400">
-            Add a template to record execution checks for this journal entry.
+            {t("journal.checklistPanel.emptyDescription")}
           </p>
         </div>
       ) : null}
@@ -319,26 +326,29 @@ export function TradeChecklistPanel({ tradeId }: TradeChecklistPanelProps) {
                   <h3 className="text-base font-semibold text-white">
                     {checklist.titleSnapshot}
                   </h3>
-                  <Badge>{checklist.categorySnapshot || "Custom"}</Badge>
+                  <Badge>{checklist.categorySnapshot || t("journal.checklistPanel.custom")}</Badge>
                   {checklist.requiredIncompleteCount > 0 ? (
                     <Badge tone="amber">
                       <AlertTriangle className="mr-1 h-3 w-3" />
-                      Required missing
+                      {t("journal.checklistPanel.requiredMissing")}
                     </Badge>
                   ) : checklist.requiredTotalCount > 0 ? (
                     <Badge tone="green">
                       <Check className="mr-1 h-3 w-3" />
-                      Required complete
+                      {t("journal.checklistPanel.requiredComplete")}
                     </Badge>
                   ) : null}
                 </div>
                 <div className="mt-3 flex flex-wrap gap-2">
                   <Badge tone="blue">
-                    {checklist.completedCount}/{checklist.totalCount} completed
+                    {t("journal.checklistPanel.completedCount")
+                      .replace("{completed}", String(checklist.completedCount))
+                      .replace("{total}", String(checklist.totalCount))}
                   </Badge>
                   <Badge>
-                    Required {checklist.requiredCompletedCount}/
-                    {checklist.requiredTotalCount}
+                    {t("journal.checklistPanel.requiredCount")
+                      .replace("{completed}", String(checklist.requiredCompletedCount))
+                      .replace("{total}", String(checklist.requiredTotalCount))}
                   </Badge>
                   <Badge>{Math.round(checklist.completionPercent)}%</Badge>
                 </div>
@@ -351,14 +361,14 @@ export function TradeChecklistPanel({ tradeId }: TradeChecklistPanelProps) {
                   className="inline-flex h-9 items-center justify-center gap-2 rounded-lg bg-[#2563EB] px-3 text-sm font-semibold text-white hover:bg-blue-500 disabled:opacity-60"
                 >
                   <Save className="h-4 w-4" />
-                  {savingId === checklist.id ? "Saving" : "Save"}
+                  {savingId === checklist.id ? t("journal.tradeDetail.saving") : t("journal.tradeDetail.save")}
                 </button>
                 <button
                   type="button"
                   onClick={() => removeChecklist(checklist)}
                   className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-red-500/30 text-[#EF4444] hover:bg-red-500/10"
-                  aria-label="Remove checklist"
-                  title="Remove checklist"
+                  aria-label={t("journal.checklistPanel.removeChecklist")}
+                  title={t("journal.checklistPanel.removeChecklist")}
                 >
                   <Trash2 className="h-4 w-4" />
                 </button>
@@ -394,7 +404,7 @@ export function TradeChecklistPanel({ tradeId }: TradeChecklistPanelProps) {
                         {answer.titleSnapshot}
                         {answer.isRequiredSnapshot ? (
                           <span className="rounded-md border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-xs text-amber-300">
-                            Required
+                            {t("journal.checklistPanel.required")}
                           </span>
                         ) : null}
                       </span>
@@ -412,7 +422,7 @@ export function TradeChecklistPanel({ tradeId }: TradeChecklistPanelProps) {
                         note: event.target.value,
                       })
                     }
-                    placeholder="Optional note"
+                    placeholder={t("journal.checklistPanel.optionalNote")}
                     rows={2}
                     className={cn(textareaClass, "mt-3")}
                   />

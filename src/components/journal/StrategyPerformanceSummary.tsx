@@ -1,3 +1,6 @@
+"use client";
+
+import { useLanguage } from "@/lib/language-context";
 import { cn } from "@/lib/utils";
 import type { StrategyAnalyticsDto } from "@/types/playbooks";
 
@@ -48,6 +51,7 @@ export function StrategyPerformanceSummary({
   analytics: StrategyAnalyticsDto | undefined;
   compact?: boolean;
 }) {
+  const { t } = useLanguage();
   const data = analytics || {
     totalTrades: 0,
     netPnl: 0,
@@ -63,18 +67,18 @@ export function StrategyPerformanceSummary({
 
   return (
     <div className={cn("grid gap-3", compact ? "grid-cols-2" : "sm:grid-cols-2 xl:grid-cols-4")}>
-      <Metric label="Total Trades" value={formatNumber(data.totalTrades, 0)} />
-      <Metric label="Win Rate" value={`${formatNumber(data.winRate, 1)}%`} tone="text-emerald-300" />
-      <Metric label="Net P&L" value={formatMoney(data.netPnl)} tone={valueTone(data.netPnl)} />
-      <Metric label="Profit Factor" value={formatNumber(data.profitFactor, 2)} />
+      <Metric label={t("journal.analytics.totalTrades")} value={formatNumber(data.totalTrades, 0)} />
+      <Metric label={t("journal.analytics.winRate")} value={`${formatNumber(data.winRate, 1)}%`} tone="text-emerald-300" />
+      <Metric label={t("journal.analytics.netPnl")} value={formatMoney(data.netPnl)} tone={valueTone(data.netPnl)} />
+      <Metric label={t("journal.analytics.profitFactor")} value={formatNumber(data.profitFactor, 2)} />
       {!compact ? (
         <>
-          <Metric label="Loss Rate" value={`${formatNumber(data.lossRate, 1)}%`} />
-          <Metric label="Average Win" value={formatMoney(data.averageWin)} tone="text-emerald-300" />
-          <Metric label="Average Loss" value={formatMoney(data.averageLoss)} tone="text-red-300" />
-          <Metric label="Average R:R" value={formatNumber(data.averageRR, 2)} />
-          <Metric label="Best Trade" value={data.bestTrade ? formatMoney(data.bestTrade.pnl) : "$0.00"} tone="text-emerald-300" />
-          <Metric label="Worst Trade" value={data.worstTrade ? formatMoney(data.worstTrade.pnl) : "$0.00"} tone="text-red-300" />
+          <Metric label={t("journal.analytics.lossRate")} value={`${formatNumber(data.lossRate, 1)}%`} />
+          <Metric label={t("journal.analytics.averageWin")} value={formatMoney(data.averageWin)} tone="text-emerald-300" />
+          <Metric label={t("journal.analytics.averageLoss")} value={formatMoney(data.averageLoss)} tone="text-red-300" />
+          <Metric label={t("journal.analytics.averageRr")} value={formatNumber(data.averageRR, 2)} />
+          <Metric label={t("journal.analytics.bestTrade")} value={data.bestTrade ? formatMoney(data.bestTrade.pnl) : "$0.00"} tone="text-emerald-300" />
+          <Metric label={t("journal.analytics.worstTrade")} value={data.worstTrade ? formatMoney(data.worstTrade.pnl) : "$0.00"} tone="text-red-300" />
         </>
       ) : null}
     </div>

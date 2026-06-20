@@ -10,7 +10,8 @@
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio",
-    "seed:phase1": "node scripts/seed-phase-1-demo.js"
+    "seed:phase1": "node scripts/seed-phase-1-demo.js",
+    "seed:plans": "node scripts/seed-plans.js"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",
@@ -21,6 +22,7 @@
     "@radix-ui/react-slot": "^1.2.0",
     "@radix-ui/react-tabs": "^1.1.4",
     "@vercel/blob": "^2.4.0",
+    "better-auth": "^1.6.18",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "embla-carousel-react": "^8.6.0",

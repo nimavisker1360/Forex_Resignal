@@ -1,15 +1,10 @@
 import { AccountsManager } from "@/components/dashboard/AccountsManager";
+import { getAccountsPageData } from "@/lib/dashboard-data";
+import { getSession } from "@/lib/server-auth";
 
-type AccountsPageProps = {
-  searchParams?: Promise<Record<string, string | string[] | undefined>>;
-};
+export default async function AccountsPage() {
+  const session = await getSession();
+  const accounts = session?.user.id ? await getAccountsPageData(session.user.id) : [];
 
-function first(value: string | string[] | undefined) {
-  return Array.isArray(value) ? value[0] : value;
-}
-
-export default async function AccountsPage({ searchParams }: AccountsPageProps) {
-  const params = (await searchParams) || {};
-
-  return <AccountsManager userId={first(params.userId)} />;
+  return <AccountsManager userId={session?.user.id} initialAccounts={accounts} />;
 }

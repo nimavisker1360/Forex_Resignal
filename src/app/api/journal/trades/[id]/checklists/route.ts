@@ -3,6 +3,8 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { serializeTradeChecklist, tradeChecklistInclude } from "@/lib/checklists/api";
 import { attachChecklistTemplateToTrade } from "@/lib/checklists/trade-checklists";
+import { getCurrentUserId, unauthorizedResponse } from "@/lib/server-auth";
+import { requireFeatureAccess, subscriptionAccessResponse } from "@/lib/subscription";
 
 export const dynamic = "force-dynamic";
 
@@ -28,9 +30,15 @@ function validationResponse(errors: string[]) {
 
 export async function GET(_request: Request, context: RouteContext) {
   try {
+    const userId = await getCurrentUserId();
+
+    if (!userId) {
+      return unauthorizedResponse();
+    }
+
     const { id } = await context.params;
-    const trade = await prisma.trade.findUnique({
-      where: { id },
+    const trade = await prisma.trade.findFirst({
+      where: { id, userId },
       select: { id: true },
     });
 
@@ -63,6 +71,14 @@ export async function GET(_request: Request, context: RouteContext) {
 
 export async function POST(request: Request, context: RouteContext) {
   try {
+    const userId = await getCurrentUserId();
+
+    if (!userId) {
+      return unauthorizedResponse();
+    }
+
+    await requireFeatureAccess(userId, "checklists");
+
     const { id } = await context.params;
     const body = (await request.json()) as Record<string, unknown>;
     const checklistTemplateId = optionalString(
@@ -71,6 +87,18 @@ export async function POST(request: Request, context: RouteContext) {
 
     if (!checklistTemplateId) {
       return validationResponse(["checklistTemplateId is required"]);
+    }
+
+    const trade = await prisma.trade.findFirst({
+      where: { id, userId },
+      select: { id: true },
+    });
+
+    if (!trade) {
+      return NextResponse.json(
+        { success: false, message: "Journal trade not found" },
+        { status: 404 }
+      );
     }
 
     const checklist = await prisma.$transaction((tx) =>
@@ -88,6 +116,12 @@ export async function POST(request: Request, context: RouteContext) {
       { status: 201 }
     );
   } catch (error) {
+    const accessResponse = subscriptionAccessResponse(error);
+
+    if (accessResponse) {
+      return accessResponse;
+    }
+
     console.error("Trade checklists POST error:", error);
 
     const message = error instanceof Error ? error.message : "";

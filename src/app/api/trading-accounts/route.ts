@@ -1,17 +1,16 @@
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { apiResponse, decimalValue } from "@/lib/journal/api-utils";
+import { getCurrentUserId, unauthorizedResponse } from "@/lib/server-auth";
 
 export const dynamic = "force-dynamic";
 
-export async function GET(request: Request) {
+export async function GET() {
   try {
-    const { searchParams } = new URL(request.url);
-    // TODO: Replace query-param userId with the authenticated session user id.
-    const userId = searchParams.get("userId");
+    const userId = await getCurrentUserId();
 
     if (!userId) {
-      return apiResponse({ success: false, message: "userId is required" }, 400);
+      return unauthorizedResponse();
     }
 
     const accounts = await prisma.tradingAccount.findMany({
@@ -32,13 +31,18 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
-    // TODO: Replace body userId with the authenticated session user id.
-    const { userId, name, broker, platform, currency, balance } = body;
+    const userId = await getCurrentUserId();
 
-    if (!userId || !name || !currency) {
+    if (!userId) {
+      return unauthorizedResponse();
+    }
+
+    const body = await request.json();
+    const { name, broker, platform, currency, balance } = body;
+
+    if (!name || !currency) {
       return apiResponse(
-        { success: false, message: "userId, name, and currency are required" },
+        { success: false, message: "name and currency are required" },
         400
       );
     }

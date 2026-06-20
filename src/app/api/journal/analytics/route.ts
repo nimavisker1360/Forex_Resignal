@@ -6,6 +6,8 @@ import {
   buildTradeAnalytics,
 } from "@/lib/analytics/tradeAnalytics";
 import { prisma } from "@/lib/prisma";
+import { getCurrentUserId, unauthorizedResponse } from "@/lib/server-auth";
+import { requireFeatureAccess, subscriptionAccessResponse } from "@/lib/subscription";
 
 export const dynamic = "force-dynamic";
 
@@ -97,7 +99,7 @@ function parseDirection(value: string | null) {
   return null;
 }
 
-function buildAnalyticsWhere(searchParams: URLSearchParams) {
+function buildAnalyticsWhere(searchParams: URLSearchParams, userId: string) {
   const errors: string[] = [];
   const and: Prisma.TradeWhereInput[] = [
     {
@@ -108,7 +110,6 @@ function buildAnalyticsWhere(searchParams: URLSearchParams) {
       ],
     },
   ];
-  const userId = searchParams.get("userId")?.trim();
   const accountId = searchParams.get("accountId")?.trim();
   const symbol = searchParams.get("symbol")?.trim();
   const strategy = searchParams.get("strategy")?.trim();
@@ -145,9 +146,7 @@ function buildAnalyticsWhere(searchParams: URLSearchParams) {
   const dateFrom = customDateFrom || presetRange?.dateFrom;
   const dateTo = customDateTo || presetRange?.dateTo;
 
-  if (userId) {
-    and.push({ userId });
-  }
+  and.push({ userId });
 
   if (accountId) {
     and.push({ accountId });
@@ -187,8 +186,16 @@ function buildAnalyticsWhere(searchParams: URLSearchParams) {
 
 export async function GET(request: Request) {
   try {
+    const userId = await getCurrentUserId();
+
+    if (!userId) {
+      return unauthorizedResponse();
+    }
+
+    await requireFeatureAccess(userId, "advancedAnalytics");
+
     const { searchParams } = new URL(request.url);
-    const { where, errors } = buildAnalyticsWhere(searchParams);
+    const { where, errors } = buildAnalyticsWhere(searchParams, userId);
 
     if (errors.length > 0) {
       return NextResponse.json(
@@ -198,18 +205,14 @@ export async function GET(request: Request) {
     }
 
     const metadataWhere: Prisma.TradeWhereInput = {
+      userId,
       OR: [
         { status: "CLOSED" },
         { closedAt: { not: null } },
         { exitPrice: { not: null } },
       ],
     };
-    const userId = searchParams.get("userId")?.trim();
     const accountId = searchParams.get("accountId")?.trim();
-
-    if (userId) {
-      metadataWhere.userId = userId;
-    }
 
     if (accountId) {
       metadataWhere.accountId = accountId;
@@ -232,6 +235,12 @@ export async function GET(request: Request) {
 
     return NextResponse.json(analytics);
   } catch (error) {
+    const accessResponse = subscriptionAccessResponse(error);
+
+    if (accessResponse) {
+      return accessResponse;
+    }
+
     console.error("Journal analytics GET error:", error);
 
     return NextResponse.json(

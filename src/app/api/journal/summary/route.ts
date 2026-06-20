@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getCurrentUserId, unauthorizedResponse } from "@/lib/server-auth";
 import {
   buildTradeWhere,
   journalTradeInclude,
@@ -19,8 +20,15 @@ function toNumber(value: unknown) {
 
 export async function GET(request: Request) {
   try {
+    const userId = await getCurrentUserId();
+
+    if (!userId) {
+      return unauthorizedResponse();
+    }
+
     const { searchParams } = new URL(request.url);
     const { where, errors } = buildTradeWhere(searchParams);
+    where.userId = userId;
 
     if (errors.length > 0) {
       return NextResponse.json(

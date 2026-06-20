@@ -7,6 +7,8 @@ import {
   serializePlaybookStrategy,
 } from "@/lib/playbooks/api";
 import { prisma } from "@/lib/prisma";
+import { getCurrentUserId, unauthorizedResponse } from "@/lib/server-auth";
+import { requireFeatureAccess, subscriptionAccessResponse } from "@/lib/subscription";
 
 export const dynamic = "force-dynamic";
 
@@ -17,9 +19,9 @@ function validationResponse(errors: string[]) {
   );
 }
 
-async function loadStrategyAnalytics(strategyId: string) {
+async function loadStrategyAnalytics(strategyId: string, userId: string) {
   const reviews = await prisma.tradeStrategyReview.findMany({
-    where: { strategyId },
+    where: { strategyId, trade: { userId } },
     include: {
       trade: true,
     },
@@ -35,12 +37,17 @@ async function loadStrategyAnalytics(strategyId: string) {
 
 export async function GET(request: Request) {
   try {
+    const userId = await getCurrentUserId();
+
+    if (!userId) {
+      return unauthorizedResponse();
+    }
+
     const { searchParams } = new URL(request.url);
     const search = searchParams.get("search")?.trim();
     const active = searchParams.get("active");
-    const userId = searchParams.get("userId")?.trim();
     const where: Prisma.PlaybookStrategyWhereInput = {
-      ...(userId ? { userId } : {}),
+      userId,
       ...(active === "true" ? { isActive: true } : {}),
       ...(active === "false" ? { isActive: false } : {}),
       ...(search
@@ -61,7 +68,7 @@ export async function GET(request: Request) {
       orderBy: [{ isActive: "desc" }, { updatedAt: "desc" }],
     });
     const analytics = await Promise.all(
-      strategies.map((strategy) => loadStrategyAnalytics(strategy.id))
+      strategies.map((strategy) => loadStrategyAnalytics(strategy.id, userId))
     );
 
     return NextResponse.json({
@@ -82,6 +89,14 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
+    const userId = await getCurrentUserId();
+
+    if (!userId) {
+      return unauthorizedResponse();
+    }
+
+    await requireFeatureAccess(userId, "playbooks");
+
     const body = (await request.json()) as Record<string, unknown>;
     const normalized = normalizePlaybookPayload(body);
     const name = normalized.data.name;
@@ -92,7 +107,7 @@ export async function POST(request: Request) {
 
     const strategy = await prisma.playbookStrategy.create({
       data: {
-        userId: normalized.data.userId,
+        userId,
         name,
         description: normalized.data.description,
         marketType: normalized.data.marketType,
@@ -128,6 +143,12 @@ export async function POST(request: Request) {
       { status: 201 }
     );
   } catch (error) {
+    const accessResponse = subscriptionAccessResponse(error);
+
+    if (accessResponse) {
+      return accessResponse;
+    }
+
     console.error("Playbooks POST error:", error);
 
     if (

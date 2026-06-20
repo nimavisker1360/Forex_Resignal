@@ -9,6 +9,7 @@ import {
   tradeStrategyReviewInclude,
 } from "@/lib/playbooks/api";
 import { prisma } from "@/lib/prisma";
+import { getCurrentUserId, unauthorizedResponse } from "@/lib/server-auth";
 
 export const dynamic = "force-dynamic";
 
@@ -23,17 +24,35 @@ function validationResponse(errors: string[]) {
   );
 }
 
-async function loadReview(tradeId: string) {
-  return prisma.tradeStrategyReview.findUnique({
-    where: { tradeId },
+async function loadReview(tradeId: string, userId: string) {
+  return prisma.tradeStrategyReview.findFirst({
+    where: { tradeId, trade: { userId } },
     include: tradeStrategyReviewInclude,
   });
 }
 
 export async function GET(_request: Request, context: RouteContext) {
   try {
+    const userId = await getCurrentUserId();
+
+    if (!userId) {
+      return unauthorizedResponse();
+    }
+
     const { id } = await context.params;
-    const review = await loadReview(id);
+    const trade = await prisma.trade.findFirst({
+      where: { id, userId },
+      select: { id: true },
+    });
+
+    if (!trade) {
+      return NextResponse.json(
+        { success: false, message: "Trade not found" },
+        { status: 404 }
+      );
+    }
+
+    const review = await loadReview(id, userId);
 
     return NextResponse.json({
       success: true,
@@ -51,6 +70,12 @@ export async function GET(_request: Request, context: RouteContext) {
 
 export async function POST(request: Request, context: RouteContext) {
   try {
+    const userId = await getCurrentUserId();
+
+    if (!userId) {
+      return unauthorizedResponse();
+    }
+
     const { id } = await context.params;
     const body = (await request.json()) as Record<string, unknown>;
     const strategyId = optionalString(body.strategyId);
@@ -66,9 +91,9 @@ export async function POST(request: Request, context: RouteContext) {
 
     const review = await prisma.$transaction(async (tx) => {
       const [trade, strategy] = await Promise.all([
-        tx.trade.findUnique({ where: { id } }),
-        tx.playbookStrategy.findUnique({
-          where: { id: strategyId },
+        tx.trade.findFirst({ where: { id, userId } }),
+        tx.playbookStrategy.findFirst({
+          where: { id: strategyId, userId },
           include: {
             rules: {
               orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
@@ -172,6 +197,12 @@ export async function POST(request: Request, context: RouteContext) {
 
 export async function PATCH(request: Request, context: RouteContext) {
   try {
+    const userId = await getCurrentUserId();
+
+    if (!userId) {
+      return unauthorizedResponse();
+    }
+
     const { id } = await context.params;
     const body = (await request.json()) as Record<string, unknown>;
     const followedPlan = normalizeFollowedPlan(body.followedPlan);
@@ -216,11 +247,12 @@ export async function PATCH(request: Request, context: RouteContext) {
       const existing = await tx.tradeStrategyReview.findUnique({
         where: { tradeId: id },
         include: {
+          trade: true,
           ruleReviews: true,
         },
       });
 
-      if (!existing) {
+      if (!existing || existing.trade.userId !== userId) {
         throw new Error("REVIEW_NOT_FOUND");
       }
 
@@ -288,7 +320,24 @@ export async function PATCH(request: Request, context: RouteContext) {
 
 export async function DELETE(_request: Request, context: RouteContext) {
   try {
+    const userId = await getCurrentUserId();
+
+    if (!userId) {
+      return unauthorizedResponse();
+    }
+
     const { id } = await context.params;
+    const existing = await prisma.tradeStrategyReview.findUnique({
+      where: { tradeId: id },
+      include: { trade: true },
+    });
+
+    if (!existing || existing.trade.userId !== userId) {
+      return NextResponse.json(
+        { success: false, message: "Strategy review not found" },
+        { status: 404 }
+      );
+    }
 
     await prisma.tradeStrategyReview.delete({
       where: { tradeId: id },

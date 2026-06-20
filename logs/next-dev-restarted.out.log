@@ -1,0 +1,28 @@
+
+> signal-forex@0.1.0 dev
+> next dev
+
+[32m✔[0m [33mConsole Ninja[0m extension is connected to [33mNext.js[0m, see [36mhttps://tinyurl.com/2vt8jxzw[0m
+   ▲ Next.js 15.3.0
+   - Local:        http://localhost:3000
+   - Network:      http://192.168.1.110:3000
+   - Environments: .env.local, .env
+
+ ✓ Starting...
+ ✓ Ready in 8.1s
+ ○ Compiling /api/journal/event ...
+ ✓ Compiled /api/journal/event in 5.5s (451 modules)
+ POST /api/journal/event 401 in 13121ms
+ POST /api/journal/event 200 in 11057ms
+ POST /api/journal/event 401 in 124ms
+ POST /api/journal/event 200 in 238ms
+ POST /api/journal/event 401 in 1566ms
+ POST /api/journal/event 200 in 549ms
+ POST /api/journal/event 401 in 105ms
+ POST /api/journal/event 200 in 249ms
+ POST /api/journal/event 401 in 118ms
+ POST /api/journal/event 200 in 249ms
+ POST /api/journal/event 401 in 297ms
+ POST /api/journal/event 200 in 714ms
+ POST /api/journal/event 401 in 125ms
+ POST /api/journal/event 200 in 268ms

@@ -1,3 +1,6 @@
+"use client";
+
+import { useLanguage } from "@/lib/language-context";
 import type { PlaybookRuleDto, PlaybookRuleSection as RuleSection } from "@/types/playbooks";
 
 export const RULE_SECTION_LABELS: Record<RuleSection, string> = {
@@ -19,6 +22,16 @@ export const RULE_SECTION_ORDER: RuleSection[] = [
 ];
 
 export function PlaybookRuleSection({ rules }: { rules: PlaybookRuleDto[] }) {
+  const { t } = useLanguage();
+  const sectionLabels: Record<RuleSection, string> = {
+    SETUP: t("journal.playbooks.setupRules"),
+    ENTRY: t("journal.playbooks.entryRules"),
+    EXIT: t("journal.playbooks.exitRules"),
+    RISK: t("journal.playbooks.riskRules"),
+    MANAGEMENT: t("journal.playbooks.managementRules"),
+    PSYCHOLOGY: t("journal.playbooks.psychologyRules"),
+  };
+
   return (
     <div className="space-y-4">
       {RULE_SECTION_ORDER.map((section) => {
@@ -26,7 +39,7 @@ export function PlaybookRuleSection({ rules }: { rules: PlaybookRuleDto[] }) {
 
         return (
           <section key={section} className="rounded-lg border border-slate-800 bg-[#111827] p-4">
-            <h3 className="text-sm font-semibold text-white">{RULE_SECTION_LABELS[section]}</h3>
+            <h3 className="text-sm font-semibold text-white">{sectionLabels[section]}</h3>
             {sectionRules.length > 0 ? (
               <div className="mt-3 space-y-2">
                 {sectionRules.map((rule) => (
@@ -35,7 +48,7 @@ export function PlaybookRuleSection({ rules }: { rules: PlaybookRuleDto[] }) {
                       <div className="text-sm font-semibold text-white">{rule.title}</div>
                       {rule.isRequired ? (
                         <span className="rounded-md border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-xs font-semibold text-amber-300">
-                          Required
+                          {t("journal.playbooks.required")}
                         </span>
                       ) : null}
                     </div>
@@ -46,7 +59,7 @@ export function PlaybookRuleSection({ rules }: { rules: PlaybookRuleDto[] }) {
                 ))}
               </div>
             ) : (
-              <p className="mt-3 text-sm text-slate-500">No rules in this section.</p>
+              <p className="mt-3 text-sm text-slate-500">{t("journal.playbooks.noRulesInSection")}</p>
             )}
           </section>
         );

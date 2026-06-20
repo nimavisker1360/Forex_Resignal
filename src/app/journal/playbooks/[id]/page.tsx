@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Pencil } from "lucide-react";
 import { fetchJournalApi } from "@/app/journal/_lib/journal-api";
+import { DashboardText } from "@/components/dashboard/DashboardText";
 import { PlaybookRuleSection } from "@/components/journal/PlaybookRuleSection";
 import { StrategyPerformanceSummary } from "@/components/journal/StrategyPerformanceSummary";
 import { cn } from "@/lib/utils";
@@ -68,25 +69,25 @@ function Badge({
   );
 }
 
-function GroupStatCard({ label, stats }: { label: string; stats: StrategyGroupStats }) {
+function GroupStatCard({ label, stats }: { label: React.ReactNode; stats: StrategyGroupStats }) {
   return (
     <div className="rounded-lg border border-slate-800 bg-[#111827] p-4">
       <div className="text-sm font-semibold text-white">{label}</div>
       <div className="mt-3 grid grid-cols-2 gap-3 text-sm">
         <div>
-          <div className="text-xs uppercase text-slate-500">Trades</div>
+          <div className="text-xs uppercase text-slate-500"><DashboardText k="journal.analytics.trades" /></div>
           <div className="mt-1 font-semibold text-slate-200">{formatNumber(stats.totalTrades, 0)}</div>
         </div>
         <div>
-          <div className="text-xs uppercase text-slate-500">Win Rate</div>
+          <div className="text-xs uppercase text-slate-500"><DashboardText k="journal.analytics.winRate" /></div>
           <div className="mt-1 font-semibold text-slate-200">{formatNumber(stats.winRate, 1)}%</div>
         </div>
         <div>
-          <div className="text-xs uppercase text-slate-500">Net P&L</div>
+          <div className="text-xs uppercase text-slate-500"><DashboardText k="journal.analytics.netPnl" /></div>
           <div className={cn("mt-1 font-semibold", valueTone(stats.netPnl))}>{formatMoney(stats.netPnl)}</div>
         </div>
         <div>
-          <div className="text-xs uppercase text-slate-500">Average</div>
+          <div className="text-xs uppercase text-slate-500"><DashboardText k="journal.analytics.average" /></div>
           <div className={cn("mt-1 font-semibold", valueTone(stats.averagePnl))}>{formatMoney(stats.averagePnl)}</div>
         </div>
       </div>
@@ -98,7 +99,7 @@ function TradeMiniTable({
   title,
   trades,
 }: {
-  title: string;
+  title: React.ReactNode;
   trades: StrategyTradeSummary[];
 }) {
   return (
@@ -108,10 +109,10 @@ function TradeMiniTable({
         <table className="w-full min-w-[460px] text-left text-sm">
           <thead className="text-xs uppercase text-slate-500">
             <tr>
-              <th className="py-2 pr-3">Symbol</th>
-              <th className="py-2 pr-3">P&L</th>
-              <th className="py-2 pr-3">R:R</th>
-              <th className="py-2">Open Time</th>
+              <th className="py-2 pr-3"><DashboardText k="dashboard.table.symbol" /></th>
+              <th className="py-2 pr-3"><DashboardText k="journal.analytics.netPnl" /></th>
+              <th className="py-2 pr-3"><DashboardText k="dashboard.table.rr" /></th>
+              <th className="py-2"><DashboardText k="dashboard.table.openTime" /></th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-800">
@@ -133,7 +134,7 @@ function TradeMiniTable({
         </table>
         {trades.length === 0 ? (
           <div className="rounded-lg border border-dashed border-slate-800 bg-[#111827] px-4 py-8 text-center text-sm text-slate-400">
-            No trades yet.
+            <DashboardText k="journal.playbooks.noTradesYet" />
           </div>
         ) : null}
       </div>
@@ -162,14 +163,14 @@ export default async function PlaybookDetailPage({ params }: PlaybookDetailPageP
           className="inline-flex items-center gap-2 text-sm text-gray-300 hover:text-white"
         >
           <ArrowLeft className="h-4 w-4" />
-          Back to playbooks
+          <DashboardText k="journal.playbooks.back" />
         </Link>
         <Link
           href={`/journal/playbooks/${playbook.id}/edit`}
           className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-[#2563EB] px-4 text-sm font-semibold text-white hover:bg-blue-500"
         >
           <Pencil className="h-4 w-4" />
-          Edit Playbook
+          <DashboardText k="journal.playbooks.editTitle" />
         </Link>
       </div>
 
@@ -179,18 +180,18 @@ export default async function PlaybookDetailPage({ params }: PlaybookDetailPageP
             <div className="flex flex-wrap items-center gap-2">
               <h1 className="text-2xl font-semibold text-white">{playbook.name}</h1>
               <Badge tone={playbook.isActive ? "green" : "amber"}>
-                {playbook.isActive ? "Active" : "Inactive"}
+                {playbook.isActive ? <DashboardText k="journal.common.active" /> : <DashboardText k="journal.common.inactive" />}
               </Badge>
             </div>
             <p className="mt-2 max-w-3xl text-sm text-slate-400">
-              {playbook.description || "No description"}
+              {playbook.description || <DashboardText k="journal.common.noDescription" />}
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <Badge>{playbook.marketType || "Custom market"}</Badge>
-            <Badge>{playbook.symbols || "All symbols"}</Badge>
-            <Badge>{playbook.timeframes || "All timeframes"}</Badge>
-            <Badge tone="blue">{playbook.linkedChecklistCount} checklists</Badge>
+            <Badge>{playbook.marketType || <DashboardText k="journal.playbooks.customMarket" />}</Badge>
+            <Badge>{playbook.symbols || <DashboardText k="journal.playbooks.allSymbols" />}</Badge>
+            <Badge>{playbook.timeframes || <DashboardText k="journal.playbooks.allTimeframes" />}</Badge>
+            <Badge tone="blue"><DashboardText k="journal.playbooks.checklistsCount" values={{ count: String(playbook.linkedChecklistCount) }} /></Badge>
           </div>
         </div>
       </section>
@@ -199,35 +200,35 @@ export default async function PlaybookDetailPage({ params }: PlaybookDetailPageP
 
       {analytics ? (
         <section className="rounded-lg border border-slate-800 bg-[#0F172A] p-4 shadow-sm">
-          <h2 className="text-sm font-semibold text-white">Plan Followed Comparison</h2>
+          <h2 className="text-sm font-semibold text-white"><DashboardText k="journal.playbooks.planFollowedComparison" /></h2>
           <div className="mt-4 grid gap-3 lg:grid-cols-3">
-            <GroupStatCard label="Followed Plan" stats={analytics.followedPlanStats} />
-            <GroupStatCard label="Partially Followed" stats={analytics.partialFollowedPlanStats} />
-            <GroupStatCard label="Did Not Follow" stats={analytics.notFollowedPlanStats} />
+            <GroupStatCard label={<DashboardText k="journal.playbooks.followedPlan" />} stats={analytics.followedPlanStats} />
+            <GroupStatCard label={<DashboardText k="journal.playbooks.partiallyFollowed" />} stats={analytics.partialFollowedPlanStats} />
+            <GroupStatCard label={<DashboardText k="journal.playbooks.didNotFollow" />} stats={analytics.notFollowedPlanStats} />
           </div>
         </section>
       ) : null}
 
       <div className="grid gap-5 xl:grid-cols-[1.2fr_0.8fr]">
         <section className="rounded-lg border border-slate-800 bg-[#0F172A] p-5 shadow-sm">
-          <h2 className="mb-4 text-lg font-semibold text-white">Strategy Rules</h2>
+          <h2 className="mb-4 text-lg font-semibold text-white"><DashboardText k="journal.playbooks.strategyRules" /></h2>
           <PlaybookRuleSection rules={playbook.rules} />
         </section>
 
         <section className="rounded-lg border border-slate-800 bg-[#0F172A] p-5 shadow-sm">
-          <h2 className="text-lg font-semibold text-white">Linked Checklists</h2>
+          <h2 className="text-lg font-semibold text-white"><DashboardText k="journal.playbooks.linkedChecklists" /></h2>
           <div className="mt-4 space-y-3">
             {playbook.checklists.map((checklist) => (
               <div key={checklist.id} className="rounded-lg border border-slate-800 bg-[#111827] p-3">
                 <div className="text-sm font-semibold text-white">{checklist.title}</div>
                 <div className="mt-1 text-xs text-slate-400">
-                  {checklist.category || "Custom"} / {checklist.itemCount} items
+                  {checklist.category || <DashboardText k="journal.playbooks.customMarket" />} / <DashboardText k="journal.playbooks.itemsCount" values={{ count: String(checklist.itemCount) }} />
                 </div>
               </div>
             ))}
             {playbook.checklists.length === 0 ? (
               <div className="rounded-lg border border-slate-800 bg-[#111827] p-4 text-sm text-slate-400">
-                No checklist templates linked.
+                <DashboardText k="journal.playbooks.noChecklistLinked" />
               </div>
             ) : null}
           </div>
@@ -236,9 +237,9 @@ export default async function PlaybookDetailPage({ params }: PlaybookDetailPageP
 
       {analytics ? (
         <div className="grid gap-5 xl:grid-cols-3">
-          <TradeMiniTable title="Example Winning Trades" trades={analytics.exampleWinningTrades} />
-          <TradeMiniTable title="Example Losing Trades" trades={analytics.exampleLosingTrades} />
-          <TradeMiniTable title="Recent Trades" trades={analytics.recentTrades} />
+          <TradeMiniTable title={<DashboardText k="journal.playbooks.exampleWinningTrades" />} trades={analytics.exampleWinningTrades} />
+          <TradeMiniTable title={<DashboardText k="journal.playbooks.exampleLosingTrades" />} trades={analytics.exampleLosingTrades} />
+          <TradeMiniTable title={<DashboardText k="journal.playbooks.recentTrades" />} trades={analytics.recentTrades} />
         </div>
       ) : null}
     </div>

@@ -6,6 +6,8 @@ import {
   normalizeTemplatePayload,
   serializeChecklistTemplate,
 } from "@/lib/checklists/api";
+import { getCurrentUserId, unauthorizedResponse } from "@/lib/server-auth";
+import { requireFeatureAccess, subscriptionAccessResponse } from "@/lib/subscription";
 
 export const dynamic = "force-dynamic";
 
@@ -133,6 +135,14 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
+    const userId = await getCurrentUserId();
+
+    if (!userId) {
+      return unauthorizedResponse();
+    }
+
+    await requireFeatureAccess(userId, "checklists");
+
     const body = (await request.json()) as Record<string, unknown>;
     const normalized = normalizeTemplatePayload(body);
     const title = normalized.data.title;
@@ -177,6 +187,12 @@ export async function POST(request: Request) {
       { status: 201 }
     );
   } catch (error) {
+    const accessResponse = subscriptionAccessResponse(error);
+
+    if (accessResponse) {
+      return accessResponse;
+    }
+
     console.error("Checklist templates POST error:", error);
 
     if (

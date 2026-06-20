@@ -7,6 +7,7 @@ import {
   serializePlaybookStrategy,
 } from "@/lib/playbooks/api";
 import { prisma } from "@/lib/prisma";
+import { getCurrentUserId, unauthorizedResponse } from "@/lib/server-auth";
 
 export const dynamic = "force-dynamic";
 
@@ -21,9 +22,9 @@ function validationResponse(errors: string[]) {
   );
 }
 
-async function loadStrategyAnalytics(strategyId: string) {
+async function loadStrategyAnalytics(strategyId: string, userId: string) {
   const reviews = await prisma.tradeStrategyReview.findMany({
-    where: { strategyId },
+    where: { strategyId, trade: { userId } },
     include: {
       trade: true,
     },
@@ -39,9 +40,15 @@ async function loadStrategyAnalytics(strategyId: string) {
 
 export async function GET(_request: Request, context: RouteContext) {
   try {
+    const userId = await getCurrentUserId();
+
+    if (!userId) {
+      return unauthorizedResponse();
+    }
+
     const { id } = await context.params;
-    const strategy = await prisma.playbookStrategy.findUnique({
-      where: { id },
+    const strategy = await prisma.playbookStrategy.findFirst({
+      where: { id, userId },
       include: playbookStrategyInclude,
     });
 
@@ -54,7 +61,7 @@ export async function GET(_request: Request, context: RouteContext) {
 
     return NextResponse.json({
       success: true,
-      playbook: serializePlaybookStrategy(strategy, await loadStrategyAnalytics(id)),
+      playbook: serializePlaybookStrategy(strategy, await loadStrategyAnalytics(id, userId)),
     });
   } catch (error) {
     console.error("Playbook GET error:", error);
@@ -68,6 +75,12 @@ export async function GET(_request: Request, context: RouteContext) {
 
 export async function PATCH(request: Request, context: RouteContext) {
   try {
+    const userId = await getCurrentUserId();
+
+    if (!userId) {
+      return unauthorizedResponse();
+    }
+
     const { id } = await context.params;
     const body = (await request.json()) as Record<string, unknown>;
     const normalized = normalizePlaybookPayload(body);
@@ -78,6 +91,18 @@ export async function PATCH(request: Request, context: RouteContext) {
     }
 
     const strategy = await prisma.$transaction(async (tx) => {
+      const existing = await tx.playbookStrategy.findFirst({
+        where: { id, userId },
+        select: { id: true },
+      });
+
+      if (!existing) {
+        throw new Prisma.PrismaClientKnownRequestError("Playbook not found", {
+          code: "P2025",
+          clientVersion: Prisma.prismaVersion.client,
+        });
+      }
+
       await tx.playbookChecklistLink.deleteMany({
         where: { strategyId: id },
       });
@@ -118,7 +143,7 @@ export async function PATCH(request: Request, context: RouteContext) {
 
     return NextResponse.json({
       success: true,
-      playbook: serializePlaybookStrategy(strategy, await loadStrategyAnalytics(id)),
+      playbook: serializePlaybookStrategy(strategy, await loadStrategyAnalytics(id, userId)),
     });
   } catch (error) {
     console.error("Playbook PATCH error:", error);
@@ -149,9 +174,27 @@ export async function PATCH(request: Request, context: RouteContext) {
 
 export async function DELETE(_request: Request, context: RouteContext) {
   try {
+    const userId = await getCurrentUserId();
+
+    if (!userId) {
+      return unauthorizedResponse();
+    }
+
     const { id } = await context.params;
+    const existing = await prisma.playbookStrategy.findFirst({
+      where: { id, userId },
+      select: { id: true },
+    });
+
+    if (!existing) {
+      return NextResponse.json(
+        { success: false, message: "Playbook not found" },
+        { status: 404 }
+      );
+    }
+
     const reviewCount = await prisma.tradeStrategyReview.count({
-      where: { strategyId: id },
+      where: { strategyId: id, trade: { userId } },
     });
 
     if (reviewCount > 0) {
@@ -164,7 +207,7 @@ export async function DELETE(_request: Request, context: RouteContext) {
       return NextResponse.json({
         success: true,
         message: "Playbook is used by trades and was disabled",
-        playbook: serializePlaybookStrategy(strategy, await loadStrategyAnalytics(id)),
+        playbook: serializePlaybookStrategy(strategy, await loadStrategyAnalytics(id, userId)),
       });
     }
 

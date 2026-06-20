@@ -1,6 +1,7 @@
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { apiResponse, decimalValue } from "@/lib/journal/api-utils";
+import { getCurrentUserId, unauthorizedResponse } from "@/lib/server-auth";
 
 export const dynamic = "force-dynamic";
 
@@ -10,14 +11,14 @@ type RouteContext = {
 
 export async function PATCH(request: Request, context: RouteContext) {
   try {
-    const { id } = await context.params;
-    const body = await request.json();
-    // TODO: Replace body userId with the authenticated session user id.
-    const userId = body.userId;
+    const userId = await getCurrentUserId();
 
     if (!userId) {
-      return apiResponse({ success: false, message: "userId is required" }, 400);
+      return unauthorizedResponse();
     }
+
+    const { id } = await context.params;
+    const body = await request.json();
 
     const data: Prisma.TradingAccountUpdateInput = {};
 
@@ -59,14 +60,13 @@ export async function PATCH(request: Request, context: RouteContext) {
 
 export async function DELETE(request: Request, context: RouteContext) {
   try {
-    const { id } = await context.params;
-    const { searchParams } = new URL(request.url);
-    // TODO: Replace query-param userId with the authenticated session user id.
-    const userId = searchParams.get("userId");
+    const userId = await getCurrentUserId();
 
     if (!userId) {
-      return apiResponse({ success: false, message: "userId is required" }, 400);
+      return unauthorizedResponse();
     }
+
+    const { id } = await context.params;
 
     await prisma.tradingAccount.delete({
       where: { id, userId },

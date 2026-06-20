@@ -64,6 +64,102 @@ type BuildUpdateResult =
 const DEFAULT_USER_ID = "demo-user";
 const MT5_SETUP_PREFIX = "MT5:";
 
+function readEnv(name: string) {
+  return process.env[name]?.trim() || "";
+}
+
+async function findUserIdById(userId: string) {
+  if (!userId) {
+    return null;
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { id: true },
+  });
+
+  return user?.id || null;
+}
+
+async function findUserIdByEmail(email: string) {
+  if (!email) {
+    return null;
+  }
+
+  const user = await prisma.user.findFirst({
+    where: {
+      email: {
+        equals: email,
+        mode: "insensitive",
+      },
+    },
+    select: { id: true },
+  });
+
+  return user?.id || null;
+}
+
+export async function resolveJournalIngestionUserId() {
+  const configuredUserId = readEnv("JOURNAL_USER_ID");
+  const userIdFromConfig = await findUserIdById(configuredUserId);
+
+  if (userIdFromConfig) {
+    return userIdFromConfig;
+  }
+
+  if (configuredUserId) {
+    console.warn("JOURNAL_USER_ID does not match an existing user; falling back.");
+  }
+
+  const configuredEmail = readEnv("JOURNAL_USER_EMAIL");
+  const userIdFromEmail = await findUserIdByEmail(configuredEmail);
+
+  if (userIdFromEmail) {
+    return userIdFromEmail;
+  }
+
+  if (configuredEmail) {
+    console.warn("JOURNAL_USER_EMAIL does not match an existing user; falling back.");
+  }
+
+  const demoUserId = readEnv("DEMO_USER_ID");
+  const userIdFromDemoEnv = await findUserIdById(demoUserId);
+
+  if (userIdFromDemoEnv) {
+    return userIdFromDemoEnv;
+  }
+
+  const adminEmails = readEnv("ADMIN_EMAILS")
+    .split(",")
+    .map((email) => email.trim())
+    .filter(Boolean);
+
+  if (adminEmails.length === 1) {
+    const userIdFromAdminEmail = await findUserIdByEmail(adminEmails[0]);
+
+    if (userIdFromAdminEmail) {
+      return userIdFromAdminEmail;
+    }
+  }
+
+  const defaultUser = await findUserIdById(DEFAULT_USER_ID);
+
+  if (defaultUser) {
+    return defaultUser;
+  }
+
+  const firstUser = await prisma.user.findFirst({
+    orderBy: { createdAt: "asc" },
+    select: { id: true },
+  });
+
+  if (!firstUser) {
+    throw new Error("No user exists for MT5 journal ingestion");
+  }
+
+  return firstUser.id;
+}
+
 function mt5TicketValue(value: string | null) {
   return value?.replace(MT5_SETUP_PREFIX, "").trim() || null;
 }
@@ -327,9 +423,10 @@ async function findFallbackOpenMt5Trade(
 }
 
 export async function processJournalEventPrisma(
-  input: ProcessJournalEventInput
+  input: ProcessJournalEventInput,
+  ingestionUserId?: string
 ): Promise<ProcessJournalEventResult> {
-  const userId = process.env.DEMO_USER_ID || DEFAULT_USER_ID;
+  const userId = ingestionUserId || (await resolveJournalIngestionUserId());
   const account = await ensureMt5TradingAccount(userId, input.account);
   const event = input.event;
   const sourceKey = getMt5ExternalTradeKey(event);
@@ -449,8 +546,9 @@ export async function saveMt5ScreenshotToPrismaTrade(input: {
   positionId: string;
   type: string;
   imageUrl: string;
+  userId?: string;
 }) {
-  const userId = process.env.DEMO_USER_ID || DEFAULT_USER_ID;
+  const userId = input.userId || (await resolveJournalIngestionUserId());
   const account = await prisma.tradingAccount.findFirst({
     where: {
       userId,

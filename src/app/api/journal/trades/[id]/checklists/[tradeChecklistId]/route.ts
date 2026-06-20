@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { serializeTradeChecklist } from "@/lib/checklists/api";
 import { recalculateTradeChecklist } from "@/lib/checklists/trade-checklists";
+import { getCurrentUserId, unauthorizedResponse } from "@/lib/server-auth";
 
 export const dynamic = "force-dynamic";
 
@@ -50,6 +51,12 @@ function validationResponse(errors: string[]) {
 
 export async function PATCH(request: Request, context: RouteContext) {
   try {
+    const userId = await getCurrentUserId();
+
+    if (!userId) {
+      return unauthorizedResponse();
+    }
+
     const { id, tradeChecklistId } = await context.params;
     const body = (await request.json()) as Record<string, unknown>;
     const answers = Array.isArray(body.answers) ? body.answers : [];
@@ -63,6 +70,7 @@ export async function PATCH(request: Request, context: RouteContext) {
         where: {
           id: tradeChecklistId,
           tradeId: id,
+          trade: { userId },
         },
         select: { id: true },
       });
@@ -137,11 +145,18 @@ export async function PATCH(request: Request, context: RouteContext) {
 
 export async function DELETE(_request: Request, context: RouteContext) {
   try {
+    const userId = await getCurrentUserId();
+
+    if (!userId) {
+      return unauthorizedResponse();
+    }
+
     const { id, tradeChecklistId } = await context.params;
     const deleted = await prisma.tradeChecklist.deleteMany({
       where: {
         id: tradeChecklistId,
         tradeId: id,
+        trade: { userId },
       },
     });
 

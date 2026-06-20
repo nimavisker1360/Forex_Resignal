@@ -1,5 +1,9 @@
 import { Prisma, TradeStatus } from "@prisma/client";
+import { serializeTrade, tradeListInclude } from "@/lib/dashboard-data";
+import { deleteAllUserTrades } from "@/lib/journal/delete-trades";
 import { prisma } from "@/lib/prisma";
+import { getCurrentUserId, unauthorizedResponse } from "@/lib/server-auth";
+import { requireFeatureAccess, subscriptionAccessResponse } from "@/lib/subscription";
 import {
   apiResponse,
   calculateTradeMetrics,
@@ -12,17 +16,6 @@ import {
 } from "@/lib/journal/api-utils";
 
 export const dynamic = "force-dynamic";
-
-const tradeInclude = {
-  account: true,
-  screenshots: true,
-  voiceMemos: true,
-  tags: {
-    include: {
-      tag: true,
-    },
-  },
-};
 
 function buildTradeCreateData(body: Record<string, unknown>) {
   const direction = parseTradeDirection(body.direction);
@@ -80,6 +73,12 @@ function buildTradeCreateData(body: Record<string, unknown>) {
 
 export async function GET(request: Request) {
   try {
+    const userId = await getCurrentUserId();
+
+    if (!userId) {
+      return unauthorizedResponse();
+    }
+
     const { searchParams } = new URL(request.url);
     const status = searchParams.get("status");
     const direction = searchParams.get("direction");
@@ -89,11 +88,7 @@ export async function GET(request: Request) {
     const page = parsePositiveInt(searchParams.get("page"), 1);
     const limit = Math.min(parsePositiveInt(searchParams.get("limit"), 50), 100);
 
-    // TODO: Replace query-param userId with the authenticated session user id.
-    const userId = searchParams.get("userId");
-    if (userId) {
-      where.userId = userId;
-    }
+    where.userId = userId;
 
     const accountId = searchParams.get("accountId");
     if (accountId) {
@@ -142,7 +137,7 @@ export async function GET(request: Request) {
       prisma.trade.count({ where }),
       db.trade.findMany({
         where,
-        include: tradeInclude,
+        include: tradeListInclude,
         orderBy: { createdAt: "desc" },
         skip: (page - 1) * limit,
         take: limit,
@@ -152,7 +147,7 @@ export async function GET(request: Request) {
     return apiResponse({
       success: true,
       data: {
-        trades,
+        trades: trades.map(serializeTrade),
         pagination: {
           page,
           limit,
@@ -170,21 +165,37 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
-    // TODO: Replace body userId with the authenticated session user id.
-    const { userId, accountId, symbol } = body;
+    const userId = await getCurrentUserId();
 
-    if (!userId || !accountId || !symbol || !body.direction) {
+    if (!userId) {
+      return unauthorizedResponse();
+    }
+
+    await requireFeatureAccess(userId, "trades");
+
+    const body = await request.json();
+    const { accountId, symbol } = body;
+
+    if (!accountId || !symbol || !body.direction) {
       return apiResponse(
         {
           success: false,
-          message: "userId, accountId, symbol, and direction are required",
+          message: "accountId, symbol, and direction are required",
         },
         400
       );
     }
 
-    const built = buildTradeCreateData(body);
+    const account = await prisma.tradingAccount.findFirst({
+      where: { id: String(accountId), userId },
+      select: { id: true },
+    });
+
+    if (!account) {
+      return apiResponse({ success: false, message: "Trading account not found" }, 404);
+    }
+
+    const built = buildTradeCreateData({ ...body, userId });
     if ("error" in built) {
       return apiResponse({ success: false, message: built.error }, 400);
     }
@@ -192,6 +203,19 @@ export async function POST(request: Request) {
     const tagIds = normalizeTagIds(body.tagIds);
     const trade = await prisma.$transaction(async (tx) => {
       const txDb = tx as any;
+      if (tagIds.length > 0) {
+        const ownedTagCount = await txDb.tag.count({
+          where: { userId, id: { in: tagIds } },
+        });
+
+        if (ownedTagCount !== tagIds.length) {
+          throw new Prisma.PrismaClientKnownRequestError("Invalid tagId", {
+            code: "P2003",
+            clientVersion: Prisma.prismaVersion.client,
+          });
+        }
+      }
+
       const created = await txDb.trade.create({
         data: built.data,
       });
@@ -205,12 +229,18 @@ export async function POST(request: Request) {
 
       return txDb.trade.findUnique({
         where: { id: created.id },
-        include: tradeInclude,
+        include: tradeListInclude,
       });
     });
 
     return apiResponse({ success: true, data: trade }, 201);
   } catch (error) {
+    const accessResponse = subscriptionAccessResponse(error);
+
+    if (accessResponse) {
+      return accessResponse;
+    }
+
     console.error("Trades POST error:", error);
 
     if (
@@ -224,5 +254,29 @@ export async function POST(request: Request) {
     }
 
     return apiResponse({ success: false, message: "Failed to create trade" }, 500);
+  }
+}
+
+export async function DELETE() {
+  try {
+    const userId = await getCurrentUserId();
+
+    if (!userId) {
+      return unauthorizedResponse();
+    }
+
+    const result = await deleteAllUserTrades(userId);
+
+    return apiResponse({
+      success: true,
+      data: result,
+    });
+  } catch (error) {
+    console.error("Trades DELETE all error:", error);
+
+    return apiResponse(
+      { success: false, message: "Failed to delete all trades" },
+      500
+    );
   }
 }

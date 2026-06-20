@@ -1,20 +1,38 @@
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { apiResponse } from "@/lib/journal/api-utils";
+import { getCurrentUserId, unauthorizedResponse } from "@/lib/server-auth";
+import { requireFeatureAccess, subscriptionAccessResponse } from "@/lib/subscription";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
-    // TODO: Replace body userId with the authenticated session user id.
-    const { userId, tradeId, type, url } = body;
+    const userId = await getCurrentUserId();
 
-    if (!userId || !tradeId || !type || !url) {
+    if (!userId) {
+      return unauthorizedResponse();
+    }
+
+    await requireFeatureAccess(userId, "screenshots");
+
+    const body = await request.json();
+    const { tradeId, type, url } = body;
+
+    if (!tradeId || !type || !url) {
       return apiResponse(
-        { success: false, message: "userId, tradeId, type, and url are required" },
+        { success: false, message: "tradeId, type, and url are required" },
         400
       );
+    }
+
+    const trade = await prisma.trade.findFirst({
+      where: { id: String(tradeId), userId },
+      select: { id: true },
+    });
+
+    if (!trade) {
+      return apiResponse({ success: false, message: "Trade not found" }, 404);
     }
 
     const screenshot = await prisma.tradeScreenshot.create({
@@ -28,6 +46,12 @@ export async function POST(request: Request) {
 
     return apiResponse({ success: true, data: screenshot }, 201);
   } catch (error) {
+    const accessResponse = subscriptionAccessResponse(error);
+
+    if (accessResponse) {
+      return accessResponse;
+    }
+
     console.error("Trade screenshot POST error:", error);
 
     if (

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ArrowDown,
   ArrowUp,
@@ -13,6 +13,7 @@ import {
   X,
 } from "lucide-react";
 import { toast } from "sonner";
+import { useLanguage } from "@/lib/language-context";
 import { cn } from "@/lib/utils";
 
 const CATEGORIES = [
@@ -108,6 +109,7 @@ function normalizeItems(items: ChecklistItem[]) {
 }
 
 export default function ChecklistManagementPage() {
+  const { t } = useLanguage();
   const [checklists, setChecklists] = useState<ChecklistTemplate[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -116,6 +118,27 @@ export default function ChecklistManagementPage() {
   const [category, setCategory] = useState("");
   const [formOpen, setFormOpen] = useState(false);
   const [form, setForm] = useState<FormState>(emptyForm);
+  const loadFailedText = t("journal.checklistsPage.loadFailed");
+  const loadTimeoutText = t("journal.checklistsPage.loadTimeout");
+  const categoryLabel = (value: string | null | undefined) => {
+    const key = String(value || "Custom").replace(/\s+/g, "");
+    const translated = t(`journal.checklistsPage.categories.${key}`);
+    return translated.startsWith("journal.") ? value || t("journal.checklistsPage.categories.Custom") : translated;
+  };
+  const templateTitle = (value: string) => {
+    const key = value.replace(/\s+/g, "");
+    const translated = t(`journal.checklistsPage.templateTitles.${key}`);
+    return translated.startsWith("journal.") ? value : translated;
+  };
+  const templateDescription = (value: string | null) => {
+    if (!value) {
+      return t("journal.common.noDescription");
+    }
+
+    const key = value.replace(/[^a-zA-Z0-9]+/g, "");
+    const translated = t(`journal.checklistsPage.templateDescriptions.${key}`);
+    return translated.startsWith("journal.") ? value : translated;
+  };
 
   const filteredChecklists = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -131,7 +154,7 @@ export default function ChecklistManagementPage() {
     });
   }, [category, checklists, search]);
 
-  async function loadChecklists() {
+  const loadChecklists = useCallback(async () => {
     setLoading(true);
     setLoadError(null);
     const controller = new AbortController();
@@ -144,7 +167,7 @@ export default function ChecklistManagementPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        const message = data.message || "Failed to load checklists";
+        const message = data.message || loadFailedText;
         setLoadError(message);
         toast.error(message);
         return;
@@ -154,19 +177,19 @@ export default function ChecklistManagementPage() {
     } catch (error) {
       const message =
         error instanceof DOMException && error.name === "AbortError"
-          ? "Checklist loading timed out. Check the database connection and retry."
-          : "Failed to load checklists";
+          ? loadTimeoutText
+          : loadFailedText;
       setLoadError(message);
       toast.error(message);
     } finally {
       window.clearTimeout(timeout);
       setLoading(false);
     }
-  }
+  }, [loadFailedText, loadTimeoutText]);
 
   useEffect(() => {
     void loadChecklists();
-  }, []);
+  }, [loadChecklists]);
 
   function openCreateForm() {
     setForm(emptyForm());
@@ -235,12 +258,12 @@ export default function ChecklistManagementPage() {
     const items = normalizeItems(form.items).filter((item) => item.title);
 
     if (!form.title.trim()) {
-      toast.error("Checklist title is required");
+      toast.error(t("journal.checklistsPage.titleRequired"));
       return;
     }
 
     if (items.length === 0) {
-      toast.error("A checklist must have at least one item");
+      toast.error(t("journal.checklistsPage.itemRequired"));
       return;
     }
 
@@ -271,11 +294,11 @@ export default function ChecklistManagementPage() {
         return;
       }
 
-      toast.success(form.id ? "Checklist updated" : "Checklist created");
+      toast.success(form.id ? t("journal.checklistsPage.updated") : t("journal.checklistsPage.created"));
       setFormOpen(false);
       await loadChecklists();
     } catch {
-      toast.error("Failed to save checklist");
+      toast.error(t("journal.checklistsPage.saveFailed"));
     } finally {
       setSaving(false);
     }
@@ -283,7 +306,7 @@ export default function ChecklistManagementPage() {
 
   async function deleteChecklist(checklist: ChecklistTemplate) {
     const confirmed = window.confirm(
-      `Delete or disable "${checklist.title}"? Used templates are disabled to preserve trade history.`
+      t("journal.checklistsPage.confirmDelete").replace("{title}", checklist.title)
     );
 
     if (!confirmed) {
@@ -297,14 +320,14 @@ export default function ChecklistManagementPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        toast.error(data.message || "Failed to delete checklist");
+        toast.error(data.message || t("journal.checklistsPage.deleteFailed"));
         return;
       }
 
-      toast.success(data.message || "Checklist updated");
+      toast.success(data.message || t("journal.checklistsPage.updated"));
       await loadChecklists();
     } catch {
-      toast.error("Failed to delete checklist");
+      toast.error(t("journal.checklistsPage.deleteFailed"));
     }
   }
 
@@ -312,9 +335,9 @@ export default function ChecklistManagementPage() {
     <div className="space-y-5">
       <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-white">Trade Checklists</h1>
+          <h1 className="text-2xl font-semibold text-white">{t("journal.checklistsPage.title")}</h1>
           <p className="mt-1 text-sm text-slate-400">
-            Build reusable execution rules and attach them to trade journal entries.
+            {t("journal.checklistsPage.subtitle")}
           </p>
         </div>
         <button
@@ -323,35 +346,35 @@ export default function ChecklistManagementPage() {
           className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-[#2563EB] px-4 text-sm font-semibold text-white hover:bg-blue-500"
         >
           <Plus className="h-4 w-4" />
-          Create Checklist
+          {t("journal.checklistsPage.create")}
         </button>
       </div>
 
       <div className="rounded-lg border border-slate-800 bg-[#0F172A] p-4 shadow-sm">
         <div className="grid gap-3 md:grid-cols-[1fr_240px]">
           <label className="space-y-1 text-xs font-medium uppercase text-slate-400">
-            Search
+            {t("journal.common.search")}
             <div className="relative">
               <Search className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-slate-500" />
               <input
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
-                placeholder="Search checklist templates"
+                placeholder={t("journal.checklistsPage.searchPlaceholder")}
                 className="h-10 w-full rounded-lg border border-slate-800 bg-[#111827] pl-9 pr-3 text-sm text-[#E5E7EB] outline-none focus:border-blue-600"
               />
             </div>
           </label>
           <label className="space-y-1 text-xs font-medium uppercase text-slate-400">
-            Category
+            {t("journal.checklistsPage.category")}
             <select
               value={category}
               onChange={(event) => setCategory(event.target.value)}
               className={inputClass}
             >
-              <option value="">All categories</option>
+              <option value="">{t("journal.checklistsPage.allCategories")}</option>
               {CATEGORIES.map((item) => (
                 <option key={item} value={item}>
-                  {item}
+                  {categoryLabel(item)}
                 </option>
               ))}
             </select>
@@ -368,10 +391,10 @@ export default function ChecklistManagementPage() {
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <h2 className="truncate text-lg font-semibold text-white">
-                  {checklist.title}
+                  {templateTitle(checklist.title)}
                 </h2>
                 <p className="mt-1 line-clamp-2 min-h-[40px] text-sm text-slate-400">
-                  {checklist.description || "No description"}
+                  {templateDescription(checklist.description)}
                 </p>
               </div>
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-slate-800 bg-[#111827] text-blue-300">
@@ -380,12 +403,12 @@ export default function ChecklistManagementPage() {
             </div>
 
             <div className="mt-4 flex flex-wrap gap-2">
-              <Badge>{checklist.category || "Custom"}</Badge>
+              <Badge>{categoryLabel(checklist.category)}</Badge>
               <Badge tone={checklist.isActive ? "green" : "amber"}>
-                {checklist.isActive ? "Active" : "Inactive"}
+                {checklist.isActive ? t("journal.common.active") : t("journal.common.inactive")}
               </Badge>
-              {checklist.isDefault ? <Badge tone="blue">Default</Badge> : null}
-              <Badge>{checklist.itemCount} items</Badge>
+              {checklist.isDefault ? <Badge tone="blue">{t("journal.checklistsPage.default")}</Badge> : null}
+              <Badge>{t("journal.checklistsPage.itemsCount").replace("{count}", String(checklist.itemCount))}</Badge>
             </div>
 
             <div className="mt-5 flex gap-2">
@@ -394,14 +417,14 @@ export default function ChecklistManagementPage() {
                 onClick={() => openEditForm(checklist)}
                 className="inline-flex h-9 flex-1 items-center justify-center gap-2 rounded-lg border border-slate-800 px-3 text-sm font-semibold text-slate-300 hover:bg-slate-800"
               >
-                Edit
+                {t("journal.tradeDetail.edit")}
               </button>
               <button
                 type="button"
                 onClick={() => deleteChecklist(checklist)}
                 className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-red-500/30 px-3 text-sm font-semibold text-[#EF4444] hover:bg-red-500/10"
-                aria-label="Delete checklist"
-                title="Delete checklist"
+                aria-label={t("journal.checklistsPage.deleteChecklist")}
+                title={t("journal.checklistsPage.deleteChecklist")}
               >
                 <Trash2 className="h-4 w-4" />
               </button>
@@ -414,10 +437,10 @@ export default function ChecklistManagementPage() {
         <div className="rounded-lg border border-slate-800 bg-[#0F172A] px-4 py-12 text-center">
           <ListChecks className="mx-auto h-8 w-8 text-slate-500" />
           <h2 className="mt-3 text-base font-semibold text-white">
-            {loadError ? "Could not load checklists" : "No checklists found"}
+            {loadError ? t("journal.checklistsPage.couldNotLoad") : t("journal.checklistsPage.emptyTitle")}
           </h2>
           <p className="mt-1 text-sm text-slate-400">
-            {loadError || "Create a reusable checklist or clear the current filters."}
+            {loadError || t("journal.checklistsPage.emptyDescription")}
           </p>
           {loadError ? (
             <button
@@ -425,7 +448,7 @@ export default function ChecklistManagementPage() {
               onClick={loadChecklists}
               className="mt-4 inline-flex h-10 items-center justify-center rounded-lg border border-slate-800 px-4 text-sm font-semibold text-slate-300 hover:bg-slate-800"
             >
-              Retry
+              {t("journal.common.retry")}
             </button>
           ) : null}
         </div>
@@ -433,7 +456,7 @@ export default function ChecklistManagementPage() {
 
       {loading ? (
         <div className="rounded-lg border border-slate-800 bg-[#0F172A] p-6 text-sm text-slate-400">
-          Loading checklists...
+          {t("journal.checklistsPage.loading")}
         </div>
       ) : null}
 
@@ -446,18 +469,18 @@ export default function ChecklistManagementPage() {
             <div className="mb-5 flex items-start justify-between gap-4">
               <div>
                 <h2 className="text-xl font-semibold text-white">
-                  {form.id ? "Edit Checklist" : "Create Checklist"}
+                  {form.id ? t("journal.checklistsPage.editTitle") : t("journal.checklistsPage.createTitle")}
                 </h2>
                 <p className="mt-1 text-sm text-slate-400">
-                  Define the ordered checks that will be snapshotted into each trade.
+                  {t("journal.checklistsPage.formSubtitle")}
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => setFormOpen(false)}
                 className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-800 text-slate-300 hover:bg-slate-800"
-                aria-label="Close"
-                title="Close"
+                aria-label={t("journal.manualTrade.close")}
+                title={t("journal.manualTrade.close")}
               >
                 <X className="h-4 w-4" />
               </button>
@@ -465,7 +488,7 @@ export default function ChecklistManagementPage() {
 
             <div className="grid gap-3 md:grid-cols-2">
               <label className="space-y-1 text-xs font-medium uppercase text-slate-400">
-                Title
+                {t("journal.checklistsPage.formTitle")}
                 <input
                   value={form.title}
                   onChange={(event) =>
@@ -476,7 +499,7 @@ export default function ChecklistManagementPage() {
                 />
               </label>
               <label className="space-y-1 text-xs font-medium uppercase text-slate-400">
-                Category
+                {t("journal.checklistsPage.category")}
                 <select
                   value={form.category}
                   onChange={(event) =>
@@ -486,13 +509,13 @@ export default function ChecklistManagementPage() {
                 >
                   {CATEGORIES.map((item) => (
                     <option key={item} value={item}>
-                      {item}
+                      {categoryLabel(item)}
                     </option>
                   ))}
                 </select>
               </label>
               <label className="space-y-1 text-xs font-medium uppercase text-slate-400 md:col-span-2">
-                Description
+                {t("journal.playbooks.description")}
                 <textarea
                   value={form.description}
                   onChange={(event) =>
@@ -520,7 +543,7 @@ export default function ChecklistManagementPage() {
                   }
                   className="h-4 w-4 rounded border-slate-700 bg-[#111827]"
                 />
-                Active
+                {t("journal.common.active")}
               </label>
               <label className="inline-flex items-center gap-2 text-sm font-medium text-slate-300">
                 <input
@@ -534,13 +557,13 @@ export default function ChecklistManagementPage() {
                   }
                   className="h-4 w-4 rounded border-slate-700 bg-[#111827]"
                 />
-                Default for new manual trades
+                {t("journal.checklistsPage.defaultManualTrades")}
               </label>
             </div>
 
             <div className="mt-5 space-y-3">
               <div className="flex items-center justify-between gap-3">
-                <h3 className="text-sm font-semibold text-white">Checklist Items</h3>
+                <h3 className="text-sm font-semibold text-white">{t("journal.checklistsPage.checklistItems")}</h3>
                 <button
                   type="button"
                   onClick={() =>
@@ -552,7 +575,7 @@ export default function ChecklistManagementPage() {
                   className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-slate-800 px-3 text-sm font-semibold text-slate-300 hover:bg-slate-800"
                 >
                   <Plus className="h-4 w-4" />
-                  Add Item
+                  {t("journal.checklistsPage.addItem")}
                 </button>
               </div>
 
@@ -563,7 +586,7 @@ export default function ChecklistManagementPage() {
                 >
                   <div className="grid gap-3 md:grid-cols-[1fr_1fr_auto]">
                     <label className="space-y-1 text-xs font-medium uppercase text-slate-400">
-                      Item Title
+                      {t("journal.checklistsPage.itemTitle")}
                       <input
                         value={item.title}
                         onChange={(event) =>
@@ -574,7 +597,7 @@ export default function ChecklistManagementPage() {
                       />
                     </label>
                     <label className="space-y-1 text-xs font-medium uppercase text-slate-400">
-                      Description
+                      {t("journal.playbooks.description")}
                       <input
                         value={item.description}
                         onChange={(event) =>
@@ -589,8 +612,8 @@ export default function ChecklistManagementPage() {
                         onClick={() => moveItem(index, -1)}
                         disabled={index === 0}
                         className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-slate-800 text-slate-300 hover:bg-slate-800 disabled:opacity-40"
-                        aria-label="Move item up"
-                        title="Move item up"
+                        aria-label={t("journal.playbooks.moveRuleUp")}
+                        title={t("journal.playbooks.moveRuleUp")}
                       >
                         <ArrowUp className="h-4 w-4" />
                       </button>
@@ -599,8 +622,8 @@ export default function ChecklistManagementPage() {
                         onClick={() => moveItem(index, 1)}
                         disabled={index === form.items.length - 1}
                         className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-slate-800 text-slate-300 hover:bg-slate-800 disabled:opacity-40"
-                        aria-label="Move item down"
-                        title="Move item down"
+                        aria-label={t("journal.playbooks.moveRuleDown")}
+                        title={t("journal.playbooks.moveRuleDown")}
                       >
                         <ArrowDown className="h-4 w-4" />
                       </button>
@@ -609,8 +632,8 @@ export default function ChecklistManagementPage() {
                         onClick={() => removeItem(index)}
                         disabled={form.items.length === 1}
                         className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-red-500/30 text-[#EF4444] hover:bg-red-500/10 disabled:opacity-40"
-                        aria-label="Delete item"
-                        title="Delete item"
+                        aria-label={t("journal.checklistsPage.deleteItem")}
+                        title={t("journal.checklistsPage.deleteItem")}
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>
@@ -625,7 +648,7 @@ export default function ChecklistManagementPage() {
                       }
                       className="h-4 w-4 rounded border-slate-700 bg-[#111827]"
                     />
-                    Required item
+                    {t("journal.checklistsPage.requiredItem")}
                   </label>
                 </div>
               ))}
@@ -638,7 +661,7 @@ export default function ChecklistManagementPage() {
                 className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-slate-800 px-4 text-sm font-semibold text-slate-300 hover:bg-slate-800"
               >
                 <X className="h-4 w-4" />
-                Cancel
+                {t("journal.tradeDetail.cancel")}
               </button>
               <button
                 type="submit"
@@ -646,7 +669,7 @@ export default function ChecklistManagementPage() {
                 className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-[#2563EB] px-4 text-sm font-semibold text-white hover:bg-blue-500 disabled:opacity-60"
               >
                 {saving ? <Check className="h-4 w-4" /> : <Save className="h-4 w-4" />}
-                {saving ? "Saving" : "Save Checklist"}
+                {saving ? t("journal.tradeDetail.saving") : t("journal.checklistsPage.saveChecklist")}
               </button>
             </div>
           </form>

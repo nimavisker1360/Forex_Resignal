@@ -1,5 +1,12 @@
 import { PricingCard } from "@/components/ui/pricing-card";
-import { CheckCircle2 } from "lucide-react";
+import {
+  CheckCircle2,
+  CreditCard,
+  Headphones,
+  HelpCircle,
+  RotateCcw,
+  Send,
+} from "lucide-react";
 
 const pricingPlans = [
   {
@@ -71,6 +78,33 @@ const premiumFeatures = [
   },
 ];
 
+const faqItems = [
+  {
+    question: "How does the subscription work?",
+    answer:
+      "Choose a plan, complete the payment, and your access will be activated after confirmation.",
+    icon: CreditCard,
+  },
+  {
+    question: "Is there a refund option?",
+    answer:
+      "Yes. If you are not satisfied during the first 7 days, you can request a refund.",
+    icon: RotateCcw,
+  },
+  {
+    question: "How are signals delivered?",
+    answer:
+      "Signals are delivered through the website, email, and the exclusive Telegram channel.",
+    icon: Send,
+  },
+  {
+    question: "Is support available on holidays?",
+    answer:
+      "Yes. Our support team is available every day of the week, including holidays.",
+    icon: Headphones,
+  },
+];
+
 export default function PremiumPage() {
   return (
     <div className="container mx-auto px-4 py-12">
@@ -98,56 +132,42 @@ export default function PremiumPage() {
       </div>
 
       {/* FAQ */}
-      <div className="bg-card border rounded-lg p-8 mb-16">
-        <h2 className="text-2xl font-bold mb-6 text-center">
-          Frequently Asked Questions
-        </h2>
-
-        <div className="space-y-6">
-          <div>
-            <h3 className="text-lg font-semibold mb-2">
-              How does the subscription work?
-            </h3>
-            <p className="text-muted-foreground">
-              You can quickly activate your membership by selecting one of the
-              above plans and making an online payment. Immediately after
-              payment confirmation, the necessary access will be activated for
-              you.
-            </p>
+      <section className="mb-16 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+        <div className="border-b border-slate-200 bg-slate-50 px-6 py-8 text-center">
+          <div className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-lg bg-blue-600 text-white">
+            <HelpCircle className="h-5 w-5" />
           </div>
-
-          <div>
-            <h3 className="text-lg font-semibold mb-2">
-              Is there a refund option?
-            </h3>
-            <p className="text-muted-foreground">
-              Yes, if you are not satisfied with our services during the first 7
-              days, you can request a refund.
-            </p>
-          </div>
-
-          <div>
-            <h3 className="text-lg font-semibold mb-2">
-              How are signals delivered?
-            </h3>
-            <p className="text-muted-foreground">
-              Signals are delivered through the website, email, and exclusive
-              Telegram channel. You can set your preferred communication method
-              in your user dashboard.
-            </p>
-          </div>
-
-          <div>
-            <h3 className="text-lg font-semibold mb-2">
-              Is support available on holidays?
-            </h3>
-            <p className="text-muted-foreground">
-              Yes, our support team is ready to answer your questions every day
-              of the week (including holidays).
-            </p>
-          </div>
+          <h2 className="text-2xl font-bold text-slate-950">
+            Frequently Asked Questions
+          </h2>
+          <p className="mx-auto mt-2 max-w-2xl text-sm leading-6 text-slate-600">
+            Clear answers about membership, payments, signal delivery, and support.
+          </p>
         </div>
-      </div>
+
+        <div className="grid gap-4 p-5 md:grid-cols-2">
+          {faqItems.map((item) => {
+            const Icon = item.icon;
+
+            return (
+              <article
+                key={item.question}
+                className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm transition hover:border-blue-200 hover:shadow-md"
+              >
+                <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-blue-700">
+                  <Icon className="h-5 w-5" />
+                </div>
+                <h3 className="text-base font-semibold text-slate-950">
+                  {item.question}
+                </h3>
+                <p className="mt-2 text-sm leading-6 text-slate-600">
+                  {item.answer}
+                </p>
+              </article>
+            );
+          })}
+        </div>
+      </section>
 
       {/* Features */}
       <div className="mb-16">
@@ -172,19 +192,6 @@ export default function PremiumPage() {
             </div>
           ))}
         </div>
-      </div>
-
-      {/* Testimonial */}
-      <div className="bg-primary/5 rounded-lg p-8 text-center">
-        <blockquote className="max-w-2xl mx-auto">
-          <p className="text-xl font-medium mb-6">
-            "Since becoming a premium member, my trading profit has more than
-            tripled. The accurate and timely signals are truly valuable."
-          </p>
-          <footer className="font-semibold">
-            Masoud Rezaei - Forex Trader
-          </footer>
-        </blockquote>
       </div>
     </div>
   );

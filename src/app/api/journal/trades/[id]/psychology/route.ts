@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { journalTradeInclude, serializeJournalTrade } from "@/lib/journal/prisma-trades";
 import { journalPsychologySchema } from "@/lib/journal/validators";
+import { getCurrentUserId, unauthorizedResponse } from "@/lib/server-auth";
 
 export const dynamic = "force-dynamic";
 
@@ -26,6 +27,12 @@ function joinNotes(personalNote: string | null, lessonLearned: string | null) {
 
 export async function PATCH(request: Request, context: RouteContext) {
   try {
+    const userId = await getCurrentUserId();
+
+    if (!userId) {
+      return unauthorizedResponse();
+    }
+
     const { id } = await context.params;
     const body = await request.json();
     const parsed = journalPsychologySchema.safeParse(body);
@@ -46,7 +53,7 @@ export async function PATCH(request: Request, context: RouteContext) {
 
     const psychology = parsed.data;
     const trade = await prisma.trade.update({
-      where: { id },
+      where: { id, userId },
       data: {
         emotion: psychology.emotionAfter || psychology.emotionBefore,
         mistake: psychology.mistakeTag,

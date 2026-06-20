@@ -1,11 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { FormEvent } from "react";
-import { Plus, Tag as TagIcon } from "lucide-react";
+import { Plus, Tag as TagIcon, Trash2 } from "lucide-react";
 import { TradeFilters, type TradeFilterValues } from "@/components/dashboard/TradeFilters";
 import { TradeForm } from "@/components/dashboard/TradeForm";
 import { TradeTable } from "@/components/dashboard/TradeTable";
+import { useLanguage } from "@/lib/language-context";
 import {
   DEFAULT_DASHBOARD_USER_ID,
   type ApiResult,
@@ -24,18 +25,30 @@ const emptyFilters: TradeFilterValues = {
   to: "",
 };
 
-export function TradesManager({ userId }: { userId?: string }) {
+export function TradesManager({
+  userId,
+  initialAccounts,
+  initialTags,
+  initialTrades,
+}: {
+  userId?: string;
+  initialAccounts: TradingAccountDto[];
+  initialTags: TagDto[];
+  initialTrades: TradeDto[];
+}) {
   // TODO: Replace temporary userId with the authenticated session user id.
   const activeUserId = userId || DEFAULT_DASHBOARD_USER_ID;
-  const [accounts, setAccounts] = useState<TradingAccountDto[]>([]);
-  const [tags, setTags] = useState<TagDto[]>([]);
-  const [trades, setTrades] = useState<TradeDto[]>([]);
+  const [accounts, setAccounts] = useState<TradingAccountDto[]>(initialAccounts);
+  const [tags, setTags] = useState<TagDto[]>(initialTags);
+  const [trades, setTrades] = useState<TradeDto[]>(initialTrades);
   const [filters, setFilters] = useState(emptyFilters);
   const [editingTrade, setEditingTrade] = useState<TradeDto | null>(null);
   const [defaultStatus, setDefaultStatus] = useState<"OPEN" | "CLOSED" | "CANCELLED">("OPEN");
   const [showForm, setShowForm] = useState(false);
   const [message, setMessage] = useState("");
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
+  const skippedInitialTradeLoad = useRef(false);
+  const { t } = useLanguage();
 
   const query = useMemo(() => {
     const params = new URLSearchParams();
@@ -70,12 +83,13 @@ export function TradesManager({ userId }: { userId?: string }) {
   }, [query]);
 
   useEffect(() => {
-    loadReferenceData().catch(() => setMessage("Failed to load accounts or tags"));
-  }, [loadReferenceData]);
+    if (!skippedInitialTradeLoad.current) {
+      skippedInitialTradeLoad.current = true;
+      return;
+    }
 
-  useEffect(() => {
-    loadTrades().catch(() => setMessage("Failed to load trades"));
-  }, [loadTrades]);
+    loadTrades().catch(() => setMessage(t("dashboard.trades.loadFailed")));
+  }, [loadTrades, t]);
 
   async function saveTrade(payload: Record<string, string | string[]>) {
     const isEditing = Boolean(editingTrade);
@@ -94,7 +108,7 @@ export function TradesManager({ userId }: { userId?: string }) {
 
       if (!json.success) {
         setSaveStatus("error");
-        setMessage(json.message || "Error saving changes");
+        setMessage(json.message || t("dashboard.trades.saveFailed"));
         return false;
       }
 
@@ -109,13 +123,13 @@ export function TradesManager({ userId }: { userId?: string }) {
       return true;
     } catch {
       setSaveStatus("error");
-      setMessage("Error saving changes");
+      setMessage(t("dashboard.trades.saveFailed"));
       return false;
     }
   }
 
   async function deleteTrade(trade: TradeDto) {
-    if (!window.confirm(`Delete ${trade.symbol} trade?`)) {
+    if (!window.confirm(t("dashboard.trades.confirmDelete").replace("{symbol}", trade.symbol))) {
       return;
     }
 
@@ -126,10 +140,33 @@ export function TradesManager({ userId }: { userId?: string }) {
     const json = (await response.json()) as ApiResult<unknown>;
 
     if (!json.success) {
-      setMessage(json.message || "Failed to delete trade");
+      setMessage(json.message || t("dashboard.trades.deleteFailed"));
       return;
     }
 
+    await loadTrades();
+  }
+
+  async function deleteAllTrades() {
+    const confirmed = window.confirm(
+      t("dashboard.trades.confirmDeleteAll")
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    const response = await fetch("/api/trades", { method: "DELETE" });
+    const json = (await response.json()) as ApiResult<{ deletedTrades: number }>;
+
+    if (!json.success) {
+      setMessage(json.message || t("dashboard.trades.deleteAllFailed"));
+      return;
+    }
+
+    setMessage(t("dashboard.trades.deletedCount").replace("{count}", String(json.data?.deletedTrades || 0)));
+    setShowForm(false);
+    setEditingTrade(null);
     await loadTrades();
   }
 
@@ -151,7 +188,7 @@ export function TradesManager({ userId }: { userId?: string }) {
     const json = (await response.json()) as ApiResult<TagDto>;
 
     if (!json.success) {
-      setMessage(json.message || "Failed to create tag");
+      setMessage(json.message || t("dashboard.trades.createTagFailed"));
       return;
     }
 
@@ -163,9 +200,9 @@ export function TradesManager({ userId }: { userId?: string }) {
     <div className="space-y-5">
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div>
-          <h2 className="text-2xl font-semibold text-white">Trades</h2>
+          <h2 className="text-2xl font-semibold text-white">{t("dashboard.trades.title")}</h2>
           <p className="mt-1 text-sm text-slate-400">
-            Manual trade entries across accounts with tags and review fields.
+            {t("dashboard.trades.subtitle")}
           </p>
         </div>
       </div>
@@ -178,7 +215,7 @@ export function TradesManager({ userId }: { userId?: string }) {
 
       {accounts.length === 0 ? (
         <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
-          Create a trading account before adding trades.
+          {t("dashboard.trades.createAccountFirst")}
         </div>
       ) : null}
 
@@ -188,20 +225,31 @@ export function TradesManager({ userId }: { userId?: string }) {
         onChange={setFilters}
         onClear={() => setFilters(emptyFilters)}
         action={
-          <button
-            type="button"
-            onClick={() => {
-              setEditingTrade(null);
-              setDefaultStatus("OPEN");
-              setSaveStatus("idle");
-              setShowForm(true);
-            }}
-            disabled={accounts.length === 0}
-            className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#2563EB] px-4 text-sm font-semibold text-white hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            <Plus className="h-4 w-4" />
-            New Trade
-          </button>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <button
+              type="button"
+              onClick={deleteAllTrades}
+              disabled={trades.length === 0}
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-red-500/30 px-4 text-sm font-semibold text-red-200 hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <Trash2 className="h-4 w-4" />
+              {t("dashboard.trades.deleteAll")}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setEditingTrade(null);
+                setDefaultStatus("OPEN");
+                setSaveStatus("idle");
+                setShowForm(true);
+              }}
+              disabled={accounts.length === 0}
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#2563EB] px-4 text-sm font-semibold text-white hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <Plus className="h-4 w-4" />
+              {t("dashboard.trades.newTrade")}
+            </button>
+          </div>
         }
       />
 
@@ -210,7 +258,7 @@ export function TradesManager({ userId }: { userId?: string }) {
         className="flex flex-col gap-2 rounded-xl border border-slate-800 bg-[#0F172A] p-4 shadow-sm md:flex-row md:items-end"
       >
         <label className="flex-1 space-y-1 text-xs font-medium uppercase text-slate-400">
-          Tag Name
+          {t("dashboard.trades.tagName")}
           <input
             name="name"
             placeholder="Breakout"
@@ -218,7 +266,7 @@ export function TradesManager({ userId }: { userId?: string }) {
           />
         </label>
         <label className="space-y-1 text-xs font-medium uppercase text-slate-400">
-          Color
+          {t("dashboard.trades.color")}
           <input
             name="color"
             type="color"
@@ -231,14 +279,14 @@ export function TradesManager({ userId }: { userId?: string }) {
           className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-slate-800 px-4 text-sm font-semibold text-slate-300 hover:bg-slate-800"
         >
           <TagIcon className="h-4 w-4" />
-          Add Tag
+          {t("dashboard.trades.addTag")}
         </button>
       </form>
 
       {showForm ? (
         <div className="rounded-xl border border-slate-800 bg-[#0F172A] p-5 shadow-sm">
           <h3 className="mb-4 text-lg font-semibold text-white">
-            {editingTrade ? "Edit Trade" : "Create Trade"}
+            {editingTrade ? t("dashboard.trades.editTrade") : t("dashboard.trades.createTrade")}
           </h3>
           <TradeForm
             trade={editingTrade}

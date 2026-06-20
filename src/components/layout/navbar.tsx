@@ -2,123 +2,102 @@
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Menu, ArrowUpRight } from "lucide-react";
-import { useState } from "react";
+import { ArrowRight, ChevronDown, Menu } from "lucide-react";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { useLanguage } from "@/lib/language-context";
 import { LanguageSwitcher } from "@/components/language-switcher";
+import { useSession } from "@/lib/auth-client";
 
 export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isScrolledAway, setIsScrolledAway] = useState(false);
   const pathname = usePathname();
-  const { t, language } = useLanguage();
+  const { t } = useLanguage();
+  const { data: session } = useSession();
+
   const ctaClass =
-    "bg-blue-600 text-white border-blue-500/50 hover:bg-blue-500 hover:text-white rounded-md shadow-sm";
-  const navLinkClass = "text-white hover:text-blue-300 transition";
+    "h-12 rounded-md border-0 bg-gradient-to-r from-violet-600 to-pink-500 px-7 text-base font-bold text-white shadow-[0_10px_25px_rgba(168,85,247,0.28)] hover:from-violet-500 hover:to-pink-500 hover:text-white";
+  const navLinkClass =
+    "inline-flex items-center gap-1 text-base font-semibold text-slate-900 transition hover:text-violet-600";
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolledAway(window.scrollY > 72);
+    };
+
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   if (pathname?.startsWith("/dashboard") || pathname?.startsWith("/journal")) {
     return null;
   }
 
   return (
-    <nav className="relative bg-gradient-to-r from-black to-black/95 w-full z-30 border-b border-gray-800/30">
-      <div className="absolute inset-0 bg-blue-900/10 mix-blend-overlay"></div>
-      <div className="container flex h-16 items-center justify-between px-4 sm:px-6 md:px-16 lg:px-24 mx-auto max-w-[1400px] relative z-10">
-        {/* Left Side - Logo (EN mode) or Telegram Button & Language Switcher (FA mode) */}
-        <div className="flex items-center">
-          {language === "fa" ? (
-            <div className="hidden md:flex items-center space-x-4">
-              <Button
-                variant="outline"
-                asChild
-                className={ctaClass}
-              >
-                <Link
-                  href="https://t.me/+uRJNzAveahQ0NjM0"
-                  className="flex items-center gap-1"
-                >
-                  ربات تلگرام <ArrowUpRight className="h-4 w-4" />
-                </Link>
-              </Button>
-              <LanguageSwitcher />
-            </div>
-          ) : (
-            <Link href="/" className="flex items-center gap-2">
-              <div>
-                <span className="text-2xl font-bold text-white">
-                  Signal<span className="text-blue-400">Max</span>
-                </span>
-              </div>
-            </Link>
-          )}
-        </div>
+    <nav
+      className={`sticky top-0 z-50 w-full border-b border-slate-200/80 bg-white text-slate-950 shadow-[0_8px_24px_rgba(15,23,42,0.12)] transition-transform duration-300 ${
+        isScrolledAway && !isMenuOpen ? "-translate-y-full" : "translate-y-0"
+      }`}
+    >
+      <div className="container relative z-10 mx-auto flex h-20 max-w-[1400px] items-center justify-between px-4 sm:px-6 md:px-16 lg:px-24">
+        <Link href="/" className="flex items-center gap-2">
+          <span className="text-3xl font-extrabold tracking-normal text-slate-950">
+            Signal<span className="text-blue-500">Ledger</span>
+          </span>
+        </Link>
 
-        {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center">
-          <div
-            className={`flex items-center ${
-              language === "en"
-                ? "space-x-reverse space-x-16 flex-row-reverse"
-                : "space-x-16"
-            }`}
-          >
-            {/* Order is important here */}
-            <Link href="/" className={navLinkClass}>
-              {t("home")}
-            </Link>
+        <div className="hidden items-center md:flex">
+          <div className="flex items-center gap-9">
             <Link href="/signals" className={navLinkClass}>
-              {t("signals") === "signals" ? "Signals" : t("signals")}
+              Products <ChevronDown className="h-4 w-4" />
             </Link>
-            <Link href="/journal" className={navLinkClass}>
-              Journal
+            <Link href="/premium" className={navLinkClass}>
+              Pricing
             </Link>
             <Link href="/blog" className={navLinkClass}>
               {t("blog")}
             </Link>
-            <Link href="/about" className={navLinkClass}>
-              {t("about")}
+            <Link href="/journal" className={navLinkClass}>
+              Journal
             </Link>
-            <Link href="/contact" className={navLinkClass}>
-              {t("contact")}
+            <Link href="/signals" className={navLinkClass}>
+              {t("signals") === "signals" ? "Signals" : t("signals")}
+            </Link>
+            <Link href="/" className={navLinkClass}>
+              {t("home")}
             </Link>
           </div>
         </div>
 
-        {/* Right Side - Telegram Button & Language Switcher (EN mode) or Logo (FA mode) */}
-        <div className="flex items-center">
-          {language === "fa" ? (
-            <Link href="/" className="flex items-center gap-2">
-              <div>
-                <span className="text-2xl font-bold text-white">
-                  <span className="text-blue-400">سیگنال</span>مکس
-                </span>
-              </div>
-            </Link>
-          ) : (
-            <div className="hidden md:flex items-center space-x-4">
-              <LanguageSwitcher />
-              <Button
-                variant="outline"
-                asChild
-                className={ctaClass}
-              >
-                <Link
-                  href="https://t.me/+uRJNzAveahQ0NjM0"
-                  className="flex items-center gap-1"
-                >
-                  Telegram Bot <ArrowUpRight className="h-4 w-4" />
+        <div className="flex items-center gap-4">
+          <div className="hidden items-center gap-5 md:flex">
+            <LanguageSwitcher />
+            {session ? (
+              <Button asChild className={ctaClass}>
+                <Link href="/dashboard" className="flex items-center gap-2">
+                  Dashboard <ArrowRight className="h-4 w-4" />
                 </Link>
               </Button>
-            </div>
-          )}
+            ) : (
+              <>
+                <Button asChild className={ctaClass}>
+                  <Link href="/dashboard" className="flex items-center gap-2">
+                    Get Started <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </Button>
+              </>
+            )}
+          </div>
 
-          {/* Mobile Menu Button */}
-          <div className="flex items-center md:hidden ml-4">
+          <div className="flex items-center md:hidden">
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="text-white"
+              className="text-slate-950 hover:bg-slate-100"
             >
               <Menu className="h-5 w-5" />
               <span className="sr-only">Toggle menu</span>
@@ -127,67 +106,77 @@ export function Navbar() {
         </div>
       </div>
 
-      {/* Mobile Navigation */}
       {isMenuOpen && (
-        <div className="md:hidden bg-black/95 backdrop-blur-sm border-t border-gray-800/50 p-4 relative z-10 w-full text-left">
-          <div
-            className={`flex flex-col space-y-4 w-full ${language === "en" ? "items-end text-right" : ""}`}
-          >
+        <div className="relative z-10 w-full border-t border-slate-200 bg-white p-4 text-left shadow-[0_16px_30px_rgba(15,23,42,0.08)] md:hidden">
+          <div className="flex w-full flex-col space-y-2">
             <Link
-              href="/"
-              className="text-white hover:text-blue-300 px-4 py-2 rounded-md hover:bg-gray-900/50 transition w-full"
+              href="/signals"
+              className="flex w-full items-center justify-between rounded-md px-4 py-3 text-slate-900 transition hover:bg-slate-100"
               onClick={() => setIsMenuOpen(false)}
             >
-              {t("home")}
+              Products <ChevronDown className="h-4 w-4" />
+            </Link>
+            <Link
+              href="/premium"
+              className="w-full rounded-md px-4 py-3 text-slate-900 transition hover:bg-slate-100"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Pricing
             </Link>
             <Link
               href="/blog"
-              className="text-white hover:text-blue-300 px-4 py-2 rounded-md hover:bg-gray-900/50 transition w-full"
+              className="w-full rounded-md px-4 py-3 text-slate-900 transition hover:bg-slate-100"
               onClick={() => setIsMenuOpen(false)}
             >
               {t("blog")}
             </Link>
             <Link
-              href="/signals"
-              className="text-white hover:text-blue-300 px-4 py-2 rounded-md hover:bg-gray-900/50 transition w-full"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              {t("signals") === "signals" ? "Signals" : t("signals")}
-            </Link>
-            <Link
               href="/journal"
-              className="text-white hover:text-blue-300 px-4 py-2 rounded-md hover:bg-gray-900/50 transition w-full"
+              className="w-full rounded-md px-4 py-3 text-slate-900 transition hover:bg-slate-100"
               onClick={() => setIsMenuOpen(false)}
             >
               Journal
             </Link>
             <Link
-              href="/about"
-              className="text-white hover:text-blue-300 px-4 py-2 rounded-md hover:bg-gray-900/50 transition w-full"
+              href="/signals"
+              className="w-full rounded-md px-4 py-3 text-slate-900 transition hover:bg-slate-100"
               onClick={() => setIsMenuOpen(false)}
             >
-              {t("about")}
+              {t("signals") === "signals" ? "Signals" : t("signals")}
             </Link>
             <Link
-              href="/contact"
-              className="text-white hover:text-blue-300 px-4 py-2 rounded-md hover:bg-gray-900/50 transition w-full"
+              href="/"
+              className="w-full rounded-md px-4 py-3 text-slate-900 transition hover:bg-slate-100"
               onClick={() => setIsMenuOpen(false)}
             >
-              {t("contact")}
+              {t("home")}
             </Link>
-            <div
-              className={`pt-2 flex flex-col space-y-2 w-full ${language === "en" ? "items-end" : ""}`}
-            >
-              <Button asChild className={`${ctaClass} w-full`}>
-                <Link
-                  href="https://t.me/+uRJNzAveahQ0NjM0"
-                  className="flex items-center justify-center gap-1"
-                >
-                  {language === "fa" ? "ربات تلگرام" : "Telegram Bot"}{" "}
-                  <ArrowUpRight className="h-4 w-4" />
-                </Link>
-              </Button>
-              <div className="flex justify-center mt-4 w-full">
+
+            <div className="flex w-full flex-col gap-3 pt-3">
+              {session ? (
+                <Button asChild className={`${ctaClass} w-full`}>
+                  <Link
+                    href="/dashboard"
+                    className="flex items-center justify-center gap-2"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Dashboard <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </Button>
+              ) : (
+                <>
+                  <Button asChild className={`${ctaClass} w-full`}>
+                    <Link
+                      href="/dashboard"
+                      className="flex items-center justify-center gap-2"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      Get Started <ArrowRight className="h-4 w-4" />
+                    </Link>
+                  </Button>
+                </>
+              )}
+              <div className="flex w-full justify-center pt-1">
                 <LanguageSwitcher />
               </div>
             </div>

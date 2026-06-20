@@ -2,6 +2,8 @@ import { Prisma } from "@prisma/client";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { journalTradeInclude, serializeJournalTrade } from "@/lib/journal/prisma-trades";
+import { getCurrentUserId, unauthorizedResponse } from "@/lib/server-auth";
+import { requireFeatureAccess, subscriptionAccessResponse } from "@/lib/subscription";
 
 export const dynamic = "force-dynamic";
 
@@ -33,6 +35,14 @@ function validationResponse(errors: string[]) {
 
 export async function POST(request: Request, context: RouteContext) {
   try {
+    const userId = await getCurrentUserId();
+
+    if (!userId) {
+      return unauthorizedResponse();
+    }
+
+    await requireFeatureAccess(userId, "screenshots");
+
     const { id } = await context.params;
     const body = (await request.json()) as Record<string, unknown>;
     const screenshotUrl = optionalString(body.screenshotUrl ?? body.url);
@@ -51,8 +61,8 @@ export async function POST(request: Request, context: RouteContext) {
       return validationResponse(errors);
     }
 
-    const trade = await prisma.trade.findUnique({
-      where: { id },
+    const trade = await prisma.trade.findFirst({
+      where: { id, userId },
       select: { id: true, userId: true },
     });
 
@@ -71,8 +81,8 @@ export async function POST(request: Request, context: RouteContext) {
         url: screenshotUrl,
       },
     });
-    const updatedTrade = await prisma.trade.findUnique({
-      where: { id },
+    const updatedTrade = await prisma.trade.findFirst({
+      where: { id, userId },
       include: journalTradeInclude,
     });
 
@@ -85,6 +95,12 @@ export async function POST(request: Request, context: RouteContext) {
       { status: 201 }
     );
   } catch (error) {
+    const accessResponse = subscriptionAccessResponse(error);
+
+    if (accessResponse) {
+      return accessResponse;
+    }
+
     console.error("Journal trade screenshot POST error:", error);
 
     if (

@@ -2,6 +2,7 @@
 
 import type { FormEvent } from "react";
 import type { TradingAccountDto } from "@/components/dashboard/types";
+import { useLanguage } from "@/lib/language-context";
 
 type AccountPayload = {
   name: string;
@@ -20,6 +21,8 @@ export function TradingAccountForm({
   onSubmit: (payload: AccountPayload) => Promise<void>;
   onCancel?: () => void;
 }) {
+  const { t } = useLanguage();
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
@@ -37,7 +40,7 @@ export function TradingAccountForm({
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="grid gap-3 md:grid-cols-2">
         <label className="space-y-1 text-xs font-medium uppercase text-slate-400">
-          Name
+          {t("dashboard.accounts.name")}
           <input
             name="name"
             required
@@ -46,7 +49,7 @@ export function TradingAccountForm({
           />
         </label>
         <label className="space-y-1 text-xs font-medium uppercase text-slate-400">
-          Currency
+          {t("dashboard.accounts.currency")}
           <input
             name="currency"
             required
@@ -55,7 +58,7 @@ export function TradingAccountForm({
           />
         </label>
         <label className="space-y-1 text-xs font-medium uppercase text-slate-400">
-          Broker
+          {t("dashboard.accounts.broker")}
           <input
             name="broker"
             defaultValue={account?.broker || ""}
@@ -63,7 +66,7 @@ export function TradingAccountForm({
           />
         </label>
         <label className="space-y-1 text-xs font-medium uppercase text-slate-400">
-          Platform
+          {t("dashboard.accounts.platform")}
           <input
             name="platform"
             defaultValue={account?.platform || ""}
@@ -71,7 +74,7 @@ export function TradingAccountForm({
           />
         </label>
         <label className="space-y-1 text-xs font-medium uppercase text-slate-400 md:col-span-2">
-          Balance
+          {t("dashboard.accounts.balance")}
           <input
             name="balance"
             type="number"
@@ -88,14 +91,14 @@ export function TradingAccountForm({
             onClick={onCancel}
             className="inline-flex h-10 items-center rounded-xl border border-slate-800 px-4 text-sm font-semibold text-slate-300 hover:bg-slate-800"
           >
-            Cancel
+            {t("dashboard.actions.cancel")}
           </button>
         ) : null}
         <button
           type="submit"
           className="inline-flex h-10 items-center rounded-xl bg-[#2563EB] px-4 text-sm font-semibold text-white hover:bg-blue-500"
         >
-          Save Account
+          {t("dashboard.accounts.save")}
         </button>
       </div>
     </form>

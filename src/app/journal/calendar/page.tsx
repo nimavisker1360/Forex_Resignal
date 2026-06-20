@@ -4,22 +4,32 @@ import {
   ArrowLeft,
   ArrowRight,
   ArrowUp,
+  BookOpenCheck,
   CalendarDays,
   CircleDot,
   RotateCcw,
 } from "lucide-react";
 import {
-  fetchJournalApi,
   mapPrismaTradeToJournalTrade,
-  type PrismaTradingAccountsResponse,
-  type PrismaTradesResponse,
 } from "@/app/journal/_lib/journal-api";
+import { DashboardMonthText, DashboardText } from "@/components/dashboard/DashboardText";
+import { getAccountsPageData, serializeTrade, tradeListInclude } from "@/lib/dashboard-data";
+import { prisma } from "@/lib/prisma";
+import { getCurrentUserId } from "@/lib/server-auth";
 import { cn } from "@/lib/utils";
+import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 
-const DEFAULT_USER_ID = "demo-user";
-const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const WEEKDAYS = [
+  "journal.calendar.weekdays.sun",
+  "journal.calendar.weekdays.mon",
+  "journal.calendar.weekdays.tue",
+  "journal.calendar.weekdays.wed",
+  "journal.calendar.weekdays.thu",
+  "journal.calendar.weekdays.fri",
+  "journal.calendar.weekdays.sat",
+];
 
 type CalendarPageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
@@ -89,14 +99,6 @@ function addParam(params: URLSearchParams, key: string, value: string | undefine
   }
 }
 
-function monthLabel(month: number, year: number) {
-  return new Date(Date.UTC(year, month - 1, 1)).toLocaleDateString("en-US", {
-    month: "long",
-    year: "numeric",
-    timeZone: "UTC",
-  });
-}
-
 function monthHref(month: number, year: number, accountId?: string) {
   const params = new URLSearchParams();
   params.set("month", String(month));
@@ -117,6 +119,13 @@ function selectedDateHref(
   params.set("selectedDate", date);
   addParam(params, "accountId", accountId);
   return `/journal/calendar?${params.toString()}`;
+}
+
+function dailyJournalHref(date: string, accountId?: string) {
+  const params = new URLSearchParams();
+  params.set("date", date);
+  addParam(params, "accountId", accountId);
+  return `/dashboard/daily-journal?${params.toString()}`;
 }
 
 function adjacentMonth(month: number, year: number, direction: -1 | 1) {
@@ -157,7 +166,100 @@ function nextDateString(date: string) {
   return next.toISOString();
 }
 
+function toNumber(value: unknown) {
+  if (value === null || value === undefined) {
+    return 0;
+  }
+
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function round(value: number, digits = 2) {
+  return Number(value.toFixed(digits));
+}
+
+async function getCalendarData(userId: string, month: number, year: number, accountId: string) {
+  const start = new Date(Date.UTC(year, month - 1, 1));
+  const end = new Date(Date.UTC(year, month, 1));
+  const trades = await prisma.trade.findMany({
+    where: {
+      userId,
+      openedAt: {
+        gte: start,
+        lt: end,
+      },
+      ...(accountId ? { accountId } : {}),
+    },
+    orderBy: [{ openedAt: "asc" }, { createdAt: "asc" }],
+  });
+  const grouped = new Map<string, typeof trades>();
+
+  for (const trade of trades) {
+    if (!trade.openedAt) {
+      continue;
+    }
+
+    const key = dateKey(trade.openedAt);
+    grouped.set(key, [...(grouped.get(key) || []), trade]);
+  }
+
+  return {
+    success: true,
+    month,
+    year,
+    days: Array.from(grouped.entries())
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([date, dayTrades]) => {
+        const closedTrades = dayTrades.filter((trade) => trade.status === "CLOSED");
+        const winningTrades = closedTrades.filter((trade) => toNumber(trade.profitLoss) > 0);
+        const losingTrades = closedTrades.filter((trade) => toNumber(trade.profitLoss) < 0);
+        const breakEvenTrades = closedTrades.filter((trade) => toNumber(trade.profitLoss) === 0);
+        const totalPnL = dayTrades.reduce(
+          (total, trade) => total + toNumber(trade.profitLoss),
+          0
+        );
+        const grossProfit = winningTrades.reduce(
+          (total, trade) => total + toNumber(trade.profitLoss),
+          0
+        );
+        const grossLoss = losingTrades.reduce(
+          (total, trade) => total + Math.abs(toNumber(trade.profitLoss)),
+          0
+        );
+        const pnlValues = dayTrades.map((trade) => toNumber(trade.profitLoss));
+
+        return {
+          date,
+          totalTrades: dayTrades.length,
+          winningTrades: winningTrades.length,
+          losingTrades: losingTrades.length,
+          breakEvenTrades: breakEvenTrades.length,
+          totalPnL: round(totalPnL),
+          winRate:
+            closedTrades.length > 0
+              ? round((winningTrades.length / closedTrades.length) * 100, 1)
+              : 0,
+          profitFactor:
+            grossLoss > 0
+              ? round(grossProfit / grossLoss, 2)
+              : grossProfit > 0
+                ? round(grossProfit, 2)
+                : 0,
+          bestTrade: pnlValues.length > 0 ? round(Math.max(...pnlValues)) : 0,
+          worstTrade: pnlValues.length > 0 ? round(Math.min(...pnlValues)) : 0,
+        };
+      }),
+  } satisfies CalendarResponse;
+}
+
 export default async function JournalCalendarPage({ searchParams }: CalendarPageProps) {
+  const userId = await getCurrentUserId();
+
+  if (!userId) {
+    redirect("/login");
+  }
+
   const params = (await searchParams) || {};
   const today = new Date();
   const currentMonth = today.getUTCMonth() + 1;
@@ -168,18 +270,10 @@ export default async function JournalCalendarPage({ searchParams }: CalendarPage
   const requestedSelectedDate = first(params.selectedDate);
   const previous = adjacentMonth(month, year, -1);
   const next = adjacentMonth(month, year, 1);
-  const calendarQuery = new URLSearchParams();
-  calendarQuery.set("month", String(month));
-  calendarQuery.set("year", String(year));
-  addParam(calendarQuery, "accountId", accountId);
 
-  const [calendarData, accountsData] = await Promise.all([
-    fetchJournalApi<CalendarResponse>(`/api/journal/calendar?${calendarQuery.toString()}`),
-    fetchJournalApi<PrismaTradingAccountsResponse>(
-      `/api/trading-accounts?userId=${DEFAULT_USER_ID}`
-    ).catch(
-      (): PrismaTradingAccountsResponse => ({ success: false, data: [] })
-    ),
+  const [calendarData, accounts] = await Promise.all([
+    getCalendarData(userId, month, year, accountId),
+    getAccountsPageData(userId),
   ]);
   const selectedDate =
     requestedSelectedDate ||
@@ -187,18 +281,21 @@ export default async function JournalCalendarPage({ searchParams }: CalendarPage
     dateKey(new Date(Date.UTC(year, month - 1, 1)));
   const dayMap = new Map(calendarData.days.map((day) => [day.date, day]));
   const cells = buildCalendarCells(month, year);
-  const accounts = accountsData.data || accountsData.accounts || [];
-  const selectedTradesQuery = new URLSearchParams();
-  selectedTradesQuery.set("limit", "100");
-  selectedTradesQuery.set("dateFrom", `${selectedDate}T00:00:00.000Z`);
-  selectedTradesQuery.set("dateTo", nextDateString(selectedDate));
-  addParam(selectedTradesQuery, "accountId", accountId);
-  const selectedTradesData = await fetchJournalApi<PrismaTradesResponse>(
-    `/api/journal/trades?${selectedTradesQuery.toString()}`
-  ).catch((): PrismaTradesResponse => ({ success: false, trades: [] }));
-  const selectedTrades = (
-    selectedTradesData.data?.trades || selectedTradesData.trades || []
-  )
+  const selectedTradesData = await prisma.trade.findMany({
+    where: {
+      userId,
+      openedAt: {
+        gte: new Date(`${selectedDate}T00:00:00.000Z`),
+        lt: new Date(nextDateString(selectedDate)),
+      },
+      ...(accountId ? { accountId } : {}),
+    },
+    include: tradeListInclude,
+    orderBy: { createdAt: "desc" },
+    take: 100,
+  });
+  const selectedTrades = selectedTradesData
+    .map(serializeTrade)
     .map(mapPrismaTradeToJournalTrade)
     .filter((trade) => trade.openTime && dateKey(new Date(trade.openTime)) === selectedDate);
 
@@ -206,9 +303,11 @@ export default async function JournalCalendarPage({ searchParams }: CalendarPage
     <div className="space-y-5">
       <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-white">Trading Calendar</h1>
+          <h1 className="text-2xl font-semibold text-white">
+            <DashboardText k="journal.calendar.title" />
+          </h1>
           <p className="mt-1 text-sm text-slate-400">
-            Monthly performance grouped by trade entry date.
+            <DashboardText k="journal.calendar.subtitle" />
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -217,20 +316,20 @@ export default async function JournalCalendarPage({ searchParams }: CalendarPage
             className="inline-flex h-10 items-center gap-2 rounded-xl border border-slate-800 px-3 text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white"
           >
             <ArrowLeft className="h-4 w-4" />
-            Previous
+            <DashboardText k="journal.calendar.previous" />
           </Link>
           <Link
             href={monthHref(currentMonth, currentYear, accountId)}
             className="inline-flex h-10 items-center gap-2 rounded-xl border border-slate-800 px-3 text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white"
           >
             <RotateCcw className="h-4 w-4" />
-            Current
+            <DashboardText k="journal.calendar.current" />
           </Link>
           <Link
             href={monthHref(next.month, next.year, accountId)}
             className="inline-flex h-10 items-center gap-2 rounded-xl border border-slate-800 px-3 text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white"
           >
-            Next
+            <DashboardText k="journal.calendar.next" />
             <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
@@ -243,11 +342,13 @@ export default async function JournalCalendarPage({ searchParams }: CalendarPage
               <CalendarDays className="h-5 w-5" />
             </span>
             <div>
-              <h2 className="text-lg font-semibold text-white">{monthLabel(month, year)}</h2>
+              <h2 className="text-lg font-semibold text-white">
+                <DashboardMonthText month={month} year={year} />
+              </h2>
               <p className="text-xs text-slate-400">
                 {calendarData.days.length > 0
-                  ? `${calendarData.days.length} active trading days`
-                  : "No trades found for this period"}
+                  ? <DashboardText k="journal.calendar.activeDays" values={{ count: String(calendarData.days.length) }} />
+                  : <DashboardText k="journal.calendar.noTradesPeriod" />}
               </p>
             </div>
           </div>
@@ -261,7 +362,7 @@ export default async function JournalCalendarPage({ searchParams }: CalendarPage
                 defaultValue={accountId}
                 className="h-10 rounded-xl border border-slate-800 bg-[#111827] px-3 text-sm text-[#E5E7EB] outline-none focus:border-blue-600"
               >
-                <option value="">All accounts</option>
+                <option value="">All accounts / همه حساب‌ها</option>
                 {accounts.map((account) => (
                   <option key={account.id} value={account.id}>
                     {account.name}
@@ -272,7 +373,7 @@ export default async function JournalCalendarPage({ searchParams }: CalendarPage
                 type="submit"
                 className="h-10 rounded-xl bg-[#2563EB] px-4 text-sm font-semibold text-white hover:bg-blue-500"
               >
-                Apply
+                <DashboardText k="journal.common.apply" />
               </button>
             </form>
           )}
@@ -284,7 +385,7 @@ export default async function JournalCalendarPage({ searchParams }: CalendarPage
           <div className="grid grid-cols-7 border-b border-slate-800 bg-[#111827] text-center text-xs font-semibold uppercase text-slate-400">
             {WEEKDAYS.map((weekday) => (
               <div key={weekday} className="px-2 py-3">
-                {weekday}
+                <DashboardText k={weekday} />
               </div>
             ))}
           </div>
@@ -349,11 +450,11 @@ export default async function JournalCalendarPage({ searchParams }: CalendarPage
                       {formatMoney(totalPnL)}
                     </div>
                     <div className="text-xs text-slate-500">
-                      {day ? `${day.totalTrades} trades` : "No trades"}
+                      {day ? <DashboardText k="journal.calendar.tradesCount" values={{ count: String(day.totalTrades) }} /> : <DashboardText k="journal.calendar.noTrades" />}
                     </div>
                     {day && (
                       <div className="text-xs text-slate-400">
-                        {formatNumber(day.winRate, 1)}% win rate
+                        <DashboardText k="journal.calendar.winRateValue" values={{ value: formatNumber(day.winRate, 1) }} />
                       </div>
                     )}
                   </div>
@@ -369,8 +470,8 @@ export default async function JournalCalendarPage({ searchParams }: CalendarPage
               <h2 className="text-base font-semibold text-white">{selectedDate}</h2>
               <p className="mt-1 text-xs text-slate-400">
                 {selectedTrades.length > 0
-                  ? `${selectedTrades.length} trades opened`
-                  : "No trades found for this period"}
+                  ? <DashboardText k="journal.calendar.tradesOpened" values={{ count: String(selectedTrades.length) }} />
+                  : <DashboardText k="journal.calendar.noTradesPeriod" />}
               </p>
             </div>
             <div
@@ -383,6 +484,14 @@ export default async function JournalCalendarPage({ searchParams }: CalendarPage
               {formatMoney(dayMap.get(selectedDate)?.totalPnL || 0)}
             </div>
           </div>
+
+          <Link
+            href={dailyJournalHref(selectedDate, accountId)}
+            className="mt-4 inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl bg-[#2563EB] px-4 text-sm font-semibold text-white hover:bg-blue-500"
+          >
+            <BookOpenCheck className="h-4 w-4" />
+            Open Daily Journal
+          </Link>
 
           <div className="mt-4 space-y-3">
             {selectedTrades.map((trade) => (
@@ -410,13 +519,13 @@ export default async function JournalCalendarPage({ searchParams }: CalendarPage
                 </div>
                 <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-slate-400">
                   <div>
-                    <span className="text-slate-500">Entry</span>
+                    <span className="text-slate-500"><DashboardText k="dashboard.table.entry" /></span>
                     <div className="mt-1 text-slate-200">
                       {formatNumber(Number(trade.entryPrice || 0), 5)}
                     </div>
                   </div>
                   <div>
-                    <span className="text-slate-500">Exit</span>
+                    <span className="text-slate-500"><DashboardText k="dashboard.table.exit" /></span>
                     <div className="mt-1 text-slate-200">
                       {trade.closePrice === null
                         ? "-"
@@ -429,9 +538,11 @@ export default async function JournalCalendarPage({ searchParams }: CalendarPage
 
             {selectedTrades.length === 0 && (
               <div className="rounded-xl border border-dashed border-slate-800 bg-[#111827] px-4 py-10 text-center">
-                <div className="text-sm font-semibold text-white">No trades found for this period</div>
+                <div className="text-sm font-semibold text-white">
+                  <DashboardText k="journal.calendar.noTradesPeriod" />
+                </div>
                 <p className="mt-1 text-xs text-slate-400">
-                  Select another day, month, or account filter.
+                  <DashboardText k="journal.calendar.emptyHint" />
                 </p>
               </div>
             )}

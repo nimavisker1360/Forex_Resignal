@@ -84,6 +84,19 @@ export type TradesListData = {
   };
 };
 
+export type DashboardOverviewStats = {
+  totalTrades: number;
+  totalPnl: number;
+  winRate: number;
+  openTrades: number;
+};
+
+export type DashboardOverviewData = {
+  accounts: TradingAccountDto[];
+  trades: TradeDto[];
+  stats: DashboardOverviewStats;
+};
+
 export function toNumber(value: string | number | null | undefined) {
   if (value === null || value === undefined || value === "") {
     return null;

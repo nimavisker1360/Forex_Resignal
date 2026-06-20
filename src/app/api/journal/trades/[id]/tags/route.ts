@@ -1,6 +1,7 @@
 import { Prisma } from "@prisma/client";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getCurrentUserId, unauthorizedResponse } from "@/lib/server-auth";
 
 export const dynamic = "force-dynamic";
 
@@ -30,9 +31,15 @@ function errorMessage(error: unknown) {
 
 export async function GET(_request: Request, context: RouteContext) {
   try {
+    const userId = await getCurrentUserId();
+
+    if (!userId) {
+      return unauthorizedResponse();
+    }
+
     const { id } = await context.params;
-    const trade = await prisma.trade.findUnique({
-      where: { id },
+    const trade = await prisma.trade.findFirst({
+      where: { id, userId },
       select: {
         id: true,
         tags: {
@@ -74,13 +81,19 @@ export async function GET(_request: Request, context: RouteContext) {
 
 export async function POST(request: Request, context: RouteContext) {
   try {
+    const userId = await getCurrentUserId();
+
+    if (!userId) {
+      return unauthorizedResponse();
+    }
+
     const { id } = await context.params;
     const body = (await request.json()) as Record<string, unknown>;
     const tagNames = normalizeTags(body.tags);
 
     const savedTags = await prisma.$transaction(async (tx) => {
-      const trade = await tx.trade.findUnique({
-        where: { id },
+      const trade = await tx.trade.findFirst({
+        where: { id, userId },
         select: { id: true, userId: true },
       });
 

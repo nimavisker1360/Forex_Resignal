@@ -6,6 +6,8 @@ import {
   normalizeTemplatePayload,
   serializeChecklistTemplate,
 } from "@/lib/checklists/api";
+import { getCurrentUserId, unauthorizedResponse } from "@/lib/server-auth";
+import { requireFeatureAccess, subscriptionAccessResponse } from "@/lib/subscription";
 
 export const dynamic = "force-dynamic";
 
@@ -51,6 +53,14 @@ export async function GET(_request: Request, context: RouteContext) {
 
 export async function PATCH(request: Request, context: RouteContext) {
   try {
+    const userId = await getCurrentUserId();
+
+    if (!userId) {
+      return unauthorizedResponse();
+    }
+
+    await requireFeatureAccess(userId, "checklists");
+
     const { id } = await context.params;
     const body = (await request.json()) as Record<string, unknown>;
     const normalized = normalizeTemplatePayload(body, { partial: true });
@@ -123,6 +133,12 @@ export async function PATCH(request: Request, context: RouteContext) {
       checklist: serializeChecklistTemplate(template),
     });
   } catch (error) {
+    const accessResponse = subscriptionAccessResponse(error);
+
+    if (accessResponse) {
+      return accessResponse;
+    }
+
     console.error("Checklist template PATCH error:", error);
 
     const message = error instanceof Error ? error.message : "";
@@ -147,6 +163,14 @@ export async function PATCH(request: Request, context: RouteContext) {
 
 export async function DELETE(_request: Request, context: RouteContext) {
   try {
+    const userId = await getCurrentUserId();
+
+    if (!userId) {
+      return unauthorizedResponse();
+    }
+
+    await requireFeatureAccess(userId, "checklists");
+
     const { id } = await context.params;
     const result = await prisma.$transaction(async (tx) => {
       const usedCount = await tx.tradeChecklist.count({
@@ -187,6 +211,12 @@ export async function DELETE(_request: Request, context: RouteContext) {
         : null,
     });
   } catch (error) {
+    const accessResponse = subscriptionAccessResponse(error);
+
+    if (accessResponse) {
+      return accessResponse;
+    }
+
     console.error("Checklist template DELETE error:", error);
 
     if (

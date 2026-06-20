@@ -7,6 +7,7 @@ import type {
   TradeDto,
   TradingAccountDto,
 } from "@/components/dashboard/types";
+import { useLanguage } from "@/lib/language-context";
 import {
   isImportedTradeSource,
   normalizeTradeSource,
@@ -79,6 +80,8 @@ function Field({
 }
 
 function SaveState({ status }: { status: SaveStatus }) {
+  const { t } = useLanguage();
+
   if (status === "idle") {
     return null;
   }
@@ -86,17 +89,17 @@ function SaveState({ status }: { status: SaveStatus }) {
   const config = {
     saving: {
       icon: <Loader2 className="h-4 w-4 animate-spin" />,
-      text: "Saving...",
+      text: t("dashboard.saveState.saving"),
       className: "text-blue-200",
     },
     saved: {
       icon: <CheckCircle2 className="h-4 w-4" />,
-      text: "Saved",
+      text: t("dashboard.saveState.saved"),
       className: "text-emerald-300",
     },
     error: {
       icon: <XCircle className="h-4 w-4" />,
-      text: "Error saving changes",
+      text: t("dashboard.saveState.error"),
       className: "text-red-300",
     },
   }[status];
@@ -129,6 +132,25 @@ export function TradeForm({
   const normalizedSource = normalizeTradeSource(trade?.source, trade?.setup);
   const brokerLocked = Boolean(trade && isImportedTradeSource(trade.source, trade.setup));
   const selectedTags = new Set(trade?.tags?.map((item) => item.tagId) || []);
+  const { t } = useLanguage();
+  const brokerFields = [
+    ["entryPrice", t("dashboard.form.entryPrice"), "0.00001"],
+    ["exitPrice", t("dashboard.form.exitPrice"), "0.00001"],
+    ["stopLoss", t("dashboard.form.stopLoss"), "0.00001"],
+    ["takeProfit", t("dashboard.form.takeProfit"), "0.00001"],
+    ["lotSize", t("dashboard.form.lotSize"), "0.01"],
+    ["riskAmount", t("dashboard.form.riskAmount"), "0.01"],
+    ["profitLoss", t("dashboard.form.profitLoss"), "0.01"],
+    ["commission", t("dashboard.form.commission"), "0.01"],
+    ["swap", t("dashboard.form.swap"), "0.01"],
+    ["rr", t("dashboard.form.rr"), "0.01"],
+  ] as const;
+  const reviewFields = [
+    ["setup", t("dashboard.form.setup")],
+    ["session", t("dashboard.form.session")],
+    ["emotion", t("dashboard.form.emotion")],
+    ["mistake", t("dashboard.form.mistake")],
+  ] as const;
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -174,25 +196,25 @@ export function TradeForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <Section
-        title="Broker Data"
+        title={t("dashboard.form.brokerData")}
         action={
           brokerLocked ? (
             <span className="inline-flex items-center gap-2 rounded-lg border border-blue-500/30 bg-blue-500/10 px-3 py-1 text-xs font-semibold text-blue-200">
               <Lock className="h-3.5 w-3.5" />
-              Synced from MT5
+              {t("dashboard.form.syncedFromMt5")}
             </span>
           ) : (
             <span className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-200">
-              Manual
+              {t("dashboard.form.manual")}
             </span>
           )
         }
       >
         <div className="grid gap-3 md:grid-cols-3">
-          <Field label="Source">
+          <Field label={t("dashboard.form.source")}>
             <input value={normalizedSource} disabled className={inputClass} />
           </Field>
-          <Field label="Account">
+          <Field label={t("dashboard.table.account")}>
             <select
               name="accountId"
               required={!brokerLocked}
@@ -207,7 +229,7 @@ export function TradeForm({
               ))}
             </select>
           </Field>
-          <Field label="MT5 Ticket">
+          <Field label={t("dashboard.form.mt5Ticket")}>
             <input
               name="mt5Ticket"
               defaultValue={trade?.mt5Ticket || ""}
@@ -216,7 +238,7 @@ export function TradeForm({
               className={inputClass}
             />
           </Field>
-          <Field label="Symbol">
+          <Field label={t("dashboard.table.symbol")}>
             <input
               name="symbol"
               required={!brokerLocked}
@@ -226,7 +248,7 @@ export function TradeForm({
               className={`${inputClass} uppercase`}
             />
           </Field>
-          <Field label="Direction">
+          <Field label={t("dashboard.table.direction")}>
             <select
               name="direction"
               required={!brokerLocked}
@@ -234,34 +256,23 @@ export function TradeForm({
               defaultValue={trade?.direction || "BUY"}
               className={inputClass}
             >
-              <option value="BUY">BUY</option>
-              <option value="SELL">SELL</option>
+              <option value="BUY">{t("dashboard.common.buy")}</option>
+              <option value="SELL">{t("dashboard.common.sell")}</option>
             </select>
           </Field>
-          <Field label="Status">
+          <Field label={t("dashboard.table.status")}>
             <select
               name="status"
               disabled={brokerLocked}
               defaultValue={defaultStatus || trade?.status || "OPEN"}
               className={inputClass}
             >
-              <option value="OPEN">OPEN</option>
-              <option value="CLOSED">CLOSED</option>
-              <option value="CANCELLED">CANCELLED</option>
+              <option value="OPEN">{t("dashboard.common.open")}</option>
+              <option value="CLOSED">{t("dashboard.common.closed")}</option>
+              <option value="CANCELLED">{t("dashboard.common.cancelled")}</option>
             </select>
           </Field>
-          {[
-            ["entryPrice", "Entry Price", "0.00001"],
-            ["exitPrice", "Exit Price", "0.00001"],
-            ["stopLoss", "Stop Loss", "0.00001"],
-            ["takeProfit", "Take Profit", "0.00001"],
-            ["lotSize", "Lot Size", "0.01"],
-            ["riskAmount", "Risk Amount", "0.01"],
-            ["profitLoss", "Profit/Loss", "0.01"],
-            ["commission", "Commission", "0.01"],
-            ["swap", "Swap", "0.01"],
-            ["rr", "R/R", "0.01"],
-          ].map(([name, label, step]) => (
+          {brokerFields.map(([name, label, step]) => (
             <Field key={name} label={label}>
               <input
                 name={name}
@@ -273,7 +284,7 @@ export function TradeForm({
               />
             </Field>
           ))}
-          <Field label="Opened At">
+          <Field label={t("dashboard.form.openedAt")}>
             <input
               name="openedAt"
               type="datetime-local"
@@ -282,7 +293,7 @@ export function TradeForm({
               className={inputClass}
             />
           </Field>
-          <Field label="Closed At">
+          <Field label={t("dashboard.form.closedAt")}>
             <input
               name="closedAt"
               type="datetime-local"
@@ -294,14 +305,9 @@ export function TradeForm({
         </div>
       </Section>
 
-      <Section title="Journal Review">
+      <Section title={t("dashboard.form.journalReview")}>
         <div className="grid gap-3 md:grid-cols-2">
-          {[
-            ["setup", "Setup"],
-            ["session", "Session"],
-            ["emotion", "Emotion"],
-            ["mistake", "Mistake"],
-          ].map(([name, label]) => (
+          {reviewFields.map(([name, label]) => (
             <Field key={name} label={label}>
               <input
                 name={name}
@@ -312,7 +318,7 @@ export function TradeForm({
           ))}
         </div>
 
-        <Field label="Notes">
+        <Field label={t("dashboard.form.notes")}>
           <textarea
             name="notes"
             defaultValue={trade?.notes || ""}
@@ -322,7 +328,7 @@ export function TradeForm({
         </Field>
 
         <div className="space-y-2">
-          <div className="text-xs font-medium uppercase text-slate-400">Tags</div>
+          <div className="text-xs font-medium uppercase text-slate-400">{t("dashboard.form.tags")}</div>
           <div className="flex flex-wrap gap-2">
             {tags.map((tag) => (
               <label
@@ -344,7 +350,7 @@ export function TradeForm({
               </label>
             ))}
             {tags.length === 0 ? (
-              <span className="text-sm text-slate-400">No tags yet</span>
+              <span className="text-sm text-slate-400">{t("dashboard.form.noTags")}</span>
             ) : null}
           </div>
         </div>
@@ -359,7 +365,7 @@ export function TradeForm({
               onClick={onCancel}
               className="inline-flex h-10 items-center rounded-xl border border-slate-800 px-4 text-sm font-semibold text-slate-300 hover:bg-slate-800"
             >
-              Cancel
+              {t("dashboard.actions.cancel")}
             </button>
           ) : null}
           <button
@@ -367,7 +373,7 @@ export function TradeForm({
             disabled={saveStatus === "saving"}
             className="inline-flex h-10 items-center rounded-xl bg-[#2563EB] px-4 text-sm font-semibold text-white hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {saveStatus === "saving" ? "Saving..." : "Save Trade"}
+            {saveStatus === "saving" ? t("dashboard.saveState.saving") : t("dashboard.form.saveTrade")}
           </button>
         </div>
       </div>

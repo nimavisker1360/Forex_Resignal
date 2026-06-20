@@ -1,15 +1,19 @@
 import { TradesManager } from "@/components/dashboard/TradesManager";
+import { getTradesPageData } from "@/lib/dashboard-data";
+import { getSession } from "@/lib/server-auth";
 
-type TradesPageProps = {
-  searchParams?: Promise<Record<string, string | string[] | undefined>>;
-};
+export default async function TradesPage() {
+  const session = await getSession();
+  const data = session?.user.id
+    ? await getTradesPageData(session.user.id)
+    : { accounts: [], tags: [], trades: [] };
 
-function first(value: string | string[] | undefined) {
-  return Array.isArray(value) ? value[0] : value;
-}
-
-export default async function TradesPage({ searchParams }: TradesPageProps) {
-  const params = (await searchParams) || {};
-
-  return <TradesManager userId={first(params.userId)} />;
+  return (
+    <TradesManager
+      userId={session?.user.id}
+      initialAccounts={data.accounts}
+      initialTags={data.tags}
+      initialTrades={data.trades}
+    />
+  );
 }

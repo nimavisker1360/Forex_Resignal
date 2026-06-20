@@ -1,6 +1,16 @@
+"use client";
+
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/lib/language-context";
 
 export function TradeStatusBadge({ status }: { status: string }) {
+  const { t } = useLanguage();
+  const labels: Record<string, string> = {
+    OPEN: t("dashboard.common.open"),
+    CLOSED: t("dashboard.common.closed"),
+    CANCELLED: t("dashboard.common.cancelled"),
+  };
+
   return (
     <span
       className={cn(
@@ -12,7 +22,7 @@ export function TradeStatusBadge({ status }: { status: string }) {
           "border-slate-700 bg-slate-900 text-slate-300"
       )}
     >
-      {status}
+      {labels[status] || status}
     </span>
   );
 }

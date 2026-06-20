@@ -1,6 +1,7 @@
 import { Prisma } from "@prisma/client";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getCurrentUserId, unauthorizedResponse } from "@/lib/server-auth";
 
 export const dynamic = "force-dynamic";
 
@@ -39,6 +40,12 @@ function parseMonthYear(searchParams: URLSearchParams) {
 
 export async function GET(request: Request) {
   try {
+    const userId = await getCurrentUserId();
+
+    if (!userId) {
+      return unauthorizedResponse();
+    }
+
     const { searchParams } = new URL(request.url);
     const parsed = parseMonthYear(searchParams);
 
@@ -58,6 +65,7 @@ export async function GET(request: Request) {
     const start = new Date(Date.UTC(year, month - 1, 1));
     const end = new Date(Date.UTC(year, month, 1));
     const where: Prisma.TradeWhereInput = {
+      userId,
       openedAt: {
         gte: start,
         lt: end,

@@ -179,7 +179,8 @@ async function saveScreenshotLocally(
 
 async function saveScreenshotUrlToTrade(
   input: JournalScreenshotUploadInput,
-  imageUrl: string
+  imageUrl: string,
+  userId?: string
 ) {
   return saveMt5ScreenshotToPrismaTrade({
     accountNumber: input.accountNumber,
@@ -188,11 +189,13 @@ async function saveScreenshotUrlToTrade(
     positionId: input.positionId,
     type: input.type,
     imageUrl,
+    userId,
   });
 }
 
 export async function uploadJournalScreenshot(
-  input: JournalScreenshotUploadInput
+  input: JournalScreenshotUploadInput,
+  userId?: string
 ): Promise<JournalScreenshotUploadResult> {
   const imageBuffer = decodeBase64Png(input.imageBase64);
   let imageUrl: string | null = null;
@@ -211,7 +214,7 @@ export async function uploadJournalScreenshot(
     imageUrl = await saveScreenshotLocally(input, imageBuffer);
   }
 
-  const tradeUpdated = await saveScreenshotUrlToTrade(input, imageUrl);
+  const tradeUpdated = await saveScreenshotUrlToTrade(input, imageUrl, userId);
 
   return { imageUrl, storage, tradeUpdated };
 }

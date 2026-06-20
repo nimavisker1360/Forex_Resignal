@@ -2,6 +2,7 @@ import { Prisma } from "@prisma/client";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { journalTradeInclude, serializeJournalTrade } from "@/lib/journal/prisma-trades";
+import { getCurrentUserId, unauthorizedResponse } from "@/lib/server-auth";
 
 export const dynamic = "force-dynamic";
 
@@ -91,9 +92,15 @@ function serializeMetadata(metadata: unknown) {
 
 export async function GET(_request: Request, context: RouteContext) {
   try {
+    const userId = await getCurrentUserId();
+
+    if (!userId) {
+      return unauthorizedResponse();
+    }
+
     const { id } = await context.params;
-    const trade = await prisma.trade.findUnique({
-      where: { id },
+    const trade = await prisma.trade.findFirst({
+      where: { id, userId },
       include: {
         ...journalTradeInclude,
         journalMetadata: true,
@@ -124,6 +131,12 @@ export async function GET(_request: Request, context: RouteContext) {
 
 export async function PUT(request: Request, context: RouteContext) {
   try {
+    const userId = await getCurrentUserId();
+
+    if (!userId) {
+      return unauthorizedResponse();
+    }
+
     const { id } = await context.params;
     const body = (await request.json()) as MetadataPayload;
     const errors: string[] = [];
@@ -148,8 +161,8 @@ export async function PUT(request: Request, context: RouteContext) {
     }
 
     const saved = await prisma.$transaction(async (tx) => {
-      const trade = await tx.trade.findUnique({
-        where: { id },
+      const trade = await tx.trade.findFirst({
+        where: { id, userId },
         select: { id: true, userId: true },
       });
 

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import type { FormEvent, ReactNode } from "react";
 import {
@@ -39,6 +40,8 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { SubscriptionLockedFeature } from "@/components/subscription/SubscriptionLockedFeature";
+import { useLanguage } from "@/lib/language-context";
 import { cn } from "@/lib/utils";
 import type {
   AnalyticsDirectionalStats,
@@ -126,6 +129,10 @@ type TradeMetadata = {
 
 type SaveStatus = "idle" | "loading" | "saving" | "saved" | "error";
 type ReviewPanelTab = "entry" | "exit" | "trade" | "daily";
+type PageError = {
+  message: string;
+  upgradeRequired?: boolean;
+};
 
 const EMPTY_FILTERS: Filters = {
   dateRange: "all",
@@ -372,8 +379,10 @@ function PnlBarChart({
   xKey: string;
   height?: number;
 }) {
+  const { t } = useLanguage();
+
   if (data.length === 0) {
-    return <EmptyPanel message="No trades found for this report." />;
+    return <EmptyPanel message={t("journal.analytics.noTradesForReport")} />;
   }
 
   return (
@@ -384,7 +393,7 @@ function PnlBarChart({
           <XAxis dataKey={xKey} stroke="#94A3B8" tickLine={false} axisLine={false} />
           <YAxis stroke="#94A3B8" tickLine={false} axisLine={false} width={70} />
           <Tooltip content={<MoneyTooltip />} cursor={{ fill: "#1E293B", opacity: 0.35 }} />
-          <Bar dataKey="netPnl" name="Net P&L" radius={[4, 4, 0, 0]}>
+          <Bar dataKey="netPnl" name={t("journal.analytics.netPnl")} radius={[4, 4, 0, 0]}>
             {data.map((item, index) => (
               <Cell
                 key={index}
@@ -399,8 +408,10 @@ function PnlBarChart({
 }
 
 function EquityChart({ data }: { data: JournalAnalyticsResponse["equityCurve"] }) {
+  const { t } = useLanguage();
+
   if (data.length === 0) {
-    return <EmptyPanel message="No closed trades yet. Equity curve appears after realized trades exist." />;
+    return <EmptyPanel message={t("journal.analytics.noEquityCurve")} />;
   }
 
   return (
@@ -414,7 +425,7 @@ function EquityChart({ data }: { data: JournalAnalyticsResponse["equityCurve"] }
           <Line
             type="monotone"
             dataKey="equity"
-            name="Equity"
+            name={t("journal.analytics.equity")}
             stroke="#38BDF8"
             strokeWidth={3}
             dot={false}
@@ -427,8 +438,10 @@ function EquityChart({ data }: { data: JournalAnalyticsResponse["equityCurve"] }
 }
 
 function DrawdownChart({ data }: { data: JournalAnalyticsResponse["drawdownCurve"] }) {
+  const { t } = useLanguage();
+
   if (data.length === 0) {
-    return <EmptyPanel message="No drawdown data available yet." />;
+    return <EmptyPanel message={t("journal.analytics.noDrawdownData")} />;
   }
 
   return (
@@ -442,7 +455,7 @@ function DrawdownChart({ data }: { data: JournalAnalyticsResponse["drawdownCurve
           <Area
             type="monotone"
             dataKey="drawdown"
-            name="Drawdown"
+            name={t("journal.analytics.drawdown")}
             stroke="#F97316"
             fill="#F97316"
             fillOpacity={0.2}
@@ -458,13 +471,15 @@ function DirectionChart({ data }: { data: AnalyticsDirectionalStats[] }) {
 }
 
 function DirectionStats({ items }: { items: AnalyticsDirectionalStats[] }) {
+  const { t } = useLanguage();
+
   return (
     <div className="grid gap-3 md:grid-cols-2">
       {items.map((item) => (
         <div key={item.direction} className="rounded-lg border border-slate-800 bg-[#111827] p-4">
           <div className="flex items-center justify-between">
             <span className="text-sm font-semibold text-white">
-              {item.direction === "BUY" ? "Long / BUY" : "Short / SELL"}
+              {item.direction === "BUY" ? t("journal.analytics.longBuy") : t("journal.analytics.shortSell")}
             </span>
             <span
               className={cn(
@@ -478,12 +493,12 @@ function DirectionStats({ items }: { items: AnalyticsDirectionalStats[] }) {
             </span>
           </div>
           <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
-            <Metric label="Trades" value={formatNumber(item.totalTrades, 0)} />
-            <Metric label="Win Rate" value={formatPercent(item.winRate)} />
-            <Metric label="Net P&L" value={formatMoney(item.netPnl)} tone={valueTone(item.netPnl)} />
-            <Metric label="Average" value={formatMoney(item.averagePnl)} tone={valueTone(item.averagePnl)} />
-            <Metric label="Best" value={formatMoney(item.bestTrade)} tone={valueTone(item.bestTrade)} />
-            <Metric label="Worst" value={formatMoney(item.worstTrade)} tone={valueTone(item.worstTrade)} />
+            <Metric label={t("journal.analytics.trades")} value={formatNumber(item.totalTrades, 0)} />
+            <Metric label={t("journal.analytics.winRate")} value={formatPercent(item.winRate)} />
+            <Metric label={t("journal.analytics.netPnl")} value={formatMoney(item.netPnl)} tone={valueTone(item.netPnl)} />
+            <Metric label={t("journal.analytics.average")} value={formatMoney(item.averagePnl)} tone={valueTone(item.averagePnl)} />
+            <Metric label={t("journal.analytics.best")} value={formatMoney(item.bestTrade)} tone={valueTone(item.bestTrade)} />
+            <Metric label={t("journal.analytics.worst")} value={formatMoney(item.worstTrade)} tone={valueTone(item.worstTrade)} />
           </div>
         </div>
       ))}
@@ -571,6 +586,17 @@ function screenshotUrlFromTrade(
   );
 }
 
+function tradeDateKey(trade: JournalTradeOption | null) {
+  const value = trade?.openedAt || trade?.closedAt;
+
+  if (!value) {
+    return null;
+  }
+
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date.toISOString().slice(0, 10);
+}
+
 function firstString(value: string | null | undefined) {
   const text = String(value || "").trim();
   return text ? [text] : [];
@@ -646,6 +672,7 @@ function AnalyticsHero({
   analytics: JournalAnalyticsResponse;
   loading: boolean;
 }) {
+  const { t } = useLanguage();
   const overview = analytics.overview;
   const costlyMistake = worstPnlRow(analytics.byMistake) || worstPnlRow(analytics.byTag);
   const bestSetup = bestPnlRow(analytics.bySetup) || bestPnlRow(analytics.byTag);
@@ -658,30 +685,29 @@ function AnalyticsHero({
         <div className="p-5 sm:p-6 lg:p-7">
           <div className="inline-flex items-center gap-2 rounded-full border border-violet-500/30 bg-violet-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-violet-200">
             <Activity className="h-3.5 w-3.5" />
-            Trade Analysis
+            {t("journal.analytics.tradeAnalysis")}
           </div>
           <h1 className="mt-5 max-w-3xl text-3xl font-semibold leading-tight text-white sm:text-4xl">
-            Analyze your trading <span className="text-violet-300">stats</span> and behavior.
+            {t("journal.analytics.heroTitlePrefix")} <span className="text-violet-300">{t("journal.analytics.heroTitleHighlight")}</span> {t("journal.analytics.heroTitleSuffix")}
           </h1>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-400">
-            TradeZella-style reporting: performance, drawdown, playbook/setup quality,
-            costly mistakes, emotions, tags, symbols, and time windows in one workspace.
+            {t("journal.analytics.heroDescription")}
           </p>
 
           <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <MetricTile label="Net P&L" value={formatMoney(overview.totalNetPnl)} tone={valueTone(overview.totalNetPnl)} />
-            <MetricTile label="Win Rate" value={formatPercent(overview.winRate)} tone="blue" />
-            <MetricTile label="Profit Factor" value={formatNumber(overview.profitFactor, 2)} tone="amber" />
-            <MetricTile label="Expectancy" value={formatMoney(overview.expectancyPerTrade)} tone={valueTone(overview.expectancyPerTrade)} />
+            <MetricTile label={t("journal.analytics.netPnl")} value={formatMoney(overview.totalNetPnl)} tone={valueTone(overview.totalNetPnl)} />
+            <MetricTile label={t("journal.analytics.winRate")} value={formatPercent(overview.winRate)} tone="blue" />
+            <MetricTile label={t("journal.analytics.profitFactor")} value={formatNumber(overview.profitFactor, 2)} tone="amber" />
+            <MetricTile label={t("journal.analytics.expectancy")} value={formatMoney(overview.expectancyPerTrade)} tone={valueTone(overview.expectancyPerTrade)} />
           </div>
         </div>
 
         <div className="border-t border-slate-800 bg-[#111827] p-5 sm:p-6 xl:border-l xl:border-t-0">
           <div className="mb-4 flex items-center justify-between gap-3">
             <div>
-              <div className="text-sm font-semibold text-white">Key insights</div>
+              <div className="text-sm font-semibold text-white">{t("journal.analytics.keyInsights")}</div>
               <div className="mt-1 text-xs text-slate-400">
-                {loading ? "Updating report..." : `${formatNumber(overview.totalTrades, 0)} closed trades analyzed`}
+                {loading ? t("journal.analytics.updatingReport") : t("journal.analytics.closedTradesAnalyzed").replace("{count}", formatNumber(overview.totalTrades, 0))}
               </div>
             </div>
             {loading ? (
@@ -693,23 +719,23 @@ function AnalyticsHero({
           <div className="space-y-3">
             <InsightLine
               icon={<AlertTriangle className="h-4 w-4" />}
-              label="Costliest mistake"
-              value={costlyMistake ? costlyMistake.label : "No mistake tags yet"}
-              detail={costlyMistake ? `${formatMoney(costlyMistake.netPnl)} across ${formatNumber(costlyMistake.totalTrades, 0)} trades` : "Tag losing trades to reveal this."}
+              label={t("journal.analytics.costliestMistake")}
+              value={costlyMistake ? costlyMistake.label : t("journal.analytics.noMistakeTags")}
+              detail={costlyMistake ? t("journal.analytics.moneyAcrossTrades").replace("{money}", formatMoney(costlyMistake.netPnl)).replace("{count}", formatNumber(costlyMistake.totalTrades, 0)) : t("journal.analytics.tagLosingTrades")}
               tone="loss"
             />
             <InsightLine
               icon={<ClipboardCheck className="h-4 w-4" />}
-              label="Best setup"
-              value={bestSetup ? bestSetup.label : "No setup data yet"}
-              detail={bestSetup ? `${formatMoney(bestSetup.netPnl)} / ${formatPercent(bestSetup.winRate)} win rate` : "Add setup or playbook names to trades."}
+              label={t("journal.analytics.bestSetup")}
+              value={bestSetup ? bestSetup.label : t("journal.analytics.noSetupData")}
+              detail={bestSetup ? t("journal.analytics.moneyWinRate").replace("{money}", formatMoney(bestSetup.netPnl)).replace("{rate}", formatPercent(bestSetup.winRate)) : t("journal.analytics.addSetupNames")}
               tone="profit"
             />
             <InsightLine
               icon={<CalendarDays className="h-4 w-4" />}
-              label="Weak time window"
-              value={weakHour ? weakHour.label : "No hour data yet"}
-              detail={weakHour ? `${formatMoney(weakHour.netPnl)} from opened trades` : "Closed trades with open time are needed."}
+              label={t("journal.analytics.weakTimeWindow")}
+              value={weakHour ? weakHour.label : t("journal.analytics.noHourData")}
+              detail={weakHour ? t("journal.analytics.moneyFromOpenedTrades").replace("{money}", formatMoney(weakHour.netPnl)) : t("journal.analytics.closedTradesNeeded")}
               tone="amber"
             />
           </div>
@@ -783,17 +809,19 @@ function InsightLine({
 }
 
 function StrategyTable({ rows }: { rows: StrategyAnalyticsRow[] }) {
+  const { t } = useLanguage();
+
   return (
     <div className="overflow-x-auto">
       <table className="w-full min-w-[620px] text-left text-sm">
         <thead className="text-xs uppercase text-slate-500">
           <tr>
-            <th className="py-2 pr-3">Strategy</th>
-            <th className="py-2 pr-3">Trades</th>
-            <th className="py-2 pr-3">Win Rate</th>
-            <th className="py-2 pr-3">Net P&L</th>
-            <th className="py-2 pr-3">Profit Factor</th>
-            <th className="py-2">Average</th>
+            <th className="py-2 pr-3">{t("journal.analytics.strategy")}</th>
+            <th className="py-2 pr-3">{t("journal.analytics.trades")}</th>
+            <th className="py-2 pr-3">{t("journal.analytics.winRate")}</th>
+            <th className="py-2 pr-3">{t("journal.analytics.netPnl")}</th>
+            <th className="py-2 pr-3">{t("journal.analytics.profitFactor")}</th>
+            <th className="py-2">{t("journal.analytics.average")}</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-slate-800">
@@ -814,7 +842,7 @@ function StrategyTable({ rows }: { rows: StrategyAnalyticsRow[] }) {
         </tbody>
       </table>
       {rows.length === 0 && (
-        <EmptyPanel message="No strategy analytics match the active filters." />
+        <EmptyPanel message={t("journal.analytics.noStrategyFilter")} />
       )}
     </div>
   );
@@ -849,6 +877,8 @@ function TradeZellaMetricRow({
 
 function ReviewCategory({
   title,
+  addLabel,
+  emptyMessage,
   icon,
   items,
   draft,
@@ -858,6 +888,8 @@ function ReviewCategory({
   onRename,
 }: {
   title: string;
+  addLabel: string;
+  emptyMessage: string;
   icon: ReactNode;
   items: ReviewListItem[];
   draft: string;
@@ -884,14 +916,14 @@ function ReviewCategory({
               onAdd();
             }
           }}
-          placeholder={`Add ${title.toLowerCase()}`}
+          placeholder={addLabel}
           className="h-9 min-w-0 flex-1 rounded-md border border-slate-800 bg-[#0F172A] px-3 text-xs text-slate-100 outline-none placeholder:text-slate-500 focus:border-violet-500 focus:ring-2 focus:ring-violet-500/10"
         />
         <button
           type="button"
           onClick={onAdd}
           className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-slate-800 bg-[#0F172A] text-slate-400 hover:border-violet-500/50 hover:text-violet-300"
-          title={`Add ${title}`}
+          title={addLabel}
         >
           <Plus className="h-4 w-4" />
         </button>
@@ -899,7 +931,7 @@ function ReviewCategory({
       <div className="space-y-2">
         {items.length === 0 && (
           <div className="rounded-md border border-dashed border-slate-700 bg-[#0F172A]/70 px-3 py-3 text-xs text-slate-500">
-            No items yet.
+            {emptyMessage}
           </div>
         )}
         {items.map((item) => (
@@ -943,25 +975,21 @@ function TradeZellaChartPanel({
   analytics,
   selectedTrade,
   tradeNote,
-  dailyJournal,
   activeNoteTab,
   saving,
   notesDirty,
   onActiveNoteTabChange,
   onTradeNoteChange,
-  onDailyJournalChange,
   onSaveNotes,
 }: {
   analytics: JournalAnalyticsResponse;
   selectedTrade: JournalTradeOption | null;
   tradeNote: string;
-  dailyJournal: string;
   activeNoteTab: ReviewPanelTab;
   saving: boolean;
   notesDirty: boolean;
   onActiveNoteTabChange: (tab: ReviewPanelTab) => void;
   onTradeNoteChange: (value: string) => void;
-  onDailyJournalChange: (value: string) => void;
   onSaveNotes: () => void;
 }) {
   const [expandedScreenshotUrl, setExpandedScreenshotUrl] = useState<string | null>(null);
@@ -989,6 +1017,7 @@ function TradeZellaChartPanel({
   }));
   const entryScreenshotUrl = screenshotUrlFromTrade(selectedTrade, "entry");
   const exitScreenshotUrl = screenshotUrlFromTrade(selectedTrade, "exit");
+  const selectedTradeDate = tradeDateKey(selectedTrade);
   const activeScreenshotUrl =
     activeNoteTab === "entry"
       ? entryScreenshotUrl
@@ -1141,7 +1170,7 @@ function TradeZellaChartPanel({
             <button
               type="button"
               onClick={onSaveNotes}
-              disabled={saving || !notesDirty || !["trade", "daily"].includes(activeNoteTab)}
+              disabled={saving || !notesDirty || activeNoteTab !== "trade"}
               className="ml-auto h-9 shrink-0 rounded-md bg-violet-600 px-3 text-xs font-semibold text-white hover:bg-violet-500 disabled:cursor-not-allowed disabled:bg-slate-800 disabled:text-slate-500"
             >
               {saving ? "Saving..." : notesDirty ? "Save" : "Saved"}
@@ -1172,21 +1201,36 @@ function TradeZellaChartPanel({
                 </div>
               )}
             </div>
+          ) : activeNoteTab === "daily" ? (
+            <div className="rounded-lg border border-slate-800 bg-[#0F172A] p-5">
+              <div className="flex items-start gap-3">
+                <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-slate-800 bg-[#111827] text-blue-300">
+                  <CalendarDays className="h-5 w-5" />
+                </span>
+                <div className="min-w-0">
+                  <h3 className="text-base font-semibold text-white">Daily Journal</h3>
+                  <p className="mt-1 text-sm text-slate-400">
+                    This trade belongs to the daily journal for {selectedTradeDate || "the selected trade date"}.
+                  </p>
+                </div>
+              </div>
+              {selectedTradeDate ? (
+                <Link
+                  href={`/dashboard/daily-journal?date=${selectedTradeDate}`}
+                  className="mt-5 inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-[#2563EB] px-4 text-sm font-semibold text-white hover:bg-blue-500"
+                >
+                  <CalendarDays className="h-4 w-4" />
+                  Open Daily Journal for this day
+                </Link>
+              ) : null}
+            </div>
           ) : (
             <textarea
-              value={activeNoteTab === "trade" ? tradeNote : dailyJournal}
+              value={tradeNote}
               onChange={(event) => {
-                if (activeNoteTab === "trade") {
-                  onTradeNoteChange(event.target.value);
-                } else {
-                  onDailyJournalChange(event.target.value);
-                }
+                onTradeNoteChange(event.target.value);
               }}
-              placeholder={
-                activeNoteTab === "trade"
-                  ? "Write trade notes, checklist results, and execution comments..."
-                  : "Write daily context, mood, market plan, and lessons..."
-              }
+              placeholder="Write trade notes, checklist results, and execution comments..."
               className="h-[280px] w-full resize-none rounded-lg border border-slate-800 bg-[#0F172A] px-4 py-3 text-sm leading-6 text-slate-100 outline-none placeholder:text-slate-500 focus:border-violet-500 sm:h-[340px]"
             />
           )}
@@ -1227,30 +1271,36 @@ function TradeZellaChartPanel({
 
 function buildWorkspaceMetrics(
   overview: JournalAnalyticsResponse["overview"],
-  trade: JournalTradeOption | null
+  trade: JournalTradeOption | null,
+  t: (key: string) => string
 ): EditableMetric[] {
   const tradePnl = trade ? toFiniteNumber(trade.profitLoss) : overview.totalNetPnl;
   const tradeRR = trade ? toFiniteNumber(trade.rr) : overview.averageRR;
 
   return [
-    { id: "netPnl", label: "Net P&L", value: formatMoney(tradePnl), tone: valueTone(tradePnl) },
+    { id: "netPnl", label: t("journal.analytics.netPnl"), value: formatMoney(tradePnl), tone: valueTone(tradePnl) },
     {
       id: "side",
-      label: "Side",
-      value: trade?.direction === "SELL" ? "SHORT" : trade?.direction === "BUY" ? "LONG" : "All trades",
+      label: t("journal.analytics.side"),
+      value: trade?.direction === "SELL"
+        ? t("journal.analytics.short")
+        : trade?.direction === "BUY"
+          ? t("journal.analytics.long")
+          : t("journal.analytics.allTrades"),
       tone: trade?.direction === "SELL" ? "loss" : "profit",
     },
-    { id: "grossProfit", label: "Gross Profit", value: formatMoney(Math.max(tradePnl, 0) || overview.grossProfit), tone: "profit" },
-    { id: "grossLoss", label: "Gross Loss", value: formatMoney(trade ? Math.abs(Math.min(tradePnl, 0)) : overview.grossLoss), tone: "loss" },
-    { id: "winRate", label: "Win Rate", value: formatPercent(overview.winRate), tone: "blue" },
-    { id: "profitFactor", label: "Profit Factor", value: formatNumber(overview.profitFactor, 2), tone: "amber" },
-    { id: "plannedR", label: "Planned R-Multiple", value: formatNumber(overview.averageRR, 2), tone: "amber" },
-    { id: "realizedR", label: "Realized R-Multiple", value: formatNumber(tradeRR, 2), tone: valueTone(tradeRR) },
-    { id: "maxDrawdown", label: "Max Drawdown", value: formatMoney(overview.maxDrawdown), tone: "loss" },
+    { id: "grossProfit", label: t("journal.analytics.grossProfit"), value: formatMoney(Math.max(tradePnl, 0) || overview.grossProfit), tone: "profit" },
+    { id: "grossLoss", label: t("journal.analytics.grossLoss"), value: formatMoney(trade ? Math.abs(Math.min(tradePnl, 0)) : overview.grossLoss), tone: "loss" },
+    { id: "winRate", label: t("journal.analytics.winRate"), value: formatPercent(overview.winRate), tone: "blue" },
+    { id: "profitFactor", label: t("journal.analytics.profitFactor"), value: formatNumber(overview.profitFactor, 2), tone: "amber" },
+    { id: "plannedR", label: t("journal.analytics.plannedRMultiple"), value: formatNumber(overview.averageRR, 2), tone: "amber" },
+    { id: "realizedR", label: t("journal.analytics.realizedRMultiple"), value: formatNumber(tradeRR, 2), tone: valueTone(tradeRR) },
+    { id: "maxDrawdown", label: t("journal.analytics.maxDrawdown"), value: formatMoney(overview.maxDrawdown), tone: "loss" },
   ];
 }
 
 function TradeZellaAnalysisWorkspace({ analytics }: { analytics: JournalAnalyticsResponse }) {
+  const { t } = useLanguage();
   const overview = analytics.overview;
   const [closedTrades, setClosedTrades] = useState<JournalTradeOption[]>([]);
   const [selectedTradeId, setSelectedTradeId] = useState("");
@@ -1268,7 +1318,7 @@ function TradeZellaAnalysisWorkspace({ analytics }: { analytics: JournalAnalytic
   const [status, setStatus] = useState<SaveStatus>("idle");
   const [statusMessage, setStatusMessage] = useState("");
   const [hydrated, setHydrated] = useState(false);
-  const editableMetrics = buildWorkspaceMetrics(overview, selectedTrade);
+  const editableMetrics = buildWorkspaceMetrics(overview, selectedTrade, t);
   const [reviewItems, setReviewItems] = useState<{
     mistakes: ReviewListItem[];
     setups: ReviewListItem[];
@@ -1291,6 +1341,16 @@ function TradeZellaAnalysisWorkspace({ analytics }: { analytics: JournalAnalytic
   });
   const [psychologyStatus, setPsychologyStatus] = useState("");
   const [exitReason, setExitReason] = useState("");
+  const loadClosedTradesFailedText = t("journal.analytics.loadClosedTradesFailed");
+  const loadingJournalMetadataText = t("journal.analytics.loadingJournalMetadata");
+  const loadSelectedTradeFailedText = t("journal.analytics.loadSelectedTradeFailed");
+  const loadJournalMetadataFailedText = t("journal.analytics.loadJournalMetadataFailed");
+  const savedMetadataText = t("journal.analytics.savedMetadata");
+  const checklistResultText = t("journal.analytics.checklistResult");
+  const savingJournalMetadataText = t("journal.analytics.savingJournalMetadata");
+  const saveJournalMetadataFailedText = t("journal.analytics.saveJournalMetadataFailed");
+  const savedText = t("journal.analytics.saved");
+  const manualItemText = t("journal.analytics.manualItem");
 
   useEffect(() => {
     let cancelled = false;
@@ -1307,7 +1367,7 @@ function TradeZellaAnalysisWorkspace({ analytics }: { analytics: JournalAnalytic
         };
 
         if (!response.ok || !data.success) {
-          throw new Error(data.message || "Failed to load closed trades");
+          throw new Error(data.message || loadClosedTradesFailedText);
         }
 
         if (!cancelled) {
@@ -1318,7 +1378,7 @@ function TradeZellaAnalysisWorkspace({ analytics }: { analytics: JournalAnalytic
       } catch (error) {
         if (!cancelled) {
           setStatus("error");
-          setStatusMessage((error as Error).message || "Failed to load closed trades");
+          setStatusMessage((error as Error).message || loadClosedTradesFailedText);
         }
       }
     }
@@ -1328,7 +1388,7 @@ function TradeZellaAnalysisWorkspace({ analytics }: { analytics: JournalAnalytic
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [loadClosedTradesFailedText]);
 
   useEffect(() => {
     if (!selectedTradeId) {
@@ -1340,7 +1400,7 @@ function TradeZellaAnalysisWorkspace({ analytics }: { analytics: JournalAnalytic
     async function loadSelectedTradeAndMetadata() {
       setHydrated(false);
       setStatus("loading");
-      setStatusMessage("Loading journal metadata...");
+      setStatusMessage(loadingJournalMetadataText);
 
       try {
         const [tradeResponse, metadataResponse] = await Promise.all([
@@ -1365,22 +1425,22 @@ function TradeZellaAnalysisWorkspace({ analytics }: { analytics: JournalAnalytic
         };
 
         if (!tradeResponse.ok || !tradeData.success || !tradeData.trade) {
-          throw new Error(tradeData.message || "Failed to load selected trade");
+          throw new Error(tradeData.message || loadSelectedTradeFailedText);
         }
 
         if (!metadataResponse.ok || !metadataData.success) {
-          throw new Error(metadataData.message || "Failed to load journal metadata");
+          throw new Error(metadataData.message || loadJournalMetadataFailedText);
         }
 
         setSelectedTradeDetail(tradeData.trade);
         const merged = mergeMetadataWithTrade(metadataData.metadata, tradeData.trade);
         setTradeRating(merged.rating ?? calculatedRating);
         setReviewItems({
-          mistakes: merged.mistakes.map((label) => ({ label, detail: "Saved metadata", tone: "neutral" })),
-          setups: merged.setups.map((label) => ({ label, detail: "Saved metadata", tone: "neutral" })),
-          emotions: merged.emotions.map((label) => ({ label, detail: "Saved metadata", tone: "neutral" })),
-          tags: merged.customTags.map((label) => ({ label, detail: "Saved metadata", tone: "neutral" })),
-          checklist: merged.checklistResults.map((label) => ({ label, detail: "Checklist result", tone: "neutral" })),
+          mistakes: merged.mistakes.map((label) => ({ label, detail: savedMetadataText, tone: "neutral" })),
+          setups: merged.setups.map((label) => ({ label, detail: savedMetadataText, tone: "neutral" })),
+          emotions: merged.emotions.map((label) => ({ label, detail: savedMetadataText, tone: "neutral" })),
+          tags: merged.customTags.map((label) => ({ label, detail: savedMetadataText, tone: "neutral" })),
+          checklist: merged.checklistResults.map((label) => ({ label, detail: checklistResultText, tone: "neutral" })),
         });
         setTradeNote(merged.tradeNote);
         setDailyJournal(merged.dailyJournal);
@@ -1393,7 +1453,7 @@ function TradeZellaAnalysisWorkspace({ analytics }: { analytics: JournalAnalytic
       } catch (error) {
         if ((error as Error).name !== "AbortError") {
           setStatus("error");
-          setStatusMessage((error as Error).message || "Failed to load journal metadata");
+          setStatusMessage((error as Error).message || loadJournalMetadataFailedText);
         }
       }
     }
@@ -1401,7 +1461,15 @@ function TradeZellaAnalysisWorkspace({ analytics }: { analytics: JournalAnalytic
     loadSelectedTradeAndMetadata();
 
     return () => controller.abort();
-  }, [calculatedRating, selectedTradeId]);
+  }, [
+    calculatedRating,
+    checklistResultText,
+    loadJournalMetadataFailedText,
+    loadSelectedTradeFailedText,
+    loadingJournalMetadataText,
+    savedMetadataText,
+    selectedTradeId,
+  ]);
 
   function currentMetadataPayload(): TradeMetadata {
     return {
@@ -1424,7 +1492,7 @@ function TradeZellaAnalysisWorkspace({ analytics }: { analytics: JournalAnalytic
     }
 
     setStatus("saving");
-    setStatusMessage("Saving journal metadata...");
+    setStatusMessage(savingJournalMetadataText);
 
     try {
       const response = await fetch(`/api/journal/trades/${selectedTradeId}/metadata`, {
@@ -1435,15 +1503,15 @@ function TradeZellaAnalysisWorkspace({ analytics }: { analytics: JournalAnalytic
       const data = (await response.json()) as { success: boolean; message?: string; errors?: string[] };
 
       if (!response.ok || !data.success) {
-        throw new Error(data.errors?.join(", ") || data.message || "Failed to save journal metadata");
+        throw new Error(data.errors?.join(", ") || data.message || saveJournalMetadataFailedText);
       }
 
       setStatus("saved");
-      setStatusMessage("Saved");
+      setStatusMessage(savedText);
       setNotesDirty(false);
     } catch (error) {
       setStatus("error");
-      setStatusMessage((error as Error).message || "Failed to save journal metadata");
+      setStatusMessage((error as Error).message || saveJournalMetadataFailedText);
     }
   }
 
@@ -1462,7 +1530,7 @@ function TradeZellaAnalysisWorkspace({ analytics }: { analytics: JournalAnalytic
       ...current,
       [category]: [
         ...current[category],
-        { label, detail: "Manual item", tone: "neutral" },
+        { label, detail: manualItemText, tone: "neutral" },
       ],
     }));
     updateDraft(category, "");
@@ -1516,11 +1584,11 @@ function TradeZellaAnalysisWorkspace({ analytics }: { analytics: JournalAnalytic
           <div className="min-w-0 flex-1 overflow-y-auto border-r border-slate-800 p-4">
             <div className="mb-4 flex items-center justify-between">
               <div>
-                <div className="text-xs font-semibold uppercase text-slate-400">Trade Review</div>
+                <div className="text-xs font-semibold uppercase text-slate-400">{t("journal.analytics.tradeReview")}</div>
                 <div className="mt-1 text-sm font-semibold text-white">
                   {selectedTrade
                     ? `${selectedTrade.symbol} / ${selectedTrade.direction}`
-                    : `${formatNumber(overview.totalTrades, 0)} closed trades`}
+                    : t("journal.analytics.closedTradesCount").replace("{count}", formatNumber(overview.totalTrades, 0))}
                 </div>
               </div>
               <div className="flex gap-1 text-amber-400">
@@ -1530,7 +1598,7 @@ function TradeZellaAnalysisWorkspace({ analytics }: { analytics: JournalAnalytic
                     type="button"
                     onClick={() => setTradeRating(index + 1)}
                     className="rounded p-0.5 hover:bg-amber-400/10"
-                    title={`Rate ${index + 1}`}
+                    title={t("journal.analytics.rateTrade").replace("{rating}", String(index + 1))}
                   >
                     <Star
                       className={cn(
@@ -1544,7 +1612,7 @@ function TradeZellaAnalysisWorkspace({ analytics }: { analytics: JournalAnalytic
             </div>
 
             <label className="mb-4 block text-xs font-semibold uppercase text-slate-400">
-              Selected Trade
+              {t("journal.analytics.selectedTrade")}
               <select
                 value={selectedTradeId}
                 onChange={(event) => {
@@ -1588,11 +1656,11 @@ function TradeZellaAnalysisWorkspace({ analytics }: { analytics: JournalAnalytic
             </div>
 
             <div className="mb-4 rounded-md border border-slate-800 bg-[#111827] px-3 py-2 text-xs text-slate-400">
-              {status === "loading" && "Loading metadata..."}
-              {status === "saving" && "Saving changes..."}
-              {status === "saved" && "Saved permanently"}
+              {status === "loading" && t("journal.analytics.loadingMetadata")}
+              {status === "saving" && t("journal.analytics.savingChanges")}
+              {status === "saved" && t("journal.analytics.savedPermanently")}
               {status === "error" && <span className="text-red-300">{statusMessage}</span>}
-              {status === "idle" && "Calculated fields are read-only. Journal metadata is editable."}
+              {status === "idle" && t("journal.analytics.calculatedReadOnly")}
             </div>
 
             <div className="space-y-2">
@@ -1608,26 +1676,26 @@ function TradeZellaAnalysisWorkspace({ analytics }: { analytics: JournalAnalytic
 
             <div className="mt-5 grid gap-3">
               <label className="space-y-1 text-xs font-semibold text-slate-300">
-                Psychology Status
+                {t("journal.analytics.psychologyStatus")}
                 <select
                   value={psychologyStatus}
                   onChange={(event) => setPsychologyStatus(event.target.value)}
                   className="h-9 w-full rounded-md border border-slate-800 bg-[#111827] px-3 text-xs font-medium text-slate-100 outline-none focus:border-violet-500"
                 >
-                  <option value="">Select status</option>
-                  <option value="DISCIPLINED">Disciplined</option>
-                  <option value="PARTIAL">Partially followed plan</option>
-                  <option value="IMPULSIVE">Impulsive</option>
-                  <option value="REVENGE">Revenge trade</option>
+                  <option value="">{t("journal.analytics.selectStatus")}</option>
+                  <option value="DISCIPLINED">{t("journal.analytics.disciplined")}</option>
+                  <option value="PARTIAL">{t("journal.analytics.partiallyFollowedPlan")}</option>
+                  <option value="IMPULSIVE">{t("journal.analytics.impulsive")}</option>
+                  <option value="REVENGE">{t("journal.analytics.revengeTrade")}</option>
                   <option value="FOMO">FOMO</option>
                 </select>
               </label>
               <label className="space-y-1 text-xs font-semibold text-slate-300">
-                Exit Reason
+                {t("journal.analytics.exitReason")}
                 <input
                   value={exitReason}
                   onChange={(event) => setExitReason(event.target.value)}
-                  placeholder="TP, SL, manual close, news, invalidation..."
+                  placeholder={t("journal.analytics.exitReasonPlaceholder")}
                   className="h-9 w-full rounded-md border border-slate-800 bg-[#111827] px-3 text-xs font-medium text-slate-100 outline-none placeholder:text-slate-500 focus:border-violet-500"
                 />
               </label>
@@ -1635,7 +1703,9 @@ function TradeZellaAnalysisWorkspace({ analytics }: { analytics: JournalAnalytic
 
             <div className="mt-5 space-y-5">
               <ReviewCategory
-                title="Mistakes"
+                title={t("journal.analytics.mistakes")}
+                addLabel={t("journal.analytics.addMistakes")}
+                emptyMessage={t("journal.analytics.noItemsYet")}
                 icon={<AlertTriangle className="h-3 w-3" />}
                 items={reviewItems.mistakes}
                 draft={drafts.mistakes}
@@ -1645,7 +1715,9 @@ function TradeZellaAnalysisWorkspace({ analytics }: { analytics: JournalAnalytic
                 onRename={(index, value) => renameReviewItem("mistakes", index, value)}
               />
               <ReviewCategory
-                title="Setups"
+                title={t("journal.analytics.setups")}
+                addLabel={t("journal.analytics.addSetups")}
+                emptyMessage={t("journal.analytics.noItemsYet")}
                 icon={<ClipboardCheck className="h-3 w-3" />}
                 items={reviewItems.setups}
                 draft={drafts.setups}
@@ -1655,7 +1727,9 @@ function TradeZellaAnalysisWorkspace({ analytics }: { analytics: JournalAnalytic
                 onRename={(index, value) => renameReviewItem("setups", index, value)}
               />
               <ReviewCategory
-                title="Emotions"
+                title={t("journal.analytics.emotions")}
+                addLabel={t("journal.analytics.addEmotions")}
+                emptyMessage={t("journal.analytics.noItemsYet")}
                 icon={<Brain className="h-3 w-3" />}
                 items={reviewItems.emotions}
                 draft={drafts.emotions}
@@ -1665,7 +1739,9 @@ function TradeZellaAnalysisWorkspace({ analytics }: { analytics: JournalAnalytic
                 onRename={(index, value) => renameReviewItem("emotions", index, value)}
               />
               <ReviewCategory
-                title="Custom Tags"
+                title={t("journal.analytics.customTags")}
+                addLabel={t("journal.analytics.addCustomTags")}
+                emptyMessage={t("journal.analytics.noItemsYet")}
                 icon={<Tags className="h-3 w-3" />}
                 items={reviewItems.tags}
                 draft={drafts.tags}
@@ -1675,7 +1751,9 @@ function TradeZellaAnalysisWorkspace({ analytics }: { analytics: JournalAnalytic
                 onRename={(index, value) => renameReviewItem("tags", index, value)}
               />
               <ReviewCategory
-                title="Checklist Results"
+                title={t("journal.analytics.checklistResults")}
+                addLabel={t("journal.analytics.addChecklistResults")}
+                emptyMessage={t("journal.analytics.noItemsYet")}
                 icon={<ClipboardCheck className="h-3 w-3" />}
                 items={reviewItems.checklist}
                 draft={drafts.checklist}
@@ -1692,17 +1770,12 @@ function TradeZellaAnalysisWorkspace({ analytics }: { analytics: JournalAnalytic
           analytics={analytics}
           selectedTrade={selectedTrade}
           tradeNote={tradeNote}
-          dailyJournal={dailyJournal}
           activeNoteTab={activeNoteTab}
           saving={status === "saving"}
           notesDirty={notesDirty}
           onActiveNoteTabChange={setActiveNoteTab}
           onTradeNoteChange={(value) => {
             setTradeNote(value);
-            setNotesDirty(true);
-          }}
-          onDailyJournalChange={(value) => {
-            setDailyJournal(value);
             setNotesDirty(true);
           }}
           onSaveNotes={() => saveMetadata()}
@@ -1725,6 +1798,8 @@ function HourlyHighlightCard({
   helper: string;
   tone: "profit" | "loss" | "neutral";
 }) {
+  const { t } = useLanguage();
+
   return (
     <div className="rounded-lg border border-slate-800 bg-[#111827] p-4">
       <div className="flex items-start justify-between gap-3">
@@ -1745,12 +1820,12 @@ function HourlyHighlightCard({
       </div>
       {row ? (
         <div className="mt-4 grid grid-cols-3 gap-3">
-          <Metric label="Trades" value={formatNumber(row.totalTrades, 0)} />
-          <Metric label="Win Rate" value={formatPercent(row.winRate)} />
-          <Metric label="Net P&L" value={formatMoney(row.netPnl)} tone={valueTone(row.netPnl)} />
+          <Metric label={t("journal.analytics.trades")} value={formatNumber(row.totalTrades, 0)} />
+          <Metric label={t("journal.analytics.winRate")} value={formatPercent(row.winRate)} />
+          <Metric label={t("journal.analytics.netPnl")} value={formatMoney(row.netPnl)} tone={valueTone(row.netPnl)} />
         </div>
       ) : (
-        <div className="mt-4 text-sm text-slate-400">No closed trades in this bucket.</div>
+        <div className="mt-4 text-sm text-slate-400">{t("journal.analytics.noClosedTradesInBucket")}</div>
       )}
       <p className="mt-4 text-xs leading-5 text-slate-400">{helper}</p>
     </div>
@@ -1766,6 +1841,8 @@ function HourlyMiniList({
   rows: HourlyAnalyticsRow[];
   emptyMessage: string;
 }) {
+  const { t } = useLanguage();
+
   return (
     <div className="rounded-lg border border-slate-800 bg-[#111827] p-4">
       <div className="text-sm font-semibold text-white">{title}</div>
@@ -1775,7 +1852,7 @@ function HourlyMiniList({
             <div className="min-w-0">
               <div className="font-semibold text-slate-200">{row.label}</div>
               <div className="text-xs text-slate-500">
-                {formatNumber(row.totalTrades, 0)} trades / {formatPercent(row.winRate)}
+                {t("journal.analytics.tradesCount").replace("{count}", formatNumber(row.totalTrades, 0))} / {formatPercent(row.winRate)}
               </div>
             </div>
             <div className={cn("shrink-0 font-semibold", valueToneClass(row.netPnl))}>
@@ -1806,6 +1883,7 @@ function getHourlyTileClass(row: HourlyAnalyticsRow) {
 }
 
 function HourlyDecisionPanel({ rows }: { rows: HourlyAnalyticsRow[] }) {
+  const { t } = useLanguage();
   const activeRows = rows.filter((row) => row.totalTrades > 0);
   const totalTrades = activeRows.reduce((sum, row) => sum + row.totalTrades, 0);
   const bestHour = activeRows.reduce<HourlyAnalyticsRow | null>(
@@ -1829,35 +1907,39 @@ function HourlyDecisionPanel({ rows }: { rows: HourlyAnalyticsRow[] }) {
     .sort((a, b) => a.netPnl - b.netPnl)
     .slice(0, 3);
   const sampleLabel =
-    totalTrades >= 50 ? "Strong sample" : totalTrades >= 20 ? "Building sample" : "Early sample";
+    totalTrades >= 50
+      ? t("journal.analytics.strongSample")
+      : totalTrades >= 20
+        ? t("journal.analytics.buildingSample")
+        : t("journal.analytics.earlySample");
   const sampleTone = totalTrades >= 20 ? "text-sky-300" : "text-amber-300";
 
   if (activeRows.length === 0) {
-    return <EmptyPanel message="No closed trades have an opening hour in the active filters." />;
+    return <EmptyPanel message={t("journal.analytics.noOpeningHourTrades")} />;
   }
 
   return (
     <div className="space-y-4">
       <div className="grid gap-3 lg:grid-cols-3">
         <HourlyHighlightCard
-          label="Best window"
-          title="Focus candidate"
+          label={t("journal.analytics.bestWindow")}
+          title={t("journal.analytics.focusCandidate")}
           row={bestHour}
-          helper="Highest realized net P&L by opening hour."
+          helper={t("journal.analytics.highestHourlyPnl")}
           tone={bestHour && bestHour.netPnl > 0 ? "profit" : "neutral"}
         />
         <HourlyHighlightCard
-          label="Weak window"
-          title="Review or reduce size"
+          label={t("journal.analytics.weakWindow")}
+          title={t("journal.analytics.reviewOrReduceSize")}
           row={worstHour}
-          helper="Lowest realized net P&L by opening hour."
+          helper={t("journal.analytics.lowestHourlyPnl")}
           tone={worstHour && worstHour.netPnl < 0 ? "loss" : "neutral"}
         />
         <HourlyHighlightCard
-          label="Most activity"
-          title="Behavior hotspot"
+          label={t("journal.analytics.mostActivity")}
+          title={t("journal.analytics.behaviorHotspot")}
           row={volumeHour}
-          helper="Largest share of trades, useful for spotting overtrading."
+          helper={t("journal.analytics.largestTradeShare")}
           tone="neutral"
         />
       </div>
@@ -1865,24 +1947,24 @@ function HourlyDecisionPanel({ rows }: { rows: HourlyAnalyticsRow[] }) {
       <div className="rounded-lg border border-slate-800 bg-[#111827] p-4">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <div className="text-sm font-semibold text-white">24-hour heatmap</div>
+            <div className="text-sm font-semibold text-white">{t("journal.analytics.hourHeatmap24")}</div>
             <div className="mt-2 flex flex-wrap gap-2 text-xs text-slate-400">
               <span className="inline-flex items-center gap-1">
                 <span className="h-2 w-2 rounded-full bg-emerald-400" />
-                Profitable
+                {t("journal.analytics.profitable")}
               </span>
               <span className="inline-flex items-center gap-1">
                 <span className="h-2 w-2 rounded-full bg-red-400" />
-                Losing
+                {t("journal.analytics.losing")}
               </span>
               <span className="inline-flex items-center gap-1">
                 <span className="h-2 w-2 rounded-full bg-slate-600" />
-                No trades
+                {t("journal.analytics.noTrades")}
               </span>
             </div>
           </div>
           <div className={cn("text-xs font-semibold uppercase", sampleTone)}>
-            {sampleLabel}: {formatNumber(totalTrades, 0)} trades
+            {sampleLabel}: {t("journal.analytics.tradesCount").replace("{count}", formatNumber(totalTrades, 0))}
           </div>
         </div>
         <div className="mt-4 grid grid-cols-4 gap-2 sm:grid-cols-6 lg:grid-cols-12">
@@ -1897,7 +1979,7 @@ function HourlyDecisionPanel({ rows }: { rows: HourlyAnalyticsRow[] }) {
               <div className="text-xs font-semibold">{row.label}</div>
               <div className="mt-2 text-sm font-semibold">{formatMoney(row.netPnl)}</div>
               <div className="mt-1 text-[11px] text-slate-400">
-                {formatNumber(row.totalTrades, 0)} trades
+                {t("journal.analytics.tradesCount").replace("{count}", formatNumber(row.totalTrades, 0))}
               </div>
             </div>
           ))}
@@ -1906,22 +1988,22 @@ function HourlyDecisionPanel({ rows }: { rows: HourlyAnalyticsRow[] }) {
 
       <div className="grid gap-3 lg:grid-cols-3">
         <HourlyMiniList
-          title="Opportunity shortlist"
+          title={t("journal.analytics.opportunityShortlist")}
           rows={opportunityRows}
-          emptyMessage="No profitable hour yet."
+          emptyMessage={t("journal.analytics.noProfitableHourYet")}
         />
-        <HourlyMiniList title="Risk shortlist" rows={riskRows} emptyMessage="No losing hour yet." />
+        <HourlyMiniList title={t("journal.analytics.riskShortlist")} rows={riskRows} emptyMessage={t("journal.analytics.noLosingHourYet")} />
         <div className="rounded-lg border border-slate-800 bg-[#111827] p-4">
-          <div className="text-sm font-semibold text-white">Decision rule</div>
+          <div className="text-sm font-semibold text-white">{t("journal.analytics.decisionRule")}</div>
           <div className="mt-3 space-y-3 text-sm leading-6 text-slate-300">
             <p>
-              Start with the top positive hour and the weakest negative hour. Treat the edge as
-              provisional until the filter has at least 20 closed trades.
+              {t("journal.analytics.decisionRuleDescription")}
             </p>
             {bestHour && worstHour && (
               <p>
-                Current read: prioritize {bestHour.label} and inspect {worstHour.label} before
-                adding risk.
+                {t("journal.analytics.currentRead")
+                  .replace("{bestHour}", bestHour.label)
+                  .replace("{worstHour}", worstHour.label)}
               </p>
             )}
           </div>
@@ -1942,16 +2024,18 @@ function CompactTable<T>({
   getLabel: (row: T) => string;
   emptyMessage: string;
 }) {
+  const { t } = useLanguage();
+
   return (
     <div className="overflow-x-auto">
       <table className="w-full min-w-[560px] text-left text-sm">
         <thead className="text-xs uppercase text-slate-500">
           <tr>
             <th className="py-2 pr-3">{labelHeader}</th>
-            <th className="py-2 pr-3">Trades</th>
-            <th className="py-2 pr-3">Win Rate</th>
-            <th className="py-2 pr-3">Net P&L</th>
-            <th className="py-2">Average</th>
+            <th className="py-2 pr-3">{t("journal.analytics.trades")}</th>
+            <th className="py-2 pr-3">{t("journal.analytics.winRate")}</th>
+            <th className="py-2 pr-3">{t("journal.analytics.netPnl")}</th>
+            <th className="py-2">{t("journal.analytics.average")}</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-slate-800">
@@ -1985,13 +2069,15 @@ function CompactTable<T>({
 }
 
 export default function JournalAnalyticsPage() {
+  const { t } = useLanguage();
   const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS);
   const [appliedFilters, setAppliedFilters] = useState<Filters>(EMPTY_FILTERS);
   const [analytics, setAnalytics] = useState<JournalAnalyticsResponse>(EMPTY_ANALYTICS);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<PageError | null>(null);
   const [sortKey, setSortKey] = useState<SortKey>("netPnl");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
+  const loadFailedText = t("journal.analytics.loadFailed");
 
   useEffect(() => {
     const controller = new AbortController();
@@ -2009,16 +2095,22 @@ export default function JournalAnalyticsPage() {
         const data = (await response.json()) as JournalAnalyticsResponse & {
           message?: string;
           errors?: string[];
+          upgradeRequired?: boolean;
         };
 
         if (!response.ok || !data.success) {
-          throw new Error(data.errors?.join(", ") || data.message || "Failed to load analytics");
+          setError({
+            message: data.errors?.join(", ") || data.message || loadFailedText,
+            upgradeRequired: data.upgradeRequired,
+          });
+          setAnalytics(EMPTY_ANALYTICS);
+          return;
         }
 
         setAnalytics(data);
       } catch (loadError) {
         if ((loadError as Error).name !== "AbortError") {
-          setError((loadError as Error).message || "Failed to load analytics");
+          setError({ message: (loadError as Error).message || loadFailedText });
           setAnalytics(EMPTY_ANALYTICS);
         }
       } finally {
@@ -2031,7 +2123,7 @@ export default function JournalAnalyticsPage() {
     loadAnalytics();
 
     return () => controller.abort();
-  }, [appliedFilters]);
+  }, [appliedFilters, loadFailedText]);
 
   const overview = analytics.overview;
   const directionData = [analytics.longShort.buy, analytics.longShort.sell];
@@ -2081,23 +2173,23 @@ export default function JournalAnalyticsPage() {
     icon: ReactNode;
     tone: "neutral" | "profit" | "loss" | "blue" | "amber";
   }> = [
-    { label: "Total Net P&L", value: formatMoney(overview.totalNetPnl), icon: <CircleDollarSign className="h-4 w-4" />, tone: valueTone(overview.totalNetPnl) },
-    { label: "Gross Profit", value: formatMoney(overview.grossProfit), icon: <ArrowUp className="h-4 w-4" />, tone: "profit" },
-    { label: "Gross Loss", value: formatMoney(overview.grossLoss), icon: <ArrowDown className="h-4 w-4" />, tone: "loss" },
-    { label: "Win Rate", value: formatPercent(overview.winRate), icon: <Target className="h-4 w-4" />, tone: "blue" },
-    { label: "Loss Rate", value: formatPercent(overview.lossRate), icon: <Target className="h-4 w-4" />, tone: "amber" },
-    { label: "Total Trades", value: formatNumber(overview.totalTrades, 0), icon: <BarChart3 className="h-4 w-4" />, tone: "blue" },
-    { label: "Winning Trades", value: formatNumber(overview.winningTrades, 0), icon: <ArrowUp className="h-4 w-4" />, tone: "profit" },
-    { label: "Losing Trades", value: formatNumber(overview.losingTrades, 0), icon: <ArrowDown className="h-4 w-4" />, tone: "loss" },
-    { label: "Break-even Trades", value: formatNumber(overview.breakEvenTrades, 0), icon: <Target className="h-4 w-4" />, tone: "neutral" },
-    { label: "Average Win", value: formatMoney(overview.averageWin), icon: <ArrowUp className="h-4 w-4" />, tone: "profit" },
-    { label: "Average Loss", value: formatMoney(overview.averageLoss), icon: <ArrowDown className="h-4 w-4" />, tone: "loss" },
-    { label: "Profit Factor", value: formatNumber(overview.profitFactor, 2), icon: <BarChart3 className="h-4 w-4" />, tone: "blue" },
-    { label: "Average R:R", value: formatNumber(overview.averageRR, 2), icon: <Target className="h-4 w-4" />, tone: "amber" },
-    { label: "Best Trade", value: overview.bestTrade ? formatMoney(overview.bestTrade.pnl) : "$0.00", icon: <ArrowUp className="h-4 w-4" />, tone: "profit" },
-    { label: "Worst Trade", value: overview.worstTrade ? formatMoney(overview.worstTrade.pnl) : "$0.00", icon: <ArrowDown className="h-4 w-4" />, tone: "loss" },
-    { label: "Max Drawdown", value: formatMoney(overview.maxDrawdown), icon: <ArrowDown className="h-4 w-4" />, tone: "loss" },
-    { label: "Expectancy / Trade", value: formatMoney(overview.expectancyPerTrade), icon: <CircleDollarSign className="h-4 w-4" />, tone: valueTone(overview.expectancyPerTrade) },
+    { label: t("journal.analytics.totalNetPnl"), value: formatMoney(overview.totalNetPnl), icon: <CircleDollarSign className="h-4 w-4" />, tone: valueTone(overview.totalNetPnl) },
+    { label: t("journal.analytics.grossProfit"), value: formatMoney(overview.grossProfit), icon: <ArrowUp className="h-4 w-4" />, tone: "profit" },
+    { label: t("journal.analytics.grossLoss"), value: formatMoney(overview.grossLoss), icon: <ArrowDown className="h-4 w-4" />, tone: "loss" },
+    { label: t("journal.analytics.winRate"), value: formatPercent(overview.winRate), icon: <Target className="h-4 w-4" />, tone: "blue" },
+    { label: t("journal.analytics.lossRate"), value: formatPercent(overview.lossRate), icon: <Target className="h-4 w-4" />, tone: "amber" },
+    { label: t("journal.analytics.totalTrades"), value: formatNumber(overview.totalTrades, 0), icon: <BarChart3 className="h-4 w-4" />, tone: "blue" },
+    { label: t("journal.analytics.winningTrades"), value: formatNumber(overview.winningTrades, 0), icon: <ArrowUp className="h-4 w-4" />, tone: "profit" },
+    { label: t("journal.analytics.losingTrades"), value: formatNumber(overview.losingTrades, 0), icon: <ArrowDown className="h-4 w-4" />, tone: "loss" },
+    { label: t("journal.analytics.breakEvenTrades"), value: formatNumber(overview.breakEvenTrades, 0), icon: <Target className="h-4 w-4" />, tone: "neutral" },
+    { label: t("journal.analytics.averageWin"), value: formatMoney(overview.averageWin), icon: <ArrowUp className="h-4 w-4" />, tone: "profit" },
+    { label: t("journal.analytics.averageLoss"), value: formatMoney(overview.averageLoss), icon: <ArrowDown className="h-4 w-4" />, tone: "loss" },
+    { label: t("journal.analytics.profitFactor"), value: formatNumber(overview.profitFactor, 2), icon: <BarChart3 className="h-4 w-4" />, tone: "blue" },
+    { label: t("journal.analytics.averageRr"), value: formatNumber(overview.averageRR, 2), icon: <Target className="h-4 w-4" />, tone: "amber" },
+    { label: t("journal.analytics.bestTrade"), value: overview.bestTrade ? formatMoney(overview.bestTrade.pnl) : "$0.00", icon: <ArrowUp className="h-4 w-4" />, tone: "profit" },
+    { label: t("journal.analytics.worstTrade"), value: overview.worstTrade ? formatMoney(overview.worstTrade.pnl) : "$0.00", icon: <ArrowDown className="h-4 w-4" />, tone: "loss" },
+    { label: t("journal.analytics.maxDrawdown"), value: formatMoney(overview.maxDrawdown), icon: <ArrowDown className="h-4 w-4" />, tone: "loss" },
+    { label: t("journal.analytics.expectancyPerTrade"), value: formatMoney(overview.expectancyPerTrade), icon: <CircleDollarSign className="h-4 w-4" />, tone: valueTone(overview.expectancyPerTrade) },
   ];
 
   return (
@@ -2107,22 +2199,22 @@ export default function JournalAnalyticsPage() {
       <div className="rounded-lg border border-slate-800 bg-[#0F172A] p-4 shadow-sm">
         <form className="grid gap-3 lg:grid-cols-6" onSubmit={submitFilters}>
           <label className="space-y-1 text-xs font-medium uppercase text-slate-400">
-            Date Range
+            {t("journal.analytics.dateRange")}
             <select
               value={filters.dateRange}
               onChange={(event) => updateFilter("dateRange", event.target.value as DateRange)}
               className="h-11 w-full rounded-lg border border-slate-800 bg-[#111827] px-3 text-sm normal-case text-[#E5E7EB] outline-none focus:border-sky-600"
             >
-              <option value="all">All time</option>
-              <option value="today">Today</option>
-              <option value="thisWeek">This week</option>
-              <option value="thisMonth">This month</option>
-              <option value="thisYear">This year</option>
-              <option value="custom">Custom</option>
+              <option value="all">{t("journal.analytics.allTime")}</option>
+              <option value="today">{t("today")}</option>
+              <option value="thisWeek">{t("thisWeek")}</option>
+              <option value="thisMonth">{t("journal.analytics.thisMonth")}</option>
+              <option value="thisYear">{t("journal.analytics.thisYear")}</option>
+              <option value="custom">{t("journal.analytics.custom")}</option>
             </select>
           </label>
           <label className="space-y-1 text-xs font-medium uppercase text-slate-400">
-            From
+            {t("dashboard.filters.from")}
             <input
               type="date"
               value={filters.dateFrom}
@@ -2132,7 +2224,7 @@ export default function JournalAnalyticsPage() {
             />
           </label>
           <label className="space-y-1 text-xs font-medium uppercase text-slate-400">
-            To
+            {t("dashboard.filters.to")}
             <input
               type="date"
               value={filters.dateTo}
@@ -2142,13 +2234,13 @@ export default function JournalAnalyticsPage() {
             />
           </label>
           <label className="space-y-1 text-xs font-medium uppercase text-slate-400">
-            Symbol
+            {t("dashboard.table.symbol")}
             <select
               value={filters.symbol}
               onChange={(event) => updateFilter("symbol", event.target.value)}
               className="h-11 w-full rounded-lg border border-slate-800 bg-[#111827] px-3 text-sm text-[#E5E7EB] outline-none focus:border-sky-600"
             >
-              <option value="">All symbols</option>
+              <option value="">{t("journal.playbooks.allSymbols")}</option>
               {analytics.metadata.symbols.map((symbol) => (
                 <option key={symbol} value={symbol}>
                   {symbol}
@@ -2157,26 +2249,26 @@ export default function JournalAnalyticsPage() {
             </select>
           </label>
           <label className="space-y-1 text-xs font-medium uppercase text-slate-400">
-            Direction
+            {t("dashboard.table.direction")}
             <select
               value={filters.direction}
               onChange={(event) => updateFilter("direction", event.target.value as DirectionFilter)}
               className="h-11 w-full rounded-lg border border-slate-800 bg-[#111827] px-3 text-sm normal-case text-[#E5E7EB] outline-none focus:border-sky-600"
             >
-              <option value="">All</option>
-              <option value="BUY">Buy</option>
-              <option value="SELL">Sell</option>
+              <option value="">{t("dashboard.common.all")}</option>
+              <option value="BUY">{t("dashboard.common.buy")}</option>
+              <option value="SELL">{t("dashboard.common.sell")}</option>
             </select>
           </label>
           <label className="space-y-1 text-xs font-medium uppercase text-slate-400">
-            Strategy
+            {t("journal.analytics.strategy")}
             <select
               value={filters.strategy}
               disabled={!analytics.metadata.hasStrategyData}
               onChange={(event) => updateFilter("strategy", event.target.value)}
               className="h-11 w-full rounded-lg border border-slate-800 bg-[#111827] px-3 text-sm normal-case text-[#E5E7EB] outline-none focus:border-sky-600 disabled:opacity-40"
             >
-              <option value="">All strategies</option>
+              <option value="">{t("journal.analytics.allStrategies")}</option>
               {analytics.metadata.strategies.map((strategy) => (
                 <option key={strategy} value={strategy}>
                   {strategy}
@@ -2190,7 +2282,7 @@ export default function JournalAnalyticsPage() {
               className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-[#2563EB] px-4 text-sm font-semibold text-white hover:bg-blue-500"
             >
               <Search className="h-4 w-4" />
-              Apply Filters
+              {t("journal.analytics.applyFilters")}
             </button>
             <button
               type="button"
@@ -2198,21 +2290,29 @@ export default function JournalAnalyticsPage() {
               className="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-slate-800 px-4 text-sm font-semibold text-slate-300 hover:bg-slate-800"
             >
               <RotateCcw className="h-4 w-4" />
-              Reset
+              {t("dashboard.actions.reset")}
             </button>
           </div>
         </form>
       </div>
 
-      {error && (
+      {error?.upgradeRequired ? (
+        <SubscriptionLockedFeature
+          title={t("journal.analytics.lockedTitle")}
+          description={error.message}
+          requiredPlan="Pro"
+          buttonText={t("journal.analytics.upgradeToPro")}
+          href="/pricing"
+        />
+      ) : error ? (
         <div className="flex items-start gap-3 rounded-lg border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-200">
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
           <div>
-            <div className="font-semibold text-red-100">Analytics failed to load</div>
-            <div className="mt-1">{error}</div>
+            <div className="font-semibold text-red-100">{t("journal.analytics.failedTitle")}</div>
+            <div className="mt-1">{error.message}</div>
           </div>
         </div>
-      )}
+      ) : null}
 
       {loading ? (
         <LoadingPanel />
@@ -2220,7 +2320,7 @@ export default function JournalAnalyticsPage() {
         <>
           {!hasTrades && (
             <div className="rounded-lg border border-dashed border-slate-800 bg-[#0F172A] p-6 text-sm text-slate-400">
-              No closed trades found. Import or close trades to populate advanced analytics.
+              {t("journal.analytics.noClosedTrades")}
             </div>
           )}
 
@@ -2234,15 +2334,15 @@ export default function JournalAnalyticsPage() {
 
           <div className="grid gap-5 xl:grid-cols-2">
             <Section
-              title="Equity Curve"
-              description="Cumulative net P&L ordered by close time."
+              title={t("journal.analytics.equityCurve")}
+              description={t("journal.analytics.equityDescription")}
               icon={<LineChartIcon className="h-4 w-4" />}
             >
               <EquityChart data={analytics.equityCurve} />
             </Section>
             <Section
-              title="Drawdown"
-              description={`Current drawdown: ${formatMoney(overview.currentDrawdown)} / Max drawdown: ${formatMoney(overview.maxDrawdown)}`}
+              title={t("journal.analytics.drawdown")}
+              description={t("journal.analytics.drawdownDescription").replace("{current}", formatMoney(overview.currentDrawdown)).replace("{max}", formatMoney(overview.maxDrawdown))}
               icon={<ArrowDown className="h-4 w-4" />}
             >
               <DrawdownChart data={analytics.drawdownCurve} />
@@ -2251,8 +2351,8 @@ export default function JournalAnalyticsPage() {
 
           <div className="grid gap-5 xl:grid-cols-2">
             <Section
-              title="Long vs Short Analytics"
-              description="BUY and SELL realized performance compared side by side."
+              title={t("journal.analytics.longShort")}
+              description={t("journal.analytics.longShortDescription")}
               icon={<Filter className="h-4 w-4" />}
             >
               <div className="space-y-4">
@@ -2261,8 +2361,8 @@ export default function JournalAnalyticsPage() {
               </div>
             </Section>
             <Section
-              title="Session Performance"
-              description="Open time grouped by approximate UTC trading session."
+              title={t("journal.analytics.sessionPerformance")}
+              description={t("journal.analytics.sessionPerformanceDescription")}
               icon={<CalendarDays className="h-4 w-4" />}
             >
               <PnlBarChart data={analytics.bySession} xKey="session" height={300} />
@@ -2270,10 +2370,10 @@ export default function JournalAnalyticsPage() {
           </div>
 
           <div className="grid gap-5 xl:grid-cols-2">
-            <Section title="Weekday P&L" icon={<CalendarDays className="h-4 w-4" />}>
+            <Section title={t("journal.analytics.weekdayPnl")} icon={<CalendarDays className="h-4 w-4" />}>
               <PnlBarChart data={analytics.byWeekday} xKey="weekday" height={280} />
             </Section>
-            <Section title="Hourly P&L" icon={<BarChart3 className="h-4 w-4" />}>
+            <Section title={t("journal.analytics.hourlyPnl")} icon={<BarChart3 className="h-4 w-4" />}>
               <PnlBarChart
                 data={hourlyChartData.length > 0 ? hourlyChartData : analytics.byHour}
                 xKey="label"
@@ -2283,8 +2383,8 @@ export default function JournalAnalyticsPage() {
           </div>
 
           <Section
-            title="Symbol Analytics"
-            description="Click a column header to sort symbol performance."
+            title={t("journal.analytics.symbolAnalytics")}
+            description={t("journal.analytics.symbolAnalyticsDescription")}
             icon={<ArrowUpDown className="h-4 w-4" />}
           >
             <div className="overflow-x-auto">
@@ -2292,14 +2392,14 @@ export default function JournalAnalyticsPage() {
                 <thead className="text-xs uppercase text-slate-500">
                   <tr>
                     {[
-                      ["symbol", "Symbol"],
-                      ["totalTrades", "Trades"],
-                      ["winRate", "Win Rate"],
-                      ["netPnl", "Net P&L"],
-                      ["averagePnl", "Average"],
-                      ["profitFactor", "Profit Factor"],
-                      ["bestTrade", "Best"],
-                      ["worstTrade", "Worst"],
+                      ["symbol", t("dashboard.table.symbol")],
+                      ["totalTrades", t("journal.analytics.trades")],
+                      ["winRate", t("journal.analytics.winRate")],
+                      ["netPnl", t("journal.analytics.netPnl")],
+                      ["averagePnl", t("journal.analytics.average")],
+                      ["profitFactor", t("journal.analytics.profitFactor")],
+                      ["bestTrade", t("journal.analytics.best")],
+                      ["worstTrade", t("journal.analytics.worst")],
                     ].map(([key, label]) => (
                       <th key={key} className="py-2 pr-3">
                         <button
@@ -2333,55 +2433,55 @@ export default function JournalAnalyticsPage() {
                   ))}
                 </tbody>
               </table>
-              {sortedSymbols.length === 0 && <EmptyPanel message="No symbol analytics available." />}
+              {sortedSymbols.length === 0 && <EmptyPanel message={t("journal.analytics.noSymbolAnalytics")} />}
             </div>
           </Section>
 
           <div className="grid gap-5 xl:grid-cols-2">
-            <Section title="Session Analytics" icon={<CalendarDays className="h-4 w-4" />}>
+            <Section title={t("journal.analytics.sessionAnalytics")} icon={<CalendarDays className="h-4 w-4" />}>
               <CompactTable
                 rows={analytics.bySession}
-                labelHeader="Session"
+                labelHeader={t("journal.analytics.session")}
                 getLabel={(row) => row.session}
-                emptyMessage="No session analytics available."
+                emptyMessage={t("journal.analytics.noSessionAnalytics")}
               />
             </Section>
-            <Section title="Weekday Analytics" icon={<CalendarDays className="h-4 w-4" />}>
+            <Section title={t("journal.analytics.weekdayAnalytics")} icon={<CalendarDays className="h-4 w-4" />}>
               <CompactTable
                 rows={analytics.byWeekday}
-                labelHeader="Weekday"
+                labelHeader={t("journal.analytics.weekday")}
                 getLabel={(row) => row.weekday}
-                emptyMessage="No weekday analytics available."
+                emptyMessage={t("journal.analytics.noWeekdayAnalytics")}
               />
             </Section>
           </div>
 
           <Section
-            title="Hourly Decision Board"
-            description="A quick read on when your journal is making or losing money."
+            title={t("journal.analytics.hourlyDecisionBoard")}
+            description={t("journal.analytics.hourlyDecisionDescription")}
             icon={<BarChart3 className="h-4 w-4" />}
           >
             <HourlyDecisionPanel rows={analytics.byHour} />
           </Section>
 
           <div className="grid gap-5 xl:grid-cols-2">
-            <Section title="Strategy / Magic Number Analytics" icon={<Target className="h-4 w-4" />}>
+            <Section title={t("journal.analytics.strategyMagicAnalytics")} icon={<Target className="h-4 w-4" />}>
               {analytics.metadata.hasStrategyData ? (
                 <StrategyTable rows={analytics.byStrategy} />
               ) : (
-                <EmptyPanel message="No strategy data available yet. Add strategyName or magicNumber to trades to enable strategy analytics." />
+                <EmptyPanel message={t("journal.analytics.noStrategyData")} />
               )}
             </Section>
-            <Section title="Psychology Analytics" icon={<Brain className="h-4 w-4" />}>
+            <Section title={t("journal.analytics.psychologyAnalytics")} icon={<Brain className="h-4 w-4" />}>
               {analytics.metadata.hasPsychologyData ? (
                 <CompactTable
                   rows={analytics.byPsychology}
-                  labelHeader="Psychology Status"
+                  labelHeader={t("journal.analytics.psychologyStatus")}
                   getLabel={(row) => row.psychologyStatus}
-                  emptyMessage="No psychology analytics match the active filters."
+                  emptyMessage={t("journal.analytics.noPsychologyFilter")}
                 />
               ) : (
-                <EmptyPanel message="No psychology data available yet. Add psychology tracking to trades to enable this report." />
+                <EmptyPanel message={t("journal.analytics.noPsychologyData")} />
               )}
             </Section>
           </div>

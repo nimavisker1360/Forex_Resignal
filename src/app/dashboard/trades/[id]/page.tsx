@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, Camera, ImagePlus } from "lucide-react";
 import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { getSession } from "@/lib/server-auth";
+import { DashboardText } from "@/components/dashboard/DashboardText";
 import { PnlText } from "@/components/dashboard/PnlText";
 import { PsychologyReviewCard } from "@/components/dashboard/PsychologyReviewCard";
 import { TradeDetailActions } from "@/components/dashboard/TradeDetailActions";
@@ -25,7 +27,7 @@ type TradeDetail = Prisma.TradeGetPayload<{
   };
 }>;
 
-function MetricCard({ label, value }: { label: string; value: React.ReactNode }) {
+function MetricCard({ label, value }: { label: React.ReactNode; value: React.ReactNode }) {
   return (
     <div className="rounded-xl border border-slate-800 bg-[#111827] p-4">
       <div className="text-xs font-medium uppercase text-slate-400">{label}</div>
@@ -34,11 +36,11 @@ function MetricCard({ label, value }: { label: string; value: React.ReactNode })
   );
 }
 
-function InfoField({ label, value }: { label: string; value: string }) {
+function InfoField({ label, value }: { label: React.ReactNode; value: React.ReactNode }) {
   return (
     <div className="rounded-xl border border-slate-800 bg-[#111827] p-3">
       <div className="text-xs font-medium uppercase text-slate-400">{label}</div>
-      <div className="mt-1 truncate text-sm font-semibold text-[#E5E7EB]">{value}</div>
+          <div className="mt-1 truncate text-sm font-semibold text-[#E5E7EB]">{value}</div>
     </div>
   );
 }
@@ -47,7 +49,7 @@ function ScreenshotCard({
   title,
   url,
 }: {
-  title: string;
+  title: React.ReactNode;
   url?: string | null;
 }) {
   return (
@@ -58,7 +60,7 @@ function ScreenshotCard({
       </div>
       {url ? (
         <a href={url} target="_blank" rel="noreferrer" className="block">
-          <img src={url} alt={`${title} screenshot`} className="aspect-video w-full object-cover" />
+          <img src={url} alt="" className="aspect-video w-full object-cover" />
         </a>
       ) : (
         <div className="flex aspect-video flex-col items-center justify-center gap-3 p-6 text-center">
@@ -66,14 +68,18 @@ function ScreenshotCard({
             <ImagePlus className="h-6 w-6" />
           </div>
           <div>
-            <div className="text-sm font-semibold text-white">No screenshot uploaded</div>
-            <div className="mt-1 text-xs text-slate-400">Attach entry and exit screenshots for review.</div>
+            <div className="text-sm font-semibold text-white">
+              <DashboardText k="dashboard.detail.noScreenshot" />
+            </div>
+            <div className="mt-1 text-xs text-slate-400">
+              <DashboardText k="dashboard.detail.screenshotHint" />
+            </div>
           </div>
           <button
             type="button"
             className="inline-flex h-9 items-center rounded-xl border border-slate-800 px-3 text-sm font-semibold text-slate-300 hover:bg-slate-800"
           >
-            Upload screenshot
+            <DashboardText k="dashboard.detail.uploadScreenshot" />
           </button>
         </div>
       )}
@@ -95,9 +101,15 @@ function decimalDisplay(value: unknown) {
 
 export default async function TradeDetailPage({ params }: TradeDetailPageProps) {
   const { id } = await params;
-  // TODO: Scope this lookup to the authenticated session user id.
-  const trade = await prisma.trade.findUnique({
-    where: { id },
+  const session = await getSession();
+  const userId = session?.user.id;
+
+  if (!userId) {
+    notFound();
+  }
+
+  const trade = await prisma.trade.findFirst({
+    where: { id, userId },
     include: {
       account: true,
       screenshots: true,
@@ -112,41 +124,43 @@ export default async function TradeDetailPage({ params }: TradeDetailPageProps) 
   const openTime = formatDate(trade.openedAt?.toISOString() || null);
   const closeTime = formatDate(trade.closedAt?.toISOString() || null);
   const metricCards = [
-    ["Lot", formatNumber(decimalDisplay(trade.lotSize), 2)],
-    ["Entry", formatNumber(decimalDisplay(trade.entryPrice), 5)],
-    ["SL", formatNumber(decimalDisplay(trade.stopLoss), 5)],
-    ["TP", formatNumber(decimalDisplay(trade.takeProfit), 5)],
-    ["Exit", formatNumber(decimalDisplay(trade.exitPrice), 5)],
-    [
-      "PnL",
-      <PnlText
-        key="pnl"
-        value={decimalDisplay(trade.profitLoss)}
-        currency={trade.account?.currency || "USD"}
-      />,
-    ],
-    ["R:R", formatNumber(decimalDisplay(trade.rr), 2)],
-    ["Risk", formatNumber(decimalDisplay(trade.riskAmount), 2)],
-  ] as const;
+    { key: "lot", label: <DashboardText k="dashboard.detail.lot" />, value: formatNumber(decimalDisplay(trade.lotSize), 2) },
+    { key: "entry", label: <DashboardText k="dashboard.table.entry" />, value: formatNumber(decimalDisplay(trade.entryPrice), 5) },
+    { key: "sl", label: <DashboardText k="dashboard.detail.sl" />, value: formatNumber(decimalDisplay(trade.stopLoss), 5) },
+    { key: "tp", label: <DashboardText k="dashboard.detail.tp" />, value: formatNumber(decimalDisplay(trade.takeProfit), 5) },
+    { key: "exit", label: <DashboardText k="dashboard.table.exit" />, value: formatNumber(decimalDisplay(trade.exitPrice), 5) },
+    {
+      key: "pnl",
+      label: <DashboardText k="dashboard.table.pnl" />,
+      value: (
+        <PnlText
+          value={decimalDisplay(trade.profitLoss)}
+          currency={trade.account?.currency || "USD"}
+        />
+      ),
+    },
+    { key: "rr", label: <DashboardText k="dashboard.table.rr" />, value: formatNumber(decimalDisplay(trade.rr), 2) },
+    { key: "risk", label: <DashboardText k="dashboard.detail.risk" />, value: formatNumber(decimalDisplay(trade.riskAmount), 2) },
+  ];
   const fullInfo = [
-    ["Account", trade.account?.name || "-"],
-    ["Broker", trade.account?.broker || "-"],
-    ["Server", trade.account?.platform || "-"],
-    ["Position ID", "-"],
-    ["Order Ticket", "-"],
-    ["Source", "Manual"],
-    ["Entry Source", "Journal"],
-    ["Timeframe", "-"],
-    ["Spread", "-"],
-    ["ATR", "-"],
-    ["RSI", "-"],
-    ["Session", trade.session || "-"],
-    ["Magic Number", "-"],
-    ["Open Time", openTime],
-    ["Close Time", closeTime],
-    ["Duration", "-"],
-    ["Commission", "-"],
-    ["Swap", "-"],
+    { key: "account", label: <DashboardText k="dashboard.table.account" />, value: trade.account?.name || "-" },
+    { key: "broker", label: <DashboardText k="dashboard.accounts.broker" />, value: trade.account?.broker || "-" },
+    { key: "server", label: <DashboardText k="dashboard.detail.server" />, value: trade.account?.platform || "-" },
+    { key: "positionId", label: <DashboardText k="dashboard.detail.positionId" />, value: "-" },
+    { key: "orderTicket", label: <DashboardText k="dashboard.detail.orderTicket" />, value: "-" },
+    { key: "source", label: <DashboardText k="dashboard.form.source" />, value: <DashboardText k="dashboard.form.manual" /> },
+    { key: "entrySource", label: <DashboardText k="dashboard.detail.entrySource" />, value: <DashboardText k="dashboard.detail.journal" /> },
+    { key: "timeframe", label: <DashboardText k="timeframe" />, value: "-" },
+    { key: "spread", label: <DashboardText k="dashboard.detail.spread" />, value: "-" },
+    { key: "atr", label: <DashboardText k="dashboard.detail.atr" />, value: "-" },
+    { key: "rsi", label: <DashboardText k="dashboard.detail.rsi" />, value: "-" },
+    { key: "session", label: <DashboardText k="dashboard.form.session" />, value: trade.session || "-" },
+    { key: "magicNumber", label: <DashboardText k="dashboard.detail.magicNumber" />, value: "-" },
+    { key: "openTime", label: <DashboardText k="dashboard.table.openTime" />, value: openTime },
+    { key: "closeTime", label: <DashboardText k="dashboard.detail.closeTime" />, value: closeTime },
+    { key: "duration", label: <DashboardText k="dashboard.detail.duration" />, value: "-" },
+    { key: "commission", label: <DashboardText k="dashboard.form.commission" />, value: "-" },
+    { key: "swap", label: <DashboardText k="dashboard.form.swap" />, value: "-" },
   ];
 
   return (
@@ -156,7 +170,7 @@ export default async function TradeDetailPage({ params }: TradeDetailPageProps) 
         className="inline-flex items-center gap-2 text-sm text-slate-400 hover:text-white"
       >
         <ArrowLeft className="h-4 w-4" />
-        Back to trades
+        <DashboardText k="dashboard.detail.backToTrades" />
       </Link>
 
       <div className="rounded-xl border border-slate-800 bg-[#0F172A] p-5 shadow-sm">
@@ -168,13 +182,13 @@ export default async function TradeDetailPage({ params }: TradeDetailPageProps) 
               <TradeStatusBadge status={trade.status} />
             </div>
             <p className="mt-2 text-sm text-slate-400">
-              {trade.account?.name || "No account"} / {trade.account?.broker || "No broker"} /{" "}
-              {trade.account?.platform || "No platform"}
+              {trade.account?.name || <DashboardText k="dashboard.detail.noAccount" />} / {trade.account?.broker || <DashboardText k="dashboard.accounts.noBroker" />} /{" "}
+              {trade.account?.platform || <DashboardText k="dashboard.accounts.noPlatform" />}
             </p>
           </div>
           <div className="grid gap-3 sm:grid-cols-2 xl:min-w-[440px]">
             <MetricCard
-              label="Profit/Loss"
+              label={<DashboardText k="dashboard.form.profitLoss" />}
               value={
                 <PnlText
                   value={decimalDisplay(trade.profitLoss)}
@@ -192,24 +206,28 @@ export default async function TradeDetailPage({ params }: TradeDetailPageProps) 
       </div>
 
       <div className="rounded-xl border border-slate-800 bg-[#0F172A] p-5 shadow-sm">
-        <h3 className="mb-4 text-lg font-semibold text-white">Screenshots</h3>
+        <h3 className="mb-4 text-lg font-semibold text-white">
+          <DashboardText k="dashboard.detail.screenshots" />
+        </h3>
         <div className="grid gap-4 lg:grid-cols-2">
-          <ScreenshotCard title="Entry Screenshot" url={screenshotByType(trade, "entry")} />
-          <ScreenshotCard title="Exit Screenshot" url={screenshotByType(trade, "exit")} />
+          <ScreenshotCard title={<DashboardText k="dashboard.detail.entryScreenshot" />} url={screenshotByType(trade, "entry")} />
+          <ScreenshotCard title={<DashboardText k="dashboard.detail.exitScreenshot" />} url={screenshotByType(trade, "exit")} />
         </div>
       </div>
 
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-        {metricCards.map(([label, value]) => (
-          <MetricCard key={label} label={label} value={value} />
+        {metricCards.map((item) => (
+          <MetricCard key={item.key} label={item.label} value={item.value} />
         ))}
       </div>
 
       <div className="rounded-xl border border-slate-800 bg-[#0F172A] p-5 shadow-sm">
-        <h3 className="mb-4 text-lg font-semibold text-white">Full Info</h3>
+        <h3 className="mb-4 text-lg font-semibold text-white">
+          <DashboardText k="dashboard.detail.fullInfo" />
+        </h3>
         <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-          {fullInfo.map(([label, value]) => (
-            <InfoField key={label} label={label} value={value} />
+          {fullInfo.map((item) => (
+            <InfoField key={item.key} label={item.label} value={item.value} />
           ))}
         </div>
       </div>

@@ -55,26 +55,18 @@ export function RecentSignals() {
   }, [loadSignals]);
 
   return (
-    <section className="py-14 bg-black relative">
-      <div
-        className="absolute inset-0 mx-auto my-auto bg-[url('/images/back.jpg')] bg-contain bg-center opacity-20 z-0"
-        style={{
-          width: "100%",
-          height: "100%",
-          top: "0%",
-          left: "0%",
-          transform: "rotate(8deg) scale(1.2)",
-        }}
-      ></div>
+    <section className="relative overflow-hidden bg-[#fbfbff] py-14">
+      <div className="absolute inset-0 bg-[linear-gradient(110deg,#ffffff_0%,#f7f9ff_38%,#f3efff_70%,#ffeaf7_100%)]" />
+      <div className="absolute inset-x-0 top-0 h-20 bg-white/75 blur-2xl" />
       <div className="container mx-auto px-4 relative z-10">
-        <div className="flex flex-col items-center justify-center mb-8 border-b border-gray-800 pb-6">
-          <MotionHeading className="text-3xl md:text-4xl font-bold text-white mb-5 text-center">
+        <div className="flex flex-col items-center justify-center mb-8 border-b border-slate-200/80 pb-6">
+          <MotionHeading className="text-3xl md:text-4xl font-bold text-[#10132f] mb-5 text-center">
             {t("latestSignals")}
           </MotionHeading>
           <Button
             variant="outline"
             asChild
-            className="border border-blue-500/40 bg-blue-500/10 shadow-md text-blue-100 hover:text-white hover:bg-blue-500/20 px-5 py-2 mx-auto"
+            className="mx-auto h-10 rounded-lg border border-blue-500/30 bg-white/85 px-5 py-2 text-sm font-bold text-[#11132c] shadow-[0_10px_24px_rgba(37,99,235,0.16)] transition-colors hover:border-blue-600 hover:bg-[#11132c] hover:text-white"
           >
             <Link href="/signals" className="flex items-center justify-center">
               {t("viewAllSignals") === "viewAllSignals"
@@ -91,14 +83,14 @@ export function RecentSignals() {
             Array.from({ length: 3 }).map((_, index) => (
               <div
                 key={index}
-                className="h-[124px] animate-pulse rounded-lg border border-gray-800 bg-gray-950/80 p-3"
+                className="h-[124px] animate-pulse rounded-lg border border-slate-200 bg-white/75 p-3 shadow-sm"
               >
                 <div className="flex items-center justify-between">
-                  <div className="h-5 w-24 rounded bg-gray-800" />
-                  <div className="h-7 w-28 rounded bg-gray-800" />
+                  <div className="h-5 w-24 rounded bg-slate-200" />
+                  <div className="h-7 w-28 rounded bg-slate-200" />
                 </div>
-                <div className="mt-3 h-11 rounded bg-gray-900" />
-                <div className="mt-3 h-6 rounded bg-gray-800" />
+                <div className="mt-3 h-11 rounded bg-slate-100" />
+                <div className="mt-3 h-6 rounded bg-slate-200" />
               </div>
             ))}
 
@@ -113,7 +105,7 @@ export function RecentSignals() {
               </MotionDiv>
             ))
           ) : !isLoading ? (
-            <div className="md:col-span-3 min-h-[120px] flex items-center justify-center text-center p-6 text-gray-400 bg-gray-900/80 backdrop-blur-sm rounded-lg border border-gray-800">
+            <div className="md:col-span-3 min-h-[120px] flex items-center justify-center text-center p-6 text-slate-500 bg-white/80 backdrop-blur-sm rounded-lg border border-slate-200">
               {t("noSignalsFound")}
             </div>
           ) : null}

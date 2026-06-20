@@ -1,6 +1,7 @@
 import { Prisma } from "@prisma/client";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getCurrentUserId, unauthorizedResponse } from "@/lib/server-auth";
 import {
   buildManualTradeUpdateData,
   journalTradeInclude,
@@ -27,9 +28,15 @@ function validationResponse(errors: string[]) {
 
 export async function GET(_request: Request, context: RouteContext) {
   try {
+    const userId = await getCurrentUserId();
+
+    if (!userId) {
+      return unauthorizedResponse();
+    }
+
     const { id } = await context.params;
-    const trade = await prisma.trade.findUnique({
-      where: { id },
+    const trade = await prisma.trade.findFirst({
+      where: { id, userId },
       include: journalTradeInclude,
     });
 
@@ -56,6 +63,12 @@ export async function GET(_request: Request, context: RouteContext) {
 
 export async function PATCH(request: Request, context: RouteContext) {
   try {
+    const userId = await getCurrentUserId();
+
+    if (!userId) {
+      return unauthorizedResponse();
+    }
+
     const { id } = await context.params;
     const body = (await request.json()) as Record<string, unknown>;
     const built = buildManualTradeUpdateData(body);
@@ -65,9 +78,9 @@ export async function PATCH(request: Request, context: RouteContext) {
     }
 
     const trade = await prisma.$transaction(async (tx) => {
-      const existing = await tx.trade.findUnique({
-        where: { id },
-        select: { source: true, setup: true },
+      const existing = await tx.trade.findFirst({
+        where: { id, userId },
+        select: { source: true, setup: true, userId: true },
       });
 
       if (!existing) {
@@ -75,6 +88,20 @@ export async function PATCH(request: Request, context: RouteContext) {
           code: "P2025",
           clientVersion: Prisma.prismaVersion.client,
         });
+      }
+
+      if (built.data.accountId) {
+        const account = await tx.tradingAccount.findFirst({
+          where: { id: String(built.data.accountId), userId },
+          select: { id: true },
+        });
+
+        if (!account) {
+          throw new Prisma.PrismaClientKnownRequestError("Invalid accountId", {
+            code: "P2003",
+            clientVersion: Prisma.prismaVersion.client,
+          });
+        }
       }
 
       return tx.trade.update({
@@ -117,10 +144,16 @@ export async function PATCH(request: Request, context: RouteContext) {
 
 export async function DELETE(_request: Request, context: RouteContext) {
   try {
+    const userId = await getCurrentUserId();
+
+    if (!userId) {
+      return unauthorizedResponse();
+    }
+
     const { id } = await context.params;
 
     await prisma.trade.delete({
-      where: { id },
+      where: { id, userId },
     });
 
     return NextResponse.json({

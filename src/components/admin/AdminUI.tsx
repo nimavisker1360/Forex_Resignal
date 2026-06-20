@@ -1,0 +1,198 @@
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import type { HTMLAttributes, ReactNode } from "react";
+import {
+  BadgeDollarSign,
+  CreditCard,
+  ExternalLink,
+  Gauge,
+  LayoutDashboard,
+  ListChecks,
+  Settings,
+  ShieldCheck,
+  Users,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+
+const navItems = [
+  { label: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
+  { label: "Users", href: "/admin/users", icon: Users },
+  { label: "Payments", href: "/admin/payments", icon: CreditCard },
+  { label: "Subscriptions", href: "/admin/subscriptions", icon: BadgeDollarSign },
+  { label: "Plans", href: "/admin/plans", icon: ListChecks },
+  { label: "Settings", href: "/admin/settings", icon: Settings },
+  { label: "Back to App", href: "/dashboard", icon: ExternalLink },
+];
+
+const pageTitles: Record<string, string> = {
+  "/admin/dashboard": "Admin Dashboard",
+  "/admin/users": "Users",
+  "/admin/payments": "Payments",
+  "/admin/subscriptions": "Subscriptions",
+  "/admin/plans": "Plans",
+  "/admin/settings": "Settings",
+};
+
+export function AdminShell({ children, adminEmail }: { children: ReactNode; adminEmail: string }) {
+  const pathname = usePathname();
+  const pageTitle =
+    pageTitles[pathname] ||
+    (pathname.startsWith("/admin/users/") ? "User Detail" : pathname.startsWith("/admin/payments/") ? "Payment Detail" : "Admin");
+
+  return (
+    <section className="min-h-screen bg-[#020617] text-slate-100">
+      <div className="flex min-h-screen flex-col lg:flex-row">
+        <aside className="border-b border-slate-800 bg-[#0F172A] lg:sticky lg:top-0 lg:h-screen lg:w-72 lg:border-b-0 lg:border-r">
+          <div className="flex h-full flex-col">
+            <div className="flex h-16 items-center gap-3 border-b border-slate-800 px-6">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-500/15 text-emerald-300">
+                <ShieldCheck className="h-5 w-5" />
+              </div>
+              <div>
+                <div className="text-sm font-semibold text-white">SignalMax</div>
+                <div className="text-xs text-slate-400">Admin Panel</div>
+              </div>
+            </div>
+            <nav className="flex gap-2 overflow-x-auto px-4 py-4 lg:flex-1 lg:flex-col lg:overflow-visible">
+              {navItems.map((item) => {
+                const Icon = item.icon;
+                const active = pathname === item.href || (item.href !== "/admin/dashboard" && pathname.startsWith(item.href));
+
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={cn(
+                      "inline-flex h-10 shrink-0 items-center gap-3 rounded-lg px-3 text-sm font-medium transition lg:w-full",
+                      active
+                        ? "bg-slate-800 text-white"
+                        : "text-slate-300 hover:bg-slate-800 hover:text-white"
+                    )}
+                  >
+                    <Icon className="h-4 w-4 text-slate-400" />
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </nav>
+          </div>
+        </aside>
+        <div className="flex min-w-0 flex-1 flex-col">
+          <header className="sticky top-0 z-20 border-b border-slate-800 bg-[#020617]/90 backdrop-blur">
+            <div className="mx-auto flex h-16 w-full max-w-[1500px] items-center justify-between gap-4 px-6">
+              <div className="min-w-0">
+                <h1 className="truncate text-sm font-semibold text-white">{pageTitle}</h1>
+                <p className="truncate text-xs text-slate-400">{adminEmail}</p>
+              </div>
+              <Button asChild variant="outline" size="sm" className="border-slate-700 text-slate-100 hover:bg-slate-800">
+                <Link href="/dashboard">
+                  <Gauge className="mr-2 h-4 w-4" />
+                  App
+                </Link>
+              </Button>
+            </div>
+          </header>
+          <main className="mx-auto w-full max-w-[1500px] flex-1 px-4 py-6 sm:px-6">{children}</main>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+export function AdminCard({ children, className, ...props }: HTMLAttributes<HTMLDivElement> & { children: ReactNode }) {
+  return <div className={cn("rounded-lg border border-slate-800 bg-slate-900/70 p-4 shadow-sm", className)} {...props}>{children}</div>;
+}
+
+export function StatCard({ label, value }: { label: string; value: ReactNode }) {
+  return (
+    <AdminCard>
+      <div className="text-xs font-medium uppercase tracking-[0.12em] text-slate-500">{label}</div>
+      <div className="mt-2 text-2xl font-semibold text-white">{value}</div>
+    </AdminCard>
+  );
+}
+
+export function StatusBadge({ value }: { value?: string | null }) {
+  const status = value || "N/A";
+  const palette = status.includes("ADMIN")
+    ? "border-purple-500/30 bg-purple-500/10 text-purple-200"
+    : status.includes("CONFIRMED") || status.includes("ACTIVE")
+      ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-200"
+      : status.includes("REJECTED") || status.includes("EXPIRED") || status.includes("CANCELED")
+        ? "border-red-500/30 bg-red-500/10 text-red-200"
+        : status.includes("UNDER_REVIEW")
+          ? "border-blue-500/30 bg-blue-500/10 text-blue-200"
+          : status.includes("TRIAL") || status.includes("WAITING")
+            ? "border-amber-500/30 bg-amber-500/10 text-amber-100"
+            : "border-slate-700 bg-slate-800 text-slate-200";
+
+  return <span className={cn("inline-flex rounded-md border px-2 py-1 text-xs font-semibold", palette)}>{status}</span>;
+}
+
+export function LoadingState({ label = "Loading" }: { label?: string }) {
+  return (
+    <div className="grid gap-3">
+      <div className="h-24 animate-pulse rounded-lg bg-slate-800" />
+      <div className="h-24 animate-pulse rounded-lg bg-slate-800/70" />
+      <p className="text-sm text-slate-400">{label}...</p>
+    </div>
+  );
+}
+
+export function EmptyState({ label }: { label: string }) {
+  return <div className="rounded-lg border border-dashed border-slate-700 p-6 text-sm text-slate-400">{label}</div>;
+}
+
+export function ErrorState({ message, onRetry }: { message: string; onRetry: () => void }) {
+  return (
+    <AdminCard className="border-red-900/60">
+      <p className="text-sm text-red-200">{message}</p>
+      <Button type="button" size="sm" className="mt-3" onClick={onRetry}>
+        Retry
+      </Button>
+    </AdminCard>
+  );
+}
+
+export function TableWrap({ children }: { children: ReactNode }) {
+  return <div className="overflow-x-auto rounded-lg border border-slate-800">{children}</div>;
+}
+
+export const tableClass = "min-w-full divide-y divide-slate-800 text-sm";
+export const thClass = "whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.12em] text-slate-500";
+export const tdClass = "whitespace-nowrap px-4 py-3 text-slate-300";
+export const inputClass = "h-9 rounded-md border border-slate-700 bg-slate-950 px-3 text-sm text-slate-100 outline-none transition focus:border-blue-400";
+export const selectClass = inputClass;
+
+export function formatDate(value?: string | Date | null) {
+  if (!value) {
+    return "Not available";
+  }
+
+  return new Intl.DateTimeFormat("en", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  }).format(new Date(value));
+}
+
+export function daysRemaining(value?: string | Date | null) {
+  if (!value) {
+    return null;
+  }
+
+  return Math.max(Math.ceil((new Date(value).getTime() - Date.now()) / 86_400_000), 0);
+}
+
+export function explorerUrl(network?: string | null, txid?: string | null) {
+  if (!txid) {
+    return null;
+  }
+
+  if (network === "ERC20") return `https://etherscan.io/tx/${txid}`;
+  if (network === "BEP20") return `https://bscscan.com/tx/${txid}`;
+  return `https://tronscan.org/#/transaction/${txid}`;
+}
