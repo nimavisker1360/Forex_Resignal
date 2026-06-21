@@ -648,6 +648,36 @@ model TradeChecklistAnswer {
   @@index([checklistItemId])
 }
 
+model EconomicEvent {
+  id String @id @default(cuid())
+
+  name     String
+  currency String
+  impact   String
+  category String?
+
+  eventTime DateTime
+
+  actual   String?
+  forecast String?
+  previous String?
+
+  outcome  String?
+  strength String?
+  quality  String?
+
+  source     String @default("jblanked-forex-factory")
+  rawPayload Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([name, currency, eventTime, source])
+  @@index([eventTime])
+  @@index([currency])
+  @@index([impact])
+}
+
 model WebsiteSignal {
   id           String                    @id @default(cuid())
   symbol       String

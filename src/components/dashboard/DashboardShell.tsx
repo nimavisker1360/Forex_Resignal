@@ -36,6 +36,7 @@ const sidebarItems = [
   { labelKey: "dashboard.nav.accounts", href: "/dashboard/accounts", icon: BriefcaseBusiness },
   { labelKey: "dashboard.nav.trades", href: "/dashboard/trades", icon: ListChecks },
   { labelKey: "dashboard.nav.calendar", href: "/journal/calendar", icon: CalendarDays },
+  { labelKey: "dashboard.nav.economicCalendar", href: "/economic-calendar", icon: CalendarDays },
   { labelKey: "dashboard.nav.analytics", href: "/journal/analytics", icon: BarChart3 },
   { labelKey: "dashboard.nav.dailyJournal", href: "/dashboard/daily-journal", icon: BookOpenCheck },
   { labelKey: "dashboard.nav.playbooks", href: "/journal/playbooks", icon: PlaySquare },

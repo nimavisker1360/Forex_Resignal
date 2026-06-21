@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Camera, ImagePlus } from "lucide-react";
+import { AlertTriangle, ArrowLeft, Camera, ImagePlus } from "lucide-react";
 import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/server-auth";
@@ -12,6 +12,7 @@ import { TradeDirectionBadge } from "@/components/dashboard/TradeDirectionBadge"
 import { TradeStatusBadge } from "@/components/dashboard/TradeStatusBadge";
 import { TradeTagsCard } from "@/components/dashboard/TradeTagsCard";
 import { formatDate, formatNumber } from "@/components/dashboard/types";
+import { getNearbyEconomicEvents } from "@/lib/news/get-nearby-economic-events";
 
 export const dynamic = "force-dynamic";
 
@@ -121,6 +122,13 @@ export default async function TradeDetailPage({ params }: TradeDetailPageProps) 
     notFound();
   }
 
+  const nearbyEconomicEvents = trade.openedAt
+    ? await getNearbyEconomicEvents({
+        tradeOpenTime: trade.openedAt,
+        symbol: trade.symbol,
+      })
+    : [];
+  const primaryEconomicEvent = nearbyEconomicEvents[0];
   const openTime = formatDate(trade.openedAt?.toISOString() || null);
   const closeTime = formatDate(trade.closedAt?.toISOString() || null);
   const metricCards = [
@@ -204,6 +212,33 @@ export default async function TradeDetailPage({ params }: TradeDetailPageProps) 
           <TradeDetailActions tradeId={trade.id} status={trade.status} userId={trade.userId} />
         </div>
       </div>
+
+      {primaryEconomicEvent && (
+        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-amber-100">
+          <div className="flex items-start gap-3">
+            <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-amber-500/30 bg-amber-500/10">
+              <AlertTriangle className="h-5 w-5" />
+            </div>
+            <div>
+              <div className="text-sm font-semibold">
+                <DashboardText
+                  k="dashboard.detail.economicEventWarning"
+                  values={{ currency: primaryEconomicEvent.currency }}
+                />
+              </div>
+              <div className="mt-1 text-xs text-amber-100/80">
+                <DashboardText
+                  k="dashboard.detail.economicEventDetail"
+                  values={{
+                    event: primaryEconomicEvent.name,
+                    time: formatDate(primaryEconomicEvent.eventTime.toISOString()),
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="rounded-xl border border-slate-800 bg-[#0F172A] p-5 shadow-sm">
         <h3 className="mb-4 text-lg font-semibold text-white">

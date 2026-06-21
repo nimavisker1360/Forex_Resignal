@@ -17,6 +17,7 @@ import {
   Settings,
   ShieldCheck,
 } from "lucide-react";
+import { LanguageSwitcher } from "@/components/language-switcher";
 import { useLanguage } from "@/lib/language-context";
 import { cn } from "@/lib/utils";
 
@@ -88,17 +89,20 @@ export function JournalShell({
 
         <div className="flex min-w-0 flex-1 flex-col">
           <header className="sticky top-0 z-20 border-b border-slate-800 bg-[#020617]/90 backdrop-blur">
-            <div className="mx-auto flex h-16 w-full max-w-[1400px] items-center justify-between px-6">
+            <div className="mx-auto flex h-16 w-full max-w-[1400px] items-center justify-between gap-4 px-6">
               <div>
                 <div className="text-sm font-semibold text-white">{t("dashboard.shell.workspace")}</div>
                 <div className="text-xs text-slate-400">{t("journal.shell.subtitle")}</div>
               </div>
-              <Link
-                href="/"
-                className="inline-flex h-9 items-center rounded-xl border border-slate-800 px-3 text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white"
-              >
-                {t("dashboard.nav.publicSite")}
-              </Link>
+              <div className="flex shrink-0 items-center gap-3">
+                <LanguageSwitcher />
+                <Link
+                  href="/"
+                  className="inline-flex h-9 items-center rounded-xl border border-slate-800 px-3 text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white"
+                >
+                  {t("dashboard.nav.publicSite")}
+                </Link>
+              </div>
             </div>
           </header>
 

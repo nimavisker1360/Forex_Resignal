@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowDown, ArrowLeft, ArrowUp, Plus, Save, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import { RULE_SECTION_LABELS, RULE_SECTION_ORDER } from "@/components/journal/PlaybookRuleSection";
+import { RULE_SECTION_ORDER } from "@/components/journal/PlaybookRuleSection";
 import { useLanguage } from "@/lib/language-context";
 import { cn } from "@/lib/utils";
 import type {
@@ -172,6 +172,14 @@ export function PlaybookRuleEditor({
   onChange: (rules: PlaybookRuleDto[]) => void;
 }) {
   const { t } = useLanguage();
+  const sectionLabels: Record<PlaybookRuleSection, string> = {
+    SETUP: t("journal.playbooks.setup"),
+    ENTRY: t("journal.playbooks.entry"),
+    EXIT: t("journal.playbooks.exit"),
+    RISK: t("journal.playbooks.risk"),
+    MANAGEMENT: t("journal.playbooks.management"),
+    PSYCHOLOGY: t("journal.playbooks.psychology"),
+  };
 
   function updateRule(index: number, patch: Partial<PlaybookRuleDto>) {
     onChange(
@@ -222,7 +230,7 @@ export function PlaybookRuleEditor({
               >
                 {RULE_SECTION_ORDER.map((section) => (
                   <option key={section} value={section}>
-                    {RULE_SECTION_LABELS[section].replace(" Rules", "")}
+                    {sectionLabels[section]}
                   </option>
                 ))}
               </select>
@@ -232,7 +240,7 @@ export function PlaybookRuleEditor({
               <input
                 value={rule.title}
                 onChange={(event) => updateRule(index, { title: event.target.value })}
-                placeholder="Market structure is clear"
+                placeholder={t("journal.playbooks.ruleTitlePlaceholder")}
                 className={inputClass}
               />
             </label>
@@ -241,7 +249,7 @@ export function PlaybookRuleEditor({
               <input
                 value={rule.description || ""}
                 onChange={(event) => updateRule(index, { description: event.target.value })}
-                placeholder="Optional detail"
+                placeholder={t("journal.playbooks.ruleDescriptionPlaceholder")}
                 className={inputClass}
               />
             </label>
@@ -345,17 +353,17 @@ export function PlaybookForm({ playbook }: { playbook?: PlaybookStrategyDto }) {
   function addTemplateRules() {
     const start = form.rules.length;
     const titles: Array<[PlaybookRuleSection, string, boolean]> = [
-      ["SETUP", "Market structure is clear", true],
-      ["SETUP", "Price is near order block or key zone", false],
-      ["ENTRY", "Confirmation candle is valid", true],
-      ["ENTRY", "Entry is not late", true],
-      ["EXIT", "Stop Loss is defined before entry", true],
-      ["EXIT", "Take Profit is defined before entry", true],
-      ["RISK", "Minimum R:R is at least 1:2", true],
-      ["RISK", "Lot size is calculated correctly", true],
-      ["MANAGEMENT", "Trade management follows the plan", false],
-      ["PSYCHOLOGY", "I am not entering because of FOMO", true],
-      ["PSYCHOLOGY", "I accept the risk before entering", true],
+      ["SETUP", t("journal.playbooks.exampleRuleMarketStructure"), true],
+      ["SETUP", t("journal.playbooks.exampleRuleKeyZone"), false],
+      ["ENTRY", t("journal.playbooks.exampleRuleConfirmation"), true],
+      ["ENTRY", t("journal.playbooks.exampleRuleNotLate"), true],
+      ["EXIT", t("journal.playbooks.exampleRuleStopLoss"), true],
+      ["EXIT", t("journal.playbooks.exampleRuleTakeProfit"), true],
+      ["RISK", t("journal.playbooks.exampleRuleMinimumRr"), true],
+      ["RISK", t("journal.playbooks.exampleRuleLotSize"), true],
+      ["MANAGEMENT", t("journal.playbooks.exampleRuleManagement"), false],
+      ["PSYCHOLOGY", t("journal.playbooks.exampleRuleFomo"), true],
+      ["PSYCHOLOGY", t("journal.playbooks.exampleRuleAcceptRisk"), true],
     ];
 
     setField("rules", [
@@ -453,7 +461,7 @@ export function PlaybookForm({ playbook }: { playbook?: PlaybookStrategyDto }) {
                 value={form.name}
                 onChange={(event) => setField("name", event.target.value)}
                 required
-                placeholder="SMC + EMA + RSI"
+                placeholder={t("journal.playbooks.strategyNamePlaceholder")}
                 className={inputClass}
               />
             </label>
@@ -494,7 +502,7 @@ export function PlaybookForm({ playbook }: { playbook?: PlaybookStrategyDto }) {
               <input
                 value={form.symbols}
                 onChange={(event) => setField("symbols", event.target.value)}
-                placeholder="XAUUSD, EURUSD"
+                placeholder={t("journal.playbooks.symbolsPlaceholder")}
                 className={inputClass}
               />
             </label>
@@ -503,7 +511,7 @@ export function PlaybookForm({ playbook }: { playbook?: PlaybookStrategyDto }) {
               <input
                 value={form.timeframes}
                 onChange={(event) => setField("timeframes", event.target.value)}
-                placeholder="M5, M15, H1"
+                placeholder={t("journal.playbooks.timeframesPlaceholder")}
                 className={inputClass}
               />
             </label>
@@ -514,7 +522,7 @@ export function PlaybookForm({ playbook }: { playbook?: PlaybookStrategyDto }) {
                 step="any"
                 value={form.riskPerTrade}
                 onChange={(event) => setField("riskPerTrade", event.target.value)}
-                placeholder="1"
+                placeholder={t("journal.playbooks.riskPerTradePlaceholder")}
                 className={inputClass}
               />
             </label>
@@ -525,7 +533,7 @@ export function PlaybookForm({ playbook }: { playbook?: PlaybookStrategyDto }) {
                 step="any"
                 value={form.minRiskReward}
                 onChange={(event) => setField("minRiskReward", event.target.value)}
-                placeholder="2"
+                placeholder={t("journal.playbooks.minimumRrPlaceholder")}
                 className={inputClass}
               />
             </label>
@@ -534,7 +542,7 @@ export function PlaybookForm({ playbook }: { playbook?: PlaybookStrategyDto }) {
               <input
                 value={form.tags}
                 onChange={(event) => setField("tags", event.target.value)}
-                placeholder="smc, trend, london"
+                placeholder={t("journal.playbooks.tagsPlaceholder")}
                 className={inputClass}
               />
             </label>
