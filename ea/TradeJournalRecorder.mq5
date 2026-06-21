@@ -6,7 +6,7 @@
 #property version   "1.04"
 #property description "Trade Journal Recorder. Records trades only; never opens, closes, or modifies trades."
 
-input string          JOURNAL_API_BASE_URL = "http://127.0.0.1:3000";
+input string          JOURNAL_API_BASE_URL = "https://forex-resignal.vercel.app";
 input string          JOURNAL_UPLOAD_SECRET = "test_journal_secret_123";
 input bool            JOURNAL_ENABLED = true;
 input bool            DEBUG_MODE = true;

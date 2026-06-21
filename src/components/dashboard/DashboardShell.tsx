@@ -52,7 +52,7 @@ export function DashboardShell({ children, showAdmin = false }: { children: Reac
   const translatedDownloadBotLabel = t("dashboard.shell.downloadMt5Bot");
   const downloadBotLabel =
     translatedDownloadBotLabel === "dashboard.shell.downloadMt5Bot"
-      ? "Download MT5 Bot"
+      ? "Download MT5 Package"
       : translatedDownloadBotLabel;
 
   const applyTheme = useCallback((nextTheme: DashboardTheme) => {

@@ -1,7 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   outputFileTracingIncludes: {
-    "/api/downloads/trade-journal-recorder": ["./ea/TradeJournalRecorder.mq5"],
+    "/api/downloads/trade-journal-recorder": [
+      "./ea/TradeJournalRecorder.mq5",
+      "./ea/README_MT5_SETUP.md",
+    ],
   },
   images: {
     domains: [

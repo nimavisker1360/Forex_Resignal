@@ -329,7 +329,7 @@
       "theme": "Dashboard theme",
       "light": "Light",
       "dark": "Dark",
-      "downloadMt5Bot": "Download MT5 Bot"
+      "downloadMt5Bot": "Download MT5 Package"
     },
     "auth": {
       "signOut": "Sign out",
