@@ -20,7 +20,8 @@ export async function GET(request: Request) {
     const report = await buildJournalReport(userId, searchParams);
 
     if (searchParams.get("format") === "csv") {
-      const csv = journalReportToCsv(report);
+      const language = searchParams.get("lang") === "fa" ? "fa" : "en";
+      const csv = journalReportToCsv(report, language);
       const filename = `journal-report-${new Date().toISOString().slice(0, 10)}.csv`;
 
       return new NextResponse(csv, {
@@ -43,7 +44,7 @@ export async function GET(request: Request) {
     console.error("Journal report GET error:", error);
 
     return NextResponse.json(
-      { success: false, message: "بارگذاری گزارش ژورنال ناموفق بود" },
+      { success: false, message: "Failed to load journal report" },
       { status: 500 }
     );
   }

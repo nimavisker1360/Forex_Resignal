@@ -69,6 +69,11 @@ export type JournalReportDailyNote = {
   endOfDayNotes: string | null;
 };
 
+export type LocalizedReportText = {
+  en: string;
+  fa: string;
+};
+
 export type JournalReportSummary = {
   totalTrades: number;
   openTrades: number;
@@ -103,9 +108,9 @@ export type JournalReport = {
   recentTrades: JournalReportTrade[];
   dailyNotes: JournalReportDailyNote[];
   insights: {
-    strengths: string[];
-    risks: string[];
-    actionPlan: string[];
+    strengths: LocalizedReportText[];
+    risks: LocalizedReportText[];
+    actionPlan: LocalizedReportText[];
   };
 };
 
@@ -121,7 +126,7 @@ export class ReportValidationError extends Error {
   errors: string[];
 
   constructor(errors: string[]) {
-    super("اعتبارسنجی گزارش ناموفق بود");
+    super("Validation failed");
     this.name = "ReportValidationError";
     this.errors = errors;
   }
@@ -277,19 +282,19 @@ export function normalizeJournalReportFilters(
   );
 
   if (!dateRange) {
-    errors.push("بازه زمانی باید یکی از گزینه‌های امروز، این هفته، این ماه، امسال، همه یا دلخواه باشد.");
+    errors.push("dateRange must be all, today, thisWeek, thisMonth, thisYear, or custom");
   }
 
   if (direction === null) {
-    errors.push("جهت معامله باید خرید یا فروش باشد.");
+    errors.push("direction must be BUY or SELL");
   }
 
   if (customDateFrom === null) {
-    errors.push("تاریخ شروع معتبر نیست.");
+    errors.push("dateFrom must be a valid date");
   }
 
   if (customDateTo === null) {
-    errors.push("تاریخ پایان معتبر نیست.");
+    errors.push("dateTo must be a valid date");
   }
 
   const presetRange = rangeFromPreset(dateRange || "thisMonth");
@@ -503,38 +508,92 @@ function buildInsights(
 
   const strengths = [
     summary.totalPnl > 0
-      ? `سود/زیان خالص در این بازه مثبت است: ${summary.totalPnl.toLocaleString("en-US")}.`
-      : "این گزارش یک خط پایه شفاف برای بازه انتخاب‌شده ایجاد می‌کند.",
+      ? {
+          en: `Net PnL is positive at ${summary.totalPnl.toLocaleString("en-US")}.`,
+          fa: `سود/زیان خالص در این بازه مثبت است: ${summary.totalPnl.toLocaleString("en-US")}.`,
+        }
+      : {
+          en: "The report establishes a clear baseline for the selected period.",
+          fa: "این گزارش یک خط پایه شفاف برای بازه انتخاب‌شده ایجاد می‌کند.",
+        },
     bestSymbol
-      ? `${bestSymbol.symbol} قوی‌ترین نماد بوده و ${bestSymbol.netPnl.toLocaleString("en-US")} سود/زیان خالص داشته است.`
-      : "هنوز مزیت مشخصی در هیچ نمادی دیده نمی‌شود.",
+      ? {
+          en: `${bestSymbol.symbol} is the strongest symbol with ${bestSymbol.netPnl.toLocaleString("en-US")} net PnL.`,
+          fa: `${bestSymbol.symbol} قوی‌ترین نماد بوده و ${bestSymbol.netPnl.toLocaleString("en-US")} سود/زیان خالص داشته است.`,
+        }
+      : {
+          en: "No symbol edge is visible yet.",
+          fa: "هنوز مزیت مشخصی در هیچ نمادی دیده نمی‌شود.",
+        },
     bestStrategy
-      ? `${bestStrategy.strategy} قوی‌ترین ستاپ بوده و نرخ برد آن ${bestStrategy.winRate}% است.`
-      : "داده‌های استراتژی هنوز برای نتیجه‌گیری کامل کافی نیست.",
+      ? {
+          en: `${bestStrategy.strategy} is the strongest setup with ${bestStrategy.winRate}% win rate.`,
+          fa: `${bestStrategy.strategy} قوی‌ترین ستاپ بوده و نرخ برد آن ${bestStrategy.winRate}% است.`,
+        }
+      : {
+          en: "Strategy data is not complete enough yet.",
+          fa: "داده‌های استراتژی هنوز برای نتیجه‌گیری کامل کافی نیست.",
+        },
   ];
 
   const risks = [
     summary.profitFactor !== null && summary.profitFactor < 1
-      ? `فاکتور سود ${summary.profitFactor} است؛ زیان‌ها از سودها سنگین‌تر هستند.`
-      : "با بیشتر شدن تعداد معاملات، فاکتور سود را همچنان زیر نظر بگیر.",
+      ? {
+          en: `Profit factor is ${summary.profitFactor}; losses are outweighing wins.`,
+          fa: `فاکتور سود ${summary.profitFactor} است؛ زیان‌ها از سودها سنگین‌تر هستند.`,
+        }
+      : {
+          en: "Keep monitoring profit factor as trade count grows.",
+          fa: "با بیشتر شدن تعداد معاملات، فاکتور سود را همچنان زیر نظر بگیر.",
+        },
     worstSymbol
-      ? `${worstSymbol.symbol} ضعیف‌ترین نماد بوده و ${worstSymbol.netPnl.toLocaleString("en-US")} سود/زیان خالص داشته است.`
-      : "هنوز نماد ضعیف مشخصی دیده نمی‌شود.",
+      ? {
+          en: `${worstSymbol.symbol} is the weakest symbol with ${worstSymbol.netPnl.toLocaleString("en-US")} net PnL.`,
+          fa: `${worstSymbol.symbol} ضعیف‌ترین نماد بوده و ${worstSymbol.netPnl.toLocaleString("en-US")} سود/زیان خالص داشته است.`,
+        }
+      : {
+          en: "No weak symbol is visible yet.",
+          fa: "هنوز نماد ضعیف مشخصی دیده نمی‌شود.",
+        },
     worstMistake
-      ? `${worstMistake.label} پرهزینه‌ترین اشتباه تکراری بوده است.`
-      : "تگ‌گذاری اشتباهات کامل نیست، بنابراین خواندن ریسک رفتاری سخت‌تر است.",
+      ? {
+          en: `${worstMistake.label} is the most expensive repeated mistake.`,
+          fa: `${worstMistake.label} پرهزینه‌ترین اشتباه تکراری بوده است.`,
+        }
+      : {
+          en: "Mistake tagging is incomplete, so behavior risk is harder to read.",
+          fa: "تگ‌گذاری اشتباهات کامل نیست، بنابراین خواندن ریسک رفتاری سخت‌تر است.",
+        },
   ];
 
   const actionPlan = [
     averageCompliance !== null && averageCompliance < 80
-      ? `قبل از افزایش حجم، پایبندی به پلی‌بوک را از ${averageCompliance}% به بالای 80% برسان.`
-      : "حجم معاملات را ثابت نگه دار و رفتارهایی را که نتیجه داده‌اند حفظ کن.",
+      ? {
+          en: `Raise playbook compliance from ${averageCompliance}% toward 80%+ before increasing size.`,
+          fa: `قبل از افزایش حجم، پایبندی به پلی‌بوک را از ${averageCompliance}% به بالای 80% برسان.`,
+        }
+      : {
+          en: "Keep position sizing stable and protect the behaviors that are already working.",
+          fa: "حجم معاملات را ثابت نگه دار و رفتارهایی را که نتیجه داده‌اند حفظ کن.",
+        },
     weakestHour
-      ? `معاملات حوالی ${weakestHour.label} را بازبینی کن؛ این بازه زمانی ${weakestHour.netPnl.toLocaleString("en-US")} سود/زیان خالص ساخته است.`
-      : "سشن‌ها و ساعت معاملات را منظم تگ کن تا تحلیل زمانی دقیق‌تر شود.",
+      ? {
+          en: `Review trades around ${weakestHour.label}; this time block produced ${weakestHour.netPnl.toLocaleString("en-US")} net PnL.`,
+          fa: `معاملات حوالی ${weakestHour.label} را بازبینی کن؛ این بازه زمانی ${weakestHour.netPnl.toLocaleString("en-US")} سود/زیان خالص ساخته است.`,
+        }
+      : {
+          en: "Tag sessions and trading hours consistently for sharper timing analysis.",
+          fa: "سشن‌ها و ساعت معاملات را منظم تگ کن تا تحلیل زمانی دقیق‌تر شود.",
+        },
     latestPlan
-      ? compactText(latestPlan.improvementPlan || latestPlan.tomorrowPlan, "برای جلسه بعدی یک قانون بهبود واضح بنویس.")
-      : "آخر روز یک یادداشت بهبود ثبت کن تا گزارش بعدی برنامه اجرایی مشخص‌تری داشته باشد.",
+      ? {
+          en: compactText(latestPlan.improvementPlan || latestPlan.tomorrowPlan, "Write one clear improvement rule for the next session."),
+          fa: compactText(latestPlan.improvementPlan || latestPlan.tomorrowPlan, "برای جلسه بعدی یک قانون بهبود واضح بنویس."),
+        }
+      : {
+          en: "Add an end-of-day improvement note so the next report can include a concrete execution plan.",
+          fa: "آخر روز یک یادداشت بهبود ثبت کن تا گزارش بعدی برنامه اجرایی مشخص‌تری داشته باشد.",
+        },
   ];
 
   return { strengths, risks, actionPlan };
@@ -563,28 +622,51 @@ function escapeCsv(value: unknown) {
   return /[",\n\r]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
 }
 
-export function journalReportToCsv(report: JournalReport) {
-  const headers = [
-    "زمان ورود",
-    "زمان خروج",
-    "حساب",
-    "نماد",
-    "جهت",
-    "وضعیت",
-    "سود/زیان",
-    "RR",
-    "ستاپ",
-    "سشن",
-    "احساس",
-    "اشتباه",
-    "تگ‌ها",
-    "استراتژی",
-    "پایبندی به پلن",
-    "درصد پایبندی",
-    "درصد چک‌لیست",
-    "امتیاز",
-    "دلیل خروج",
-  ];
+export function journalReportToCsv(report: JournalReport, language: "en" | "fa" = "en") {
+  const headers =
+    language === "fa"
+      ? [
+          "زمان ورود",
+          "زمان خروج",
+          "حساب",
+          "نماد",
+          "جهت",
+          "وضعیت",
+          "سود/زیان",
+          "RR",
+          "ستاپ",
+          "سشن",
+          "احساس",
+          "اشتباه",
+          "تگ‌ها",
+          "استراتژی",
+          "پایبندی به پلن",
+          "درصد پایبندی",
+          "درصد چک‌لیست",
+          "امتیاز",
+          "دلیل خروج",
+        ]
+      : [
+          "Opened At",
+          "Closed At",
+          "Account",
+          "Symbol",
+          "Direction",
+          "Status",
+          "PnL",
+          "RR",
+          "Setup",
+          "Session",
+          "Emotion",
+          "Mistake",
+          "Tags",
+          "Strategy",
+          "Followed Plan",
+          "Compliance %",
+          "Checklist %",
+          "Rating",
+          "Exit Reason",
+        ];
   const rows = report.recentTrades.map((trade) => [
     trade.openedAt,
     trade.closedAt,
