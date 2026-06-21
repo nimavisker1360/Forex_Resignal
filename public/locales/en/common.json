@@ -328,7 +328,8 @@
       "subtitle": "Trading operations dashboard",
       "theme": "Dashboard theme",
       "light": "Light",
-      "dark": "Dark"
+      "dark": "Dark",
+      "downloadMt5Bot": "Download MT5 Bot"
     },
     "auth": {
       "signOut": "Sign out",

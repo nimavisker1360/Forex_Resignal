@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import {
   BarChart3,
@@ -17,6 +18,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { useLanguage } from "@/lib/language-context";
+import { cn } from "@/lib/utils";
 
 const sidebarItems = [
   { labelKey: "dashboard.nav.dashboard", href: "/dashboard", icon: Gauge },
@@ -37,6 +39,7 @@ export function JournalShell({
 }: {
   children: ReactNode;
 }) {
+  const pathname = usePathname();
   const { language, t } = useLanguage();
 
   return (
@@ -57,14 +60,24 @@ export function JournalShell({
             <nav className="flex gap-2 overflow-x-auto px-4 py-4 lg:flex-1 lg:flex-col lg:overflow-visible">
               {sidebarItems.map((item) => {
                 const Icon = item.icon;
+                const isActive =
+                  item.href === "/dashboard" || item.href === "/journal"
+                    ? pathname === item.href
+                    : pathname === item.href || pathname.startsWith(`${item.href}/`);
 
                 return (
                   <Link
                     key={item.href}
                     href={item.href}
-                    className="inline-flex h-10 shrink-0 items-center gap-3 rounded-xl px-3 text-sm font-medium text-slate-300 transition hover:bg-slate-800 hover:text-white lg:w-full"
+                    aria-current={isActive ? "page" : undefined}
+                    className={cn(
+                      "inline-flex h-10 shrink-0 items-center gap-3 rounded-xl px-3 text-sm font-medium transition lg:w-full",
+                      isActive
+                        ? "bg-blue-600/15 text-blue-100 ring-1 ring-blue-500/30"
+                        : "text-slate-300 hover:bg-slate-800 hover:text-white"
+                    )}
                   >
-                    <Icon className="h-4 w-4 text-slate-400" />
+                    <Icon className={cn("h-4 w-4", isActive ? "text-blue-300" : "text-slate-400")} />
                     {t(item.labelKey)}
                   </Link>
                 );

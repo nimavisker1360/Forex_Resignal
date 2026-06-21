@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
@@ -8,6 +9,7 @@ import {
   BookOpenCheck,
   BriefcaseBusiness,
   CalendarDays,
+  Download,
   ExternalLink,
   FileText,
   Gauge,
@@ -27,6 +29,7 @@ import { cn } from "@/lib/utils";
 type DashboardTheme = "dark" | "light";
 
 const THEME_STORAGE_KEY = "signalmax-dashboard-theme";
+const MT5_BOT_DOWNLOAD_URL = "/api/downloads/trade-journal-recorder";
 
 const sidebarItems = [
   { labelKey: "dashboard.nav.dashboard", href: "/dashboard", icon: Gauge },
@@ -44,7 +47,13 @@ const sidebarItems = [
 
 export function DashboardShell({ children, showAdmin = false }: { children: ReactNode; showAdmin?: boolean }) {
   const [theme, setTheme] = useState<DashboardTheme>("dark");
+  const pathname = usePathname();
   const { language, t } = useLanguage();
+  const translatedDownloadBotLabel = t("dashboard.shell.downloadMt5Bot");
+  const downloadBotLabel =
+    translatedDownloadBotLabel === "dashboard.shell.downloadMt5Bot"
+      ? "Download MT5 Bot"
+      : translatedDownloadBotLabel;
 
   const applyTheme = useCallback((nextTheme: DashboardTheme) => {
     setTheme(nextTheme);
@@ -110,19 +119,41 @@ export function DashboardShell({ children, showAdmin = false }: { children: Reac
             <nav className="flex gap-2 overflow-x-auto px-4 py-4 lg:flex-1 lg:flex-col lg:overflow-visible">
               {[...sidebarItems, ...(showAdmin ? [{ labelKey: "dashboard.nav.admin", href: "/admin/dashboard", icon: ShieldCheck }] : [])].map((item) => {
                 const Icon = item.icon;
+                const isActive =
+                  item.href === "/"
+                    ? pathname === item.href
+                    : item.href === "/dashboard"
+                      ? pathname === item.href
+                      : pathname === item.href || pathname.startsWith(`${item.href}/`);
 
                 return (
                   <Link
                     key={item.href}
                     href={item.href}
+                    aria-current={isActive ? "page" : undefined}
                     className={cn(
                       "inline-flex h-10 shrink-0 items-center gap-3 rounded-xl px-3 text-sm font-medium transition lg:w-full",
-                      isDark
+                      isActive
+                        ? isDark
+                          ? "bg-blue-600/15 text-blue-100 ring-1 ring-blue-500/30"
+                          : "bg-blue-50 text-blue-700 ring-1 ring-blue-200"
+                        : isDark
                         ? "text-slate-300 hover:bg-slate-800 hover:text-white"
                         : "text-slate-700 hover:bg-slate-100 hover:text-slate-950"
                     )}
                   >
-                    <Icon className={cn("h-4 w-4", isDark ? "text-slate-400" : "text-slate-500")} />
+                    <Icon
+                      className={cn(
+                        "h-4 w-4",
+                        isActive
+                          ? isDark
+                            ? "text-blue-300"
+                            : "text-blue-700"
+                          : isDark
+                            ? "text-slate-400"
+                            : "text-slate-500"
+                      )}
+                    />
                     {t(item.labelKey)}
                   </Link>
                 );
@@ -150,6 +181,19 @@ export function DashboardShell({ children, showAdmin = false }: { children: Reac
               </div>
 
               <div className="flex shrink-0 items-center gap-3">
+                <a
+                  href={MT5_BOT_DOWNLOAD_URL}
+                  className={cn(
+                    "inline-flex h-9 items-center gap-2 rounded-xl border px-3 text-xs font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400",
+                    isDark
+                      ? "border-blue-500/40 bg-blue-600 text-white hover:bg-blue-500"
+                      : "border-blue-600 bg-blue-600 text-white hover:bg-blue-700"
+                  )}
+                >
+                  <Download className="h-4 w-4" />
+                  <span className="hidden sm:inline">{downloadBotLabel}</span>
+                  <span className="sm:hidden">MT5</span>
+                </a>
                 <LanguageSwitcher />
                 <div
                   className={cn(
