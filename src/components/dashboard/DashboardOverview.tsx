@@ -2,20 +2,32 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { Activity, BriefcaseBusiness, CalendarDays, CircleDollarSign, Percent } from "lucide-react";
+import {
+  Activity,
+  BriefcaseBusiness,
+  CalendarDays,
+  CircleDollarSign,
+  ClipboardCheck,
+  Percent,
+} from "lucide-react";
 import { PnlText } from "@/components/dashboard/PnlText";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { useLanguage } from "@/lib/language-context";
+import { TradeDirectionBadge } from "@/components/dashboard/TradeDirectionBadge";
 import { TradeTable } from "@/components/dashboard/TradeTable";
+import { TradeReadinessGuide } from "@/components/dashboard/TradeReadinessGuide";
 import {
   DEFAULT_DASHBOARD_USER_ID,
   type ApiResult,
   type DashboardOverviewData,
   type DashboardOverviewStats,
+  formatDate,
   formatMoney,
+  formatNumber,
   type TradeDto,
   type TradingAccountDto,
 } from "@/components/dashboard/types";
+import { cn } from "@/lib/utils";
 
 const DASHBOARD_REFRESH_INTERVAL_MS = 15000;
 
@@ -48,6 +60,29 @@ const highImpactWidgetText = {
   },
 };
 
+const dashboardModeText = {
+  en: {
+    simple: "Simple",
+    pro: "Pro",
+    simpleHint: "Simple mode keeps only the decision flow and the most important numbers visible.",
+    recentSummary: "Recent trade summary",
+    viewFullTable: "Switch to Pro mode to see the full table.",
+    noTrades: "No recent trades yet.",
+    review: "Review",
+    waitingReview: "Waiting Review",
+  },
+  fa: {
+    simple: "ساده",
+    pro: "حرفه‌ای",
+    simpleHint: "حالت ساده فقط مسیر تصمیم‌گیری و عددهای مهم را نشان می‌دهد.",
+    recentSummary: "خلاصه معاملات اخیر",
+    viewFullTable: "برای دیدن جدول کامل، حالت حرفه‌ای را فعال کن.",
+    noTrades: "هنوز معامله اخیری وجود ندارد.",
+    review: "بررسی",
+    waitingReview: "در انتظار بررسی",
+  },
+} as const;
+
 function formatEventDistance(eventTime: string, language: "en" | "fa") {
   const minutes = Math.max(0, Math.round((new Date(eventTime).getTime() - Date.now()) / 60000));
   const labels = highImpactWidgetText[language];
@@ -58,6 +93,74 @@ function formatEventDistance(eventTime: string, language: "en" | "fa") {
 
   const hours = Math.round(minutes / 60);
   return labels.hours(hours);
+}
+
+function RecentTradeSummary({
+  trades,
+  labels,
+  isRtl,
+}: {
+  trades: TradeDto[];
+  labels: typeof dashboardModeText.en | typeof dashboardModeText.fa;
+  isRtl: boolean;
+}) {
+  return (
+    <div className={cn("rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-[#0F172A]", isRtl && "text-right")}>
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h2 className="text-lg font-semibold text-slate-950 dark:text-white">
+            {labels.recentSummary}
+          </h2>
+          <p className="text-sm text-slate-500 dark:text-slate-400">
+            {labels.viewFullTable}
+          </p>
+        </div>
+      </div>
+
+      {trades.length === 0 ? (
+        <div className="mt-4 rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-8 text-center text-sm text-slate-500 dark:border-slate-800 dark:bg-[#111827] dark:text-slate-400">
+          {labels.noTrades}
+        </div>
+      ) : (
+        <div className="mt-4 grid gap-3 lg:grid-cols-3">
+          {trades.slice(0, 3).map((trade) => (
+            <Link
+              key={trade.id}
+              href={`/journal/${trade.id}`}
+              className="rounded-xl border border-slate-200 bg-slate-50 p-4 transition hover:bg-slate-100 dark:border-slate-800 dark:bg-[#111827] dark:hover:bg-slate-800"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="truncate text-base font-semibold text-slate-950 dark:text-white">
+                    {trade.symbol}
+                  </div>
+                  <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                    {formatDate(trade.openedAt)}
+                  </div>
+                </div>
+                <TradeDirectionBadge direction={trade.direction} />
+              </div>
+              <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
+                <div>
+                  <div className="text-xs text-slate-500 dark:text-slate-400">PnL</div>
+                  <PnlText value={trade.profitLoss} currency={trade.account?.currency || "USD"} />
+                </div>
+                <div>
+                  <div className="text-xs text-slate-500 dark:text-slate-400">R:R</div>
+                  <div className="font-semibold text-slate-950 dark:text-white">
+                    {formatNumber(trade.rr, 2)}
+                  </div>
+                </div>
+              </div>
+              <div className="mt-4 inline-flex rounded-lg border border-blue-500/30 px-2.5 py-1 text-xs font-semibold text-blue-600 dark:text-blue-300">
+                {labels.review}
+              </div>
+            </Link>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }
 
 export function DashboardOverview({
@@ -78,15 +181,27 @@ export function DashboardOverview({
   const [stats, setStats] = useState(initialStats);
   const [highImpactEvents, setHighImpactEvents] = useState<EconomicEventDto[]>([]);
   const [eventsLoaded, setEventsLoaded] = useState(false);
+  const [simpleMode, setSimpleMode] = useState(true);
   const isRefreshingRef = useRef(false);
   const { language, t } = useLanguage();
   const eventLabels = highImpactWidgetText[language];
+  const modeLabels = dashboardModeText[language];
+  const isRtl = language === "fa";
 
   useEffect(() => {
     setAccounts(initialAccounts);
     setTrades(initialTrades);
     setStats(initialStats);
   }, [initialAccounts, initialStats, initialTrades]);
+
+  useEffect(() => {
+    const savedMode = window.localStorage.getItem("dashboard-mode");
+    setSimpleMode(savedMode !== "pro");
+  }, []);
+
+  useEffect(() => {
+    window.localStorage.setItem("dashboard-mode", simpleMode ? "simple" : "pro");
+  }, [simpleMode]);
 
   const refreshTrades = useCallback(async (signal?: AbortSignal) => {
     if (!userId || isRefreshingRef.current) {
@@ -195,41 +310,109 @@ export function DashboardOverview({
             {t("dashboard.overview.subtitle")}
           </p>
         </div>
+        <div className="flex flex-col gap-2 sm:items-end">
+          <div className="inline-flex rounded-xl border border-slate-200 bg-white p-1 shadow-sm dark:border-slate-800 dark:bg-[#0F172A]">
+            <button
+              type="button"
+              onClick={() => setSimpleMode(true)}
+              className={cn(
+                "h-9 rounded-lg px-4 text-sm font-semibold transition",
+                simpleMode
+                  ? "bg-blue-600 text-white"
+                  : "text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
+              )}
+            >
+              {modeLabels.simple}
+            </button>
+            <button
+              type="button"
+              onClick={() => setSimpleMode(false)}
+              className={cn(
+                "h-9 rounded-lg px-4 text-sm font-semibold transition",
+                !simpleMode
+                  ? "bg-blue-600 text-white"
+                  : "text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
+              )}
+            >
+              {modeLabels.pro}
+            </button>
+          </div>
+          <p className="max-w-sm text-xs text-slate-500 dark:text-slate-400">
+            {modeLabels.simpleHint}
+          </p>
+        </div>
       </div>
 
-      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
-        <StatCard
-          label={t("dashboard.overview.totalAccounts")}
-          value={String(accounts.length)}
-          icon={<BriefcaseBusiness className="h-4 w-4" />}
-          tone="blue"
-        />
-        <StatCard
-          label={t("dashboard.overview.totalTrades")}
-          value={String(stats.totalTrades)}
-          icon={<Activity className="h-4 w-4" />}
-        />
-        <StatCard
-          label={t("dashboard.overview.totalPnl")}
-          value={formatMoney(stats.totalPnl)}
-          icon={<CircleDollarSign className="h-4 w-4" />}
-          tone={stats.totalPnl >= 0 ? "green" : "red"}
-        />
-        <StatCard
-          label={t("dashboard.overview.winRate")}
-          value={`${stats.winRate}%`}
-          icon={<Percent className="h-4 w-4" />}
-          tone="green"
-        />
-        <StatCard
-          label={t("dashboard.overview.openTrades")}
-          value={String(stats.openTrades)}
-          icon={<Activity className="h-4 w-4" />}
-          tone="blue"
-        />
-      </div>
+      <TradeReadinessGuide
+        recentTrades={trades}
+        openTrades={stats.openTrades}
+        notReviewedTrades={stats.notReviewedTrades}
+        highImpactEventCount={highImpactEvents.length}
+        eventsLoaded={eventsLoaded}
+      />
 
-      {stats.notReviewedTrades > 0 ? (
+      {simpleMode ? (
+        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+          <StatCard
+            label={t("dashboard.overview.totalPnl")}
+            value={formatMoney(stats.totalPnl)}
+            icon={<CircleDollarSign className="h-4 w-4" />}
+            tone={stats.totalPnl >= 0 ? "green" : "red"}
+          />
+          <StatCard
+            label={t("dashboard.overview.openTrades")}
+            value={String(stats.openTrades)}
+            icon={<Activity className="h-4 w-4" />}
+            tone="blue"
+          />
+          <StatCard
+            label={t("dashboard.overview.winRate")}
+            value={`${stats.winRate}%`}
+            icon={<Percent className="h-4 w-4" />}
+            tone="green"
+          />
+          <StatCard
+            label={modeLabels.waitingReview}
+            value={String(stats.notReviewedTrades)}
+            icon={<ClipboardCheck className="h-4 w-4" />}
+            tone={stats.notReviewedTrades > 0 ? "red" : "green"}
+          />
+        </div>
+      ) : (
+        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
+          <StatCard
+            label={t("dashboard.overview.totalAccounts")}
+            value={String(accounts.length)}
+            icon={<BriefcaseBusiness className="h-4 w-4" />}
+            tone="blue"
+          />
+          <StatCard
+            label={t("dashboard.overview.totalTrades")}
+            value={String(stats.totalTrades)}
+            icon={<Activity className="h-4 w-4" />}
+          />
+          <StatCard
+            label={t("dashboard.overview.totalPnl")}
+            value={formatMoney(stats.totalPnl)}
+            icon={<CircleDollarSign className="h-4 w-4" />}
+            tone={stats.totalPnl >= 0 ? "green" : "red"}
+          />
+          <StatCard
+            label={t("dashboard.overview.winRate")}
+            value={`${stats.winRate}%`}
+            icon={<Percent className="h-4 w-4" />}
+            tone="green"
+          />
+          <StatCard
+            label={t("dashboard.overview.openTrades")}
+            value={String(stats.openTrades)}
+            icon={<Activity className="h-4 w-4" />}
+            tone="blue"
+          />
+        </div>
+      )}
+
+      {!simpleMode && stats.notReviewedTrades > 0 ? (
         <div className="flex flex-col gap-3 rounded-xl border border-blue-500/30 bg-blue-500/10 p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
           <div className="text-sm font-medium text-blue-950 dark:text-blue-100">
             You have {stats.notReviewedTrades} trades waiting for review.
@@ -243,6 +426,7 @@ export function DashboardOverview({
         </div>
       ) : null}
 
+      {!simpleMode ? (
       <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-[#0F172A]">
         <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
           <div>
@@ -287,7 +471,9 @@ export function DashboardOverview({
           )}
         </div>
       </div>
+      ) : null}
 
+      {!simpleMode ? (
       <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-[#0F172A]">
         <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
           <div>
@@ -301,8 +487,13 @@ export function DashboardOverview({
           <PnlText value={stats.totalPnl} />
         </div>
       </div>
+      ) : null}
 
-      <TradeTable trades={trades} />
+      {simpleMode ? (
+        <RecentTradeSummary trades={trades} labels={modeLabels} isRtl={isRtl} />
+      ) : (
+        <TradeTable trades={trades} />
+      )}
     </div>
   );
 }

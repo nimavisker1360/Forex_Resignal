@@ -86,6 +86,8 @@ const emptyForm: JournalForm = {
   endOfDayNotes: "",
 };
 
+const formFieldKeys = Object.keys(emptyForm) as Array<keyof JournalForm>;
+
 const inputClass =
   "h-10 w-full rounded-lg border border-slate-800 bg-[#111827] px-3 text-sm text-[#E5E7EB] outline-none focus:border-blue-600";
 const textareaClass =
@@ -254,21 +256,19 @@ function formFromJournal(journal: DailyJournalRecord | null): JournalForm {
     return emptyForm;
   }
 
-  return {
-    ...emptyForm,
-    ...Object.fromEntries(
-      Object.entries(journal).map(([key, value]) => [
-        key,
-        typeof value === "number" ? String(value) : value ?? "",
-      ])
-    ),
-    respectedRisk: Boolean(journal.respectedRisk),
-    waitedForConfirmation: Boolean(journal.waitedForConfirmation),
-    avoidedRevengeTrading: Boolean(journal.avoidedRevengeTrading),
-    stoppedAfterDailyLimit: Boolean(journal.stoppedAfterDailyLimit),
-    followedPlaybook: Boolean(journal.followedPlaybook),
-    avoidedOvertrading: Boolean(journal.avoidedOvertrading),
-  } as JournalForm;
+  const nextForm = { ...emptyForm };
+
+  for (const key of formFieldKeys) {
+    const value = journal[key];
+
+    if (typeof emptyForm[key] === "boolean") {
+      nextForm[key] = Boolean(value) as never;
+    } else {
+      nextForm[key] = (typeof value === "number" ? String(value) : value ?? "") as never;
+    }
+  }
+
+  return nextForm;
 }
 
 function Field({
@@ -334,6 +334,7 @@ export default function DailyJournalPage() {
   const [playbooks, setPlaybooks] = useState<PlaybookOption[]>([]);
   const [accounts, setAccounts] = useState<AccountOption[]>([]);
   const [status, setStatus] = useState<SaveStatus>("loading");
+  const [saveError, setSaveError] = useState("");
   const [hydrated, setHydrated] = useState(false);
   const [dirty, setDirty] = useState(false);
   const latestSaveRef = useRef(0);
@@ -342,9 +343,9 @@ export default function DailyJournalPage() {
     if (status === "loading") return text.loading;
     if (status === "saving") return text.saving;
     if (status === "saved") return text.saved;
-    if (status === "error") return text.errorSaving;
+    if (status === "error") return saveError || text.errorSaving;
     return "";
-  }, [status, text]);
+  }, [saveError, status, text]);
 
   const updateUrl = useCallback(
     (nextDate: string, nextAccountId: string) => {
@@ -370,12 +371,13 @@ export default function DailyJournalPage() {
       const saveId = Date.now();
       latestSaveRef.current = saveId;
       setStatus("saving");
+      setSaveError("");
 
       try {
         const response = await fetch("/api/daily-journal", {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ date, ...nextForm }),
+          body: JSON.stringify({ ...nextForm, date }),
         });
         const data = (await response.json()) as { success: boolean; message?: string; errors?: string[] };
 
@@ -387,13 +389,14 @@ export default function DailyJournalPage() {
           setStatus("saved");
           setDirty(false);
         }
-      } catch {
+      } catch (error) {
         if (latestSaveRef.current === saveId) {
+          setSaveError(error instanceof Error ? error.message : text.errorSaving);
           setStatus("error");
         }
       }
     },
-    [date]
+    [date, text.errorSaving]
   );
 
   useEffect(() => {
@@ -460,6 +463,7 @@ export default function DailyJournalPage() {
 
         setForm(formFromJournal(data.journal));
         setPlaybooks(data.playbooks || []);
+        setSaveError("");
         setStatus("idle");
         setDirty(false);
         setHydrated(true);
