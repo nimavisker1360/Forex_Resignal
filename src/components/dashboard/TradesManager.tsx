@@ -1,8 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { FormEvent } from "react";
-import { Plus, Tag as TagIcon, Trash2 } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { Plus, Trash2 } from "lucide-react";
 import { TradeFilters, type TradeFilterValues } from "@/components/dashboard/TradeFilters";
 import { TradeForm } from "@/components/dashboard/TradeForm";
 import { TradeTable } from "@/components/dashboard/TradeTable";
@@ -21,9 +21,24 @@ const emptyFilters: TradeFilterValues = {
   symbol: "",
   direction: "",
   status: "",
+  reviewStatus: "",
   from: "",
   to: "",
 };
+
+function filtersFromSearchParams(searchParams: URLSearchParams): TradeFilterValues {
+  const date = searchParams.get("date") || "";
+
+  return {
+    accountId: searchParams.get("accountId") || "",
+    symbol: searchParams.get("symbol") || "",
+    direction: searchParams.get("direction") || "",
+    status: searchParams.get("status") || "",
+    reviewStatus: searchParams.get("reviewStatus") || "",
+    from: searchParams.get("from") || date,
+    to: searchParams.get("to") || date,
+  };
+}
 
 export function TradesManager({
   userId,
@@ -38,16 +53,20 @@ export function TradesManager({
 }) {
   // TODO: Replace temporary userId with the authenticated session user id.
   const activeUserId = userId || DEFAULT_DASHBOARD_USER_ID;
-  const [accounts, setAccounts] = useState<TradingAccountDto[]>(initialAccounts);
-  const [tags, setTags] = useState<TagDto[]>(initialTags);
+  const searchParams = useSearchParams();
+  const initialFilterValues = useMemo(
+    () => filtersFromSearchParams(searchParams),
+    [searchParams]
+  );
+  const [accounts] = useState<TradingAccountDto[]>(initialAccounts);
+  const [tags] = useState<TagDto[]>(initialTags);
   const [trades, setTrades] = useState<TradeDto[]>(initialTrades);
-  const [filters, setFilters] = useState(emptyFilters);
+  const [filters, setFilters] = useState(initialFilterValues);
   const [editingTrade, setEditingTrade] = useState<TradeDto | null>(null);
   const [defaultStatus, setDefaultStatus] = useState<"OPEN" | "CLOSED" | "CANCELLED">("OPEN");
   const [showForm, setShowForm] = useState(false);
   const [message, setMessage] = useState("");
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
-  const skippedInitialTradeLoad = useRef(false);
   const { t } = useLanguage();
 
   const query = useMemo(() => {
@@ -64,18 +83,6 @@ export function TradesManager({
     return params.toString();
   }, [activeUserId, filters]);
 
-  const loadReferenceData = useCallback(async () => {
-    const [accountsResponse, tagsResponse] = await Promise.all([
-      fetch(`/api/trading-accounts?userId=${encodeURIComponent(activeUserId)}`),
-      fetch(`/api/tags?userId=${encodeURIComponent(activeUserId)}`),
-    ]);
-    const accountsJson =
-      (await accountsResponse.json()) as ApiResult<TradingAccountDto[]>;
-    const tagsJson = (await tagsResponse.json()) as ApiResult<TagDto[]>;
-    setAccounts(accountsJson.data || []);
-    setTags(tagsJson.data || []);
-  }, [activeUserId]);
-
   const loadTrades = useCallback(async () => {
     const response = await fetch(`/api/trades?${query}`);
     const json = (await response.json()) as ApiResult<TradesListData>;
@@ -83,13 +90,16 @@ export function TradesManager({
   }, [query]);
 
   useEffect(() => {
-    if (!skippedInitialTradeLoad.current) {
-      skippedInitialTradeLoad.current = true;
-      return;
-    }
-
     loadTrades().catch(() => setMessage(t("dashboard.trades.loadFailed")));
   }, [loadTrades, t]);
+
+  useEffect(() => {
+    const nextFilters = filtersFromSearchParams(searchParams);
+
+    setFilters((current) =>
+      JSON.stringify(current) === JSON.stringify(nextFilters) ? current : nextFilters
+    );
+  }, [searchParams]);
 
   async function saveTrade(payload: Record<string, string | string[]>) {
     const isEditing = Boolean(editingTrade);
@@ -170,32 +180,6 @@ export function TradesManager({
     await loadTrades();
   }
 
-  async function createTag(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const formData = new FormData(event.currentTarget);
-    const name = String(formData.get("name") || "").trim();
-    const color = String(formData.get("color") || "#60a5fa");
-
-    if (!name) {
-      return;
-    }
-
-    const response = await fetch("/api/tags", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId: activeUserId, name, color }),
-    });
-    const json = (await response.json()) as ApiResult<TagDto>;
-
-    if (!json.success) {
-      setMessage(json.message || t("dashboard.trades.createTagFailed"));
-      return;
-    }
-
-    event.currentTarget.reset();
-    await loadReferenceData();
-  }
-
   return (
     <div className="space-y-5">
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
@@ -252,36 +236,6 @@ export function TradesManager({
           </div>
         }
       />
-
-      <form
-        onSubmit={createTag}
-        className="flex flex-col gap-2 rounded-xl border border-slate-800 bg-[#0F172A] p-4 shadow-sm md:flex-row md:items-end"
-      >
-        <label className="flex-1 space-y-1 text-xs font-medium uppercase text-slate-400">
-          {t("dashboard.trades.tagName")}
-          <input
-            name="name"
-            placeholder="Breakout"
-            className="h-11 w-full rounded-xl border border-slate-800 bg-[#111827] px-3 text-sm normal-case text-[#E5E7EB] outline-none focus:border-blue-600"
-          />
-        </label>
-        <label className="space-y-1 text-xs font-medium uppercase text-slate-400">
-          {t("dashboard.trades.color")}
-          <input
-            name="color"
-            type="color"
-            defaultValue="#60a5fa"
-            className="h-11 w-20 rounded-xl border border-slate-800 bg-[#111827] px-2"
-          />
-        </label>
-        <button
-          type="submit"
-          className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-slate-800 px-4 text-sm font-semibold text-slate-300 hover:bg-slate-800"
-        >
-          <TagIcon className="h-4 w-4" />
-          {t("dashboard.trades.addTag")}
-        </button>
-      </form>
 
       {showForm ? (
         <div className="rounded-xl border border-slate-800 bg-[#0F172A] p-5 shadow-sm">

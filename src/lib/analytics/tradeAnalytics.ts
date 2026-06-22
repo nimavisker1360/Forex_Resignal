@@ -22,6 +22,7 @@ export const analyticsTradeInclude = {
       tag: true,
     },
   },
+  strategyReview: true,
 } satisfies Prisma.TradeInclude;
 
 export type AnalyticsTrade = Prisma.TradeGetPayload<{
@@ -40,6 +41,8 @@ type NormalizedTrade = {
   session: string | null;
   emotion: string | null;
   mistake: string | null;
+  strategyName: string | null;
+  followedPlan: string | null;
   tags: string[];
 };
 
@@ -209,6 +212,8 @@ function normalizeTrade(trade: AnalyticsTrade): NormalizedTrade | null {
     session: trade.session,
     emotion: trade.emotion,
     mistake: trade.mistake,
+    strategyName: trade.strategyReview?.strategyNameSnapshot || null,
+    followedPlan: trade.strategyReview?.followedPlan || null,
     tags: trade.tags
       .map((tradeTag) => tradeTag.tag.name?.trim())
       .filter((tag): tag is string => Boolean(tag)),
@@ -249,6 +254,15 @@ function getSession(date: Date | null): SessionAnalyticsRow["session"] {
 }
 
 function getStrategy(trade: NormalizedTrade) {
+  const strategyName =
+    trade.followedPlan && trade.followedPlan !== "NOT_REVIEWED"
+      ? trade.strategyName?.trim()
+      : "";
+
+  if (strategyName) {
+    return strategyName;
+  }
+
   const session = trade.session?.trim();
 
   if (session) {

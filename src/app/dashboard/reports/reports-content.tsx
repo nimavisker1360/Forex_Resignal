@@ -89,8 +89,9 @@ const COPY = {
       symbol: "Symbol",
       side: "Side",
       pnl: "PnL",
-      setup: "Setup",
-      execution: "Execution",
+      playbook: "Playbook",
+      planCompliance: "Plan Compliance",
+      reviewStatus: "Review Status",
       plan: "plan",
     },
     notes: {
@@ -172,8 +173,9 @@ const COPY = {
       symbol: "نماد",
       side: "جهت",
       pnl: "سود/زیان",
-      setup: "ستاپ",
-      execution: "اجرا",
+      playbook: "پلی بوک",
+      planCompliance: "پایبندی به پلن",
+      reviewStatus: "وضعیت بررسی",
       plan: "پایبندی به پلن",
     },
     notes: {
@@ -441,7 +443,7 @@ function PlaybookPerformanceTable({ report, copy }: { report: JournalReport; cop
   const rows = report.analytics.byStrategy.slice(0, 8);
 
   if (rows.length === 0) {
-    return <EmptyLine label="No playbook performance yet." />;
+    return <EmptyLine label="No playbook performance yet. Assign playbooks during trade review." />;
   }
 
   return (
@@ -474,6 +476,22 @@ function PlaybookPerformanceTable({ report, copy }: { report: JournalReport; cop
   );
 }
 
+function reviewStatusLabel(followedPlan: string | null) {
+  if (!followedPlan || followedPlan === "NOT_REVIEWED") {
+    return "Not Reviewed";
+  }
+
+  return "Reviewed";
+}
+
+function planComplianceLabel(trade: JournalReport["recentTrades"][number]) {
+  if (!trade.followedPlan || trade.followedPlan === "NOT_REVIEWED" || trade.compliancePercent === null) {
+    return "-";
+  }
+
+  return formatPercent(trade.compliancePercent);
+}
+
 function RecentTradesTable({
   report,
   copy,
@@ -502,8 +520,9 @@ function RecentTradesTable({
             <th className="py-2 pr-4">{copy.trades.side}</th>
             <th className="py-2 pr-4">{copy.trades.pnl}</th>
             <th className="py-2 pr-4">RR</th>
-            <th className="py-2 pr-4">{copy.trades.setup}</th>
-            <th className="py-2">{copy.trades.execution}</th>
+            <th className="py-2 pr-4">{copy.trades.playbook}</th>
+            <th className="py-2 pr-4">{copy.trades.planCompliance}</th>
+            <th className="py-2">{copy.trades.reviewStatus}</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-slate-800 print:divide-slate-200">
@@ -516,10 +535,9 @@ function RecentTradesTable({
                 {formatMoney(trade.pnl)}
               </td>
               <td className="py-3 pr-4">{formatNumber(trade.rr, 2)}</td>
-              <td className="py-3 pr-4">{trade.setup || trade.strategyName || "-"}</td>
-              <td className="py-3">
-                {trade.compliancePercent !== null ? `${formatPercent(trade.compliancePercent)} ${copy.trades.plan}` : "-"}
-              </td>
+              <td className="py-3 pr-4">{trade.strategyName || trade.setup || "-"}</td>
+              <td className="py-3 pr-4">{planComplianceLabel(trade)}</td>
+              <td className="py-3">{reviewStatusLabel(trade.followedPlan)}</td>
             </tr>
           ))}
         </tbody>

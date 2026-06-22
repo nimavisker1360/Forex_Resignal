@@ -79,20 +79,16 @@ function badgeClass(kind: "status" | "side", value: string | null | undefined) {
 }
 
 function reviewStatus(strategyReview: { followedPlan?: string | null } | null | undefined) {
-  if (!strategyReview) {
+  if (!strategyReview || strategyReview.followedPlan === "NOT_REVIEWED") {
     return "Not Reviewed";
   }
 
-  return strategyReview.followedPlan === "NOT_REVIEWED" ? "Needs Review" : "Reviewed";
+  return "Reviewed";
 }
 
 function reviewStatusBadgeClass(value: string) {
   if (value === "Reviewed") {
     return "border-emerald-500/30 bg-emerald-500/10 text-emerald-300";
-  }
-
-  if (value === "Needs Review") {
-    return "border-amber-500/30 bg-amber-500/10 text-amber-300";
   }
 
   return "border-slate-700 bg-slate-900 text-slate-300";
@@ -372,7 +368,7 @@ export default async function JournalPage({ searchParams }: JournalPageProps) {
                     <StrategyComplianceBadge
                       percent={trade.strategyReview?.compliancePercent}
                       violatedRules={trade.strategyReview?.violatedRules || 0}
-                      reviewed={Boolean(trade.strategyReview)}
+                      reviewed={Boolean(trade.strategyReview && trade.strategyReview.followedPlan !== "NOT_REVIEWED")}
                     />
                   </td>
                   <td className="px-3 py-4">{formatNumber(trade.entryPrice, 5)}</td>

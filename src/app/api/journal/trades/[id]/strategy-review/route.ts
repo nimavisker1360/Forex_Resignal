@@ -133,7 +133,7 @@ export async function POST(request: Request, context: RouteContext) {
               ruleDescriptionSnapshot: item.description,
               ruleSectionSnapshot: "ENTRY",
               isRequiredSnapshot: item.isRequired,
-              status: "VIOLATED",
+              status: "NOT_REVIEWED",
               sortOrder: item.sortOrder ?? index,
             }))
           : strategy.rules.map((rule, index) => ({
@@ -142,15 +142,11 @@ export async function POST(request: Request, context: RouteContext) {
               ruleDescriptionSnapshot: rule.description,
               ruleSectionSnapshot: rule.section,
               isRequiredSnapshot: rule.isRequired,
-              status: "VIOLATED",
+              status: "NOT_REVIEWED",
               sortOrder: rule.sortOrder ?? index,
             }));
       const ruleSnapshots = planItems;
       const compliance = calculateStrategyCompliance(ruleSnapshots);
-      const autoFollowedPlan =
-        ruleSnapshots.length > 0
-          ? followedPlanFromCompliance(compliance.compliancePercent)
-          : followedPlan;
       const existing = await tx.tradeStrategyReview.findUnique({
         where: { tradeId: id },
         select: { id: true },
@@ -171,7 +167,7 @@ export async function POST(request: Request, context: RouteContext) {
           data: {
             strategyId: strategy.id,
             strategyNameSnapshot: strategy.name,
-            followedPlan: autoFollowedPlan,
+            followedPlan: "NOT_REVIEWED",
             notes: optionalString(body.notes),
             ...compliance,
             ruleReviews: {
@@ -187,7 +183,7 @@ export async function POST(request: Request, context: RouteContext) {
           tradeId: id,
           strategyId: strategy.id,
           strategyNameSnapshot: strategy.name,
-          followedPlan: autoFollowedPlan,
+          followedPlan: "NOT_REVIEWED",
           notes: optionalString(body.notes),
           ...compliance,
           ruleReviews: {

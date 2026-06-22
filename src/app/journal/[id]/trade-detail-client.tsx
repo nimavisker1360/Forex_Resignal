@@ -32,9 +32,9 @@ type TradeDetailClientProps = {
 };
 
 const inputClass =
-  "h-10 w-full rounded-lg border border-slate-800 bg-[#111827] px-3 text-sm normal-case text-[#E5E7EB] outline-none focus:border-blue-600";
+  "h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm normal-case text-slate-950 outline-none transition focus:border-blue-500 dark:border-slate-800 dark:bg-[#111827] dark:text-[#E5E7EB]";
 const textareaClass =
-  "w-full rounded-lg border border-slate-800 bg-[#111827] px-3 py-2 text-sm normal-case text-[#E5E7EB] outline-none focus:border-blue-600";
+  "w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm normal-case text-slate-950 outline-none transition focus:border-blue-500 dark:border-slate-800 dark:bg-[#111827] dark:text-[#E5E7EB]";
 
 function toDisplay(value: string | number | null | undefined) {
   if (value === null || value === undefined || value === "") {
@@ -108,7 +108,7 @@ function Field({
   children: React.ReactNode;
 }) {
   return (
-    <label className="space-y-1 text-xs font-medium uppercase text-slate-400">
+    <label className="space-y-1 text-xs font-medium uppercase text-slate-500 dark:text-slate-400">
       {label}
       {children}
     </label>
@@ -119,15 +119,17 @@ function Section({
   title,
   children,
   actions,
+  rtl = false,
 }: {
   title: string;
   children: React.ReactNode;
   actions?: React.ReactNode;
+  rtl?: boolean;
 }) {
   return (
-    <section className="rounded-lg border border-slate-800 bg-[#0F172A] p-5 shadow-sm">
+    <section className={cn("rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-[#0F172A]", rtl && "text-right")}>
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <h2 className="text-lg font-semibold text-white">{title}</h2>
+        <h2 className="text-lg font-semibold text-slate-950 dark:text-white">{title}</h2>
         {actions}
       </div>
       {children}
@@ -145,9 +147,9 @@ function Metric({
   className?: string;
 }) {
   return (
-    <div className="min-w-0 rounded-lg border border-slate-800 bg-[#111827] p-3">
-      <div className="text-xs font-medium uppercase text-slate-400">{label}</div>
-      <div className={cn("mt-1 truncate text-sm font-semibold text-white", className)}>
+    <div className="min-w-0 rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-[#111827]">
+      <div className="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">{label}</div>
+      <div className={cn("mt-1 truncate text-sm font-semibold text-slate-950 dark:text-white", className)}>
         {value}
       </div>
     </div>
@@ -181,7 +183,8 @@ export function TradeDetailClient({
   accounts,
 }: TradeDetailClientProps) {
   const router = useRouter();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const isRtl = language === "fa";
   const [trade, setTrade] = useState(initialTrade);
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -432,17 +435,17 @@ export function TradeDetailClient({
     <div className="space-y-5">
       <Link
         href="/journal"
-        className="inline-flex items-center gap-2 text-sm text-gray-300 hover:text-white"
+        className="inline-flex items-center gap-2 text-sm text-slate-600 hover:text-slate-950 dark:text-gray-300 dark:hover:text-white"
       >
         <ArrowLeft className="h-4 w-4" />
         {t("journal.tradeDetail.backToTrades")}
       </Link>
 
-      <div className="rounded-lg border border-slate-800 bg-[#0F172A] p-5 shadow-sm">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-          <div>
+      <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-[#0F172A]">
+        <div className={cn("flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between", isRtl && "text-right")}>
+          <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <h1 className="text-2xl font-semibold text-white">{trade.symbol}</h1>
+              <h1 className="text-2xl font-semibold text-slate-950 dark:text-white">{trade.symbol}</h1>
               <span
                 className={cn(
                   "inline-flex items-center gap-1 rounded-lg border px-2.5 py-1 text-xs font-semibold",
@@ -465,7 +468,7 @@ export function TradeDetailClient({
                 {statusLabel(trade.status)}
               </span>
             </div>
-            <p className="mt-2 text-sm text-slate-400">
+            <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
               {account?.name || trade.accountId} / {account?.broker || "-"} /{" "}
               {account?.platform || "-"}
             </p>
@@ -475,7 +478,7 @@ export function TradeDetailClient({
             <button
               type="button"
               onClick={() => setEditing((value) => !value)}
-              className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-slate-800 px-4 text-sm font-semibold text-slate-300 hover:bg-slate-800"
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 px-4 text-sm font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:text-slate-300 dark:hover:bg-slate-800"
             >
               {editing ? <X className="h-4 w-4" /> : <Edit3 className="h-4 w-4" />}
               {editing ? t("journal.tradeDetail.cancel") : t("journal.tradeDetail.edit")}
@@ -495,6 +498,7 @@ export function TradeDetailClient({
       {editing ? (
         <Section
           title={t("journal.tradeDetail.editTrade")}
+          rtl={isRtl}
           actions={
             <button
               type="submit"
@@ -650,7 +654,7 @@ export function TradeDetailClient({
         </Section>
       ) : null}
 
-      <Section title={t("journal.tradeDetail.tradeOverview")}>
+      <Section title={t("journal.tradeDetail.tradeOverview")} rtl={isRtl}>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <Metric label={t("journal.tradeDetail.symbol")} value={trade.symbol} />
           <Metric label={t("journal.tradeDetail.directionSide")} value={directionLabel(trade.direction)} />
@@ -674,28 +678,28 @@ export function TradeDetailClient({
       </Section>
 
       <div className="grid gap-5 xl:grid-cols-[1.4fr_1fr]">
-        <Section title={t("journal.tradeDetail.tradeReview")}>
+        <Section title={t("journal.tradeDetail.tradeReview")} rtl={isRtl}>
           <div className="grid gap-3 md:grid-cols-2">
             <Metric label={t("journal.tradeDetail.strategy")} value={toDisplay(trade.strategy || trade.session)} />
             <Metric label={t("journal.tradeDetail.setup")} value={toDisplay(trade.setup)} />
             <Metric label={t("journal.tradeDetail.mistakes")} value={toDisplay(trade.mistakes || trade.mistake)} />
             <Metric label={t("journal.tradeDetail.emotionPsychologyState")} value={toDisplay(trade.emotion)} />
           </div>
-          <div className="mt-3 rounded-lg border border-slate-800 bg-[#111827] p-3">
-            <div className="text-xs font-medium uppercase text-slate-400">{t("journal.tradeDetail.notes")}</div>
-            <p className="mt-2 whitespace-pre-wrap text-sm text-slate-200">
+          <div className="mt-3 rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-[#111827]">
+            <div className="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">{t("journal.tradeDetail.notes")}</div>
+            <p className="mt-2 whitespace-pre-wrap text-sm text-slate-700 dark:text-slate-200">
               {trade.notes || "-"}
             </p>
           </div>
         </Section>
 
-        <Section title={t("journal.tradeDetail.psychology")}>
+        <Section title={t("journal.tradeDetail.psychology")} rtl={isRtl}>
           <div className="grid gap-3">
             <Metric label={t("journal.tradeDetail.emotion")} value={toDisplay(trade.emotion)} />
             <Metric label={t("journal.tradeDetail.mistakeType")} value={toDisplay(trade.mistakes || trade.mistake)} />
-            <div className="rounded-lg border border-slate-800 bg-[#111827] p-3">
-              <div className="text-xs font-medium uppercase text-slate-400">{t("journal.tradeDetail.psychologyNotes")}</div>
-              <p className="mt-2 whitespace-pre-wrap text-sm text-slate-200">
+            <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-[#111827]">
+              <div className="text-xs font-medium uppercase text-slate-500 dark:text-slate-400">{t("journal.tradeDetail.psychologyNotes")}</div>
+              <p className="mt-2 whitespace-pre-wrap text-sm text-slate-700 dark:text-slate-200">
                 {trade.notes || "-"}
               </p>
             </div>
@@ -707,11 +711,11 @@ export function TradeDetailClient({
 
       <TradeStrategyReviewPanel tradeId={trade.id} />
 
-      <Section title={t("journal.tradeDetail.screenshots")}>
+      <Section title={t("journal.tradeDetail.screenshots")} rtl={isRtl}>
         <div className="grid gap-4 lg:grid-cols-2">
           {Object.entries(groupedScreenshots).map(([type, items]) => (
-            <div key={type} className="overflow-hidden rounded-lg border border-slate-800 bg-[#111827]">
-              <div className="flex items-center gap-2 border-b border-slate-800 px-4 py-3 text-sm font-semibold text-white">
+            <div key={type} className="overflow-hidden rounded-lg border border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-[#111827]">
+              <div className="flex items-center gap-2 border-b border-slate-200 px-4 py-3 text-sm font-semibold text-slate-950 dark:border-slate-800 dark:text-white">
                 <Camera className="h-4 w-4 text-blue-400" />
                 {screenshotTypeLabel(type)}
               </div>
@@ -734,7 +738,7 @@ export function TradeDetailClient({
                   ))}
                 </div>
               ) : (
-                <div className="flex aspect-video flex-col items-center justify-center gap-2 bg-[#0F172A] p-6 text-center text-sm text-slate-400">
+                <div className="flex aspect-video flex-col items-center justify-center gap-2 bg-white p-6 text-center text-sm text-slate-500 dark:bg-[#0F172A] dark:text-slate-400">
                   <ImageOff className="h-8 w-8 text-slate-600" />
                   <div>{t("journal.tradeDetail.noScreenshot")}</div>
                 </div>
@@ -751,7 +755,7 @@ export function TradeDetailClient({
                 href={screenshot.url}
                 target="_blank"
                 rel="noreferrer"
-                className="block overflow-hidden rounded-lg border border-slate-800 bg-[#111827]"
+                className="block overflow-hidden rounded-lg border border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-[#111827]"
               >
                 <img
                   src={screenshot.url}
@@ -793,7 +797,7 @@ export function TradeDetailClient({
         </form>
       </Section>
 
-      <Section title={t("journal.tradeDetail.tags")}>
+      <Section title={t("journal.tradeDetail.tags")} rtl={isRtl}>
         <form onSubmit={saveTags} className="flex flex-col gap-3 md:flex-row md:items-end">
           <Field label={t("journal.tradeDetail.connectedTags")}>
             <input

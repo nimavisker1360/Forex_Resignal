@@ -43,9 +43,9 @@ type TradeChecklistPanelProps = {
 };
 
 const inputClass =
-  "h-10 w-full rounded-lg border border-slate-800 bg-[#111827] px-3 text-sm normal-case text-[#E5E7EB] outline-none focus:border-blue-600";
+  "h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm normal-case text-slate-950 outline-none transition focus:border-blue-500 dark:border-slate-800 dark:bg-[#111827] dark:text-[#E5E7EB]";
 const textareaClass =
-  "w-full rounded-lg border border-slate-800 bg-[#0F172A] px-3 py-2 text-sm normal-case text-[#E5E7EB] outline-none focus:border-blue-600";
+  "w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm normal-case text-slate-950 outline-none transition focus:border-blue-500 dark:border-slate-800 dark:bg-[#0F172A] dark:text-[#E5E7EB]";
 
 function Badge({
   children,
@@ -83,7 +83,8 @@ function progressTone(percent: number) {
 }
 
 export function TradeChecklistPanel({ tradeId }: TradeChecklistPanelProps) {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const isRtl = language === "fa";
   const [templates, setTemplates] = useState<ChecklistTemplate[]>([]);
   const [checklists, setChecklists] = useState<TradeChecklist[]>([]);
   const [selectedTemplateId, setSelectedTemplateId] = useState("");
@@ -259,11 +260,11 @@ export function TradeChecklistPanel({ tradeId }: TradeChecklistPanelProps) {
   }
 
   return (
-    <section className="rounded-lg border border-slate-800 bg-[#0F172A] p-5 shadow-sm">
+    <section className={cn("rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-[#0F172A]", isRtl && "text-right")}>
       <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-        <div>
-          <h2 className="text-lg font-semibold text-white">{t("journal.checklistPanel.title")}</h2>
-          <p className="mt-1 text-sm text-slate-400">
+        <div className="min-w-0">
+          <h2 className="text-lg font-semibold text-slate-950 dark:text-white">{t("journal.checklistPanel.title")}</h2>
+          <p className="mt-1 text-sm leading-6 text-slate-500 dark:text-slate-400">
             {t("journal.checklistPanel.subtitle")}
           </p>
         </div>
@@ -271,7 +272,7 @@ export function TradeChecklistPanel({ tradeId }: TradeChecklistPanelProps) {
           <select
             value={selectedTemplateId}
             onChange={(event) => setSelectedTemplateId(event.target.value)}
-            className={cn(inputClass, "min-w-[240px]")}
+            className={cn(inputClass, "min-w-[260px]", isRtl && "text-right")}
             disabled={loading || availableTemplates.length === 0}
           >
             <option value="">
@@ -299,16 +300,16 @@ export function TradeChecklistPanel({ tradeId }: TradeChecklistPanelProps) {
       </div>
 
       {loading ? (
-        <div className="rounded-lg border border-slate-800 bg-[#111827] p-4 text-sm text-slate-400">
+        <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 text-sm text-slate-500 dark:border-slate-800 dark:bg-[#111827] dark:text-slate-400">
           {t("journal.checklistPanel.loading")}
         </div>
       ) : null}
 
       {!loading && checklists.length === 0 ? (
-        <div className="rounded-lg border border-slate-800 bg-[#111827] px-4 py-10 text-center">
+        <div className="rounded-lg border border-dashed border-slate-200 bg-slate-50 px-4 py-10 text-center dark:border-slate-800 dark:bg-[#111827]">
           <ListChecks className="mx-auto h-8 w-8 text-slate-500" />
-          <h3 className="mt-3 text-base font-semibold text-white">{t("journal.checklistPanel.emptyTitle")}</h3>
-          <p className="mt-1 text-sm text-slate-400">
+          <h3 className="mt-3 text-base font-semibold text-slate-950 dark:text-white">{t("journal.checklistPanel.emptyTitle")}</h3>
+          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
             {t("journal.checklistPanel.emptyDescription")}
           </p>
         </div>
@@ -318,23 +319,23 @@ export function TradeChecklistPanel({ tradeId }: TradeChecklistPanelProps) {
         {checklists.map((checklist) => (
           <article
             key={checklist.id}
-            className="rounded-lg border border-slate-800 bg-[#111827] p-4"
+            className="rounded-lg border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-[#111827]"
           >
             <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-              <div>
+              <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
-                  <h3 className="text-base font-semibold text-white">
+                  <h3 className="text-base font-semibold text-slate-950 dark:text-white">
                     {checklist.titleSnapshot}
                   </h3>
                   <Badge>{checklist.categorySnapshot || t("journal.checklistPanel.custom")}</Badge>
                   {checklist.requiredIncompleteCount > 0 ? (
                     <Badge tone="amber">
-                      <AlertTriangle className="mr-1 h-3 w-3" />
+                      <AlertTriangle className={cn("h-3 w-3", isRtl ? "ml-1" : "mr-1")} />
                       {t("journal.checklistPanel.requiredMissing")}
                     </Badge>
                   ) : checklist.requiredTotalCount > 0 ? (
                     <Badge tone="green">
-                      <Check className="mr-1 h-3 w-3" />
+                      <Check className={cn("h-3 w-3", isRtl ? "ml-1" : "mr-1")} />
                       {t("journal.checklistPanel.requiredComplete")}
                     </Badge>
                   ) : null}
@@ -375,7 +376,7 @@ export function TradeChecklistPanel({ tradeId }: TradeChecklistPanelProps) {
               </div>
             </div>
 
-            <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-900">
+            <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-900">
               <div
                 className={cn("h-full rounded-full", progressTone(checklist.completionPercent))}
                 style={{ width: `${Math.min(checklist.completionPercent, 100)}%` }}
@@ -386,7 +387,7 @@ export function TradeChecklistPanel({ tradeId }: TradeChecklistPanelProps) {
               {checklist.answers.map((answer) => (
                 <div
                   key={answer.id}
-                  className="rounded-lg border border-slate-800 bg-[#0F172A] p-3"
+                  className="rounded-lg border border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-[#0F172A]"
                 >
                   <label className="flex items-start gap-3">
                     <input
@@ -400,7 +401,7 @@ export function TradeChecklistPanel({ tradeId }: TradeChecklistPanelProps) {
                       className="mt-1 h-4 w-4 rounded border-slate-700 bg-[#111827]"
                     />
                     <span className="min-w-0 flex-1">
-                      <span className="flex flex-wrap items-center gap-2 text-sm font-semibold text-white">
+                      <span className="flex flex-wrap items-center gap-2 text-sm font-semibold text-slate-950 dark:text-white">
                         {answer.titleSnapshot}
                         {answer.isRequiredSnapshot ? (
                           <span className="rounded-md border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-xs text-amber-300">
@@ -409,7 +410,7 @@ export function TradeChecklistPanel({ tradeId }: TradeChecklistPanelProps) {
                         ) : null}
                       </span>
                       {answer.descriptionSnapshot ? (
-                        <span className="mt-1 block text-sm text-slate-400">
+                        <span className="mt-1 block text-sm text-slate-500 dark:text-slate-400">
                           {answer.descriptionSnapshot}
                         </span>
                       ) : null}

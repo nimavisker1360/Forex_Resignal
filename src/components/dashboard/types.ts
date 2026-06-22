@@ -100,6 +100,7 @@ export type DashboardOverviewStats = {
   totalPnl: number;
   winRate: number;
   openTrades: number;
+  notReviewedTrades: number;
 };
 
 export type DashboardOverviewData = {

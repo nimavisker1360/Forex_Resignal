@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Edit, Lock, Plus, Trash2 } from "lucide-react";
+import { ClipboardCheck, Edit, Lock, Plus, Trash2 } from "lucide-react";
 import { PnlText } from "@/components/dashboard/PnlText";
 import { TradeDirectionBadge } from "@/components/dashboard/TradeDirectionBadge";
 import { TradeStatusBadge } from "@/components/dashboard/TradeStatusBadge";
@@ -13,11 +13,11 @@ import {
 } from "@/components/dashboard/types";
 
 function reviewStatus(trade: TradeDto) {
-  if (!trade.strategyReview) {
+  if (!trade.strategyReview || trade.strategyReview.followedPlan === "NOT_REVIEWED") {
     return "Not Reviewed";
   }
 
-  return trade.strategyReview.followedPlan === "NOT_REVIEWED" ? "Needs Review" : "Reviewed";
+  return "Reviewed";
 }
 
 function reviewStatusClass(status: string) {
@@ -25,11 +25,15 @@ function reviewStatusClass(status: string) {
     return "border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-300";
   }
 
-  if (status === "Needs Review") {
-    return "border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-300";
+  return "border-slate-300 bg-slate-100 text-slate-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300";
+}
+
+function planComplianceLabel(trade: TradeDto) {
+  if (!trade.strategyReview || trade.strategyReview.followedPlan === "NOT_REVIEWED") {
+    return "-";
   }
 
-  return "border-slate-300 bg-slate-100 text-slate-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300";
+  return `${Math.round(trade.strategyReview.compliancePercent)}%`;
 }
 
 export function TradeTable({
@@ -99,13 +103,22 @@ export function TradeTable({
                   </span>
                 </td>
                 <td className="px-3 py-3">
-                  {trade.strategyReview ? `${Math.round(trade.strategyReview.compliancePercent)}%` : "-"}
+                  {planComplianceLabel(trade)}
                 </td>
                 <td className="px-3 py-3">
                   <TradeStatusBadge status={trade.status} />
                 </td>
                 <td className="px-3 py-3">
                   <div className="flex gap-2">
+                    <Link
+                      href={`/journal/${trade.id}`}
+                      className="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-blue-500/30 px-2.5 text-xs font-semibold text-blue-600 hover:bg-blue-50 dark:text-blue-300 dark:hover:bg-blue-500/10"
+                      aria-label="Review Trade"
+                      title="Review Trade"
+                    >
+                      <ClipboardCheck className="h-4 w-4" />
+                      Review
+                    </Link>
                     {onEdit ? (
                       <button
                         type="button"

@@ -142,6 +142,7 @@ export async function getDashboardOverviewData(userId: string): Promise<Dashboar
     totalTrades,
     totalPnl,
     openTrades,
+    notReviewedTrades,
     closedTrades,
     winningTrades,
     trades,
@@ -160,6 +161,15 @@ export async function getDashboardOverviewData(userId: string): Promise<Dashboar
     }),
     prisma.trade.count({
       where: { userId, status: "OPEN" },
+    }),
+    prisma.trade.count({
+      where: {
+        userId,
+        OR: [
+          { strategyReview: null },
+          { strategyReview: { followedPlan: "NOT_REVIEWED" } },
+        ],
+      },
     }),
     prisma.trade.count({
       where: { userId, status: "CLOSED" },
@@ -187,6 +197,7 @@ export async function getDashboardOverviewData(userId: string): Promise<Dashboar
       totalPnl: Number(totalPnl._sum.profitLoss ?? 0),
       winRate: calculateWinRate(closedTrades, winningTrades),
       openTrades,
+      notReviewedTrades,
     },
   };
 }

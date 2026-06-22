@@ -37,6 +37,112 @@ type FormState = {
 
 const MARKET_TYPES = ["Forex", "Crypto", "Indices", "Stocks", "Futures", "Custom"];
 
+type PlaybookTemplate = Pick<
+  FormState,
+  | "name"
+  | "marketType"
+  | "symbols"
+  | "timeframes"
+  | "direction"
+  | "entryRules"
+  | "exitRules"
+  | "riskRules"
+  | "checklistItems"
+>;
+
+const PLAYBOOK_TEMPLATES: PlaybookTemplate[] = [
+  {
+    name: "EMA Pullback",
+    marketType: "Forex",
+    direction: "BOTH",
+    symbols: "EURUSD, GBPUSD, XAUUSD",
+    timeframes: "M15, H1",
+    entryRules: [
+      "Price is aligned with the higher-timeframe trend",
+      "20 EMA and 50 EMA are sloping in trade direction",
+      "Pullback holds near the EMA zone",
+      "Enter after bullish/bearish confirmation candle",
+    ].join("\n"),
+    exitRules: [
+      "Take partial profit at 1R",
+      "Move stop to breakeven after structure confirms",
+      "Exit if price closes beyond the EMA zone against the trade",
+    ].join("\n"),
+    riskRules: [
+      "Risk maximum 1% per trade",
+      "Minimum planned R:R is 1.5",
+      "Stop goes beyond the pullback swing",
+      "Do not enter within 15 minutes of high-impact news",
+    ].join("\n"),
+    checklistItems: [
+      { title: "Higher-timeframe trend confirmed", description: "", isRequired: true, sortOrder: 0 },
+      { title: "EMA pullback zone respected", description: "", isRequired: true, sortOrder: 1 },
+      { title: "Confirmation candle printed", description: "", isRequired: true, sortOrder: 2 },
+      { title: "Minimum R:R met", description: "", isRequired: true, sortOrder: 3 },
+    ],
+  },
+  {
+    name: "London Breakout",
+    marketType: "Forex",
+    direction: "BOTH",
+    symbols: "GBPUSD, EURUSD, GBPJPY",
+    timeframes: "M5, M15",
+    entryRules: [
+      "Mark the Asian session high and low",
+      "Trade only during the London open window",
+      "Enter after a clean break and retest or strong momentum break",
+      "Avoid entries directly into nearby higher-timeframe resistance/support",
+    ].join("\n"),
+    exitRules: [
+      "Target first liquidity level or 2R",
+      "Trail after price makes a new structure point",
+      "Exit if breakout fails back inside the range",
+    ].join("\n"),
+    riskRules: [
+      "Risk maximum 0.5% to 1% per trade",
+      "Maximum one breakout attempt per direction",
+      "Stop goes inside or beyond the opposite side of the trigger structure",
+      "No trade after the London window closes",
+    ].join("\n"),
+    checklistItems: [
+      { title: "Asian range marked", description: "", isRequired: true, sortOrder: 0 },
+      { title: "London window active", description: "", isRequired: true, sortOrder: 1 },
+      { title: "Breakout has confirmation", description: "", isRequired: true, sortOrder: 2 },
+      { title: "No high-impact news conflict", description: "", isRequired: true, sortOrder: 3 },
+    ],
+  },
+  {
+    name: "SMC / Order Block",
+    marketType: "Forex",
+    direction: "BOTH",
+    symbols: "EURUSD, GBPUSD, XAUUSD, NAS100",
+    timeframes: "M15, H1, H4",
+    entryRules: [
+      "Higher-timeframe bias is defined",
+      "Liquidity sweep or displacement confirms intent",
+      "Valid order block or fair value gap is identified",
+      "Enter on mitigation with lower-timeframe confirmation",
+    ].join("\n"),
+    exitRules: [
+      "Target opposing liquidity or imbalance",
+      "Take partials at 1R or first reaction level",
+      "Exit if market structure invalidates the idea",
+    ].join("\n"),
+    riskRules: [
+      "Risk maximum 1% per trade",
+      "Stop goes beyond the order block or invalidation point",
+      "Minimum planned R:R is 2",
+      "Skip if entry is too far from invalidation",
+    ].join("\n"),
+    checklistItems: [
+      { title: "HTF bias documented", description: "", isRequired: true, sortOrder: 0 },
+      { title: "Liquidity sweep or displacement present", description: "", isRequired: true, sortOrder: 1 },
+      { title: "Valid order block selected", description: "", isRequired: true, sortOrder: 2 },
+      { title: "Invalidation and target defined", description: "", isRequired: true, sortOrder: 3 },
+    ],
+  },
+];
+
 const copy = {
   en: {
     back: "Back to Playbooks",
@@ -46,6 +152,8 @@ const copy = {
       "Keep the plan simple: define when to trade, how to enter, how to exit, and what must be checked during review.",
     save: "Save",
     saving: "Saving...",
+    useTemplate: "Use Template",
+    templatePlaceholder: "Choose template",
     playbookName: "Playbook Name",
     playbookNamePlaceholder: "London breakout",
     market: "Market",
@@ -106,6 +214,8 @@ const copy = {
       "پلن را ساده نگه دارید: مشخص کنید چه زمانی معامله می کنید، چطور وارد می شوید، چطور خارج می شوید و در زمان بررسی چه مواردی باید چک شوند.",
     save: "ذخیره",
     saving: "در حال ذخیره...",
+    useTemplate: "استفاده از قالب",
+    templatePlaceholder: "انتخاب قالب",
     playbookName: "نام پلی بوک",
     playbookNamePlaceholder: "بریک اوت لندن",
     market: "بازار",
@@ -288,6 +398,7 @@ export function PlaybookForm({ playbook }: { playbook?: PlaybookStrategyDto }) {
   const { language } = useLanguage();
   const text = copy[language];
   const [form, setForm] = useState<FormState>(() => initialForm(playbook));
+  const [selectedTemplateName, setSelectedTemplateName] = useState("");
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [saving, setSaving] = useState(false);
   const rules = useMemo(() => rulesFromText(form), [form]);
@@ -310,6 +421,23 @@ export function PlaybookForm({ playbook }: { playbook?: PlaybookStrategyDto }) {
       ...form.checklistItems,
       { title: "", description: "", isRequired: true, sortOrder: form.checklistItems.length },
     ]);
+  }
+
+  function applyTemplate() {
+    const template = PLAYBOOK_TEMPLATES.find((item) => item.name === selectedTemplateName);
+
+    if (!template) {
+      return;
+    }
+
+    setForm((current) => ({
+      ...current,
+      ...template,
+      checklistItems: template.checklistItems.map((item, index) => ({
+        ...item,
+        sortOrder: index,
+      })),
+    }));
   }
 
   function removeChecklistItem(index: number) {
@@ -407,14 +535,36 @@ export function PlaybookForm({ playbook }: { playbook?: PlaybookStrategyDto }) {
                 {text.subtitle}
               </p>
             </div>
-            <button
-              type="submit"
-              disabled={saving}
-              className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-[#2563EB] px-4 text-sm font-semibold text-white hover:bg-blue-500 disabled:opacity-60"
-            >
-              <Save className="h-4 w-4" />
-              {saving ? text.saving : text.save}
-            </button>
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <select
+                value={selectedTemplateName}
+                onChange={(event) => setSelectedTemplateName(event.target.value)}
+                className="h-10 rounded-lg border border-slate-800 bg-[#111827] px-3 text-sm text-[#E5E7EB] outline-none focus:border-blue-600"
+              >
+                <option value="">{text.templatePlaceholder}</option>
+                {PLAYBOOK_TEMPLATES.map((template) => (
+                  <option key={template.name} value={template.name}>
+                    {template.name}
+                  </option>
+                ))}
+              </select>
+              <button
+                type="button"
+                onClick={applyTemplate}
+                disabled={!selectedTemplateName}
+                className="inline-flex h-10 items-center justify-center rounded-lg border border-slate-800 px-4 text-sm font-semibold text-slate-300 hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {text.useTemplate}
+              </button>
+              <button
+                type="submit"
+                disabled={saving}
+                className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-[#2563EB] px-4 text-sm font-semibold text-white hover:bg-blue-500 disabled:opacity-60"
+              >
+                <Save className="h-4 w-4" />
+                {saving ? text.saving : text.save}
+              </button>
+            </div>
           </div>
 
           <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">

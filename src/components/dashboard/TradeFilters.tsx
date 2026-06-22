@@ -11,6 +11,7 @@ export type TradeFilterValues = {
   symbol: string;
   direction: string;
   status: string;
+  reviewStatus: string;
   from: string;
   to: string;
 };
@@ -38,6 +39,7 @@ export function TradeFilters({
       symbol: String(formData.get("symbol") || ""),
       direction: String(formData.get("direction") || ""),
       status: String(formData.get("status") || ""),
+      reviewStatus: String(formData.get("reviewStatus") || ""),
       from: String(formData.get("from") || ""),
       to: String(formData.get("to") || ""),
     });
@@ -52,7 +54,7 @@ export function TradeFilters({
         </div>
         {action}
       </div>
-      <form onSubmit={handleSubmit} className="grid gap-3 md:grid-cols-7">
+      <form key={JSON.stringify(values)} onSubmit={handleSubmit} className="grid gap-3 md:grid-cols-8">
         <label className="space-y-1 text-xs font-medium uppercase text-slate-400">
           {t("dashboard.table.account")}
           <select
@@ -100,6 +102,18 @@ export function TradeFilters({
             <option value="OPEN">{t("dashboard.common.open")}</option>
             <option value="CLOSED">{t("dashboard.common.closed")}</option>
             <option value="CANCELLED">{t("dashboard.common.cancelled")}</option>
+          </select>
+        </label>
+        <label className="space-y-1 text-xs font-medium uppercase text-slate-400">
+          Review
+          <select
+            name="reviewStatus"
+            defaultValue={values.reviewStatus}
+            className="h-11 w-full rounded-xl border border-slate-800 bg-[#111827] px-3 text-sm normal-case text-[#E5E7EB] outline-none focus:border-blue-600"
+          >
+            <option value="">{t("dashboard.common.all")}</option>
+            <option value="not-reviewed">Not Reviewed</option>
+            <option value="reviewed">Reviewed</option>
           </select>
         </label>
         <label className="space-y-1 text-xs font-medium uppercase text-slate-400">

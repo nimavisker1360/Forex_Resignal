@@ -128,6 +128,14 @@ function dailyJournalHref(date: string, accountId?: string) {
   return `/dashboard/daily-journal?${params.toString()}`;
 }
 
+function tradesByDateHref(date: string, accountId?: string) {
+  const params = new URLSearchParams();
+  params.set("from", date);
+  params.set("to", date);
+  addParam(params, "accountId", accountId);
+  return `/dashboard/trades?${params.toString()}`;
+}
+
 function adjacentMonth(month: number, year: number, direction: -1 | 1) {
   const date = new Date(Date.UTC(year, month - 1 + direction, 1));
   return {
@@ -494,15 +502,16 @@ export default async function JournalCalendarPage({ searchParams }: CalendarPage
           </Link>
 
           <div className="mt-4 space-y-3">
-            {selectedTrades.map((trade) => (
-              <Link
+            {selectedTrades.slice(0, 5).map((trade) => (
+              <article
                 key={trade._id}
-                href={`/journal/${trade._id}`}
-                className="block rounded-xl border border-slate-800 bg-[#111827] p-3 transition hover:border-blue-500/60 hover:bg-slate-800/70"
+                className="rounded-xl border border-slate-800 bg-[#111827] p-3"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <div className="font-semibold text-white">{trade.symbol}</div>
+                    <Link href={`/journal/${trade._id}`} className="font-semibold text-white hover:text-blue-200">
+                      {trade.symbol}
+                    </Link>
                     <div className="mt-1 text-xs uppercase tracking-wide text-slate-500">
                       {trade.tradeType} / {trade.status}
                     </div>
@@ -516,6 +525,14 @@ export default async function JournalCalendarPage({ searchParams }: CalendarPage
                   >
                     {formatMoney(Number(trade.profit || 0))}
                   </div>
+                </div>
+                <div className="mt-3">
+                  <Link
+                    href={`/journal/${trade._id}`}
+                    className="inline-flex h-8 items-center justify-center rounded-lg border border-blue-500/30 px-3 text-xs font-semibold text-blue-200 hover:bg-blue-500/10"
+                  >
+                    Review
+                  </Link>
                 </div>
                 <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-slate-400">
                   <div>
@@ -533,8 +550,17 @@ export default async function JournalCalendarPage({ searchParams }: CalendarPage
                     </div>
                   </div>
                 </div>
-              </Link>
+              </article>
             ))}
+
+            {selectedTrades.length > 5 ? (
+              <Link
+                href={tradesByDateHref(selectedDate, accountId)}
+                className="inline-flex h-10 w-full items-center justify-center rounded-xl border border-slate-800 px-4 text-sm font-semibold text-slate-300 hover:bg-slate-800"
+              >
+                View all trades for this day
+              </Link>
+            ) : null}
 
             {selectedTrades.length === 0 && (
               <div className="rounded-xl border border-dashed border-slate-800 bg-[#111827] px-4 py-10 text-center">

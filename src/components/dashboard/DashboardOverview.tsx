@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { Activity, BriefcaseBusiness, CalendarDays, CircleDollarSign, Percent } from "lucide-react";
 import { PnlText } from "@/components/dashboard/PnlText";
 import { StatCard } from "@/components/dashboard/StatCard";
@@ -227,6 +228,20 @@ export function DashboardOverview({
           tone="blue"
         />
       </div>
+
+      {stats.notReviewedTrades > 0 ? (
+        <div className="flex flex-col gap-3 rounded-xl border border-blue-500/30 bg-blue-500/10 p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+          <div className="text-sm font-medium text-blue-950 dark:text-blue-100">
+            You have {stats.notReviewedTrades} trades waiting for review.
+          </div>
+          <Link
+            href="/dashboard/trades?reviewStatus=not-reviewed"
+            className="inline-flex h-9 items-center justify-center rounded-lg bg-blue-600 px-3 text-sm font-semibold text-white hover:bg-blue-500"
+          >
+            Review Trades
+          </Link>
+        </div>
+      ) : null}
 
       <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-[#0F172A]">
         <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">

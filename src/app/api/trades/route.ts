@@ -17,6 +17,16 @@ import {
 
 export const dynamic = "force-dynamic";
 
+function endOfDayIfDateOnly(value: string | null, date: Date | null | undefined) {
+  if (!value || !date || !/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return date;
+  }
+
+  const copy = new Date(date);
+  copy.setUTCHours(23, 59, 59, 999);
+  return copy;
+}
+
 function buildTradeCreateData(body: Record<string, unknown>) {
   const direction = parseTradeDirection(body.direction);
   const status = body.status ? parseTradeStatus(body.status) : TradeStatus.OPEN;
@@ -81,9 +91,11 @@ export async function GET(request: Request) {
 
     const { searchParams } = new URL(request.url);
     const status = searchParams.get("status");
+    const reviewStatus = searchParams.get("reviewStatus");
     const direction = searchParams.get("direction");
     const dateFrom = parseDate(searchParams.get("from") ?? searchParams.get("dateFrom"));
-    const dateTo = parseDate(searchParams.get("to") ?? searchParams.get("dateTo"));
+    const rawDateTo = searchParams.get("to") ?? searchParams.get("dateTo");
+    const dateTo = endOfDayIfDateOnly(rawDateTo, parseDate(rawDateTo));
     const where: Prisma.TradeWhereInput = {};
     const page = parsePositiveInt(searchParams.get("page"), 1);
     const limit = Math.min(parsePositiveInt(searchParams.get("limit"), 50), 100);
@@ -119,6 +131,23 @@ export async function GET(request: Request) {
       }
 
       where.direction = parsedDirection;
+    }
+
+    if (reviewStatus) {
+      if (reviewStatus === "not-reviewed") {
+        where.OR = [
+          { strategyReview: null },
+          { strategyReview: { followedPlan: "NOT_REVIEWED" } },
+        ];
+      } else if (reviewStatus === "reviewed") {
+        where.strategyReview = {
+          is: {
+            followedPlan: { not: "NOT_REVIEWED" },
+          },
+        };
+      } else {
+        return apiResponse({ success: false, message: "Invalid review status" }, 400);
+      }
     }
 
     if (dateFrom === null || dateTo === null) {

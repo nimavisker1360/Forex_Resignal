@@ -351,6 +351,35 @@ function LoadingPanel() {
   );
 }
 
+function LowSampleNotice() {
+  return (
+    <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-4 text-sm font-medium text-amber-100">
+      More reliable insights unlock after 20 closed trades.
+    </div>
+  );
+}
+
+function CollapsibleAnalyticsSection({
+  title,
+  collapsed,
+  children,
+}: {
+  title: string;
+  collapsed: boolean;
+  children: ReactNode;
+}) {
+  if (!collapsed) {
+    return <>{children}</>;
+  }
+
+  return (
+    <details className="rounded-lg border border-slate-800 bg-[#0F172A] p-4">
+      <summary className="cursor-pointer text-sm font-semibold text-white">{title}</summary>
+      <div className="mt-4">{children}</div>
+    </details>
+  );
+}
+
 function MoneyTooltip(props: ChartTooltipProps) {
   if (!props.active || !props.payload?.length) {
     return null;
@@ -1883,7 +1912,13 @@ function getHourlyTileClass(row: HourlyAnalyticsRow) {
   return "border-slate-700 bg-slate-800/70 text-slate-300";
 }
 
-function HourlyDecisionPanel({ rows }: { rows: HourlyAnalyticsRow[] }) {
+function HourlyDecisionPanel({
+  rows,
+  defaultCollapsed = false,
+}: {
+  rows: HourlyAnalyticsRow[];
+  defaultCollapsed?: boolean;
+}) {
   const { t } = useLanguage();
   const activeRows = rows.filter((row) => row.totalTrades > 0);
   const totalTrades = activeRows.reduce((sum, row) => sum + row.totalTrades, 0);
@@ -1921,71 +1956,75 @@ function HourlyDecisionPanel({ rows }: { rows: HourlyAnalyticsRow[] }) {
 
   return (
     <div className="space-y-4">
-      <div className="grid gap-3 lg:grid-cols-3">
-        <HourlyHighlightCard
-          label={t("journal.analytics.bestWindow")}
-          title={t("journal.analytics.focusCandidate")}
-          row={bestHour}
-          helper={t("journal.analytics.highestHourlyPnl")}
-          tone={bestHour && bestHour.netPnl > 0 ? "profit" : "neutral"}
-        />
-        <HourlyHighlightCard
-          label={t("journal.analytics.weakWindow")}
-          title={t("journal.analytics.reviewOrReduceSize")}
-          row={worstHour}
-          helper={t("journal.analytics.lowestHourlyPnl")}
-          tone={worstHour && worstHour.netPnl < 0 ? "loss" : "neutral"}
-        />
-        <HourlyHighlightCard
-          label={t("journal.analytics.mostActivity")}
-          title={t("journal.analytics.behaviorHotspot")}
-          row={volumeHour}
-          helper={t("journal.analytics.largestTradeShare")}
-          tone="neutral"
-        />
-      </div>
-
-      <div className="rounded-lg border border-slate-800 bg-[#111827] p-4">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <div className="text-sm font-semibold text-white">{t("journal.analytics.hourHeatmap24")}</div>
-            <div className="mt-2 flex flex-wrap gap-2 text-xs text-slate-400">
-              <span className="inline-flex items-center gap-1">
-                <span className="h-2 w-2 rounded-full bg-emerald-400" />
-                {t("journal.analytics.profitable")}
-              </span>
-              <span className="inline-flex items-center gap-1">
-                <span className="h-2 w-2 rounded-full bg-red-400" />
-                {t("journal.analytics.losing")}
-              </span>
-              <span className="inline-flex items-center gap-1">
-                <span className="h-2 w-2 rounded-full bg-slate-600" />
-                {t("journal.analytics.noTrades")}
-              </span>
-            </div>
-          </div>
-          <div className={cn("text-xs font-semibold uppercase", sampleTone)}>
-            {sampleLabel}: {t("journal.analytics.tradesCount").replace("{count}", formatNumber(totalTrades, 0))}
-          </div>
+      <CollapsibleAnalyticsSection title="Best and weak windows" collapsed={defaultCollapsed}>
+        <div className="grid gap-3 lg:grid-cols-3">
+          <HourlyHighlightCard
+            label={t("journal.analytics.bestWindow")}
+            title={t("journal.analytics.focusCandidate")}
+            row={bestHour}
+            helper={t("journal.analytics.highestHourlyPnl")}
+            tone={bestHour && bestHour.netPnl > 0 ? "profit" : "neutral"}
+          />
+          <HourlyHighlightCard
+            label={t("journal.analytics.weakWindow")}
+            title={t("journal.analytics.reviewOrReduceSize")}
+            row={worstHour}
+            helper={t("journal.analytics.lowestHourlyPnl")}
+            tone={worstHour && worstHour.netPnl < 0 ? "loss" : "neutral"}
+          />
+          <HourlyHighlightCard
+            label={t("journal.analytics.mostActivity")}
+            title={t("journal.analytics.behaviorHotspot")}
+            row={volumeHour}
+            helper={t("journal.analytics.largestTradeShare")}
+            tone="neutral"
+          />
         </div>
-        <div className="mt-4 grid grid-cols-4 gap-2 sm:grid-cols-6 lg:grid-cols-12">
-          {rows.map((row) => (
-            <div
-              key={row.label}
-              className={cn("min-h-[82px] rounded-lg border p-2", getHourlyTileClass(row))}
-              title={`${row.label}: ${formatNumber(row.totalTrades, 0)} trades, ${formatMoney(
-                row.netPnl
-              )}`}
-            >
-              <div className="text-xs font-semibold">{row.label}</div>
-              <div className="mt-2 text-sm font-semibold">{formatMoney(row.netPnl)}</div>
-              <div className="mt-1 text-[11px] text-slate-400">
-                {t("journal.analytics.tradesCount").replace("{count}", formatNumber(row.totalTrades, 0))}
+      </CollapsibleAnalyticsSection>
+
+      <CollapsibleAnalyticsSection title={t("journal.analytics.hourHeatmap24")} collapsed={defaultCollapsed}>
+        <div className="rounded-lg border border-slate-800 bg-[#111827] p-4">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <div className="text-sm font-semibold text-white">{t("journal.analytics.hourHeatmap24")}</div>
+              <div className="mt-2 flex flex-wrap gap-2 text-xs text-slate-400">
+                <span className="inline-flex items-center gap-1">
+                  <span className="h-2 w-2 rounded-full bg-emerald-400" />
+                  {t("journal.analytics.profitable")}
+                </span>
+                <span className="inline-flex items-center gap-1">
+                  <span className="h-2 w-2 rounded-full bg-red-400" />
+                  {t("journal.analytics.losing")}
+                </span>
+                <span className="inline-flex items-center gap-1">
+                  <span className="h-2 w-2 rounded-full bg-slate-600" />
+                  {t("journal.analytics.noTrades")}
+                </span>
               </div>
             </div>
-          ))}
+            <div className={cn("text-xs font-semibold uppercase", sampleTone)}>
+              {sampleLabel}: {t("journal.analytics.tradesCount").replace("{count}", formatNumber(totalTrades, 0))}
+            </div>
+          </div>
+          <div className="mt-4 grid grid-cols-4 gap-2 sm:grid-cols-6 lg:grid-cols-12">
+            {rows.map((row) => (
+              <div
+                key={row.label}
+                className={cn("min-h-[82px] rounded-lg border p-2", getHourlyTileClass(row))}
+                title={`${row.label}: ${formatNumber(row.totalTrades, 0)} trades, ${formatMoney(
+                  row.netPnl
+                )}`}
+              >
+                <div className="text-xs font-semibold">{row.label}</div>
+                <div className="mt-2 text-sm font-semibold">{formatMoney(row.netPnl)}</div>
+                <div className="mt-1 text-[11px] text-slate-400">
+                  {t("journal.analytics.tradesCount").replace("{count}", formatNumber(row.totalTrades, 0))}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
+      </CollapsibleAnalyticsSection>
 
       <div className="grid gap-3 lg:grid-cols-3">
         <HourlyMiniList
@@ -2417,7 +2456,7 @@ export default function JournalAnalyticsPage() {
                   {analytics.metadata.hasStrategyData ? (
                     <StrategyTable rows={analytics.byStrategy} />
                   ) : (
-                    <EmptyPanel message={t("journal.analytics.noStrategyData")} />
+                    <EmptyPanel message="No playbook assigned yet. Review your trades and select a playbook to unlock playbook performance." />
                   )}
                 </Section>
               </div>
@@ -2426,36 +2465,38 @@ export default function JournalAnalyticsPage() {
 
           {activeTab === "behavior" ? (
             <>
+              {!advancedInsightsUnlocked ? <LowSampleNotice /> : null}
               <div className="grid gap-5 xl:grid-cols-2">
                 <Section title={t("journal.analytics.mistakes")} icon={<AlertTriangle className="h-4 w-4" />}>
-                  <CompactTable rows={analytics.byMistake} labelHeader={t("journal.analytics.mistakes")} getLabel={(row) => row.label} emptyMessage={t("journal.analytics.noMistakeTags")} />
+                  <CompactTable rows={analytics.byMistake} labelHeader={t("journal.analytics.mistakes")} getLabel={(row) => row.label} emptyMessage="No mistake tags yet. Open a trade review and add mistakes to see behavior analytics." />
                 </Section>
                 <Section title={t("journal.analytics.emotions")} icon={<Brain className="h-4 w-4" />}>
-                  <CompactTable rows={analytics.byEmotion} labelHeader={t("journal.analytics.emotions")} getLabel={(row) => row.label} emptyMessage={t("journal.analytics.noPsychologyData")} />
+                  <CompactTable rows={analytics.byEmotion} labelHeader={t("journal.analytics.emotions")} getLabel={(row) => row.label} emptyMessage="No emotion data yet. Add emotion or psychology status during trade review." />
                 </Section>
               </div>
 
-              <div className="grid gap-5 xl:grid-cols-2">
-                <Section title={t("journal.analytics.sessionPerformance")} description={t("journal.analytics.sessionPerformanceDescription")} icon={<CalendarDays className="h-4 w-4" />}>
-                  <PnlBarChart data={analytics.bySession} xKey="session" height={300} />
-                </Section>
-                <Section title={t("journal.analytics.weekdayPnl")} icon={<CalendarDays className="h-4 w-4" />}>
-                  <PnlBarChart data={analytics.byWeekday} xKey="weekday" height={280} />
-                </Section>
-              </div>
+              <CollapsibleAnalyticsSection title="Session, weekday, and hourly analytics" collapsed={!advancedInsightsUnlocked}>
+                <div className="space-y-5">
+                  <div className="grid gap-5 xl:grid-cols-2">
+                    <Section title={t("journal.analytics.sessionPerformance")} description={t("journal.analytics.sessionPerformanceDescription")} icon={<CalendarDays className="h-4 w-4" />}>
+                      <PnlBarChart data={analytics.bySession} xKey="session" height={300} />
+                    </Section>
+                    <Section title={t("journal.analytics.weekdayPnl")} icon={<CalendarDays className="h-4 w-4" />}>
+                      <PnlBarChart data={analytics.byWeekday} xKey="weekday" height={280} />
+                    </Section>
+                  </div>
 
-              <Section title={t("journal.analytics.hourlyPnl")} icon={<BarChart3 className="h-4 w-4" />}>
-                <PnlBarChart data={hourlyChartData.length > 0 ? hourlyChartData : analytics.byHour} xKey="label" height={280} />
-              </Section>
+                  <Section title={t("journal.analytics.hourlyPnl")} icon={<BarChart3 className="h-4 w-4" />}>
+                    <PnlBarChart data={hourlyChartData.length > 0 ? hourlyChartData : analytics.byHour} xKey="label" height={280} />
+                  </Section>
+                </div>
+              </CollapsibleAnalyticsSection>
             </>
           ) : null}
 
           {activeTab === "advanced" ? (
-            !advancedInsightsUnlocked ? (
-              <div className="rounded-lg border border-dashed border-slate-800 bg-[#0F172A] p-6 text-sm text-slate-400">
-                More insights unlock after 20 closed trades.
-              </div>
-            ) : (
+            <>
+              {!advancedInsightsUnlocked ? <LowSampleNotice /> : null}
               <>
                 <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
                   {advancedMetricCards.map(({ label, value, icon, tone }) => (
@@ -2463,7 +2504,9 @@ export default function JournalAnalyticsPage() {
                   ))}
                 </div>
 
-                <TradeZellaAnalysisWorkspace analytics={analytics} />
+                <CollapsibleAnalyticsSection title="Trade review workspace" collapsed={!advancedInsightsUnlocked}>
+                  <TradeZellaAnalysisWorkspace analytics={analytics} />
+                </CollapsibleAnalyticsSection>
 
                 <div className="grid gap-5 xl:grid-cols-2">
                   <Section title={t("journal.analytics.longShort")} description={t("journal.analytics.longShortDescription")} icon={<Filter className="h-4 w-4" />}>
@@ -2478,7 +2521,7 @@ export default function JournalAnalyticsPage() {
                 </div>
 
                 <Section title={t("journal.analytics.hourlyDecisionBoard")} description={t("journal.analytics.hourlyDecisionDescription")} icon={<BarChart3 className="h-4 w-4" />}>
-                  <HourlyDecisionPanel rows={analytics.byHour} />
+                  <HourlyDecisionPanel rows={analytics.byHour} defaultCollapsed={!advancedInsightsUnlocked} />
                 </Section>
 
                 <div className="grid gap-5 xl:grid-cols-2">
@@ -2490,7 +2533,7 @@ export default function JournalAnalyticsPage() {
                   </Section>
                 </div>
               </>
-            )
+            </>
           ) : null}
         </>
       )}

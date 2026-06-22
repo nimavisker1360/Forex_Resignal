@@ -9,7 +9,7 @@ export default async function DashboardPage() {
     : {
         accounts: [],
         trades: [],
-        stats: { totalTrades: 0, totalPnl: 0, winRate: 0, openTrades: 0 },
+        stats: { totalTrades: 0, totalPnl: 0, winRate: 0, openTrades: 0, notReviewedTrades: 0 },
       };
 
   return (
