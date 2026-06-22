@@ -3,7 +3,9 @@ import { prisma } from "@/lib/prisma";
 
 const JBLANKED_BASE_URL = "https://www.jblanked.com";
 const WEEKLY_CALENDAR_ENDPOINT = "/news/api/forex-factory/calendar/week/";
+const FOREX_FACTORY_WEEKLY_XML_URL = "https://nfs.faireconomy.media/ff_calendar_thisweek.xml";
 export const ECONOMIC_CALENDAR_SOURCE = "jblanked-forex-factory";
+export const FOREX_FACTORY_XML_SOURCE = "forex-factory-xml";
 
 type JBlankedEvent = Record<string, unknown>;
 
@@ -30,6 +32,62 @@ function text(value: unknown) {
 
   const normalized = String(value).trim();
   return normalized.length > 0 ? normalized : null;
+}
+
+function decodeXml(value: string) {
+  return value
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, "\"")
+    .replace(/&#39;/g, "'");
+}
+
+function extractXmlTag(block: string, tagName: string) {
+  const match = block.match(new RegExp(`<${tagName}>\\s*(?:<!\\[CDATA\\[)?([\\s\\S]*?)(?:\\]\\]>)?\\s*<\\/${tagName}>`, "i"));
+  return match ? text(decodeXml(match[1])) : null;
+}
+
+function parseForexFactoryTime(value: string | null) {
+  if (!value) {
+    return { hour: 0, minute: 0 };
+  }
+
+  const normalized = value.trim().toLowerCase();
+  const match = normalized.match(/^(\d{1,2})(?::(\d{2}))?\s*([ap]m)$/);
+
+  if (!match) {
+    return { hour: 0, minute: 0 };
+  }
+
+  const [, hourValue, minuteValue = "0", period] = match;
+  let hour = Number(hourValue);
+  const minute = Number(minuteValue);
+
+  if (period === "am" && hour === 12) {
+    hour = 0;
+  } else if (period === "pm" && hour !== 12) {
+    hour += 12;
+  }
+
+  return { hour, minute };
+}
+
+function forexFactoryDateTime(dateValue: string | null, timeValue: string | null) {
+  if (!dateValue) {
+    return null;
+  }
+
+  const dateMatch = dateValue.match(/^(\d{2})-(\d{2})-(\d{4})$/);
+
+  if (!dateMatch) {
+    return null;
+  }
+
+  const [, month, day, year] = dateMatch;
+  const { hour, minute } = parseForexFactoryTime(timeValue);
+
+  return `${year}.${month}.${day} ${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}:00`;
 }
 
 function normalizeImpact(value: unknown) {
@@ -104,6 +162,36 @@ function extractEvents(payload: unknown): JBlankedEvent[] {
   return [];
 }
 
+function parseForexFactoryXml(xml: string): JBlankedEvent[] {
+  const eventBlocks = xml.match(/<event>[\s\S]*?<\/event>/gi) || [];
+  const events: JBlankedEvent[] = [];
+
+  for (const block of eventBlocks) {
+    const dateTime = forexFactoryDateTime(
+      extractXmlTag(block, "date"),
+      extractXmlTag(block, "time")
+    );
+
+    if (!dateTime) {
+      continue;
+    }
+
+    events.push({
+      Name: extractXmlTag(block, "title"),
+      Currency: extractXmlTag(block, "country"),
+      Date: dateTime,
+      Impact: extractXmlTag(block, "impact"),
+      Actual: extractXmlTag(block, "actual"),
+      Forecast: extractXmlTag(block, "forecast"),
+      Previous: extractXmlTag(block, "previous"),
+      Category: extractXmlTag(block, "url"),
+      Source: FOREX_FACTORY_XML_SOURCE,
+    });
+  }
+
+  return events;
+}
+
 export async function fetchJBlankedWeeklyCalendar() {
   const apiKey = process.env.JBLANKED_API_KEY;
 
@@ -135,6 +223,49 @@ export async function fetchJBlankedWeeklyCalendar() {
   return events;
 }
 
+export async function fetchForexFactoryWeeklyCalendar() {
+  const response = await fetch(FOREX_FACTORY_WEEKLY_XML_URL, {
+    headers: {
+      "User-Agent": "Mozilla/5.0 Economic Calendar Import",
+      Accept: "text/xml,application/xml",
+    },
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    const body = await response.text().catch(() => "");
+    const details = body ? `: ${body.slice(0, 250)}` : "";
+    throw new Error(`Forex Factory XML request failed with ${response.status}${details}`);
+  }
+
+  const xml = await response.text();
+  const events = parseForexFactoryXml(xml);
+
+  if (events.length === 0) {
+    console.warn("Forex Factory XML response did not include any events.");
+  }
+
+  return events;
+}
+
+export async function fetchWeeklyEconomicCalendar() {
+  if (process.env.JBLANKED_API_KEY) {
+    try {
+      return {
+        events: await fetchJBlankedWeeklyCalendar(),
+        source: ECONOMIC_CALENDAR_SOURCE,
+      };
+    } catch (error) {
+      console.warn("JBlanked calendar import failed, falling back to Forex Factory XML:", error);
+    }
+  }
+
+  return {
+    events: await fetchForexFactoryWeeklyCalendar(),
+    source: FOREX_FACTORY_XML_SOURCE,
+  };
+}
+
 export function normalizeJBlankedEvent(item: JBlankedEvent): NormalizedEconomicEvent | null {
   const eventTime = parseJBlankedDate(item.Date);
 
@@ -163,7 +294,7 @@ export function normalizeJBlankedEvent(item: JBlankedEvent): NormalizedEconomicE
     outcome: text(item.Outcome),
     strength: text(item.Strength),
     quality: text(item.Quality),
-    source: ECONOMIC_CALENDAR_SOURCE,
+    source: text(item.Source) || ECONOMIC_CALENDAR_SOURCE,
     rawPayload: item as Prisma.InputJsonValue,
   };
 }

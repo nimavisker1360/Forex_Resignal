@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import {
-  ECONOMIC_CALENDAR_SOURCE,
-  fetchJBlankedWeeklyCalendar,
+  fetchWeeklyEconomicCalendar,
   saveEconomicEventsToDatabase,
 } from "@/lib/news/jblanked-calendar";
 
@@ -22,20 +21,13 @@ export async function POST(request: Request) {
       }
     }
 
-    if (!process.env.JBLANKED_API_KEY) {
-      return NextResponse.json(
-        { success: false, message: "JBLANKED_API_KEY is missing" },
-        { status: 500 }
-      );
-    }
-
-    const events = await fetchJBlankedWeeklyCalendar();
+    const { events, source } = await fetchWeeklyEconomicCalendar();
     const insertedOrUpdated = await saveEconomicEventsToDatabase(events);
 
     return NextResponse.json({
       success: true,
       insertedOrUpdated,
-      source: ECONOMIC_CALENDAR_SOURCE,
+      source,
     });
   } catch (error) {
     console.error("Economic calendar import failed:", error);

@@ -1,8 +1,23 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUserId, unauthorizedResponse } from "@/lib/server-auth";
+import {
+  fetchWeeklyEconomicCalendar,
+  saveEconomicEventsToDatabase,
+} from "@/lib/news/jblanked-calendar";
 
 export const dynamic = "force-dynamic";
+
+async function importCalendarWhenEmpty() {
+  const eventCount = await prisma.economicEvent.count();
+
+  if (eventCount > 0) {
+    return;
+  }
+
+  const { events } = await fetchWeeklyEconomicCalendar();
+  await saveEconomicEventsToDatabase(events);
+}
 
 function startOfToday() {
   const date = new Date();
@@ -15,15 +30,27 @@ function parseDateParam(value: string | null, fallback: Date, endOfDay = false) 
     return fallback;
   }
 
-  const dateOnly = /^\d{4}-\d{2}-\d{2}$/.test(value);
+  const dateOnly = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+
+  if (dateOnly) {
+    const [, year, month, day] = dateOnly;
+    const parsed = new Date(Number(year), Number(month) - 1, Number(day));
+
+    if (Number.isNaN(parsed.getTime())) {
+      return fallback;
+    }
+
+    if (endOfDay) {
+      parsed.setHours(23, 59, 59, 999);
+    }
+
+    return parsed;
+  }
+
   const parsed = new Date(value);
 
   if (Number.isNaN(parsed.getTime())) {
     return fallback;
-  }
-
-  if (dateOnly && endOfDay) {
-    parsed.setUTCHours(23, 59, 59, 999);
   }
 
   return parsed;
@@ -60,6 +87,8 @@ export async function GET(request: Request) {
     const to = parseDateParam(searchParams.get("to"), defaultTo, true);
     const currency = searchParams.get("currency");
     const impact = normalizeImpactFilter(searchParams.get("impact"));
+
+    await importCalendarWhenEmpty();
 
     const events = await prisma.economicEvent.findMany({
       where: {
