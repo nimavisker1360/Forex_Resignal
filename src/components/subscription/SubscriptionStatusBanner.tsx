@@ -34,10 +34,10 @@ export function SubscriptionStatusBanner({
       className={cn(
         "mb-5 rounded-lg border p-4 text-sm",
         isWarning
-          ? "border-amber-500/30 bg-amber-500/10 text-amber-100"
+          ? "border-amber-300 bg-amber-50 text-amber-800 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-100"
           : tone === "neutral"
-            ? "border-slate-700 bg-slate-800/70 text-slate-200"
-            : "border-blue-500/30 bg-blue-500/10 text-blue-100",
+            ? "border-slate-200 bg-white text-slate-800 dark:border-slate-700 dark:bg-slate-800/70 dark:text-slate-200"
+            : "border-blue-200 bg-blue-50 text-blue-800 dark:border-blue-500/30 dark:bg-blue-500/10 dark:text-blue-100",
         className
       )}
     >

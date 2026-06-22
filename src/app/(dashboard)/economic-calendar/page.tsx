@@ -304,14 +304,14 @@ export default function EconomicCalendarPage() {
         </button>
       </div>
 
-      <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-5 dark:bg-red-500/10">
+      <div className="rounded-xl border border-red-200 bg-red-50 p-5 text-red-900 dark:border-red-500/20 dark:bg-red-500/10">
         <div className="flex items-start gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-red-500/30 bg-red-500/10 text-red-300">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-red-200 bg-white text-red-500 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300">
             <AlertTriangle className="h-5 w-5" />
           </div>
           <div>
-            <div className="text-sm font-semibold text-red-100">{labels.nextHighImpactEvent}</div>
-            <p className="mt-1 text-sm text-red-100/80">
+            <div className="text-sm font-semibold text-red-900 dark:text-red-100">{labels.nextHighImpactEvent}</div>
+            <p className="mt-1 text-sm text-red-800 dark:text-red-100/80">
               {nextHighImpactEvent
                 ? labels.highImpactAlert(
                     nextHighImpactEvent.currency,

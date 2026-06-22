@@ -374,12 +374,12 @@ function CheckboxField({
   onChange: (checked: boolean) => void;
 }) {
   return (
-    <label className="flex min-h-11 items-center gap-3 rounded-lg border border-slate-800 bg-[#111827] px-3 text-sm text-slate-200">
+    <label className="flex min-h-11 items-center gap-3 rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-800 shadow-sm dark:border-slate-800 dark:bg-[#111827] dark:text-slate-200">
       <input
         type="checkbox"
         checked={checked}
         onChange={(event) => onChange(event.target.checked)}
-        className="h-4 w-4 rounded border-slate-700 bg-slate-950 accent-blue-600"
+        className="h-4 w-4 rounded border-slate-300 bg-white accent-blue-600 dark:border-slate-700 dark:bg-slate-950"
       />
       {label}
     </label>

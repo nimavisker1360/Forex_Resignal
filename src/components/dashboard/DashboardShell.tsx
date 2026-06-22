@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
-import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   BarChart3,
   BookOpenCheck,
@@ -15,20 +14,16 @@ import {
   Gauge,
   LineChart,
   ListChecks,
-  Moon,
   PlaySquare,
   Settings,
   ShieldCheck,
-  Sun,
 } from "lucide-react";
 import { DashboardSignOutButton } from "@/components/dashboard/DashboardSignOutButton";
+import { DashboardThemeToggle, useDashboardTheme } from "@/components/dashboard/dashboard-theme";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { useLanguage } from "@/lib/language-context";
 import { cn } from "@/lib/utils";
 
-type DashboardTheme = "dark" | "light";
-
-const THEME_STORAGE_KEY = "signalmax-dashboard-theme";
 const MT5_BOT_DOWNLOAD_URL = "/api/downloads/trade-journal-recorder";
 
 const sidebarItems = [
@@ -47,39 +42,19 @@ const sidebarItems = [
 ];
 
 export function DashboardShell({ children, showAdmin = false }: { children: ReactNode; showAdmin?: boolean }) {
-  const [theme, setTheme] = useState<DashboardTheme>("dark");
   const pathname = usePathname();
   const { language, t } = useLanguage();
+  const { theme, isDark, applyTheme } = useDashboardTheme();
   const translatedDownloadBotLabel = t("dashboard.shell.downloadMt5Bot");
   const downloadBotLabel =
     translatedDownloadBotLabel === "dashboard.shell.downloadMt5Bot"
       ? "Download MT5 Package"
       : translatedDownloadBotLabel;
 
-  const applyTheme = useCallback((nextTheme: DashboardTheme) => {
-    setTheme(nextTheme);
-    window.localStorage.setItem(THEME_STORAGE_KEY, nextTheme);
-    document.documentElement.dataset.dashboardTheme = nextTheme;
-    document.documentElement.classList.toggle("dark", nextTheme === "dark");
-  }, []);
-
-  const isDark = theme === "dark";
-
-  const themeButtonClass = useMemo(
-    () =>
-      "inline-flex h-9 items-center gap-2 rounded-lg border px-3 text-xs font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400",
-    []
-  );
-
-  useEffect(() => {
-    const savedTheme = window.localStorage.getItem(THEME_STORAGE_KEY);
-    applyTheme(savedTheme === "light" ? "light" : "dark");
-  }, [applyTheme]);
-
   return (
     <section
       className={cn(
-        "dashboard-shell min-h-screen transition-colors",
+        "dashboard-shell themeable-shell min-h-screen transition-colors",
         isDark ? "dark bg-[#020617] text-[#E5E7EB]" : "bg-slate-50 text-slate-950"
       )}
       data-dashboard-theme={theme}
@@ -209,42 +184,7 @@ export function DashboardShell({ children, showAdmin = false }: { children: Reac
                   <span className="sm:hidden">MT5</span>
                 </a>
                 <LanguageSwitcher />
-                <div
-                  className={cn(
-                    "flex rounded-xl border p-1",
-                    isDark ? "border-slate-800 bg-slate-950" : "border-slate-200 bg-slate-100"
-                  )}
-                  aria-label={t("dashboard.shell.theme")}
-                >
-                  <button
-                    type="button"
-                    aria-pressed={!isDark}
-                    onClick={() => applyTheme("light")}
-                    className={cn(
-                      themeButtonClass,
-                      !isDark
-                        ? "border-white bg-white text-slate-950 shadow-sm"
-                        : "border-transparent text-slate-400 hover:text-white"
-                    )}
-                  >
-                    <Sun className="h-4 w-4" />
-                    {t("dashboard.shell.light")}
-                  </button>
-                  <button
-                    type="button"
-                    aria-pressed={isDark}
-                    onClick={() => applyTheme("dark")}
-                    className={cn(
-                      themeButtonClass,
-                      isDark
-                        ? "border-slate-700 bg-slate-800 text-white shadow-sm"
-                        : "border-transparent text-slate-500 hover:text-slate-950"
-                    )}
-                  >
-                    <Moon className="h-4 w-4" />
-                    {t("dashboard.shell.dark")}
-                  </button>
-                </div>
+                <DashboardThemeToggle isDark={isDark} onThemeChange={applyTheme} />
               </div>
             </div>
           </header>

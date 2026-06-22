@@ -68,7 +68,8 @@
   --card-foreground: oklch(0.147 0.004 49.25);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.147 0.004 49.25);
-  --primary: oklch(0.216 0.006 56.043);
+  --primary: oklch(0.55 0.22 260);
+  --primary-foreground: oklch(0.985 0.001 106.423);
   --secondary: oklch(0.97 0.001 106.424);
   --secondary-foreground: oklch(0.216 0.006 56.043);
   --muted: oklch(0.97 0.001 106.424);
@@ -179,42 +180,107 @@ html[data-dashboard-theme="light"] body::before {
   opacity: 0;
 }
 
-html[data-dashboard-theme="light"] .dashboard-shell {
-  background-color: #f8fafc !important;
+html[data-dashboard-theme="light"] .themeable-shell {
+  background:
+    radial-gradient(circle at top left, rgba(59, 130, 246, 0.08), transparent 28rem),
+    linear-gradient(180deg, #f8fbff 0%, #f8fafc 48%, #eef6ff 100%) !important;
   color: #0f172a !important;
 }
 
-html[data-dashboard-theme="light"] .dashboard-shell [class*="bg-[#020617]"] {
+html[data-dashboard-theme="light"] .themeable-shell [class*="bg-[#020617]"],
+html[data-dashboard-theme="light"] .themeable-shell [class*="bg-[#0B1020]"],
+html[data-dashboard-theme="light"] .themeable-shell [class*="bg-[#0B1220]"] {
   background-color: #f8fafc !important;
 }
 
-html[data-dashboard-theme="light"] .dashboard-shell [class*="bg-[#0F172A]"],
-html[data-dashboard-theme="light"] .dashboard-shell [class*="bg-[#111827]"],
-html[data-dashboard-theme="light"] .dashboard-shell [class*="bg-slate-950"] {
+html[data-dashboard-theme="light"] .themeable-shell [class*="bg-[#0F172A]"],
+html[data-dashboard-theme="light"] .themeable-shell [class*="bg-[#111827]"],
+html[data-dashboard-theme="light"] .themeable-shell [class*="bg-slate-950"],
+html[data-dashboard-theme="light"] .themeable-shell [class*="bg-slate-900"],
+html[data-dashboard-theme="light"] .themeable-shell [class*="bg-gray-950"] {
   background-color: #ffffff !important;
 }
 
-html[data-dashboard-theme="light"] .dashboard-shell [class*="border-slate-800"],
-html[data-dashboard-theme="light"] .dashboard-shell [class*="border-slate-700"] {
-  border-color: #e2e8f0 !important;
-}
-
-html[data-dashboard-theme="light"] .dashboard-shell [class*="text-white"]:not([class*="bg-[#2563EB]"]):not([class*="bg-blue-"]):not([class*="bg-emerald-"]):not([class*="bg-red-"]),
-html[data-dashboard-theme="light"] .dashboard-shell [class*="text-slate-100"],
-html[data-dashboard-theme="light"] .dashboard-shell [class*="text-[#E5E7EB]"] {
-  color: #0f172a !important;
-}
-
-html[data-dashboard-theme="light"] .dashboard-shell [class*="text-slate-300"],
-html[data-dashboard-theme="light"] .dashboard-shell [class*="text-slate-400"] {
-  color: #475569 !important;
-}
-
-html[data-dashboard-theme="light"] .dashboard-shell [class*="hover:bg-slate-800"]:hover {
+html[data-dashboard-theme="light"] .themeable-shell [class*="bg-slate-800"],
+html[data-dashboard-theme="light"] .themeable-shell [class*="bg-gray-900"] {
   background-color: #f1f5f9 !important;
 }
 
-html[data-dashboard-theme="light"] .dashboard-shell [class*="hover:text-white"]:hover {
+html[data-dashboard-theme="light"] .themeable-shell [class*="border-slate-800"],
+html[data-dashboard-theme="light"] .themeable-shell [class*="border-slate-700"],
+html[data-dashboard-theme="light"] .themeable-shell [class*="border-gray-800"],
+html[data-dashboard-theme="light"] .themeable-shell [class*="divide-slate-800"] {
+  border-color: #dbe5f0 !important;
+}
+
+html[data-dashboard-theme="light"] .themeable-shell [class*="text-white"]:not([class*="bg-[#2563EB]"]):not([class*="bg-blue-"]):not([class*="bg-emerald-"]):not([class*="bg-red-"]):not([class*="bg-violet-"]):not([class*="bg-gradient"]),
+html[data-dashboard-theme="light"] .themeable-shell [class*="text-slate-100"],
+html[data-dashboard-theme="light"] .themeable-shell [class*="text-slate-200"],
+html[data-dashboard-theme="light"] .themeable-shell [class*="text-[#E5E7EB]"],
+html[data-dashboard-theme="light"] .themeable-shell [class*="text-gray-200"] {
+  color: #0f172a !important;
+}
+
+html[data-dashboard-theme="light"] .themeable-shell [class*="text-blue-100"],
+html[data-dashboard-theme="light"] .themeable-shell [class*="text-blue-200"] {
+  color: #1d4ed8 !important;
+}
+
+html[data-dashboard-theme="light"] .themeable-shell [class*="text-red-100"],
+html[data-dashboard-theme="light"] .themeable-shell [class*="text-red-200"] {
+  color: #991b1b !important;
+}
+
+html[data-dashboard-theme="light"] .themeable-shell [class*="text-amber-100"],
+html[data-dashboard-theme="light"] .themeable-shell [class*="text-amber-200"] {
+  color: #92400e !important;
+}
+
+html[data-dashboard-theme="light"] .themeable-shell [class*="text-slate-300"],
+html[data-dashboard-theme="light"] .themeable-shell [class*="text-slate-400"],
+html[data-dashboard-theme="light"] .themeable-shell [class*="text-gray-300"],
+html[data-dashboard-theme="light"] .themeable-shell [class*="text-gray-400"] {
+  color: #475569 !important;
+}
+
+html[data-dashboard-theme="light"] .themeable-shell input,
+html[data-dashboard-theme="light"] .themeable-shell select,
+html[data-dashboard-theme="light"] .themeable-shell textarea {
+  background-color: #ffffff !important;
+  border-color: #dbe5f0 !important;
+  color: #0f172a !important;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+html[data-dashboard-theme="light"] .themeable-shell input::placeholder,
+html[data-dashboard-theme="light"] .themeable-shell textarea::placeholder {
+  color: #94a3b8 !important;
+}
+
+html[data-dashboard-theme="light"] .themeable-shell a[class*="bg-[#2563EB]"],
+html[data-dashboard-theme="light"] .themeable-shell button[class*="bg-[#2563EB]"],
+html[data-dashboard-theme="light"] .themeable-shell a[class*="bg-blue-600"],
+html[data-dashboard-theme="light"] .themeable-shell button[class*="bg-blue-600"] {
+  background-image: linear-gradient(135deg, #2563eb 0%, #0891b2 100%) !important;
+  border-color: transparent !important;
+  color: #ffffff !important;
+  box-shadow: 0 12px 28px rgba(37, 99, 235, 0.22);
+}
+
+html[data-dashboard-theme="light"] .themeable-shell a[class*="bg-[#2563EB]"]:hover,
+html[data-dashboard-theme="light"] .themeable-shell button[class*="bg-[#2563EB]"]:hover,
+html[data-dashboard-theme="light"] .themeable-shell a[class*="bg-blue-600"]:hover,
+html[data-dashboard-theme="light"] .themeable-shell button[class*="bg-blue-600"]:hover {
+  filter: saturate(1.08) brightness(1.02);
+  transform: translateY(-1px);
+}
+
+html[data-dashboard-theme="light"] .themeable-shell [class*="hover:bg-slate-800"]:hover,
+html[data-dashboard-theme="light"] .themeable-shell [class*="hover:bg-gray-800"]:hover {
+  background-color: #eef6ff !important;
+}
+
+html[data-dashboard-theme="light"] .themeable-shell [class*="hover:text-white"]:hover {
   color: #0f172a !important;
 }
 

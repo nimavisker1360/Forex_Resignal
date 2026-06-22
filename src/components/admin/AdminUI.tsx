@@ -14,7 +14,11 @@ import {
   ShieldCheck,
   Users,
 } from "lucide-react";
+import { DashboardSignOutButton } from "@/components/dashboard/DashboardSignOutButton";
+import { DashboardThemeToggle, useDashboardTheme } from "@/components/dashboard/dashboard-theme";
+import { LanguageSwitcher } from "@/components/language-switcher";
 import { Button } from "@/components/ui/button";
+import { useLanguage } from "@/lib/language-context";
 import { cn } from "@/lib/utils";
 
 const navItems = [
@@ -38,22 +42,46 @@ const pageTitles: Record<string, string> = {
 
 export function AdminShell({ children, adminEmail }: { children: ReactNode; adminEmail: string }) {
   const pathname = usePathname();
+  const { theme, isDark, applyTheme } = useDashboardTheme();
+  const { language } = useLanguage();
   const pageTitle =
     pageTitles[pathname] ||
     (pathname.startsWith("/admin/users/") ? "User Detail" : pathname.startsWith("/admin/payments/") ? "Payment Detail" : "Admin");
 
   return (
-    <section className="min-h-screen bg-[#020617] text-slate-100">
+    <section
+      className={cn(
+        "dashboard-shell themeable-shell min-h-screen transition-colors",
+        isDark ? "dark bg-[#020617] text-slate-100" : "bg-slate-50 text-slate-950"
+      )}
+      data-dashboard-theme={theme}
+      dir={language === "fa" ? "rtl" : "ltr"}
+    >
       <div className="flex min-h-screen flex-col lg:flex-row">
-        <aside className="border-b border-slate-800 bg-[#0F172A] lg:sticky lg:top-0 lg:h-screen lg:w-72 lg:border-b-0 lg:border-r">
+        <aside
+          className={cn(
+            "border-b lg:sticky lg:top-0 lg:h-screen lg:w-72 lg:border-b-0 lg:border-r",
+            isDark ? "border-slate-800 bg-[#0F172A]" : "border-slate-200 bg-white"
+          )}
+        >
           <div className="flex h-full flex-col">
-            <div className="flex h-16 items-center gap-3 border-b border-slate-800 px-6">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-500/15 text-emerald-300">
+            <div
+              className={cn(
+                "flex h-16 items-center gap-3 border-b px-6",
+                isDark ? "border-slate-800" : "border-slate-200"
+              )}
+            >
+              <div
+                className={cn(
+                  "flex h-10 w-10 items-center justify-center rounded-lg",
+                  isDark ? "bg-emerald-500/15 text-emerald-300" : "bg-emerald-50 text-emerald-700"
+                )}
+              >
                 <ShieldCheck className="h-5 w-5" />
               </div>
               <div>
-                <div className="text-sm font-semibold text-white">SignalMax</div>
-                <div className="text-xs text-slate-400">Admin Panel</div>
+                <div className={cn("text-sm font-semibold", isDark ? "text-white" : "text-slate-950")}>SignalMax</div>
+                <div className={cn("text-xs", isDark ? "text-slate-400" : "text-slate-500")}>Admin Panel</div>
               </div>
             </div>
             <nav className="flex gap-2 overflow-x-auto px-4 py-4 lg:flex-1 lg:flex-col lg:overflow-visible">
@@ -68,31 +96,67 @@ export function AdminShell({ children, adminEmail }: { children: ReactNode; admi
                     className={cn(
                       "inline-flex h-10 shrink-0 items-center gap-3 rounded-lg px-3 text-sm font-medium transition lg:w-full",
                       active
-                        ? "bg-slate-800 text-white"
-                        : "text-slate-300 hover:bg-slate-800 hover:text-white"
+                        ? isDark
+                          ? "bg-slate-800 text-white"
+                          : "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200"
+                        : isDark
+                          ? "text-slate-300 hover:bg-slate-800 hover:text-white"
+                          : "text-slate-700 hover:bg-slate-100 hover:text-slate-950"
                     )}
                   >
-                    <Icon className="h-4 w-4 text-slate-400" />
+                    <Icon className={cn("h-4 w-4", active && !isDark ? "text-emerald-700" : isDark ? "text-slate-400" : "text-slate-500")} />
                     {item.label}
                   </Link>
                 );
               })}
             </nav>
+
+            <div
+              className={cn(
+                "px-4 pb-5 pt-3 lg:mt-auto lg:border-t",
+                isDark ? "lg:border-slate-800" : "lg:border-slate-200"
+              )}
+            >
+              <DashboardSignOutButton
+                className={cn(
+                  "h-11 w-full rounded-xl px-3",
+                  isDark ? "hover:bg-red-500/10" : "hover:bg-red-50"
+                )}
+              />
+            </div>
           </div>
         </aside>
         <div className="flex min-w-0 flex-1 flex-col">
-          <header className="sticky top-0 z-20 border-b border-slate-800 bg-[#020617]/90 backdrop-blur">
+          <header
+            className={cn(
+              "sticky top-0 z-20 border-b backdrop-blur",
+              isDark ? "border-slate-800 bg-[#020617]/90" : "border-slate-200 bg-white/90"
+            )}
+          >
             <div className="mx-auto flex h-16 w-full max-w-[1500px] items-center justify-between gap-4 px-6">
               <div className="min-w-0">
-                <h1 className="truncate text-sm font-semibold text-white">{pageTitle}</h1>
-                <p className="truncate text-xs text-slate-400">{adminEmail}</p>
+                <h1 className={cn("truncate text-sm font-semibold", isDark ? "text-white" : "text-slate-950")}>{pageTitle}</h1>
+                <p className={cn("truncate text-xs", isDark ? "text-slate-400" : "text-slate-500")}>{adminEmail}</p>
               </div>
-              <Button asChild variant="outline" size="sm" className="border-slate-700 text-slate-100 hover:bg-slate-800">
-                <Link href="/dashboard">
-                  <Gauge className="mr-2 h-4 w-4" />
-                  App
-                </Link>
-              </Button>
+              <div className="flex shrink-0 items-center gap-3">
+                <LanguageSwitcher />
+                <DashboardThemeToggle isDark={isDark} onThemeChange={applyTheme} />
+                <Button
+                  asChild
+                  variant="outline"
+                  size="sm"
+                  className={cn(
+                    isDark
+                      ? "border-slate-700 text-slate-100 hover:bg-slate-800"
+                      : "border-slate-200 bg-white text-slate-700 shadow-sm hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700"
+                  )}
+                >
+                  <Link href="/dashboard">
+                    <Gauge className="mr-2 h-4 w-4" />
+                    App
+                  </Link>
+                </Button>
+              </div>
             </div>
           </header>
           <main className="mx-auto w-full max-w-[1500px] flex-1 px-4 py-6 sm:px-6">{children}</main>

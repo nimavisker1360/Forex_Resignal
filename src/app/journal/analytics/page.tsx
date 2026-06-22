@@ -680,17 +680,17 @@ function AnalyticsHero({
   const weakHour = activeHours.sort((a, b) => a.netPnl - b.netPnl)[0] || null;
 
   return (
-    <section className="overflow-hidden rounded-lg border border-slate-800 bg-[#0B1020] shadow-sm">
+    <section className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-[#0B1020]">
       <div className="grid gap-0 xl:grid-cols-[1.08fr_0.92fr]">
-        <div className="p-5 sm:p-6 lg:p-7">
-          <div className="inline-flex items-center gap-2 rounded-full border border-violet-500/30 bg-violet-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-violet-200">
+        <div className="bg-gradient-to-br from-slate-50 via-white to-violet-50 p-5 sm:p-6 lg:p-7 dark:bg-none">
+          <div className="inline-flex items-center gap-2 rounded-full border border-violet-200 bg-violet-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-violet-700 dark:border-violet-500/30 dark:bg-violet-500/10 dark:text-violet-200">
             <Activity className="h-3.5 w-3.5" />
             {t("journal.analytics.tradeAnalysis")}
           </div>
-          <h1 className="mt-5 max-w-3xl text-3xl font-semibold leading-tight text-white sm:text-4xl">
-            {t("journal.analytics.heroTitlePrefix")} <span className="text-violet-300">{t("journal.analytics.heroTitleHighlight")}</span> {t("journal.analytics.heroTitleSuffix")}
+          <h1 className="mt-5 max-w-3xl text-3xl font-semibold leading-tight text-slate-950 sm:text-4xl dark:text-white">
+            {t("journal.analytics.heroTitlePrefix")} <span className="text-violet-600 dark:text-violet-300">{t("journal.analytics.heroTitleHighlight")}</span> {t("journal.analytics.heroTitleSuffix")}
           </h1>
-          <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-400">
+          <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-400">
             {t("journal.analytics.heroDescription")}
           </p>
 
@@ -702,18 +702,18 @@ function AnalyticsHero({
           </div>
         </div>
 
-        <div className="border-t border-slate-800 bg-[#111827] p-5 sm:p-6 xl:border-l xl:border-t-0">
+        <div className="border-t border-slate-200 bg-white p-5 sm:p-6 xl:border-l xl:border-t-0 dark:border-slate-800 dark:bg-[#111827]">
           <div className="mb-4 flex items-center justify-between gap-3">
             <div>
-              <div className="text-sm font-semibold text-white">{t("journal.analytics.keyInsights")}</div>
-              <div className="mt-1 text-xs text-slate-400">
+              <div className="text-sm font-semibold text-slate-950 dark:text-white">{t("journal.analytics.keyInsights")}</div>
+              <div className="mt-1 text-xs text-slate-600 dark:text-slate-400">
                 {loading ? t("journal.analytics.updatingReport") : t("journal.analytics.closedTradesAnalyzed").replace("{count}", formatNumber(overview.totalTrades, 0))}
               </div>
             </div>
             {loading ? (
-              <Loader2 className="h-4 w-4 animate-spin text-violet-300" />
+              <Loader2 className="h-4 w-4 animate-spin text-violet-500 dark:text-violet-300" />
             ) : (
-              <Zap className="h-4 w-4 text-violet-300" />
+              <Zap className="h-4 w-4 text-violet-500 dark:text-violet-300" />
             )}
           </div>
           <div className="space-y-3">
@@ -755,15 +755,15 @@ function MetricTile({
   tone?: "neutral" | "profit" | "loss" | "blue" | "amber";
 }) {
   return (
-    <div className="rounded-lg border border-slate-800 bg-[#0F172A] p-3">
-      <div className="text-xs font-medium uppercase text-slate-500">{label}</div>
+    <div className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-800 dark:bg-[#0F172A]">
+      <div className="text-xs font-medium uppercase text-slate-500 dark:text-slate-500">{label}</div>
       <div
         className={cn(
-          "mt-2 text-lg font-semibold text-white",
-          tone === "profit" && "text-emerald-300",
-          tone === "loss" && "text-red-300",
-          tone === "blue" && "text-sky-300",
-          tone === "amber" && "text-amber-300"
+          "mt-2 text-lg font-semibold text-slate-950 dark:text-white",
+          tone === "profit" && "text-emerald-600 dark:text-emerald-300",
+          tone === "loss" && "text-red-500 dark:text-red-300",
+          tone === "blue" && "text-sky-500 dark:text-sky-300",
+          tone === "amber" && "text-amber-500 dark:text-amber-300"
         )}
       >
         {value}
@@ -786,22 +786,22 @@ function InsightLine({
   tone: "profit" | "loss" | "amber";
 }) {
   return (
-    <div className="rounded-lg border border-slate-800 bg-[#0B1020] p-4">
+    <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 shadow-sm dark:border-slate-800 dark:bg-[#0B1020]">
       <div className="flex items-start gap-3">
         <span
           className={cn(
             "mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border",
-            tone === "profit" && "border-emerald-500/30 bg-emerald-500/10 text-emerald-300",
-            tone === "loss" && "border-red-500/30 bg-red-500/10 text-red-300",
-            tone === "amber" && "border-amber-500/30 bg-amber-500/10 text-amber-300"
+            tone === "profit" && "border-emerald-200 bg-emerald-50 text-emerald-600 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300",
+            tone === "loss" && "border-red-200 bg-red-50 text-red-600 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300",
+            tone === "amber" && "border-amber-200 bg-amber-50 text-amber-600 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-300"
           )}
         >
           {icon}
         </span>
         <div className="min-w-0">
-          <div className="text-xs font-medium uppercase text-slate-500">{label}</div>
-          <div className="mt-1 truncate text-sm font-semibold text-white">{value}</div>
-          <div className="mt-1 text-xs text-slate-400">{detail}</div>
+          <div className="text-xs font-medium uppercase text-slate-500 dark:text-slate-500">{label}</div>
+          <div className="mt-1 truncate text-sm font-semibold text-slate-950 dark:text-white">{value}</div>
+          <div className="mt-1 text-xs text-slate-600 dark:text-slate-400">{detail}</div>
         </div>
       </div>
     </div>
