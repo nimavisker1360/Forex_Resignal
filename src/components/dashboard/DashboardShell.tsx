@@ -159,8 +159,21 @@ export function DashboardShell({ children, showAdmin = false }: { children: Reac
                   </Link>
                 );
               })}
-              <DashboardSignOutButton className="h-10 w-auto shrink-0 rounded-xl px-3 lg:w-full" />
             </nav>
+
+            <div
+              className={cn(
+                "px-4 pb-5 pt-3 lg:mt-auto lg:border-t",
+                isDark ? "lg:border-slate-800" : "lg:border-slate-200"
+              )}
+            >
+              <DashboardSignOutButton
+                className={cn(
+                  "h-11 w-full rounded-xl px-3",
+                  isDark ? "hover:bg-red-500/10" : "hover:bg-red-50"
+                )}
+              />
+            </div>
           </div>
         </aside>
 
