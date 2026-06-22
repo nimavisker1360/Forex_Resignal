@@ -24,6 +24,18 @@ function validationResponse(errors: string[]) {
   );
 }
 
+function followedPlanFromCompliance(percent: number) {
+  if (percent >= 80) {
+    return "YES" as const;
+  }
+
+  if (percent >= 50) {
+    return "PARTIAL" as const;
+  }
+
+  return "NO" as const;
+}
+
 async function loadReview(tradeId: string, userId: string) {
   return prisma.tradeStrategyReview.findFirst({
     where: { tradeId, trade: { userId } },
@@ -98,6 +110,9 @@ export async function POST(request: Request, context: RouteContext) {
             rules: {
               orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
             },
+            checklistItems: {
+              orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+            },
           },
         }),
       ]);
@@ -110,16 +125,32 @@ export async function POST(request: Request, context: RouteContext) {
         throw new Error("STRATEGY_NOT_FOUND");
       }
 
-      const ruleSnapshots = strategy.rules.map((rule, index) => ({
-        originalRuleId: rule.id,
-        ruleTitleSnapshot: rule.title,
-        ruleDescriptionSnapshot: rule.description,
-        ruleSectionSnapshot: rule.section,
-        isRequiredSnapshot: rule.isRequired,
-        status: "NOT_REVIEWED",
-        sortOrder: rule.sortOrder ?? index,
-      }));
+      const planItems =
+        strategy.checklistItems.length > 0
+          ? strategy.checklistItems.map((item, index) => ({
+              originalRuleId: item.id,
+              ruleTitleSnapshot: item.title,
+              ruleDescriptionSnapshot: item.description,
+              ruleSectionSnapshot: "ENTRY",
+              isRequiredSnapshot: item.isRequired,
+              status: "VIOLATED",
+              sortOrder: item.sortOrder ?? index,
+            }))
+          : strategy.rules.map((rule, index) => ({
+              originalRuleId: rule.id,
+              ruleTitleSnapshot: rule.title,
+              ruleDescriptionSnapshot: rule.description,
+              ruleSectionSnapshot: rule.section,
+              isRequiredSnapshot: rule.isRequired,
+              status: "VIOLATED",
+              sortOrder: rule.sortOrder ?? index,
+            }));
+      const ruleSnapshots = planItems;
       const compliance = calculateStrategyCompliance(ruleSnapshots);
+      const autoFollowedPlan =
+        ruleSnapshots.length > 0
+          ? followedPlanFromCompliance(compliance.compliancePercent)
+          : followedPlan;
       const existing = await tx.tradeStrategyReview.findUnique({
         where: { tradeId: id },
         select: { id: true },
@@ -140,7 +171,7 @@ export async function POST(request: Request, context: RouteContext) {
           data: {
             strategyId: strategy.id,
             strategyNameSnapshot: strategy.name,
-            followedPlan,
+            followedPlan: autoFollowedPlan,
             notes: optionalString(body.notes),
             ...compliance,
             ruleReviews: {
@@ -156,7 +187,7 @@ export async function POST(request: Request, context: RouteContext) {
           tradeId: id,
           strategyId: strategy.id,
           strategyNameSnapshot: strategy.name,
-          followedPlan,
+          followedPlan: autoFollowedPlan,
           notes: optionalString(body.notes),
           ...compliance,
           ruleReviews: {
@@ -206,7 +237,11 @@ export async function PATCH(request: Request, context: RouteContext) {
     const { id } = await context.params;
     const body = (await request.json()) as Record<string, unknown>;
     const followedPlan = normalizeFollowedPlan(body.followedPlan);
-    const rawRuleReviews = Array.isArray(body.ruleReviews) ? body.ruleReviews : [];
+    const rawRuleReviews = Array.isArray(body.ruleReviews)
+      ? body.ruleReviews
+      : Array.isArray(body.checklistItems)
+        ? body.checklistItems
+        : [];
     const errors: string[] = [];
 
     if (!followedPlan) {
@@ -219,7 +254,14 @@ export async function PATCH(request: Request, context: RouteContext) {
           ? (rawReview as Record<string, unknown>)
           : {};
       const reviewId = optionalString(review.id);
-      const status = normalizeRuleReviewStatus(review.status);
+      const checked =
+        typeof review.checked === "boolean" ? review.checked : undefined;
+      const status =
+        checked === undefined
+          ? normalizeRuleReviewStatus(review.status)
+          : checked
+            ? "FOLLOWED"
+            : "VIOLATED";
 
       if (!reviewId) {
         return [];
@@ -275,11 +317,12 @@ export async function PATCH(request: Request, context: RouteContext) {
         where: { tradeStrategyReviewId: existing.id },
       });
       const compliance = calculateStrategyCompliance(refreshedRules);
+      const autoFollowedPlan = followedPlanFromCompliance(compliance.compliancePercent);
 
       return tx.tradeStrategyReview.update({
         where: { id: existing.id },
         data: {
-          followedPlan,
+          followedPlan: autoFollowedPlan,
           notes: optionalString(body.notes),
           ...compliance,
         },

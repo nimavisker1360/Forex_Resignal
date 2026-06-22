@@ -437,6 +437,43 @@ function TopTable({ report, copy }: { report: JournalReport; copy: typeof COPY[L
   );
 }
 
+function PlaybookPerformanceTable({ report, copy }: { report: JournalReport; copy: typeof COPY[Language] }) {
+  const rows = report.analytics.byStrategy.slice(0, 8);
+
+  if (rows.length === 0) {
+    return <EmptyLine label="No playbook performance yet." />;
+  }
+
+  return (
+    <div className="overflow-x-auto">
+      <table className="min-w-full divide-y divide-slate-800 text-sm print:divide-slate-200">
+        <thead>
+          <tr className="text-left text-xs uppercase text-slate-500">
+            <th className="py-2 pr-4">Playbook</th>
+            <th className="py-2 pr-4">{copy.symbolPanel.trades}</th>
+            <th className="py-2 pr-4">{copy.symbolPanel.winRate}</th>
+            <th className="py-2 pr-4">{copy.symbolPanel.netPnl}</th>
+            <th className="py-2">Profit Factor</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-slate-800 print:divide-slate-200">
+          {rows.map((row) => (
+            <tr key={row.strategy} className="text-slate-300 print:text-slate-700">
+              <td className="py-3 pr-4 font-semibold text-white print:text-slate-950">{row.strategy}</td>
+              <td className="py-3 pr-4">{row.totalTrades}</td>
+              <td className="py-3 pr-4">{formatPercent(row.winRate)}</td>
+              <td className={cn("py-3 pr-4 font-semibold", toneClass(pnlTone(row.netPnl)), "print:text-slate-950")}>
+                {formatMoney(row.netPnl)}
+              </td>
+              <td className="py-3">{formatNumber(row.profitFactor, 2)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 function RecentTradesTable({
   report,
   copy,
@@ -589,9 +626,15 @@ export function ReportsContent({
       </Panel>
 
       <div className="grid gap-5 xl:grid-cols-2">
+        <Panel title="Playbook Performance" subtitle="Plan compliance and realized performance grouped by playbook." icon={Target}>
+          <PlaybookPerformanceTable report={report} copy={copy} />
+        </Panel>
         <Panel title={copy.symbolPanel.title} subtitle={copy.symbolPanel.subtitle} icon={Target}>
           <TopTable report={report} copy={copy} />
         </Panel>
+      </div>
+
+      <div className="grid gap-5 xl:grid-cols-2">
         <Panel title={copy.behavior.title} subtitle={copy.behavior.subtitle} icon={Brain}>
           <div className="grid gap-4 sm:grid-cols-2">
             <div>

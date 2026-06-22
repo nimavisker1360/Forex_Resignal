@@ -78,17 +78,21 @@ function badgeClass(kind: "status" | "side", value: string | null | undefined) {
   return "border-slate-700 bg-slate-900 text-slate-300";
 }
 
-function planBadgeClass(value: string | null | undefined) {
-  if (value === "YES") {
+function reviewStatus(strategyReview: { followedPlan?: string | null } | null | undefined) {
+  if (!strategyReview) {
+    return "Not Reviewed";
+  }
+
+  return strategyReview.followedPlan === "NOT_REVIEWED" ? "Needs Review" : "Reviewed";
+}
+
+function reviewStatusBadgeClass(value: string) {
+  if (value === "Reviewed") {
     return "border-emerald-500/30 bg-emerald-500/10 text-emerald-300";
   }
 
-  if (value === "PARTIAL") {
-    return "border-blue-500/30 bg-blue-500/10 text-blue-300";
-  }
-
-  if (value === "NO") {
-    return "border-red-500/30 bg-red-500/10 text-red-300";
+  if (value === "Needs Review") {
+    return "border-amber-500/30 bg-amber-500/10 text-amber-300";
   }
 
   return "border-slate-700 bg-slate-900 text-slate-300";
@@ -314,7 +318,7 @@ export default async function JournalPage({ searchParams }: JournalPageProps) {
                 <th className="px-3 py-3"><DashboardText k="journal.trades.direction" /></th>
                 <th className="px-3 py-3"><DashboardText k="journal.tradeDetail.account" /></th>
                 <th className="px-3 py-3"><DashboardText k="journal.tradeDetail.strategy" /></th>
-                <th className="px-3 py-3"><DashboardText k="journal.strategyReview.plan" /></th>
+                <th className="px-3 py-3">Review Status</th>
                 <th className="px-3 py-3"><DashboardText k="journal.trades.compliance" /></th>
                 <th className="px-3 py-3"><DashboardText k="journal.tradeDetail.entry" /></th>
                 <th className="px-3 py-3"><DashboardText k="journal.tradeDetail.exit" /></th>
@@ -358,20 +362,10 @@ export default async function JournalPage({ searchParams }: JournalPageProps) {
                     <span
                       className={cn(
                         "inline-flex rounded-lg border px-2.5 py-1 text-xs font-semibold",
-                        planBadgeClass(trade.strategyReview?.followedPlan)
+                        reviewStatusBadgeClass(reviewStatus(trade.strategyReview))
                       )}
                     >
-                      <DashboardText
-                        k={
-                          trade.strategyReview?.followedPlan === "YES"
-                            ? "journal.strategyReview.yes"
-                            : trade.strategyReview?.followedPlan === "PARTIAL"
-                              ? "journal.strategyReview.partial"
-                              : trade.strategyReview?.followedPlan === "NO"
-                                ? "journal.strategyReview.no"
-                                : "journal.strategyReview.notReviewed"
-                        }
-                      />
+                      {reviewStatus(trade.strategyReview)}
                     </span>
                   </td>
                   <td className="px-3 py-4">

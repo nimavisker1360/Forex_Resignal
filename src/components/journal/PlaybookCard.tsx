@@ -87,7 +87,7 @@ export function PlaybookCard({
         <Badge>{playbook.symbols || t("journal.playbooks.allSymbols")}</Badge>
         <Badge>{playbook.timeframes || t("journal.playbooks.allTimeframes")}</Badge>
         <Badge tone="blue">
-          {t("journal.playbooks.checklistsCount").replace("{count}", String(playbook.linkedChecklistCount))}
+          {t("journal.playbooks.checklistItemsCount").replace("{count}", String(playbook.checklistItems.length))}
         </Badge>
         <Badge>{t("journal.playbooks.rulesCount").replace("{count}", String(playbook.ruleCount))}</Badge>
       </div>

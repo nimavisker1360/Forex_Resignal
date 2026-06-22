@@ -38,6 +38,19 @@ export const tradeListInclude = {
       },
     },
   },
+  strategyReview: {
+    select: {
+      id: true,
+      strategyId: true,
+      strategyNameSnapshot: true,
+      followedPlan: true,
+      totalRules: true,
+      followedRules: true,
+      violatedRules: true,
+      compliancePercent: true,
+      requiredCompliancePercent: true,
+    },
+  },
 } satisfies Prisma.TradeInclude;
 
 type AccountRecord = Prisma.TradingAccountGetPayload<{ select: typeof accountSelect }>;
@@ -103,6 +116,19 @@ export function serializeTrade(trade: TradeListRecord): TradeDto {
       tagId: item.tagId,
       tag: serializeTag(item.tag),
     })),
+    strategyReview: trade.strategyReview
+      ? {
+          id: trade.strategyReview.id,
+          strategyId: trade.strategyReview.strategyId,
+          strategyNameSnapshot: trade.strategyReview.strategyNameSnapshot,
+          followedPlan: trade.strategyReview.followedPlan as "YES" | "PARTIAL" | "NO" | "NOT_REVIEWED",
+          totalRules: trade.strategyReview.totalRules,
+          followedRules: trade.strategyReview.followedRules,
+          violatedRules: trade.strategyReview.violatedRules,
+          compliancePercent: trade.strategyReview.compliancePercent,
+          requiredCompliancePercent: trade.strategyReview.requiredCompliancePercent,
+        }
+      : null,
   };
 }
 

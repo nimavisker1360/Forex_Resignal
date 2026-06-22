@@ -266,7 +266,8 @@
       "reports": "گزارش‌ها",
       "publicSite": "سایت عمومی",
       "settings": "تنظیمات",
-      "admin": "ادمین"
+      "admin": "ادمین",
+      "advanced": "پیشرفته"
     },
     "shell": {
       "tradingJournal": "ژورنال معاملاتی",
@@ -748,7 +749,11 @@
       "allSymbols": "همه نمادها",
       "allTimeframes": "همه تایم‌فریم‌ها",
       "checklistsCount": "{count} چک‌لیست",
+      "checklistItemsCount": "{count} مورد چک‌لیست",
       "rulesCount": "{count} قانون",
+      "tradingPlan": "پلن معاملاتی",
+      "checklistItems": "موارد چک‌لیست",
+      "noChecklistItemsYet": "هنوز موردی برای چک‌لیست ثبت نشده است.",
       "setup": "ستاپ",
       "entry": "ورود",
       "exit": "خروج",

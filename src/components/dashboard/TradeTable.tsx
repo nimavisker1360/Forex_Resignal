@@ -12,6 +12,26 @@ import {
   type TradeDto,
 } from "@/components/dashboard/types";
 
+function reviewStatus(trade: TradeDto) {
+  if (!trade.strategyReview) {
+    return "Not Reviewed";
+  }
+
+  return trade.strategyReview.followedPlan === "NOT_REVIEWED" ? "Needs Review" : "Reviewed";
+}
+
+function reviewStatusClass(status: string) {
+  if (status === "Reviewed") {
+    return "border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-300";
+  }
+
+  if (status === "Needs Review") {
+    return "border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-300";
+  }
+
+  return "border-slate-300 bg-slate-100 text-slate-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300";
+}
+
 export function TradeTable({
   trades,
   onEdit,
@@ -28,7 +48,7 @@ export function TradeTable({
   return (
     <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-[#0F172A]">
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[1040px] text-left text-sm">
+        <table className="w-full min-w-[1280px] text-left text-sm">
           <thead className="border-b border-slate-200 bg-slate-50 text-xs uppercase text-slate-500 dark:border-slate-800 dark:bg-[#111827] dark:text-slate-400">
             <tr>
               <th className="px-4 py-3">{t("dashboard.table.openTime")}</th>
@@ -39,6 +59,9 @@ export function TradeTable({
               <th className="px-3 py-3">{t("dashboard.table.exit")}</th>
               <th className="px-3 py-3">{t("dashboard.table.pnl")}</th>
               <th className="px-3 py-3">{t("dashboard.table.rr")}</th>
+              <th className="px-3 py-3">Playbook</th>
+              <th className="px-3 py-3">Review Status</th>
+              <th className="px-3 py-3">Plan Compliance</th>
               <th className="px-3 py-3">{t("dashboard.table.status")}</th>
               <th className="px-3 py-3">{t("dashboard.table.actions")}</th>
             </tr>
@@ -67,6 +90,17 @@ export function TradeTable({
                   />
                 </td>
                 <td className="px-3 py-3">{formatNumber(trade.rr, 2)}</td>
+                <td className="px-3 py-3 text-slate-500 dark:text-slate-300">
+                  {trade.strategyReview?.strategyNameSnapshot || trade.session || "-"}
+                </td>
+                <td className="px-3 py-3">
+                  <span className={`inline-flex rounded-lg border px-2.5 py-1 text-xs font-semibold ${reviewStatusClass(reviewStatus(trade))}`}>
+                    {reviewStatus(trade)}
+                  </span>
+                </td>
+                <td className="px-3 py-3">
+                  {trade.strategyReview ? `${Math.round(trade.strategyReview.compliancePercent)}%` : "-"}
+                </td>
                 <td className="px-3 py-3">
                   <TradeStatusBadge status={trade.status} />
                 </td>

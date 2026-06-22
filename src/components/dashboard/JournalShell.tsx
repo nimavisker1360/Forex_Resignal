@@ -11,6 +11,7 @@ import {
   ClipboardCheck,
   FileText,
   Gauge,
+  Globe2,
   LineChart,
   ListChecks,
   PlaySquare,
@@ -27,14 +28,19 @@ const sidebarItems = [
   { labelKey: "dashboard.nav.dashboard", href: "/dashboard", icon: Gauge },
   { labelKey: "dashboard.nav.accounts", href: "/dashboard/accounts", icon: BriefcaseBusiness },
   { labelKey: "dashboard.nav.trades", href: "/journal", icon: ListChecks },
-  { labelKey: "journal.nav.checklists", href: "/journal/checklists", icon: ClipboardCheck },
   { labelKey: "dashboard.nav.calendar", href: "/journal/calendar", icon: CalendarDays },
+  { labelKey: "dashboard.nav.economicCalendar", href: "/economic-calendar", icon: CalendarDays },
   { labelKey: "dashboard.nav.analytics", href: "/journal/analytics", icon: BarChart3 },
   { labelKey: "dashboard.nav.dailyJournal", href: "/dashboard/daily-journal", icon: BookOpenCheck },
   { labelKey: "dashboard.nav.playbooks", href: "/journal/playbooks", icon: PlaySquare },
-  { labelKey: "dashboard.nav.propFirms", href: "/dashboard/prop-firms", icon: ShieldCheck },
   { labelKey: "dashboard.nav.reports", href: "/dashboard/reports", icon: FileText },
   { labelKey: "dashboard.nav.settings", href: "/dashboard/settings", icon: Settings },
+];
+
+const advancedSidebarItems = [
+  { labelKey: "dashboard.nav.propFirms", href: "/dashboard/prop-firms", icon: ShieldCheck },
+  { labelKey: "dashboard.nav.publicSite", href: "/", icon: Globe2 },
+  { labelKey: "journal.nav.checklists", href: "/journal/checklists", icon: ClipboardCheck },
 ];
 
 export function JournalShell({
@@ -125,6 +131,36 @@ export function JournalShell({
                   </Link>
                 );
               })}
+
+              <div className={cn("hidden pt-3 text-xs font-semibold uppercase tracking-wide lg:block", isDark ? "text-slate-500" : "text-slate-400")}>
+                {t("dashboard.nav.advanced")}
+              </div>
+              {advancedSidebarItems.map((item) => {
+                const Icon = item.icon;
+                const isActive =
+                  pathname === item.href || (item.href !== "/" && pathname.startsWith(`${item.href}/`));
+
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    aria-current={isActive ? "page" : undefined}
+                    className={cn(
+                      "inline-flex h-10 shrink-0 items-center gap-3 rounded-xl px-3 text-sm font-medium transition lg:w-full",
+                      isActive
+                        ? isDark
+                          ? "bg-blue-600/15 text-blue-100 ring-1 ring-blue-500/30"
+                          : "bg-blue-50 text-blue-700 ring-1 ring-blue-200"
+                        : isDark
+                          ? "text-slate-300 hover:bg-slate-800 hover:text-white"
+                          : "text-slate-700 hover:bg-slate-100 hover:text-slate-950"
+                    )}
+                  >
+                    <Icon className={cn("h-4 w-4", isActive ? (isDark ? "text-blue-300" : "text-blue-700") : isDark ? "text-slate-400" : "text-slate-500")} />
+                    {t(item.labelKey)}
+                  </Link>
+                );
+              })}
             </nav>
 
             <div
@@ -162,17 +198,6 @@ export function JournalShell({
               <div className="flex shrink-0 items-center gap-3">
                 <LanguageSwitcher />
                 <DashboardThemeToggle isDark={isDark} onThemeChange={applyTheme} />
-                <Link
-                  href="/"
-                  className={cn(
-                    "inline-flex h-9 items-center rounded-xl border px-3 text-sm font-semibold transition",
-                    isDark
-                      ? "border-slate-800 text-slate-300 hover:bg-slate-800 hover:text-white"
-                      : "border-slate-200 bg-white text-slate-700 shadow-sm hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700"
-                  )}
-                >
-                  {t("dashboard.nav.publicSite")}
-                </Link>
               </div>
             </div>
           </header>

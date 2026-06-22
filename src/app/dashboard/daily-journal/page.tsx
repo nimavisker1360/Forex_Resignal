@@ -1,17 +1,13 @@
 "use client";
-
-import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   ArrowLeft,
   ArrowRight,
   CalendarDays,
-  ExternalLink,
   Save,
 } from "lucide-react";
 import { useLanguage } from "@/lib/language-context";
-import { cn } from "@/lib/utils";
 
 type JournalForm = {
   marketBias: string;
@@ -46,28 +42,6 @@ type JournalForm = {
 type DailyJournalRecord = Partial<JournalForm> & {
   id: string;
   date: string;
-};
-
-type DailyStats = {
-  netPnl: number;
-  totalTrades: number;
-  winRate: number;
-  averageRR: number;
-  bestTradePnl: number;
-  worstTradePnl: number;
-};
-
-type LinkedTrade = {
-  id: string;
-  openTime: string | null;
-  symbol: string;
-  direction: "BUY" | "SELL";
-  account: { id: string; name: string; currency: string } | null;
-  entry: number | null;
-  exit: number | null;
-  pnl: number | null;
-  rMultiple: number | null;
-  status: string;
 };
 
 type PlaybookOption = {
@@ -112,15 +86,6 @@ const emptyForm: JournalForm = {
   endOfDayNotes: "",
 };
 
-const emptyStats: DailyStats = {
-  netPnl: 0,
-  totalTrades: 0,
-  winRate: 0,
-  averageRR: 0,
-  bestTradePnl: 0,
-  worstTradePnl: 0,
-};
-
 const inputClass =
   "h-10 w-full rounded-lg border border-slate-800 bg-[#111827] px-3 text-sm text-[#E5E7EB] outline-none focus:border-blue-600";
 const textareaClass =
@@ -147,7 +112,7 @@ const copy = {
     averageRr: "Average R:R",
     bestTrade: "Best Trade",
     worstTrade: "Worst Trade",
-    dailyPlan: "Daily Plan",
+    dailyPlan: "Morning Plan",
     marketBias: "Market Bias",
     selectBias: "Select bias",
     todayFocus: "Today's Focus",
@@ -175,7 +140,7 @@ const copy = {
     followedPlaybook: "I followed my playbook",
     avoidedOvertrading: "I avoided overtrading",
     checklistNotes: "Checklist Notes",
-    endOfDayReview: "End-of-Day Review",
+    endOfDayReview: "End of Day Review",
     whatWentWell: "What went well today?",
     mistakesSummary: "What mistakes did I make?",
     followedPlanReview: "Did I follow my plan?",
@@ -270,9 +235,6 @@ const copy = {
 } as const;
 
 const biasValues = ["Bullish", "Bearish", "Neutral", "Range", "Waiting"] as const;
-const moodValues = ["Calm", "Confident", "Stressed", "Fearful", "Angry", "Tired", "Distracted"] as const;
-const sleepValues = ["Good", "Normal", "Bad"] as const;
-
 function todayKey() {
   return new Date().toISOString().slice(0, 10);
 }
@@ -285,31 +247,6 @@ function adjacentDate(value: string, days: number) {
   const date = new Date(`${value}T00:00:00.000Z`);
   date.setUTCDate(date.getUTCDate() + days);
   return date.toISOString().slice(0, 10);
-}
-
-function formatMoney(value: number | null | undefined) {
-  return Number(value || 0).toLocaleString("en-US", {
-    style: "currency",
-    currency: "USD",
-    maximumFractionDigits: 2,
-  });
-}
-
-function formatNumber(value: number | null | undefined, digits = 2) {
-  return Number(value || 0).toLocaleString("en-US", {
-    maximumFractionDigits: digits,
-  });
-}
-
-function formatTime(value: string | null) {
-  if (!value) {
-    return "-";
-  }
-
-  return new Date(value).toLocaleTimeString("en-US", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
 }
 
 function formFromJournal(journal: DailyJournalRecord | null): JournalForm {
@@ -386,31 +323,6 @@ function CheckboxField({
   );
 }
 
-function MetricCard({
-  label,
-  value,
-  tone,
-}: {
-  label: string;
-  value: string;
-  tone?: "profit" | "loss";
-}) {
-  return (
-    <div className="rounded-xl border border-slate-800 bg-[#0F172A] p-4">
-      <div className="text-xs font-medium uppercase text-slate-400">{label}</div>
-      <div
-        className={cn(
-          "mt-2 truncate text-lg font-semibold text-white",
-          tone === "profit" && "text-[#10B981]",
-          tone === "loss" && "text-[#EF4444]"
-        )}
-      >
-        {value}
-      </div>
-    </div>
-  );
-}
-
 export default function DailyJournalPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -419,8 +331,6 @@ export default function DailyJournalPage() {
   const [date, setDate] = useState(() => normalizeDate(searchParams.get("date")));
   const [accountId, setAccountId] = useState(() => searchParams.get("accountId") || "");
   const [form, setForm] = useState<JournalForm>(emptyForm);
-  const [stats, setStats] = useState<DailyStats>(emptyStats);
-  const [trades, setTrades] = useState<LinkedTrade[]>([]);
   const [playbooks, setPlaybooks] = useState<PlaybookOption[]>([]);
   const [accounts, setAccounts] = useState<AccountOption[]>([]);
   const [status, setStatus] = useState<SaveStatus>("loading");
@@ -538,8 +448,8 @@ export default function DailyJournalPage() {
         const data = (await response.json()) as {
           success: boolean;
           journal: DailyJournalRecord | null;
-          stats: DailyStats;
-          trades: LinkedTrade[];
+          stats: unknown;
+          trades: unknown[];
           playbooks: PlaybookOption[];
           message?: string;
         };
@@ -549,8 +459,6 @@ export default function DailyJournalPage() {
         }
 
         setForm(formFromJournal(data.journal));
-        setStats(data.stats || emptyStats);
-        setTrades(data.trades || []);
         setPlaybooks(data.playbooks || []);
         setStatus("idle");
         setDirty(false);
@@ -580,27 +488,6 @@ export default function DailyJournalPage() {
 
     return () => window.clearTimeout(timeout);
   }, [dirty, form, hydrated, saveJournal]);
-
-  const summaryCards = [
-    {
-      label: text.netPnl,
-      value: formatMoney(stats.netPnl),
-      tone: stats.netPnl > 0 ? "profit" as const : stats.netPnl < 0 ? "loss" as const : undefined,
-    },
-    { label: text.totalTrades, value: formatNumber(stats.totalTrades, 0) },
-    { label: text.winRate, value: `${formatNumber(stats.winRate, 1)}%` },
-    { label: text.averageRr, value: formatNumber(stats.averageRR, 2) },
-    {
-      label: text.bestTrade,
-      value: formatMoney(stats.bestTradePnl),
-      tone: stats.bestTradePnl > 0 ? "profit" as const : undefined,
-    },
-    {
-      label: text.worstTrade,
-      value: formatMoney(stats.worstTradePnl),
-      tone: stats.worstTradePnl < 0 ? "loss" as const : undefined,
-    },
-  ];
 
   return (
     <div className="space-y-5">
@@ -682,13 +569,7 @@ export default function DailyJournalPage() {
         </div>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-6">
-        {summaryCards.map((card) => (
-          <MetricCard key={card.label} label={card.label} value={card.value} tone={card.tone} />
-        ))}
-      </div>
-
-      <div className="grid gap-5 xl:grid-cols-3">
+      <div className="grid gap-5 xl:grid-cols-[1.1fr_0.9fr]">
         <Section title={text.dailyPlan}>
           <div className="grid gap-3">
             <Field label={text.marketBias}>
@@ -718,50 +599,6 @@ export default function DailyJournalPage() {
                 ))}
               </select>
             </Field>
-            <Field label={text.symbolsToTrade}>
-              <input value={form.symbolsToTrade} onChange={(event) => updateForm("symbolsToTrade", event.target.value)} className={inputClass} />
-            </Field>
-            <Field label={text.newsToWatch}>
-              <input value={form.newsToWatch} onChange={(event) => updateForm("newsToWatch", event.target.value)} className={inputClass} />
-            </Field>
-            <Field label={text.preMarketNotes}>
-              <textarea rows={5} value={form.preMarketNotes} onChange={(event) => updateForm("preMarketNotes", event.target.value)} className={textareaClass} />
-            </Field>
-          </div>
-        </Section>
-
-        <Section title={text.dailyPsychology}>
-          <div className="grid gap-3">
-            <Field label={text.mood}>
-              <select value={form.mood} onChange={(event) => updateForm("mood", event.target.value)} className={inputClass}>
-                <option value="">{text.selectMood}</option>
-                {moodValues.map((item, index) => (
-                  <option key={item} value={item}>{text.moodOptions[index]}</option>
-                ))}
-              </select>
-            </Field>
-            <div className="grid gap-3 sm:grid-cols-2">
-              <Field label={text.focusLevel}>
-                <input type="number" min="1" max="10" value={form.focusLevel} onChange={(event) => updateForm("focusLevel", event.target.value)} className={inputClass} />
-              </Field>
-              <Field label={text.confidenceLevel}>
-                <input type="number" min="1" max="10" value={form.confidenceLevel} onChange={(event) => updateForm("confidenceLevel", event.target.value)} className={inputClass} />
-              </Field>
-              <Field label={text.stressLevel}>
-                <input type="number" min="1" max="10" value={form.stressLevel} onChange={(event) => updateForm("stressLevel", event.target.value)} className={inputClass} />
-              </Field>
-              <Field label={text.disciplineScore}>
-                <input type="number" min="1" max="10" value={form.disciplineScore} onChange={(event) => updateForm("disciplineScore", event.target.value)} className={inputClass} />
-              </Field>
-            </div>
-            <Field label={text.sleepQuality}>
-              <select value={form.sleepQuality} onChange={(event) => updateForm("sleepQuality", event.target.value)} className={inputClass}>
-                <option value="">{text.selectSleepQuality}</option>
-                {sleepValues.map((item, index) => (
-                  <option key={item} value={item}>{text.sleepOptions[index]}</option>
-                ))}
-              </select>
-            </Field>
           </div>
         </Section>
 
@@ -770,12 +607,8 @@ export default function DailyJournalPage() {
             <CheckboxField label={text.respectedRisk} checked={form.respectedRisk} onChange={(checked) => updateForm("respectedRisk", checked)} />
             <CheckboxField label={text.waitedForConfirmation} checked={form.waitedForConfirmation} onChange={(checked) => updateForm("waitedForConfirmation", checked)} />
             <CheckboxField label={text.avoidedRevengeTrading} checked={form.avoidedRevengeTrading} onChange={(checked) => updateForm("avoidedRevengeTrading", checked)} />
-            <CheckboxField label={text.stoppedAfterDailyLimit} checked={form.stoppedAfterDailyLimit} onChange={(checked) => updateForm("stoppedAfterDailyLimit", checked)} />
             <CheckboxField label={text.followedPlaybook} checked={form.followedPlaybook} onChange={(checked) => updateForm("followedPlaybook", checked)} />
-            <CheckboxField label={text.avoidedOvertrading} checked={form.avoidedOvertrading} onChange={(checked) => updateForm("avoidedOvertrading", checked)} />
-            <Field label={text.checklistNotes}>
-              <textarea rows={5} value={form.checklistNotes} onChange={(event) => updateForm("checklistNotes", event.target.value)} className={textareaClass} />
-            </Field>
+            <CheckboxField label={text.stoppedAfterDailyLimit} checked={form.stoppedAfterDailyLimit} onChange={(checked) => updateForm("stoppedAfterDailyLimit", checked)} />
           </div>
         </Section>
       </div>
@@ -797,53 +630,7 @@ export default function DailyJournalPage() {
           <Field label={text.tomorrowPlan}>
             <textarea rows={4} value={form.tomorrowPlan} onChange={(event) => updateForm("tomorrowPlan", event.target.value)} className={textareaClass} />
           </Field>
-          <Field label={text.endOfDayNotes}>
-            <textarea rows={4} value={form.endOfDayNotes} onChange={(event) => updateForm("endOfDayNotes", event.target.value)} className={textareaClass} />
-          </Field>
         </div>
-      </Section>
-
-      <Section title={text.linkedTrades}>
-        <div className="overflow-x-auto">
-          <table className="min-w-full text-left text-sm">
-            <thead className="text-xs uppercase text-slate-500">
-              <tr className="border-b border-slate-800">
-                {[text.time, text.symbol, text.direction, text.account, text.entry, text.exit, text.pnl, text.rr, text.status, ""].map((heading) => (
-                  <th key={heading} className="whitespace-nowrap px-3 py-3 font-semibold">{heading}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {trades.map((trade) => (
-                <tr key={trade.id} className="border-b border-slate-800 text-slate-300 last:border-0">
-                  <td className="whitespace-nowrap px-3 py-3">{formatTime(trade.openTime)}</td>
-                  <td className="whitespace-nowrap px-3 py-3 font-semibold text-white">{trade.symbol}</td>
-                  <td className="whitespace-nowrap px-3 py-3">{trade.direction}</td>
-                  <td className="whitespace-nowrap px-3 py-3">{trade.account?.name || "-"}</td>
-                  <td className="whitespace-nowrap px-3 py-3">{trade.entry === null ? "-" : formatNumber(trade.entry, 5)}</td>
-                  <td className="whitespace-nowrap px-3 py-3">{trade.exit === null ? "-" : formatNumber(trade.exit, 5)}</td>
-                  <td className={cn("whitespace-nowrap px-3 py-3 font-semibold", Number(trade.pnl || 0) > 0 && "text-[#10B981]", Number(trade.pnl || 0) < 0 && "text-[#EF4444]")}>
-                    {trade.pnl === null ? "-" : formatMoney(trade.pnl)}
-                  </td>
-                  <td className="whitespace-nowrap px-3 py-3">{trade.rMultiple === null ? "-" : formatNumber(trade.rMultiple, 2)}</td>
-                  <td className="whitespace-nowrap px-3 py-3">{trade.status}</td>
-                  <td className="whitespace-nowrap px-3 py-3 text-right">
-                    <Link href={`/journal/${trade.id}`} className="inline-flex h-9 items-center gap-2 rounded-lg border border-slate-800 px-3 text-xs font-semibold text-slate-300 hover:bg-slate-800 hover:text-white">
-                      <ExternalLink className="h-3.5 w-3.5" />
-                      {text.openReview}
-                    </Link>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {trades.length === 0 ? (
-          <div className="mt-4 rounded-xl border border-dashed border-slate-800 bg-[#111827] px-4 py-10 text-center text-sm text-slate-400">
-            {text.noTrades}
-          </div>
-        ) : null}
       </Section>
     </div>
   );

@@ -32,6 +32,14 @@ export type PlaybookChecklistDto = {
   itemCount: number;
 };
 
+export type PlaybookChecklistItemDto = {
+  id?: string;
+  title: string;
+  description?: string | null;
+  isRequired: boolean;
+  sortOrder: number;
+};
+
 export type StrategyGroupStats = {
   totalTrades: number;
   winRate: number;
@@ -75,13 +83,26 @@ export type PlaybookStrategyDto = {
   marketType: string | null;
   symbols: string | null;
   timeframes: string | null;
+  direction: string;
   riskPerTrade: number | null;
   minRiskReward: number | null;
+  entryRules: string | null;
+  exitRules: string | null;
+  riskRules: string | null;
+  setupRules: string | null;
+  managementRules: string | null;
+  psychologyRules: string | null;
+  sessionFilter: string | null;
+  newsFilter: string | null;
+  htfBias: string | null;
+  exampleWinningTrade: string | null;
+  exampleLosingTrade: string | null;
   tags: string | null;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
   rules: PlaybookRuleDto[];
+  checklistItems: PlaybookChecklistItemDto[];
   checklists: PlaybookChecklistDto[];
   linkedChecklistCount: number;
   ruleCount: number;

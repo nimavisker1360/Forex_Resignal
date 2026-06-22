@@ -72,6 +72,17 @@ export type TradeDto = {
   account?: TradingAccountDto | null;
   screenshots?: TradeScreenshotDto[];
   tags?: TradeTagDto[];
+  strategyReview?: {
+    id: string;
+    strategyId: string | null;
+    strategyNameSnapshot: string | null;
+    followedPlan: "YES" | "PARTIAL" | "NO" | "NOT_REVIEWED";
+    totalRules: number;
+    followedRules: number;
+    violatedRules: number;
+    compliancePercent: number;
+    requiredCompliancePercent: number;
+  } | null;
 };
 
 export type TradesListData = {

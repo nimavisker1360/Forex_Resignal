@@ -499,14 +499,27 @@ model PlaybookStrategy {
   marketType    String?
   symbols       String?
   timeframes    String?
+  direction     String   @default("BOTH")
   riskPerTrade  Float?
   minRiskReward Float?
+  entryRules    String?
+  exitRules     String?
+  riskRules     String?
+  setupRules    String?
+  managementRules String?
+  psychologyRules String?
+  sessionFilter String?
+  newsFilter    String?
+  htfBias       String?
+  exampleWinningTrade String?
+  exampleLosingTrade String?
   tags          String?
   isActive      Boolean  @default(true)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
   rules           PlaybookRule[]
+  checklistItems  PlaybookChecklistItem[]
   checklistLinks  PlaybookChecklistLink[]
   strategyReviews TradeStrategyReview[]
   user            User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -514,6 +527,21 @@ model PlaybookStrategy {
   @@index([userId])
   @@index([isActive])
   @@index([name])
+}
+
+model PlaybookChecklistItem {
+  id          String   @id @default(cuid())
+  strategyId  String
+  title       String
+  description String?
+  isRequired  Boolean  @default(false)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  strategy PlaybookStrategy @relation(fields: [strategyId], references: [id], onDelete: Cascade)
+
+  @@index([strategyId])
 }
 
 model PlaybookRule {

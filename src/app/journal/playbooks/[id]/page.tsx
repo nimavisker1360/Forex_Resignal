@@ -3,7 +3,6 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, Pencil } from "lucide-react";
 import { fetchJournalApi } from "@/app/journal/_lib/journal-api";
 import { DashboardText } from "@/components/dashboard/DashboardText";
-import { PlaybookRuleSection } from "@/components/journal/PlaybookRuleSection";
 import { StrategyPerformanceSummary } from "@/components/journal/StrategyPerformanceSummary";
 import { cn } from "@/lib/utils";
 import type {
@@ -191,7 +190,7 @@ export default async function PlaybookDetailPage({ params }: PlaybookDetailPageP
             <Badge>{playbook.marketType || <DashboardText k="journal.playbooks.customMarket" />}</Badge>
             <Badge>{playbook.symbols || <DashboardText k="journal.playbooks.allSymbols" />}</Badge>
             <Badge>{playbook.timeframes || <DashboardText k="journal.playbooks.allTimeframes" />}</Badge>
-            <Badge tone="blue"><DashboardText k="journal.playbooks.checklistsCount" values={{ count: String(playbook.linkedChecklistCount) }} /></Badge>
+            <Badge tone="blue"><DashboardText k="journal.playbooks.checklistItemsCount" values={{ count: String(playbook.checklistItems.length) }} /></Badge>
           </div>
         </div>
       </section>
@@ -211,24 +210,33 @@ export default async function PlaybookDetailPage({ params }: PlaybookDetailPageP
 
       <div className="grid gap-5 xl:grid-cols-[1.2fr_0.8fr]">
         <section className="rounded-lg border border-slate-800 bg-[#0F172A] p-5 shadow-sm">
-          <h2 className="mb-4 text-lg font-semibold text-white"><DashboardText k="journal.playbooks.strategyRules" /></h2>
-          <PlaybookRuleSection rules={playbook.rules} />
+          <h2 className="mb-4 text-lg font-semibold text-white"><DashboardText k="journal.playbooks.tradingPlan" /></h2>
+          <div className="grid gap-4 md:grid-cols-3">
+            {[
+              { id: "entry", labelKey: "journal.playbooks.entryRules", value: playbook.entryRules },
+              { id: "exit", labelKey: "journal.playbooks.exitRules", value: playbook.exitRules },
+              { id: "risk", labelKey: "journal.playbooks.riskRules", value: playbook.riskRules },
+            ].map((item) => (
+              <div key={item.id} className="rounded-lg border border-slate-800 bg-[#111827] p-4">
+                <h3 className="text-sm font-semibold text-white"><DashboardText k={item.labelKey} /></h3>
+                <p className="mt-2 whitespace-pre-line text-sm leading-6 text-slate-400">{item.value || "-"}</p>
+              </div>
+            ))}
+          </div>
         </section>
 
         <section className="rounded-lg border border-slate-800 bg-[#0F172A] p-5 shadow-sm">
-          <h2 className="text-lg font-semibold text-white"><DashboardText k="journal.playbooks.linkedChecklists" /></h2>
+          <h2 className="text-lg font-semibold text-white"><DashboardText k="journal.playbooks.checklistItems" /></h2>
           <div className="mt-4 space-y-3">
-            {playbook.checklists.map((checklist) => (
-              <div key={checklist.id} className="rounded-lg border border-slate-800 bg-[#111827] p-3">
-                <div className="text-sm font-semibold text-white">{checklist.title}</div>
-                <div className="mt-1 text-xs text-slate-400">
-                  {checklist.category || <DashboardText k="journal.playbooks.customMarket" />} / <DashboardText k="journal.playbooks.itemsCount" values={{ count: String(checklist.itemCount) }} />
-                </div>
+            {playbook.checklistItems.map((item) => (
+              <div key={item.id || item.title} className="rounded-lg border border-slate-800 bg-[#111827] p-3">
+                <div className="text-sm font-semibold text-white">{item.title}</div>
+                {item.description ? <div className="mt-1 text-xs text-slate-400">{item.description}</div> : null}
               </div>
             ))}
-            {playbook.checklists.length === 0 ? (
+            {playbook.checklistItems.length === 0 ? (
               <div className="rounded-lg border border-slate-800 bg-[#111827] p-4 text-sm text-slate-400">
-                <DashboardText k="journal.playbooks.noChecklistLinked" />
+                <DashboardText k="journal.playbooks.noChecklistItemsYet" />
               </div>
             ) : null}
           </div>

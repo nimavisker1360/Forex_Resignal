@@ -321,7 +321,8 @@
       "reports": "Reports",
       "publicSite": "Public Site",
       "settings": "Settings",
-      "admin": "Admin"
+      "admin": "Admin",
+      "advanced": "Advanced"
     },
     "shell": {
       "tradingJournal": "Trading Journal",
@@ -804,7 +805,11 @@
       "allSymbols": "All symbols",
       "allTimeframes": "All timeframes",
       "checklistsCount": "{count} checklists",
+      "checklistItemsCount": "{count} checklist items",
       "rulesCount": "{count} rules",
+      "tradingPlan": "Trading Plan",
+      "checklistItems": "Checklist Items",
+      "noChecklistItemsYet": "No checklist items yet.",
       "setup": "Setup",
       "entry": "Entry",
       "exit": "Exit",

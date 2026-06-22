@@ -1,393 +1,336 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowDown, ArrowLeft, ArrowUp, Plus, Save, Trash2 } from "lucide-react";
+import { ArrowLeft, Plus, Save, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import { RULE_SECTION_ORDER } from "@/components/journal/PlaybookRuleSection";
 import { useLanguage } from "@/lib/language-context";
 import { cn } from "@/lib/utils";
 import type {
-  PlaybookChecklistDto,
+  PlaybookChecklistItemDto,
   PlaybookRuleDto,
   PlaybookRuleSection,
   PlaybookStrategyDto,
 } from "@/types/playbooks";
 
-type ChecklistTemplate = PlaybookChecklistDto;
-
 type FormState = {
   name: string;
-  description: string;
   marketType: string;
   symbols: string;
   timeframes: string;
-  riskPerTrade: string;
-  minRiskReward: string;
+  direction: "BUY_ONLY" | "SELL_ONLY" | "BOTH";
+  entryRules: string;
+  exitRules: string;
+  riskRules: string;
+  setupRules: string;
+  managementRules: string;
+  psychologyRules: string;
+  sessionFilter: string;
+  newsFilter: string;
+  htfBias: string;
+  exampleWinningTrade: string;
+  exampleLosingTrade: string;
   tags: string;
   isActive: boolean;
-  rules: PlaybookRuleDto[];
-  checklistTemplateIds: string[];
+  checklistItems: PlaybookChecklistItemDto[];
 };
 
 const MARKET_TYPES = ["Forex", "Crypto", "Indices", "Stocks", "Futures", "Custom"];
 
+const copy = {
+  en: {
+    back: "Back to Playbooks",
+    createTitle: "Create Playbook",
+    editTitle: "Edit Playbook",
+    subtitle:
+      "Keep the plan simple: define when to trade, how to enter, how to exit, and what must be checked during review.",
+    save: "Save",
+    saving: "Saving...",
+    playbookName: "Playbook Name",
+    playbookNamePlaceholder: "London breakout",
+    market: "Market",
+    direction: "Direction",
+    buyOnly: "Buy only",
+    sellOnly: "Sell only",
+    both: "Both",
+    symbols: "Symbols",
+    symbolsPlaceholder: "EURUSD, GBPUSD",
+    timeframes: "Timeframes",
+    timeframesPlaceholder: "M15, H1",
+    entryRules: "Entry Rules",
+    exitRules: "Exit Rules",
+    riskRules: "Risk Rules",
+    oneRulePerLine: "One rule per line",
+    riskPlaceholder: "Risk per trade, max loss, minimum R:R, invalidation rules",
+    checklistItems: "Checklist Items",
+    checklistSubtitle: "These boxes appear in Trade Review and drive Plan Compliance.",
+    addChecklistItem: "Add checklist item",
+    item: "Item",
+    itemPlaceholder: "Waited for confirmation",
+    optionalNote: "Optional Note",
+    optionalNotePlaceholder: "What exactly counts as confirmation?",
+    required: "Required",
+    removeChecklistItem: "Remove checklist item",
+    showAdvanced: "Show Advanced Fields",
+    hideAdvanced: "Hide Advanced Fields",
+    setupRules: "Setup Rules",
+    managementRules: "Management Rules",
+    psychologyRules: "Psychology Rules",
+    sessionFilter: "Session Filter",
+    newsFilter: "News Filter",
+    htfBias: "HTF Bias",
+    exampleWinningTrade: "Example Winning Trade",
+    exampleLosingTrade: "Example Losing Trade",
+    tags: "Tags",
+    tagsPlaceholder: "breakout, london, momentum",
+    activePlaybook: "Active Playbook",
+    nameRequired: "Playbook name is required",
+    rulesRequired: "Add at least one entry, exit, risk, or advanced rule.",
+    created: "Playbook created",
+    updated: "Playbook updated",
+    saveFailed: "Failed to save playbook",
+    marketLabels: {
+      Forex: "Forex",
+      Crypto: "Crypto",
+      Indices: "Indices",
+      Stocks: "Stocks",
+      Futures: "Futures",
+      Custom: "Custom",
+    },
+  },
+  fa: {
+    back: "بازگشت به پلی بوک ها",
+    createTitle: "ساخت پلی بوک",
+    editTitle: "ویرایش پلی بوک",
+    subtitle:
+      "پلن را ساده نگه دارید: مشخص کنید چه زمانی معامله می کنید، چطور وارد می شوید، چطور خارج می شوید و در زمان بررسی چه مواردی باید چک شوند.",
+    save: "ذخیره",
+    saving: "در حال ذخیره...",
+    playbookName: "نام پلی بوک",
+    playbookNamePlaceholder: "بریک اوت لندن",
+    market: "بازار",
+    direction: "جهت معامله",
+    buyOnly: "فقط خرید",
+    sellOnly: "فقط فروش",
+    both: "هر دو",
+    symbols: "نمادها",
+    symbolsPlaceholder: "EURUSD, GBPUSD",
+    timeframes: "تایم فریم ها",
+    timeframesPlaceholder: "M15, H1",
+    entryRules: "قوانین ورود",
+    exitRules: "قوانین خروج",
+    riskRules: "قوانین ریسک",
+    oneRulePerLine: "هر قانون در یک خط",
+    riskPlaceholder: "ریسک هر معامله، حداکثر ضرر، حداقل R:R، قوانین بی اعتباری",
+    checklistItems: "موارد چک لیست",
+    checklistSubtitle: "این موارد در بررسی معامله نمایش داده می شوند و درصد پایبندی به پلن را محاسبه می کنند.",
+    addChecklistItem: "افزودن مورد چک لیست",
+    item: "مورد",
+    itemPlaceholder: "برای تایید ورود صبر کردم",
+    optionalNote: "یادداشت اختیاری",
+    optionalNotePlaceholder: "دقیقا چه چیزی تایید محسوب می شود؟",
+    required: "ضروری",
+    removeChecklistItem: "حذف مورد چک لیست",
+    showAdvanced: "نمایش فیلدهای پیشرفته",
+    hideAdvanced: "مخفی کردن فیلدهای پیشرفته",
+    setupRules: "قوانین ستاپ",
+    managementRules: "قوانین مدیریت معامله",
+    psychologyRules: "قوانین روانشناسی",
+    sessionFilter: "فیلتر سشن",
+    newsFilter: "فیلتر اخبار",
+    htfBias: "جهت تایم فریم بالاتر",
+    exampleWinningTrade: "نمونه معامله برنده",
+    exampleLosingTrade: "نمونه معامله بازنده",
+    tags: "برچسب ها",
+    tagsPlaceholder: "breakout, london, momentum",
+    activePlaybook: "پلی بوک فعال",
+    nameRequired: "نام پلی بوک الزامی است",
+    rulesRequired: "حداقل یک قانون ورود، خروج، ریسک یا قانون پیشرفته اضافه کنید.",
+    created: "پلی بوک ساخته شد",
+    updated: "پلی بوک به روز شد",
+    saveFailed: "ذخیره پلی بوک ناموفق بود",
+    marketLabels: {
+      Forex: "فارکس",
+      Crypto: "کریپتو",
+      Indices: "شاخص ها",
+      Stocks: "سهام",
+      Futures: "فیوچرز",
+      Custom: "سفارشی",
+    },
+  },
+} as const;
+
 const inputClass =
   "h-10 w-full rounded-lg border border-slate-800 bg-[#111827] px-3 text-sm normal-case text-[#E5E7EB] outline-none focus:border-blue-600";
 const textareaClass =
-  "w-full rounded-lg border border-slate-800 bg-[#111827] px-3 py-2 text-sm normal-case text-[#E5E7EB] outline-none focus:border-blue-600";
+  "w-full rounded-lg border border-slate-800 bg-[#111827] px-3 py-2 text-sm leading-6 normal-case text-[#E5E7EB] outline-none focus:border-blue-600";
 
-function emptyRule(section: PlaybookRuleSection, sortOrder: number): PlaybookRuleDto {
-  return {
-    title: "",
-    description: "",
-    section,
-    isRequired: false,
-    sortOrder,
-  };
+function sectionText(playbook: PlaybookStrategyDto | undefined, section: PlaybookRuleSection) {
+  if (!playbook) {
+    return "";
+  }
+
+  const direct =
+    section === "ENTRY"
+      ? playbook.entryRules
+      : section === "EXIT"
+        ? playbook.exitRules
+        : section === "RISK"
+          ? playbook.riskRules
+          : section === "SETUP"
+            ? playbook.setupRules
+            : section === "MANAGEMENT"
+              ? playbook.managementRules
+              : playbook.psychologyRules;
+
+  if (direct) {
+    return direct;
+  }
+
+  return playbook.rules
+    .filter((rule) => rule.section === section)
+    .map((rule) => rule.description || rule.title)
+    .filter(Boolean)
+    .join("\n");
 }
 
 function initialForm(playbook?: PlaybookStrategyDto): FormState {
-  if (!playbook) {
-    return {
-      name: "",
-      description: "",
-      marketType: "Forex",
-      symbols: "",
-      timeframes: "",
-      riskPerTrade: "",
-      minRiskReward: "",
-      tags: "",
-      isActive: true,
-      rules: [
-        emptyRule("SETUP", 0),
-        emptyRule("ENTRY", 1),
-        emptyRule("EXIT", 2),
-        emptyRule("RISK", 3),
-        emptyRule("MANAGEMENT", 4),
-        emptyRule("PSYCHOLOGY", 5),
-      ],
-      checklistTemplateIds: [],
-    };
-  }
-
   return {
-    name: playbook.name,
-    description: playbook.description || "",
-    marketType: playbook.marketType || "Forex",
-    symbols: playbook.symbols || "",
-    timeframes: playbook.timeframes || "",
-    riskPerTrade: playbook.riskPerTrade === null ? "" : String(playbook.riskPerTrade),
-    minRiskReward: playbook.minRiskReward === null ? "" : String(playbook.minRiskReward),
-    tags: playbook.tags || "",
-    isActive: playbook.isActive,
-    rules: playbook.rules.map((rule, index) => ({
-      id: rule.id,
-      title: rule.title,
-      description: rule.description || "",
-      section: rule.section,
-      isRequired: rule.isRequired,
-      sortOrder: index,
-    })),
-    checklistTemplateIds: playbook.checklists.map((checklist) => checklist.id),
+    name: playbook?.name || "",
+    marketType: playbook?.marketType || "Forex",
+    symbols: playbook?.symbols || "",
+    timeframes: playbook?.timeframes || "",
+    direction:
+      playbook?.direction === "BUY_ONLY" || playbook?.direction === "SELL_ONLY"
+        ? playbook.direction
+        : "BOTH",
+    entryRules: sectionText(playbook, "ENTRY"),
+    exitRules: sectionText(playbook, "EXIT"),
+    riskRules: sectionText(playbook, "RISK"),
+    setupRules: sectionText(playbook, "SETUP"),
+    managementRules: sectionText(playbook, "MANAGEMENT"),
+    psychologyRules: sectionText(playbook, "PSYCHOLOGY"),
+    sessionFilter: playbook?.sessionFilter || "",
+    newsFilter: playbook?.newsFilter || "",
+    htfBias: playbook?.htfBias || "",
+    exampleWinningTrade: playbook?.exampleWinningTrade || "",
+    exampleLosingTrade: playbook?.exampleLosingTrade || "",
+    tags: playbook?.tags || "",
+    isActive: playbook?.isActive ?? true,
+    checklistItems:
+      playbook?.checklistItems.length
+        ? playbook.checklistItems.map((item, index) => ({
+            id: item.id,
+            title: item.title,
+            description: item.description || "",
+            isRequired: item.isRequired,
+            sortOrder: index,
+          }))
+        : [{ title: "", description: "", isRequired: true, sortOrder: 0 }],
   };
 }
 
-function normalizeRules(rules: PlaybookRuleDto[]) {
-  return rules
-    .filter((rule) => rule.title.trim())
-    .map((rule, index) => ({
-      ...rule,
-      title: rule.title.trim(),
-      description: rule.description?.trim() || null,
-      sortOrder: index,
-    }));
+function rulesFromText(form: FormState): PlaybookRuleDto[] {
+  const sections: Array<[PlaybookRuleSection, string]> = [
+    ["ENTRY", form.entryRules],
+    ["EXIT", form.exitRules],
+    ["RISK", form.riskRules],
+    ["SETUP", form.setupRules],
+    ["MANAGEMENT", form.managementRules],
+    ["PSYCHOLOGY", form.psychologyRules],
+  ];
+
+  return sections.flatMap(([section, text]) =>
+    text
+      .split("\n")
+      .map((line) => line.trim())
+      .filter(Boolean)
+      .map((line) => ({
+        title: line,
+        description: line,
+        section,
+        isRequired: section === "ENTRY" || section === "EXIT" || section === "RISK",
+        sortOrder: 0,
+      }))
+  ).map((rule, index) => ({ ...rule, sortOrder: index }));
 }
 
-export function LinkedChecklistSelector({
-  templates,
-  selectedIds,
-  onChange,
-  loading,
-}: {
-  templates: ChecklistTemplate[];
-  selectedIds: string[];
-  onChange: (ids: string[]) => void;
-  loading: boolean;
-}) {
-  const { t } = useLanguage();
-  const selected = new Set(selectedIds);
-
-  if (loading) {
-    return (
-      <div className="rounded-lg border border-slate-800 bg-[#111827] p-4 text-sm text-slate-400">
-        {t("journal.playbooks.loadingChecklistTemplates")}
-      </div>
-    );
-  }
-
-  if (templates.length === 0) {
-    return (
-      <div className="rounded-lg border border-slate-800 bg-[#111827] p-4 text-sm text-slate-400">
-        {t("journal.playbooks.noChecklistTemplates")}
-      </div>
-    );
-  }
-
-  return (
-    <div className="grid gap-2 md:grid-cols-2">
-      {templates.map((template) => (
-        <label
-          key={template.id}
-          className="flex items-start gap-3 rounded-lg border border-slate-800 bg-[#111827] p-3"
-        >
-          <input
-            type="checkbox"
-            checked={selected.has(template.id)}
-            onChange={(event) => {
-              const next = event.target.checked
-                ? [...selectedIds, template.id]
-                : selectedIds.filter((id) => id !== template.id);
-              onChange(next);
-            }}
-            className="mt-1 h-4 w-4 rounded border-slate-700 bg-[#0F172A]"
-          />
-          <span>
-            <span className="block text-sm font-semibold text-white">{template.title}</span>
-            <span className="mt-1 block text-xs text-slate-400">
-              {template.category || t("journal.playbooks.customMarket")} / {t("journal.playbooks.itemsCount").replace("{count}", String(template.itemCount))}
-            </span>
-          </span>
-        </label>
-      ))}
-    </div>
-  );
+function cleanChecklistItems(items: PlaybookChecklistItemDto[]) {
+  return items
+    .map((item) => ({
+      ...item,
+      title: item.title.trim(),
+      description: item.description?.trim() || null,
+    }))
+    .filter((item) => item.title)
+    .map((item, index) => ({ ...item, sortOrder: index }));
 }
 
-export function PlaybookRuleEditor({
-  rules,
-  onChange,
+function Field({
+  label,
+  children,
+  className,
 }: {
-  rules: PlaybookRuleDto[];
-  onChange: (rules: PlaybookRuleDto[]) => void;
+  label: string;
+  children: React.ReactNode;
+  className?: string;
 }) {
-  const { t } = useLanguage();
-  const sectionLabels: Record<PlaybookRuleSection, string> = {
-    SETUP: t("journal.playbooks.setup"),
-    ENTRY: t("journal.playbooks.entry"),
-    EXIT: t("journal.playbooks.exit"),
-    RISK: t("journal.playbooks.risk"),
-    MANAGEMENT: t("journal.playbooks.management"),
-    PSYCHOLOGY: t("journal.playbooks.psychology"),
-  };
-
-  function updateRule(index: number, patch: Partial<PlaybookRuleDto>) {
-    onChange(
-      rules.map((rule, ruleIndex) =>
-        ruleIndex === index ? { ...rule, ...patch } : rule
-      )
-    );
-  }
-
-  function moveRule(index: number, direction: -1 | 1) {
-    const nextIndex = index + direction;
-
-    if (nextIndex < 0 || nextIndex >= rules.length) {
-      return;
-    }
-
-    const next = [...rules];
-    const [rule] = next.splice(index, 1);
-    next.splice(nextIndex, 0, rule);
-    onChange(next.map((item, itemIndex) => ({ ...item, sortOrder: itemIndex })));
-  }
-
-  function removeRule(index: number) {
-    if (rules.length === 1) {
-      return;
-    }
-
-    onChange(
-      rules
-        .filter((_, ruleIndex) => ruleIndex !== index)
-        .map((rule, ruleIndex) => ({ ...rule, sortOrder: ruleIndex }))
-    );
-  }
-
   return (
-    <div className="space-y-3">
-      {rules.map((rule, index) => (
-        <div key={`${rule.id || "new"}-${index}`} className="rounded-lg border border-slate-800 bg-[#111827] p-3">
-          <div className="grid gap-3 lg:grid-cols-[180px_1fr_1fr_auto]">
-            <label className="space-y-1 text-xs font-medium uppercase text-slate-400">
-              {t("journal.playbooks.section")}
-              <select
-                value={rule.section}
-                onChange={(event) =>
-                  updateRule(index, { section: event.target.value as PlaybookRuleSection })
-                }
-                className={inputClass}
-              >
-                {RULE_SECTION_ORDER.map((section) => (
-                  <option key={section} value={section}>
-                    {sectionLabels[section]}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="space-y-1 text-xs font-medium uppercase text-slate-400">
-              {t("journal.playbooks.ruleTitle")}
-              <input
-                value={rule.title}
-                onChange={(event) => updateRule(index, { title: event.target.value })}
-                placeholder={t("journal.playbooks.ruleTitlePlaceholder")}
-                className={inputClass}
-              />
-            </label>
-            <label className="space-y-1 text-xs font-medium uppercase text-slate-400">
-              {t("journal.playbooks.description")}
-              <input
-                value={rule.description || ""}
-                onChange={(event) => updateRule(index, { description: event.target.value })}
-                placeholder={t("journal.playbooks.ruleDescriptionPlaceholder")}
-                className={inputClass}
-              />
-            </label>
-            <div className="flex items-end gap-2">
-              <button
-                type="button"
-                onClick={() => moveRule(index, -1)}
-                disabled={index === 0}
-                className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-slate-800 text-slate-300 hover:bg-slate-800 disabled:opacity-40"
-                aria-label={t("journal.playbooks.moveRuleUp")}
-                title={t("journal.playbooks.moveRuleUp")}
-              >
-                <ArrowUp className="h-4 w-4" />
-              </button>
-              <button
-                type="button"
-                onClick={() => moveRule(index, 1)}
-                disabled={index === rules.length - 1}
-                className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-slate-800 text-slate-300 hover:bg-slate-800 disabled:opacity-40"
-                aria-label={t("journal.playbooks.moveRuleDown")}
-                title={t("journal.playbooks.moveRuleDown")}
-              >
-                <ArrowDown className="h-4 w-4" />
-              </button>
-              <button
-                type="button"
-                onClick={() => removeRule(index)}
-                disabled={rules.length === 1}
-                className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-red-500/30 text-[#EF4444] hover:bg-red-500/10 disabled:opacity-40"
-                aria-label={t("journal.playbooks.deleteRule")}
-                title={t("journal.playbooks.deleteRule")}
-              >
-                <Trash2 className="h-4 w-4" />
-              </button>
-            </div>
-          </div>
-          <label className="mt-3 inline-flex items-center gap-2 text-sm font-medium text-slate-300">
-            <input
-              type="checkbox"
-              checked={rule.isRequired}
-              onChange={(event) => updateRule(index, { isRequired: event.target.checked })}
-              className="h-4 w-4 rounded border-slate-700 bg-[#0F172A]"
-            />
-            {t("journal.playbooks.requiredRule")}
-          </label>
-        </div>
-      ))}
-    </div>
+    <label className={cn("space-y-1 text-xs font-medium uppercase text-slate-400", className)}>
+      {label}
+      {children}
+    </label>
   );
 }
 
 export function PlaybookForm({ playbook }: { playbook?: PlaybookStrategyDto }) {
   const router = useRouter();
-  const { t } = useLanguage();
-  const loadChecklistFailedText = t("journal.playbooks.loadChecklistTemplatesFailed");
+  const { language } = useLanguage();
+  const text = copy[language];
   const [form, setForm] = useState<FormState>(() => initialForm(playbook));
-  const [templates, setTemplates] = useState<ChecklistTemplate[]>([]);
-  const [loadingTemplates, setLoadingTemplates] = useState(true);
+  const [showAdvanced, setShowAdvanced] = useState(false);
   const [saving, setSaving] = useState(false);
-  const formTitle = playbook ? t("journal.playbooks.editTitle") : t("journal.playbooks.createTitle");
-  const validRules = useMemo(() => normalizeRules(form.rules), [form.rules]);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    async function loadTemplates() {
-      setLoadingTemplates(true);
-
-      try {
-        const response = await fetch("/api/journal/checklists");
-        const data = await response.json();
-
-        if (!response.ok) {
-          toast.error(data.message || loadChecklistFailedText);
-          return;
-        }
-
-        if (!cancelled) {
-          setTemplates(data.checklists || []);
-        }
-      } catch {
-        toast.error(loadChecklistFailedText);
-      } finally {
-        if (!cancelled) {
-          setLoadingTemplates(false);
-        }
-      }
-    }
-
-    void loadTemplates();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [loadChecklistFailedText]);
+  const rules = useMemo(() => rulesFromText(form), [form]);
 
   function setField<K extends keyof FormState>(field: K, value: FormState[K]) {
     setForm((current) => ({ ...current, [field]: value }));
   }
 
-  function addTemplateRules() {
-    const start = form.rules.length;
-    const titles: Array<[PlaybookRuleSection, string, boolean]> = [
-      ["SETUP", t("journal.playbooks.exampleRuleMarketStructure"), true],
-      ["SETUP", t("journal.playbooks.exampleRuleKeyZone"), false],
-      ["ENTRY", t("journal.playbooks.exampleRuleConfirmation"), true],
-      ["ENTRY", t("journal.playbooks.exampleRuleNotLate"), true],
-      ["EXIT", t("journal.playbooks.exampleRuleStopLoss"), true],
-      ["EXIT", t("journal.playbooks.exampleRuleTakeProfit"), true],
-      ["RISK", t("journal.playbooks.exampleRuleMinimumRr"), true],
-      ["RISK", t("journal.playbooks.exampleRuleLotSize"), true],
-      ["MANAGEMENT", t("journal.playbooks.exampleRuleManagement"), false],
-      ["PSYCHOLOGY", t("journal.playbooks.exampleRuleFomo"), true],
-      ["PSYCHOLOGY", t("journal.playbooks.exampleRuleAcceptRisk"), true],
-    ];
+  function updateChecklistItem(index: number, patch: Partial<PlaybookChecklistItemDto>) {
+    setField(
+      "checklistItems",
+      form.checklistItems.map((item, itemIndex) =>
+        itemIndex === index ? { ...item, ...patch } : item
+      )
+    );
+  }
 
-    setField("rules", [
-      ...form.rules.filter((rule) => rule.title.trim()),
-      ...titles.map(([section, title, isRequired], index) => ({
-        title,
-        description: "",
-        section,
-        isRequired,
-        sortOrder: start + index,
-      })),
+  function addChecklistItem() {
+    setField("checklistItems", [
+      ...form.checklistItems,
+      { title: "", description: "", isRequired: true, sortOrder: form.checklistItems.length },
     ]);
+  }
+
+  function removeChecklistItem(index: number) {
+    setField(
+      "checklistItems",
+      form.checklistItems
+        .filter((_, itemIndex) => itemIndex !== index)
+        .map((item, itemIndex) => ({ ...item, sortOrder: itemIndex }))
+    );
   }
 
   async function submitForm(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     if (!form.name.trim()) {
-      toast.error(t("journal.playbooks.strategyNameRequired"));
+      toast.error(text.nameRequired);
       return;
     }
 
-    if (validRules.length === 0) {
-      toast.error(t("journal.playbooks.addRuleRequired"));
+    if (rules.length === 0) {
+      toast.error(text.rulesRequired);
       return;
     }
 
@@ -400,10 +343,28 @@ export function PlaybookForm({ playbook }: { playbook?: PlaybookStrategyDto }) {
           method: playbook ? "PATCH" : "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            ...form,
             name: form.name.trim(),
-            description: form.description.trim(),
-            rules: validRules,
+            description: "",
+            marketType: form.marketType,
+            symbols: form.symbols,
+            timeframes: form.timeframes,
+            direction: form.direction,
+            entryRules: form.entryRules,
+            exitRules: form.exitRules,
+            riskRules: form.riskRules,
+            setupRules: form.setupRules,
+            managementRules: form.managementRules,
+            psychologyRules: form.psychologyRules,
+            sessionFilter: form.sessionFilter,
+            newsFilter: form.newsFilter,
+            htfBias: form.htfBias,
+            exampleWinningTrade: form.exampleWinningTrade,
+            exampleLosingTrade: form.exampleLosingTrade,
+            tags: form.tags,
+            isActive: form.isActive,
+            rules,
+            checklistItems: cleanChecklistItems(form.checklistItems),
+            checklistTemplateIds: [],
           }),
         }
       );
@@ -414,11 +375,11 @@ export function PlaybookForm({ playbook }: { playbook?: PlaybookStrategyDto }) {
         return;
       }
 
-      toast.success(playbook ? t("journal.playbooks.updated") : t("journal.playbooks.created"));
+      toast.success(playbook ? text.updated : text.created);
       router.push(`/journal/playbooks/${data.playbook.id}`);
       router.refresh();
     } catch {
-      toast.error(t("journal.playbooks.saveFailed"));
+      toast.error(text.saveFailed);
     } finally {
       setSaving(false);
     }
@@ -432,16 +393,18 @@ export function PlaybookForm({ playbook }: { playbook?: PlaybookStrategyDto }) {
         className="inline-flex items-center gap-2 text-sm text-gray-300 hover:text-white"
       >
         <ArrowLeft className="h-4 w-4" />
-        {t("journal.playbooks.back")}
+        {text.back}
       </button>
 
       <form onSubmit={submitForm} className="space-y-5">
         <section className="rounded-lg border border-slate-800 bg-[#0F172A] p-5 shadow-sm">
           <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
             <div>
-              <h1 className="text-2xl font-semibold text-white">{formTitle}</h1>
+              <h1 className="text-2xl font-semibold text-white">
+                {playbook ? text.editTitle : text.createTitle}
+              </h1>
               <p className="mt-1 text-sm text-slate-400">
-                {t("journal.playbooks.formSubtitle")}
+                {text.subtitle}
               </p>
             </div>
             <button
@@ -450,23 +413,21 @@ export function PlaybookForm({ playbook }: { playbook?: PlaybookStrategyDto }) {
               className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-[#2563EB] px-4 text-sm font-semibold text-white hover:bg-blue-500 disabled:opacity-60"
             >
               <Save className="h-4 w-4" />
-              {saving ? t("journal.playbooks.saving") : t("journal.playbooks.save")}
+              {saving ? text.saving : text.save}
             </button>
           </div>
 
           <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-            <label className="space-y-1 text-xs font-medium uppercase text-slate-400 md:col-span-2">
-              {t("journal.playbooks.strategyName")}
+            <Field label={text.playbookName} className="md:col-span-2">
               <input
                 value={form.name}
                 onChange={(event) => setField("name", event.target.value)}
                 required
-                placeholder={t("journal.playbooks.strategyNamePlaceholder")}
+                placeholder={text.playbookNamePlaceholder}
                 className={inputClass}
               />
-            </label>
-            <label className="space-y-1 text-xs font-medium uppercase text-slate-400">
-              {t("journal.playbooks.market")}
+            </Field>
+            <Field label={text.market}>
               <select
                 value={form.marketType}
                 onChange={(event) => setField("marketType", event.target.value)}
@@ -474,140 +435,189 @@ export function PlaybookForm({ playbook }: { playbook?: PlaybookStrategyDto }) {
               >
                 {MARKET_TYPES.map((market) => (
                   <option key={market} value={market}>
-                    {market}
+                    {text.marketLabels[market as keyof typeof text.marketLabels]}
                   </option>
                 ))}
               </select>
-            </label>
-            <label className="inline-flex items-center gap-2 self-end text-sm font-medium text-slate-300">
-              <input
-                type="checkbox"
-                checked={form.isActive}
-                onChange={(event) => setField("isActive", event.target.checked)}
-                className="h-4 w-4 rounded border-slate-700 bg-[#111827]"
-              />
-              {t("journal.playbooks.activeStrategy")}
-            </label>
-            <label className="space-y-1 text-xs font-medium uppercase text-slate-400 md:col-span-2">
-              {t("journal.playbooks.description")}
-              <textarea
-                value={form.description}
-                onChange={(event) => setField("description", event.target.value)}
-                rows={3}
-                className={textareaClass}
-              />
-            </label>
-            <label className="space-y-1 text-xs font-medium uppercase text-slate-400">
-              {t("journal.playbooks.symbols")}
+            </Field>
+            <Field label={text.direction}>
+              <select
+                value={form.direction}
+                onChange={(event) => setField("direction", event.target.value as FormState["direction"])}
+                className={inputClass}
+              >
+                <option value="BUY_ONLY">{text.buyOnly}</option>
+                <option value="SELL_ONLY">{text.sellOnly}</option>
+                <option value="BOTH">{text.both}</option>
+              </select>
+            </Field>
+            <Field label={text.symbols} className="md:col-span-2">
               <input
                 value={form.symbols}
                 onChange={(event) => setField("symbols", event.target.value)}
-                placeholder={t("journal.playbooks.symbolsPlaceholder")}
+                placeholder={text.symbolsPlaceholder}
                 className={inputClass}
               />
-            </label>
-            <label className="space-y-1 text-xs font-medium uppercase text-slate-400">
-              {t("journal.playbooks.timeframes")}
+            </Field>
+            <Field label={text.timeframes} className="md:col-span-2">
               <input
                 value={form.timeframes}
                 onChange={(event) => setField("timeframes", event.target.value)}
-                placeholder={t("journal.playbooks.timeframesPlaceholder")}
+                placeholder={text.timeframesPlaceholder}
                 className={inputClass}
               />
-            </label>
-            <label className="space-y-1 text-xs font-medium uppercase text-slate-400">
-              {t("journal.playbooks.riskPerTrade")}
-              <input
-                type="number"
-                step="any"
-                value={form.riskPerTrade}
-                onChange={(event) => setField("riskPerTrade", event.target.value)}
-                placeholder={t("journal.playbooks.riskPerTradePlaceholder")}
-                className={inputClass}
+            </Field>
+            <Field label={text.entryRules} className="md:col-span-2">
+              <textarea
+                value={form.entryRules}
+                onChange={(event) => setField("entryRules", event.target.value)}
+                rows={5}
+                placeholder={text.oneRulePerLine}
+                className={textareaClass}
               />
-            </label>
-            <label className="space-y-1 text-xs font-medium uppercase text-slate-400">
-              {t("journal.playbooks.minimumRr")}
-              <input
-                type="number"
-                step="any"
-                value={form.minRiskReward}
-                onChange={(event) => setField("minRiskReward", event.target.value)}
-                placeholder={t("journal.playbooks.minimumRrPlaceholder")}
-                className={inputClass}
+            </Field>
+            <Field label={text.exitRules} className="md:col-span-2">
+              <textarea
+                value={form.exitRules}
+                onChange={(event) => setField("exitRules", event.target.value)}
+                rows={5}
+                placeholder={text.oneRulePerLine}
+                className={textareaClass}
               />
-            </label>
-            <label className="space-y-1 text-xs font-medium uppercase text-slate-400 md:col-span-2">
-              {t("dashboard.form.tags")}
-              <input
-                value={form.tags}
-                onChange={(event) => setField("tags", event.target.value)}
-                placeholder={t("journal.playbooks.tagsPlaceholder")}
-                className={inputClass}
+            </Field>
+            <Field label={text.riskRules} className="md:col-span-4">
+              <textarea
+                value={form.riskRules}
+                onChange={(event) => setField("riskRules", event.target.value)}
+                rows={4}
+                placeholder={text.riskPlaceholder}
+                className={textareaClass}
               />
-            </label>
+            </Field>
           </div>
         </section>
 
         <section className="rounded-lg border border-slate-800 bg-[#0F172A] p-5 shadow-sm">
           <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div>
-              <h2 className="text-lg font-semibold text-white">{t("journal.playbooks.strategyRules")}</h2>
+              <h2 className="text-lg font-semibold text-white">{text.checklistItems}</h2>
               <p className="mt-1 text-sm text-slate-400">
-                {t("journal.playbooks.rulesSubtitle")}
+                {text.checklistSubtitle}
               </p>
             </div>
-            <div className="flex flex-wrap gap-2">
-              <button
-                type="button"
-                onClick={() =>
-                  setField("rules", [
-                    ...form.rules,
-                    emptyRule("SETUP", form.rules.length),
-                  ])
-                }
-                className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-slate-800 px-4 text-sm font-semibold text-slate-300 hover:bg-slate-800"
-              >
-                <Plus className="h-4 w-4" />
-                {t("journal.playbooks.addRule")}
-              </button>
-              <button
-                type="button"
-                onClick={addTemplateRules}
-                className="inline-flex h-10 items-center justify-center rounded-lg border border-slate-800 px-4 text-sm font-semibold text-slate-300 hover:bg-slate-800"
-              >
-                {t("journal.playbooks.addExampleRules")}
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={addChecklistItem}
+              className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-slate-800 px-4 text-sm font-semibold text-slate-300 hover:bg-slate-800"
+            >
+              <Plus className="h-4 w-4" />
+              {text.addChecklistItem}
+            </button>
           </div>
-          <PlaybookRuleEditor rules={form.rules} onChange={(rules) => setField("rules", rules)} />
+
+          <div className="space-y-3">
+            {form.checklistItems.map((item, index) => (
+              <div key={`${item.id || "new"}-${index}`} className="grid gap-3 rounded-lg border border-slate-800 bg-[#111827] p-3 md:grid-cols-[1fr_auto]">
+                <div className="grid gap-3 md:grid-cols-2">
+                  <Field label={`${text.item} ${index + 1}`}>
+                    <input
+                      value={item.title}
+                      onChange={(event) => updateChecklistItem(index, { title: event.target.value })}
+                      placeholder={text.itemPlaceholder}
+                      className={inputClass}
+                    />
+                  </Field>
+                  <Field label={text.optionalNote}>
+                    <input
+                      value={item.description || ""}
+                      onChange={(event) => updateChecklistItem(index, { description: event.target.value })}
+                      placeholder={text.optionalNotePlaceholder}
+                      className={inputClass}
+                    />
+                  </Field>
+                  <label className="inline-flex items-center gap-2 text-sm font-medium text-slate-300">
+                    <input
+                      type="checkbox"
+                      checked={item.isRequired}
+                      onChange={(event) => updateChecklistItem(index, { isRequired: event.target.checked })}
+                      className="h-4 w-4 rounded border-slate-700 bg-[#0F172A]"
+                    />
+                    {text.required}
+                  </label>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => removeChecklistItem(index)}
+                  className="inline-flex h-10 w-10 items-center justify-center self-end rounded-lg border border-red-500/30 text-[#EF4444] hover:bg-red-500/10"
+                  aria-label={text.removeChecklistItem}
+                  title={text.removeChecklistItem}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
+            ))}
+          </div>
         </section>
 
         <section className="rounded-lg border border-slate-800 bg-[#0F172A] p-5 shadow-sm">
-          <div className="mb-4">
-            <h2 className="text-lg font-semibold text-white">{t("journal.playbooks.linkedChecklistTemplates")}</h2>
-            <p className="mt-1 text-sm text-slate-400">
-              {t("journal.playbooks.linkedChecklistSubtitle")}
-            </p>
-          </div>
-          <LinkedChecklistSelector
-            templates={templates}
-            selectedIds={form.checklistTemplateIds}
-            onChange={(ids) => setField("checklistTemplateIds", ids)}
-            loading={loadingTemplates}
-          />
+          <button
+            type="button"
+            onClick={() => setShowAdvanced((current) => !current)}
+            className="inline-flex h-10 items-center justify-center rounded-lg border border-slate-800 px-4 text-sm font-semibold text-slate-300 hover:bg-slate-800"
+          >
+            {showAdvanced ? text.hideAdvanced : text.showAdvanced}
+          </button>
+
+          {showAdvanced ? (
+            <div className="mt-4 grid gap-3 md:grid-cols-2">
+              <Field label={text.setupRules}>
+                <textarea value={form.setupRules} onChange={(event) => setField("setupRules", event.target.value)} rows={4} className={textareaClass} />
+              </Field>
+              <Field label={text.managementRules}>
+                <textarea value={form.managementRules} onChange={(event) => setField("managementRules", event.target.value)} rows={4} className={textareaClass} />
+              </Field>
+              <Field label={text.psychologyRules}>
+                <textarea value={form.psychologyRules} onChange={(event) => setField("psychologyRules", event.target.value)} rows={4} className={textareaClass} />
+              </Field>
+              <Field label={text.sessionFilter}>
+                <textarea value={form.sessionFilter} onChange={(event) => setField("sessionFilter", event.target.value)} rows={4} className={textareaClass} />
+              </Field>
+              <Field label={text.newsFilter}>
+                <textarea value={form.newsFilter} onChange={(event) => setField("newsFilter", event.target.value)} rows={4} className={textareaClass} />
+              </Field>
+              <Field label={text.htfBias}>
+                <textarea value={form.htfBias} onChange={(event) => setField("htfBias", event.target.value)} rows={4} className={textareaClass} />
+              </Field>
+              <Field label={text.exampleWinningTrade}>
+                <textarea value={form.exampleWinningTrade} onChange={(event) => setField("exampleWinningTrade", event.target.value)} rows={4} className={textareaClass} />
+              </Field>
+              <Field label={text.exampleLosingTrade}>
+                <textarea value={form.exampleLosingTrade} onChange={(event) => setField("exampleLosingTrade", event.target.value)} rows={4} className={textareaClass} />
+              </Field>
+              <Field label={text.tags}>
+                <input value={form.tags} onChange={(event) => setField("tags", event.target.value)} placeholder={text.tagsPlaceholder} className={inputClass} />
+              </Field>
+              <label className="inline-flex items-center gap-2 self-end text-sm font-medium text-slate-300">
+                <input
+                  type="checkbox"
+                  checked={form.isActive}
+                  onChange={(event) => setField("isActive", event.target.checked)}
+                  className="h-4 w-4 rounded border-slate-700 bg-[#111827]"
+                />
+                {text.activePlaybook}
+              </label>
+            </div>
+          ) : null}
         </section>
 
         <div className="flex justify-end">
           <button
             type="submit"
             disabled={saving}
-            className={cn(
-              "inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-[#2563EB] px-4 text-sm font-semibold text-white hover:bg-blue-500 disabled:opacity-60"
-            )}
+            className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-[#2563EB] px-4 text-sm font-semibold text-white hover:bg-blue-500 disabled:opacity-60"
           >
             <Save className="h-4 w-4" />
-            {saving ? t("journal.playbooks.saving") : t("journal.playbooks.save")}
+            {saving ? text.saving : text.save}
           </button>
         </div>
       </form>

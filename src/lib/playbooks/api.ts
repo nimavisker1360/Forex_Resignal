@@ -32,12 +32,17 @@ export const MARKET_TYPES = [
   "Custom",
 ] as const;
 
+export const PLAYBOOK_DIRECTIONS = ["BUY_ONLY", "SELL_ONLY", "BOTH"] as const;
+
 export type PlaybookRuleSection = (typeof PLAYBOOK_RULE_SECTIONS)[number];
 export type FollowedPlanStatus = (typeof FOLLOWED_PLAN_STATUSES)[number];
 export type RuleReviewStatus = (typeof RULE_REVIEW_STATUSES)[number];
 
 export const playbookStrategyInclude = {
   rules: {
+    orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+  },
+  checklistItems: {
     orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
   },
   checklistLinks: {
@@ -65,6 +70,9 @@ export const tradeStrategyReviewInclude = {
       rules: {
         orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
       },
+      checklistItems: {
+        orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+      },
     },
   },
   ruleReviews: {
@@ -87,12 +95,25 @@ export type PlaybookPayload = {
   marketType?: unknown;
   symbols?: unknown;
   timeframes?: unknown;
+  direction?: unknown;
   riskPerTrade?: unknown;
   minRiskReward?: unknown;
+  entryRules?: unknown;
+  exitRules?: unknown;
+  riskRules?: unknown;
+  setupRules?: unknown;
+  managementRules?: unknown;
+  psychologyRules?: unknown;
+  sessionFilter?: unknown;
+  newsFilter?: unknown;
+  htfBias?: unknown;
+  exampleWinningTrade?: unknown;
+  exampleLosingTrade?: unknown;
   tags?: unknown;
   isActive?: unknown;
   userId?: unknown;
   rules?: unknown;
+  checklistItems?: unknown;
   checklistTemplateIds?: unknown;
 };
 
@@ -158,7 +179,11 @@ export function normalizePlaybookPayload(
   const errors: string[] = [];
   const name = optionalString(body.name);
   const marketType = optionalString(body.marketType);
+  const direction = optionalString(body.direction)?.toUpperCase() || "BOTH";
   const rawRules = Array.isArray(body.rules) ? body.rules : [];
+  const rawChecklistItems = Array.isArray(body.checklistItems)
+    ? body.checklistItems
+    : [];
   const checklistTemplateIds = Array.isArray(body.checklistTemplateIds)
     ? Array.from(
         new Set(
@@ -175,6 +200,10 @@ export function normalizePlaybookPayload(
 
   if (marketType && !(MARKET_TYPES as readonly string[]).includes(marketType)) {
     errors.push("marketType must be Forex, Crypto, Indices, Stocks, Futures, or Custom");
+  }
+
+  if (!(PLAYBOOK_DIRECTIONS as readonly string[]).includes(direction)) {
+    errors.push("direction must be BUY_ONLY, SELL_ONLY, or BOTH");
   }
 
   const rules = rawRules.flatMap((rawRule, index) => {
@@ -211,6 +240,29 @@ export function normalizePlaybookPayload(
     errors.push("A strategy should have at least one rule");
   }
 
+  const checklistItems = rawChecklistItems.flatMap((rawItem, index) => {
+    const item =
+      rawItem && typeof rawItem === "object"
+        ? (rawItem as Record<string, unknown>)
+        : {};
+    const title = optionalString(item.title);
+    const id = optionalString(item.id);
+
+    if (!title) {
+      return [];
+    }
+
+    return [
+      {
+        ...(id ? { id } : {}),
+        title,
+        description: optionalString(item.description),
+        isRequired: optionalBoolean(item.isRequired, false),
+        sortOrder: parseSortOrder(item.sortOrder, index),
+      },
+    ];
+  });
+
   return {
     errors,
     data: {
@@ -220,11 +272,24 @@ export function normalizePlaybookPayload(
       marketType,
       symbols: optionalString(body.symbols),
       timeframes: optionalString(body.timeframes),
+      direction,
       riskPerTrade: optionalFloat(body.riskPerTrade, "riskPerTrade", errors),
       minRiskReward: optionalFloat(body.minRiskReward, "minRiskReward", errors),
+      entryRules: optionalString(body.entryRules),
+      exitRules: optionalString(body.exitRules),
+      riskRules: optionalString(body.riskRules),
+      setupRules: optionalString(body.setupRules),
+      managementRules: optionalString(body.managementRules),
+      psychologyRules: optionalString(body.psychologyRules),
+      sessionFilter: optionalString(body.sessionFilter),
+      newsFilter: optionalString(body.newsFilter),
+      htfBias: optionalString(body.htfBias),
+      exampleWinningTrade: optionalString(body.exampleWinningTrade),
+      exampleLosingTrade: optionalString(body.exampleLosingTrade),
       tags: optionalString(body.tags),
       isActive: optionalBoolean(body.isActive, true),
       rules,
+      checklistItems,
       checklistTemplateIds,
     },
   };
@@ -250,11 +315,31 @@ export function serializePlaybookStrategy(
   }>,
   analytics?: unknown
 ) {
+  const textBySection = (section: PlaybookRuleSection) =>
+    strategy.rules
+      .filter((rule) => rule.section === section)
+      .map((rule) => rule.description || rule.title)
+      .filter(Boolean)
+      .join("\n");
+
   return {
     ...strategy,
+    entryRules: strategy.entryRules || textBySection("ENTRY") || null,
+    exitRules: strategy.exitRules || textBySection("EXIT") || null,
+    riskRules: strategy.riskRules || textBySection("RISK") || null,
+    setupRules: strategy.setupRules || textBySection("SETUP") || null,
+    managementRules: strategy.managementRules || textBySection("MANAGEMENT") || null,
+    psychologyRules: strategy.psychologyRules || textBySection("PSYCHOLOGY") || null,
     linkedChecklistCount: strategy._count.checklistLinks,
     ruleCount: strategy._count.rules,
     tradeCount: strategy._count.strategyReviews,
+    checklistItems: strategy.checklistItems.map((item) => ({
+      id: item.id,
+      title: item.title,
+      description: item.description,
+      isRequired: item.isRequired,
+      sortOrder: item.sortOrder,
+    })),
     checklists: strategy.checklistLinks.map((link) => ({
       id: link.checklistTemplate.id,
       title: link.checklistTemplate.title,

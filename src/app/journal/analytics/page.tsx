@@ -129,6 +129,7 @@ type TradeMetadata = {
 
 type SaveStatus = "idle" | "loading" | "saving" | "saved" | "error";
 type ReviewPanelTab = "entry" | "exit" | "trade" | "daily";
+type AnalyticsTab = "overview" | "behavior" | "advanced";
 type PageError = {
   message: string;
   upgradeRequired?: boolean;
@@ -2077,6 +2078,7 @@ export default function JournalAnalyticsPage() {
   const [error, setError] = useState<PageError | null>(null);
   const [sortKey, setSortKey] = useState<SortKey>("netPnl");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
+  const [activeTab, setActiveTab] = useState<AnalyticsTab>("overview");
   const loadFailedText = t("journal.analytics.loadFailed");
 
   useEffect(() => {
@@ -2142,6 +2144,7 @@ export default function JournalAnalyticsPage() {
   }, [analytics.bySymbol, sortDirection, sortKey]);
   const hourlyChartData = analytics.byHour.filter((row) => row.totalTrades > 0);
   const hasTrades = overview.totalTrades > 0;
+  const advancedInsightsUnlocked = overview.totalTrades >= 20;
 
   function updateFilter<K extends keyof Filters>(name: K, value: Filters[K]) {
     setFilters((current) => ({ ...current, [name]: value }));
@@ -2174,21 +2177,27 @@ export default function JournalAnalyticsPage() {
     tone: "neutral" | "profit" | "loss" | "blue" | "amber";
   }> = [
     { label: t("journal.analytics.totalNetPnl"), value: formatMoney(overview.totalNetPnl), icon: <CircleDollarSign className="h-4 w-4" />, tone: valueTone(overview.totalNetPnl) },
-    { label: t("journal.analytics.grossProfit"), value: formatMoney(overview.grossProfit), icon: <ArrowUp className="h-4 w-4" />, tone: "profit" },
-    { label: t("journal.analytics.grossLoss"), value: formatMoney(overview.grossLoss), icon: <ArrowDown className="h-4 w-4" />, tone: "loss" },
     { label: t("journal.analytics.winRate"), value: formatPercent(overview.winRate), icon: <Target className="h-4 w-4" />, tone: "blue" },
-    { label: t("journal.analytics.lossRate"), value: formatPercent(overview.lossRate), icon: <Target className="h-4 w-4" />, tone: "amber" },
-    { label: t("journal.analytics.totalTrades"), value: formatNumber(overview.totalTrades, 0), icon: <BarChart3 className="h-4 w-4" />, tone: "blue" },
-    { label: t("journal.analytics.winningTrades"), value: formatNumber(overview.winningTrades, 0), icon: <ArrowUp className="h-4 w-4" />, tone: "profit" },
-    { label: t("journal.analytics.losingTrades"), value: formatNumber(overview.losingTrades, 0), icon: <ArrowDown className="h-4 w-4" />, tone: "loss" },
-    { label: t("journal.analytics.breakEvenTrades"), value: formatNumber(overview.breakEvenTrades, 0), icon: <Target className="h-4 w-4" />, tone: "neutral" },
-    { label: t("journal.analytics.averageWin"), value: formatMoney(overview.averageWin), icon: <ArrowUp className="h-4 w-4" />, tone: "profit" },
-    { label: t("journal.analytics.averageLoss"), value: formatMoney(overview.averageLoss), icon: <ArrowDown className="h-4 w-4" />, tone: "loss" },
     { label: t("journal.analytics.profitFactor"), value: formatNumber(overview.profitFactor, 2), icon: <BarChart3 className="h-4 w-4" />, tone: "blue" },
     { label: t("journal.analytics.averageRr"), value: formatNumber(overview.averageRR, 2), icon: <Target className="h-4 w-4" />, tone: "amber" },
+    { label: t("journal.analytics.totalTrades"), value: formatNumber(overview.totalTrades, 0), icon: <BarChart3 className="h-4 w-4" />, tone: "blue" },
+    { label: t("journal.analytics.maxDrawdown"), value: formatMoney(overview.maxDrawdown), icon: <ArrowDown className="h-4 w-4" />, tone: "loss" },
+  ];
+
+  const advancedMetricCards: Array<{
+    label: string;
+    value: string;
+    icon: ReactNode;
+    tone: "neutral" | "profit" | "loss" | "blue" | "amber";
+  }> = [
+    { label: t("journal.analytics.grossProfit"), value: formatMoney(overview.grossProfit), icon: <ArrowUp className="h-4 w-4" />, tone: "profit" },
+    { label: t("journal.analytics.grossLoss"), value: formatMoney(overview.grossLoss), icon: <ArrowDown className="h-4 w-4" />, tone: "loss" },
+    { label: t("journal.analytics.averageWin"), value: formatMoney(overview.averageWin), icon: <ArrowUp className="h-4 w-4" />, tone: "profit" },
+    { label: t("journal.analytics.averageLoss"), value: formatMoney(overview.averageLoss), icon: <ArrowDown className="h-4 w-4" />, tone: "loss" },
     { label: t("journal.analytics.bestTrade"), value: overview.bestTrade ? formatMoney(overview.bestTrade.pnl) : "$0.00", icon: <ArrowUp className="h-4 w-4" />, tone: "profit" },
     { label: t("journal.analytics.worstTrade"), value: overview.worstTrade ? formatMoney(overview.worstTrade.pnl) : "$0.00", icon: <ArrowDown className="h-4 w-4" />, tone: "loss" },
-    { label: t("journal.analytics.maxDrawdown"), value: formatMoney(overview.maxDrawdown), icon: <ArrowDown className="h-4 w-4" />, tone: "loss" },
+    { label: t("journal.analytics.lossRate"), value: formatPercent(overview.lossRate), icon: <Target className="h-4 w-4" />, tone: "amber" },
+    { label: t("journal.analytics.breakEvenTrades"), value: formatNumber(overview.breakEvenTrades, 0), icon: <Target className="h-4 w-4" />, tone: "neutral" },
     { label: t("journal.analytics.expectancyPerTrade"), value: formatMoney(overview.expectancyPerTrade), icon: <CircleDollarSign className="h-4 w-4" />, tone: valueTone(overview.expectancyPerTrade) },
   ];
 
@@ -2314,6 +2323,28 @@ export default function JournalAnalyticsPage() {
         </div>
       ) : null}
 
+      <div className="flex flex-wrap gap-2 rounded-lg border border-slate-800 bg-[#0F172A] p-2 shadow-sm">
+        {[
+          ["overview", "Overview"],
+          ["behavior", "Behavior"],
+          ["advanced", "Advanced"],
+        ].map(([tab, label]) => (
+          <button
+            key={tab}
+            type="button"
+            onClick={() => setActiveTab(tab as AnalyticsTab)}
+            className={cn(
+              "inline-flex h-10 items-center rounded-lg px-4 text-sm font-semibold transition",
+              activeTab === tab
+                ? "bg-blue-600 text-white"
+                : "text-slate-300 hover:bg-slate-800 hover:text-white"
+            )}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
       {loading ? (
         <LoadingPanel />
       ) : (
@@ -2324,167 +2355,143 @@ export default function JournalAnalyticsPage() {
             </div>
           )}
 
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            {overviewCards.map(({ label, value, icon, tone }) => (
-              <StatCard key={label} label={label} value={value} icon={icon} tone={tone} />
-            ))}
-          </div>
-
-          <TradeZellaAnalysisWorkspace analytics={analytics} />
-
-          <div className="grid gap-5 xl:grid-cols-2">
-            <Section
-              title={t("journal.analytics.equityCurve")}
-              description={t("journal.analytics.equityDescription")}
-              icon={<LineChartIcon className="h-4 w-4" />}
-            >
-              <EquityChart data={analytics.equityCurve} />
-            </Section>
-            <Section
-              title={t("journal.analytics.drawdown")}
-              description={t("journal.analytics.drawdownDescription").replace("{current}", formatMoney(overview.currentDrawdown)).replace("{max}", formatMoney(overview.maxDrawdown))}
-              icon={<ArrowDown className="h-4 w-4" />}
-            >
-              <DrawdownChart data={analytics.drawdownCurve} />
-            </Section>
-          </div>
-
-          <div className="grid gap-5 xl:grid-cols-2">
-            <Section
-              title={t("journal.analytics.longShort")}
-              description={t("journal.analytics.longShortDescription")}
-              icon={<Filter className="h-4 w-4" />}
-            >
-              <div className="space-y-4">
-                <DirectionStats items={directionData} />
-                <DirectionChart data={directionData} />
+          {activeTab === "overview" ? (
+            <>
+              <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-6">
+                {overviewCards.map(({ label, value, icon, tone }) => (
+                  <StatCard key={label} label={label} value={value} icon={icon} tone={tone} />
+                ))}
               </div>
-            </Section>
-            <Section
-              title={t("journal.analytics.sessionPerformance")}
-              description={t("journal.analytics.sessionPerformanceDescription")}
-              icon={<CalendarDays className="h-4 w-4" />}
-            >
-              <PnlBarChart data={analytics.bySession} xKey="session" height={300} />
-            </Section>
-          </div>
 
-          <div className="grid gap-5 xl:grid-cols-2">
-            <Section title={t("journal.analytics.weekdayPnl")} icon={<CalendarDays className="h-4 w-4" />}>
-              <PnlBarChart data={analytics.byWeekday} xKey="weekday" height={280} />
-            </Section>
-            <Section title={t("journal.analytics.hourlyPnl")} icon={<BarChart3 className="h-4 w-4" />}>
-              <PnlBarChart
-                data={hourlyChartData.length > 0 ? hourlyChartData : analytics.byHour}
-                xKey="label"
-                height={280}
-              />
-            </Section>
-          </div>
+              <Section
+                title={t("journal.analytics.equityCurve")}
+                description={t("journal.analytics.equityDescription")}
+                icon={<LineChartIcon className="h-4 w-4" />}
+              >
+                <EquityChart data={analytics.equityCurve} />
+              </Section>
 
-          <Section
-            title={t("journal.analytics.symbolAnalytics")}
-            description={t("journal.analytics.symbolAnalyticsDescription")}
-            icon={<ArrowUpDown className="h-4 w-4" />}
-          >
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[900px] text-left text-sm">
-                <thead className="text-xs uppercase text-slate-500">
-                  <tr>
-                    {[
-                      ["symbol", t("dashboard.table.symbol")],
-                      ["totalTrades", t("journal.analytics.trades")],
-                      ["winRate", t("journal.analytics.winRate")],
-                      ["netPnl", t("journal.analytics.netPnl")],
-                      ["averagePnl", t("journal.analytics.average")],
-                      ["profitFactor", t("journal.analytics.profitFactor")],
-                      ["bestTrade", t("journal.analytics.best")],
-                      ["worstTrade", t("journal.analytics.worst")],
-                    ].map(([key, label]) => (
-                      <th key={key} className="py-2 pr-3">
-                        <button
-                          type="button"
-                          onClick={() => toggleSymbolSort(key as SortKey)}
-                          className="inline-flex items-center gap-1 hover:text-white"
-                        >
-                          {label}
-                          <ArrowUpDown className="h-3 w-3" />
-                        </button>
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-800">
-                  {sortedSymbols.map((row) => (
-                    <tr key={row.symbol} className="text-slate-300">
-                      <td className="py-3 pr-3 font-semibold text-white">{row.symbol}</td>
-                      <td className="py-3 pr-3">{formatNumber(row.totalTrades, 0)}</td>
-                      <td className="py-3 pr-3">{formatPercent(row.winRate)}</td>
-                      <td className={cn("py-3 pr-3 font-semibold", valueToneClass(row.netPnl))}>
-                        {formatMoney(row.netPnl)}
-                      </td>
-                      <td className={cn("py-3 pr-3", valueToneClass(row.averagePnl))}>
-                        {formatMoney(row.averagePnl)}
-                      </td>
-                      <td className="py-3 pr-3">{formatNumber(row.profitFactor, 2)}</td>
-                      <td className="py-3 pr-3 text-emerald-300">{formatMoney(row.bestTrade)}</td>
-                      <td className="py-3 text-red-300">{formatMoney(row.worstTrade)}</td>
-                    </tr>
+              <div className="grid gap-5 xl:grid-cols-2">
+                <Section
+                  title={t("journal.analytics.symbolAnalytics")}
+                  description={t("journal.analytics.symbolAnalyticsDescription")}
+                  icon={<ArrowUpDown className="h-4 w-4" />}
+                >
+                  <div className="overflow-x-auto">
+                    <table className="w-full min-w-[720px] text-left text-sm">
+                      <thead className="text-xs uppercase text-slate-500">
+                        <tr>
+                          {[
+                            ["symbol", t("dashboard.table.symbol")],
+                            ["totalTrades", t("journal.analytics.trades")],
+                            ["winRate", t("journal.analytics.winRate")],
+                            ["netPnl", t("journal.analytics.netPnl")],
+                            ["profitFactor", t("journal.analytics.profitFactor")],
+                          ].map(([key, label]) => (
+                            <th key={key} className="py-2 pr-3">
+                              <button type="button" onClick={() => toggleSymbolSort(key as SortKey)} className="inline-flex items-center gap-1 hover:text-white">
+                                {label}
+                                <ArrowUpDown className="h-3 w-3" />
+                              </button>
+                            </th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-800">
+                        {sortedSymbols.map((row) => (
+                          <tr key={row.symbol} className="text-slate-300">
+                            <td className="py-3 pr-3 font-semibold text-white">{row.symbol}</td>
+                            <td className="py-3 pr-3">{formatNumber(row.totalTrades, 0)}</td>
+                            <td className="py-3 pr-3">{formatPercent(row.winRate)}</td>
+                            <td className={cn("py-3 pr-3 font-semibold", valueToneClass(row.netPnl))}>{formatMoney(row.netPnl)}</td>
+                            <td className="py-3 pr-3">{formatNumber(row.profitFactor, 2)}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                    {sortedSymbols.length === 0 && <EmptyPanel message={t("journal.analytics.noSymbolAnalytics")} />}
+                  </div>
+                </Section>
+
+                <Section title="Playbook Performance" icon={<Target className="h-4 w-4" />}>
+                  {analytics.metadata.hasStrategyData ? (
+                    <StrategyTable rows={analytics.byStrategy} />
+                  ) : (
+                    <EmptyPanel message={t("journal.analytics.noStrategyData")} />
+                  )}
+                </Section>
+              </div>
+            </>
+          ) : null}
+
+          {activeTab === "behavior" ? (
+            <>
+              <div className="grid gap-5 xl:grid-cols-2">
+                <Section title={t("journal.analytics.mistakes")} icon={<AlertTriangle className="h-4 w-4" />}>
+                  <CompactTable rows={analytics.byMistake} labelHeader={t("journal.analytics.mistakes")} getLabel={(row) => row.label} emptyMessage={t("journal.analytics.noMistakeTags")} />
+                </Section>
+                <Section title={t("journal.analytics.emotions")} icon={<Brain className="h-4 w-4" />}>
+                  <CompactTable rows={analytics.byEmotion} labelHeader={t("journal.analytics.emotions")} getLabel={(row) => row.label} emptyMessage={t("journal.analytics.noPsychologyData")} />
+                </Section>
+              </div>
+
+              <div className="grid gap-5 xl:grid-cols-2">
+                <Section title={t("journal.analytics.sessionPerformance")} description={t("journal.analytics.sessionPerformanceDescription")} icon={<CalendarDays className="h-4 w-4" />}>
+                  <PnlBarChart data={analytics.bySession} xKey="session" height={300} />
+                </Section>
+                <Section title={t("journal.analytics.weekdayPnl")} icon={<CalendarDays className="h-4 w-4" />}>
+                  <PnlBarChart data={analytics.byWeekday} xKey="weekday" height={280} />
+                </Section>
+              </div>
+
+              <Section title={t("journal.analytics.hourlyPnl")} icon={<BarChart3 className="h-4 w-4" />}>
+                <PnlBarChart data={hourlyChartData.length > 0 ? hourlyChartData : analytics.byHour} xKey="label" height={280} />
+              </Section>
+            </>
+          ) : null}
+
+          {activeTab === "advanced" ? (
+            !advancedInsightsUnlocked ? (
+              <div className="rounded-lg border border-dashed border-slate-800 bg-[#0F172A] p-6 text-sm text-slate-400">
+                More insights unlock after 20 closed trades.
+              </div>
+            ) : (
+              <>
+                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                  {advancedMetricCards.map(({ label, value, icon, tone }) => (
+                    <StatCard key={label} label={label} value={value} icon={icon} tone={tone} />
                   ))}
-                </tbody>
-              </table>
-              {sortedSymbols.length === 0 && <EmptyPanel message={t("journal.analytics.noSymbolAnalytics")} />}
-            </div>
-          </Section>
+                </div>
 
-          <div className="grid gap-5 xl:grid-cols-2">
-            <Section title={t("journal.analytics.sessionAnalytics")} icon={<CalendarDays className="h-4 w-4" />}>
-              <CompactTable
-                rows={analytics.bySession}
-                labelHeader={t("journal.analytics.session")}
-                getLabel={(row) => row.session}
-                emptyMessage={t("journal.analytics.noSessionAnalytics")}
-              />
-            </Section>
-            <Section title={t("journal.analytics.weekdayAnalytics")} icon={<CalendarDays className="h-4 w-4" />}>
-              <CompactTable
-                rows={analytics.byWeekday}
-                labelHeader={t("journal.analytics.weekday")}
-                getLabel={(row) => row.weekday}
-                emptyMessage={t("journal.analytics.noWeekdayAnalytics")}
-              />
-            </Section>
-          </div>
+                <TradeZellaAnalysisWorkspace analytics={analytics} />
 
-          <Section
-            title={t("journal.analytics.hourlyDecisionBoard")}
-            description={t("journal.analytics.hourlyDecisionDescription")}
-            icon={<BarChart3 className="h-4 w-4" />}
-          >
-            <HourlyDecisionPanel rows={analytics.byHour} />
-          </Section>
+                <div className="grid gap-5 xl:grid-cols-2">
+                  <Section title={t("journal.analytics.longShort")} description={t("journal.analytics.longShortDescription")} icon={<Filter className="h-4 w-4" />}>
+                    <div className="space-y-4">
+                      <DirectionStats items={directionData} />
+                      <DirectionChart data={directionData} />
+                    </div>
+                  </Section>
+                  <Section title={t("journal.analytics.drawdown")} description={t("journal.analytics.drawdownDescription").replace("{current}", formatMoney(overview.currentDrawdown)).replace("{max}", formatMoney(overview.maxDrawdown))} icon={<ArrowDown className="h-4 w-4" />}>
+                    <DrawdownChart data={analytics.drawdownCurve} />
+                  </Section>
+                </div>
 
-          <div className="grid gap-5 xl:grid-cols-2">
-            <Section title={t("journal.analytics.strategyMagicAnalytics")} icon={<Target className="h-4 w-4" />}>
-              {analytics.metadata.hasStrategyData ? (
-                <StrategyTable rows={analytics.byStrategy} />
-              ) : (
-                <EmptyPanel message={t("journal.analytics.noStrategyData")} />
-              )}
-            </Section>
-            <Section title={t("journal.analytics.psychologyAnalytics")} icon={<Brain className="h-4 w-4" />}>
-              {analytics.metadata.hasPsychologyData ? (
-                <CompactTable
-                  rows={analytics.byPsychology}
-                  labelHeader={t("journal.analytics.psychologyStatus")}
-                  getLabel={(row) => row.psychologyStatus}
-                  emptyMessage={t("journal.analytics.noPsychologyFilter")}
-                />
-              ) : (
-                <EmptyPanel message={t("journal.analytics.noPsychologyData")} />
-              )}
-            </Section>
-          </div>
+                <Section title={t("journal.analytics.hourlyDecisionBoard")} description={t("journal.analytics.hourlyDecisionDescription")} icon={<BarChart3 className="h-4 w-4" />}>
+                  <HourlyDecisionPanel rows={analytics.byHour} />
+                </Section>
+
+                <div className="grid gap-5 xl:grid-cols-2">
+                  <Section title={t("journal.analytics.sessionAnalytics")} icon={<CalendarDays className="h-4 w-4" />}>
+                    <CompactTable rows={analytics.bySession} labelHeader={t("journal.analytics.session")} getLabel={(row) => row.session} emptyMessage={t("journal.analytics.noSessionAnalytics")} />
+                  </Section>
+                  <Section title={t("journal.analytics.weekdayAnalytics")} icon={<CalendarDays className="h-4 w-4" />}>
+                    <CompactTable rows={analytics.byWeekday} labelHeader={t("journal.analytics.weekday")} getLabel={(row) => row.weekday} emptyMessage={t("journal.analytics.noWeekdayAnalytics")} />
+                  </Section>
+                </div>
+              </>
+            )
+          ) : null}
         </>
       )}
     </div>

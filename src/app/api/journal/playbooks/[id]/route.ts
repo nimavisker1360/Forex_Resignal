@@ -109,6 +109,9 @@ export async function PATCH(request: Request, context: RouteContext) {
       await tx.playbookRule.deleteMany({
         where: { strategyId: id },
       });
+      await tx.playbookChecklistItem.deleteMany({
+        where: { strategyId: id },
+      });
 
       return tx.playbookStrategy.update({
         where: { id },
@@ -118,8 +121,20 @@ export async function PATCH(request: Request, context: RouteContext) {
           marketType: normalized.data.marketType,
           symbols: normalized.data.symbols,
           timeframes: normalized.data.timeframes,
+          direction: normalized.data.direction,
           riskPerTrade: normalized.data.riskPerTrade,
           minRiskReward: normalized.data.minRiskReward,
+          entryRules: normalized.data.entryRules,
+          exitRules: normalized.data.exitRules,
+          riskRules: normalized.data.riskRules,
+          setupRules: normalized.data.setupRules,
+          managementRules: normalized.data.managementRules,
+          psychologyRules: normalized.data.psychologyRules,
+          sessionFilter: normalized.data.sessionFilter,
+          newsFilter: normalized.data.newsFilter,
+          htfBias: normalized.data.htfBias,
+          exampleWinningTrade: normalized.data.exampleWinningTrade,
+          exampleLosingTrade: normalized.data.exampleLosingTrade,
           tags: normalized.data.tags,
           isActive: normalized.data.isActive,
           rules: {
@@ -129,6 +144,14 @@ export async function PATCH(request: Request, context: RouteContext) {
               section: rule.section,
               isRequired: rule.isRequired,
               sortOrder: rule.sortOrder ?? index,
+            })),
+          },
+          checklistItems: {
+            create: normalized.data.checklistItems.map((item, index) => ({
+              title: item.title,
+              description: item.description,
+              isRequired: item.isRequired,
+              sortOrder: item.sortOrder ?? index,
             })),
           },
           checklistLinks: {
