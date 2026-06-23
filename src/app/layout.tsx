@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
+import { cookies } from "next/headers";
 import "./globals.css";
 import "tw-animate-css";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { ToastProvider } from "@/components/ui/toast-provider";
-import { LanguageProvider } from "@/lib/language-context";
+import { LanguageProvider, type Language } from "@/lib/language-context";
 
 export const metadata: Metadata = {
   title: "Signal Forex - Structured Forex Signals",
@@ -12,13 +13,29 @@ export const metadata: Metadata = {
     "Structured forex signals with clear entry, exit, risk levels, and transparent tracking",
 };
 
-export default function RootLayout({
+const LANGUAGE_COOKIE_KEY = "signal_forex_language";
+
+function parseLanguage(value: string | undefined): Language {
+  return value === "fa" ? "fa" : "en";
+}
+
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const cookieStore = await cookies();
+  const initialLanguage = parseLanguage(
+    cookieStore.get(LANGUAGE_COOKIE_KEY)?.value
+  );
+  const initialDirection = initialLanguage === "fa" ? "rtl" : "ltr";
+
   return (
-    <html className="bg-black" dir="ltr" lang="en">
+    <html
+      className="bg-black"
+      dir={initialDirection}
+      lang={initialLanguage}
+    >
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
@@ -31,7 +48,7 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <LanguageProvider>
+      <LanguageProvider initialLanguage={initialLanguage}>
         <body className="min-h-screen flex flex-col overflow-x-hidden bg-black text-white">
           <Navbar />
           <main className="flex-1">{children}</main>

@@ -391,6 +391,8 @@ void ProcessScreenshotForDeal(string eventType, ulong dealTicket, string fallbac
    else
       return;
 
+   bool shouldDeleteTradeLevels = eventType == "close";
+
    string symbol = HistoryDealGetString(dealTicket, DEAL_SYMBOL);
    if(symbol == "")
       symbol = fallbackSymbol;
@@ -438,6 +440,8 @@ void ProcessScreenshotForDeal(string eventType, ulong dealTicket, string fallbac
    if(!CaptureChartScreenshot(chartId, filename))
    {
       Print("Screenshot error: ChartScreenShot failed for ", symbol);
+      if(shouldDeleteTradeLevels)
+         DeleteTradeLevels(chartId, symbol);
       CleanupTemporaryChart(chartId, isTemporary);
       return;
    }
@@ -446,6 +450,8 @@ void ProcessScreenshotForDeal(string eventType, ulong dealTicket, string fallbac
    if(!ReadFileToBase64(filename, imageBase64))
    {
       Print("Screenshot error: could not read PNG for ", symbol);
+      if(shouldDeleteTradeLevels)
+         DeleteTradeLevels(chartId, symbol);
       CleanupTemporaryChart(chartId, isTemporary);
       return;
    }
@@ -454,6 +460,9 @@ void ProcessScreenshotForDeal(string eventType, ulong dealTicket, string fallbac
       Print("Screenshot uploaded. Type: ", screenshotType, ", deal: ", (string)dealTicket);
    else
       Print("Screenshot upload failed. Type: ", screenshotType, ", deal: ", (string)dealTicket);
+
+   if(shouldDeleteTradeLevels)
+      DeleteTradeLevels(chartId, symbol);
 
    CleanupTemporaryChart(chartId, isTemporary);
 }
@@ -620,6 +629,20 @@ void DrawTradeLevels(
    ObjectSetInteger(chartId, labelName, OBJPROP_FONTSIZE, 9);
    ObjectSetString(chartId, labelName, OBJPROP_TEXT, labelText);
 
+   ChartRedraw(chartId);
+}
+
+void DeleteTradeLevels(long chartId, string symbol)
+{
+   if(chartId <= 0 || symbol == "")
+      return;
+
+   string prefix = "TJR_" + SanitizeFilePart(symbol) + "_";
+   ObjectDelete(chartId, prefix + "ENTRY");
+   ObjectDelete(chartId, prefix + "SL");
+   ObjectDelete(chartId, prefix + "TP");
+   ObjectDelete(chartId, prefix + "CLOSE");
+   ObjectDelete(chartId, prefix + "LABEL");
    ChartRedraw(chartId);
 }
 

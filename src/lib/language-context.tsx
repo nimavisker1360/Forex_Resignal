@@ -1,8 +1,14 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useState,
+  useEffect,
+} from "react";
 
-type Language = "en" | "fa";
+export type Language = "en" | "fa";
 
 interface LanguageContextType {
   language: Language;
@@ -14,20 +20,69 @@ const LanguageContext = createContext<LanguageContextType | undefined>(
   undefined
 );
 
-export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const [language, setLanguage] = useState<Language>("en");
-  const [translations, setTranslations] = useState<Record<string, any>>({});
+const LANGUAGE_STORAGE_KEY = "signal-forex-language";
+const LANGUAGE_COOKIE_KEY = "signal_forex_language";
+
+function isLanguage(value: string | null | undefined): value is Language {
+  return value === "en" || value === "fa";
+}
+
+function applyDocumentLanguage(lang: Language, direction?: string) {
+  document.documentElement.dir = direction || (lang === "fa" ? "rtl" : "ltr");
+  document.documentElement.lang = lang;
+}
+
+function persistLanguage(lang: Language) {
+  window.localStorage.setItem(LANGUAGE_STORAGE_KEY, lang);
+  document.cookie = `${LANGUAGE_COOKIE_KEY}=${lang}; path=/; max-age=31536000; SameSite=Lax`;
+}
+
+function asTranslationRecord(value: unknown): Record<string, unknown> {
+  return value && typeof value === "object"
+    ? (value as Record<string, unknown>)
+    : {};
+}
+
+export function LanguageProvider({
+  children,
+  initialLanguage = "en",
+}: {
+  children: React.ReactNode;
+  initialLanguage?: Language;
+}) {
+  const [language, setLanguageState] = useState<Language>(initialLanguage);
+  const [translations, setTranslations] = useState<Record<string, unknown>>({});
+
+  useEffect(() => {
+    const storedLanguage = window.localStorage.getItem(LANGUAGE_STORAGE_KEY);
+
+    if (isLanguage(storedLanguage)) {
+      setLanguageState(storedLanguage);
+      persistLanguage(storedLanguage);
+      applyDocumentLanguage(storedLanguage);
+    }
+  }, []);
+
+  const setLanguage = useCallback((lang: Language) => {
+    setLanguageState(lang);
+    persistLanguage(lang);
+    applyDocumentLanguage(lang);
+  }, []);
 
   useEffect(() => {
     // Load translations based on selected language
     fetch(`/locales/${language}/common.json`, { cache: "no-store" })
       .then((response) => response.json())
-      .then((data) => {
-        setTranslations(data);
+      .then((data: unknown) => {
+        const translationData = asTranslationRecord(data);
+        const direction =
+          typeof translationData.direction === "string"
+            ? translationData.direction
+            : undefined;
+
+        setTranslations(translationData);
         // Update document direction and language
-        document.documentElement.dir =
-          data.direction || (language === "fa" ? "rtl" : "ltr");
-        document.documentElement.lang = language;
+        applyDocumentLanguage(language, direction);
       })
       .catch((error) => console.error("Failed to load translations:", error));
   }, [language]);
@@ -39,11 +94,11 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     }
 
     const keys = key.split(".");
-    let result = translations;
+    let result: unknown = translations;
 
     for (const k of keys) {
       if (result && typeof result === "object" && k in result) {
-        result = result[k];
+        result = (result as Record<string, unknown>)[k];
       } else {
         return key; // Return the key if translation is not found
       }
