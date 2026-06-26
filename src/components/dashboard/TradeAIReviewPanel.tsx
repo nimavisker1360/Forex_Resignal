@@ -38,7 +38,10 @@ function ListBlock({
     <div className="rounded-lg border border-slate-800 bg-[#111827] p-3">
       <div className="text-xs font-semibold uppercase text-slate-400">{title}</div>
       {items.length > 0 ? (
-        <ul className="mt-2 list-disc space-y-1 pl-4 text-sm text-slate-200">
+        <ul
+          className="mt-2 list-disc space-y-1 pl-4 text-left text-sm text-slate-200"
+          dir="ltr"
+        >
           {items.map((item, index) => (
             <li key={`${title}-${index}`}>{item}</li>
           ))}
@@ -54,7 +57,9 @@ function TextBlock({ title, text }: { title: string; text: string }) {
   return (
     <div className="rounded-lg border border-slate-800 bg-[#111827] p-3">
       <div className="text-xs font-semibold uppercase text-slate-400">{title}</div>
-      <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-slate-200">{text}</p>
+      <p className="mt-2 whitespace-pre-wrap text-left text-sm leading-6 text-slate-200" dir="ltr">
+        {text}
+      </p>
     </div>
   );
 }

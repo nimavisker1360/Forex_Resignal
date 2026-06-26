@@ -964,7 +964,13 @@
       "heroTitlePrefix": "Analyze your trading",
       "heroTitleHighlight": "stats",
       "heroTitleSuffix": "and behavior.",
-      "heroDescription": "TradeZella-style reporting: performance, drawdown, playbook/setup quality, costly mistakes, emotions, tags, symbols, and time windows in one workspace.",
+      "heroDescription": "TradeZella-style analytics for performance, drawdown, playbook/setup quality, costly mistakes, trader emotions, tags, symbols, and time-window review in one analytics workspace.",
+      "tabs": {
+        "overview": "Overview",
+        "behavior": "Behavior",
+        "advanced": "Advanced"
+      },
+      "lowSampleNotice": "More reliable insights unlock after 20 closed trades.",
       "keyInsights": "Key insights",
       "updatingReport": "Updating report...",
       "closedTradesAnalyzed": "{count} closed trades analyzed",

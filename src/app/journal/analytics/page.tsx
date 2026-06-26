@@ -352,9 +352,17 @@ function LoadingPanel() {
 }
 
 function LowSampleNotice() {
+  const { t, language } = useLanguage();
+
   return (
-    <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-4 text-sm font-medium text-amber-100">
-      More reliable insights unlock after 20 closed trades.
+    <div
+      className={cn(
+        "rounded-lg border border-amber-500/30 bg-amber-500/10 p-4 text-sm font-medium text-amber-100",
+        language === "fa" && "text-right"
+      )}
+      dir={language === "fa" ? "rtl" : "ltr"}
+    >
+      {t("journal.analytics.lowSampleNotice")}
     </div>
   );
 }
@@ -702,7 +710,8 @@ function AnalyticsHero({
   analytics: JournalAnalyticsResponse;
   loading: boolean;
 }) {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const isRtl = language === "fa";
   const overview = analytics.overview;
   const costlyMistake = worstPnlRow(analytics.byMistake) || worstPnlRow(analytics.byTag);
   const bestSetup = bestPnlRow(analytics.bySetup) || bestPnlRow(analytics.byTag);
@@ -712,15 +721,26 @@ function AnalyticsHero({
   return (
     <section className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-[#0B1020]">
       <div className="grid gap-0 xl:grid-cols-[1.08fr_0.92fr]">
-        <div className="bg-gradient-to-br from-slate-50 via-white to-violet-50 p-5 sm:p-6 lg:p-7 dark:bg-none">
-          <div className="inline-flex items-center gap-2 rounded-full border border-violet-200 bg-violet-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-violet-700 dark:border-violet-500/30 dark:bg-violet-500/10 dark:text-violet-200">
+        <div
+          className={cn(
+            "bg-gradient-to-br from-slate-50 via-white to-violet-50 p-5 sm:p-6 lg:p-7 dark:bg-none",
+            isRtl && "text-right"
+          )}
+          dir={isRtl ? "rtl" : "ltr"}
+        >
+          <div
+            className={cn(
+              "inline-flex items-center gap-2 rounded-full border border-violet-200 bg-violet-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-violet-700 dark:border-violet-500/30 dark:bg-violet-500/10 dark:text-violet-200",
+              isRtl && "tracking-normal"
+            )}
+          >
             <Activity className="h-3.5 w-3.5" />
             {t("journal.analytics.tradeAnalysis")}
           </div>
-          <h1 className="mt-5 max-w-3xl text-3xl font-semibold leading-tight text-slate-950 sm:text-4xl dark:text-white">
+          <h1 className={cn("mt-5 max-w-3xl text-3xl font-semibold leading-tight text-slate-950 sm:text-4xl dark:text-white", isRtl && "mr-0 ml-auto")}>
             {t("journal.analytics.heroTitlePrefix")} <span className="text-violet-600 dark:text-violet-300">{t("journal.analytics.heroTitleHighlight")}</span> {t("journal.analytics.heroTitleSuffix")}
           </h1>
-          <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-400">
+          <p className={cn("mt-3 max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-400", isRtl && "mr-0 ml-auto text-right")}>
             {t("journal.analytics.heroDescription")}
           </p>
 
@@ -732,8 +752,8 @@ function AnalyticsHero({
           </div>
         </div>
 
-        <div className="border-t border-slate-200 bg-white p-5 sm:p-6 xl:border-l xl:border-t-0 dark:border-slate-800 dark:bg-[#111827]">
-          <div className="mb-4 flex items-center justify-between gap-3">
+        <div className="border-t border-slate-200 bg-white p-5 sm:p-6 xl:border-l xl:border-t-0 dark:border-slate-800 dark:bg-[#111827]" dir={isRtl ? "rtl" : "ltr"}>
+          <div className={cn("mb-4 flex items-center justify-between gap-3", isRtl && "text-right")}>
             <div>
               <div className="text-sm font-semibold text-slate-950 dark:text-white">{t("journal.analytics.keyInsights")}</div>
               <div className="mt-1 text-xs text-slate-600 dark:text-slate-400">
@@ -2364,9 +2384,9 @@ export default function JournalAnalyticsPage() {
 
       <div className="flex flex-wrap gap-2 rounded-lg border border-slate-800 bg-[#0F172A] p-2 shadow-sm">
         {[
-          ["overview", "Overview"],
-          ["behavior", "Behavior"],
-          ["advanced", "Advanced"],
+          ["overview", t("journal.analytics.tabs.overview")],
+          ["behavior", t("journal.analytics.tabs.behavior")],
+          ["advanced", t("journal.analytics.tabs.advanced")],
         ].map(([tab, label]) => (
           <button
             key={tab}

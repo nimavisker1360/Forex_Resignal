@@ -908,7 +908,13 @@
       "heroTitlePrefix": "آمار",
       "heroTitleHighlight": "معاملات",
       "heroTitleSuffix": "و رفتار خود را تحلیل کنید.",
-      "heroDescription": "گزارش‌گیری مشابه TradeZella: Performance، Drawdown، کیفیت Playbook/Setup، اشتباهات پرهزینه، احساسات، Tags، Symbols و بازه‌های زمانی در یک فضای کاری.",
+      "heroDescription": "گزارش تحلیلی شبیه TradeZella برای بررسی عملکرد (Performance)، افت سرمایه (Drawdown)، کیفیت پلن و ستاپ معاملاتی (Playbook/Setup)، اشتباهات پرهزینه، احساسات معامله‌گر، تگ‌ها (Tags)، نمادها (Symbols) و بازه‌های زمانی؛ همه در یک داشبورد تحلیلی.",
+      "tabs": {
+        "overview": "نمای کلی",
+        "behavior": "رفتار",
+        "advanced": "پیشرفته"
+      },
+      "lowSampleNotice": "بینش‌های قابل‌اعتمادتر بعد از ۲۰ معامله بسته‌شده فعال می‌شوند.",
       "keyInsights": "بینش‌های کلیدی",
       "updatingReport": "در حال به‌روزرسانی گزارش...",
       "closedTradesAnalyzed": "{count} معامله بسته‌شده تحلیل شد",
