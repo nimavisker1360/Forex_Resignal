@@ -10,6 +10,7 @@ type AccountPayload = {
   platform?: string;
   currency: string;
   balance?: string;
+  mt5AccountNumber?: string;
 };
 
 export function TradingAccountForm({
@@ -33,6 +34,7 @@ export function TradingAccountForm({
       platform: String(formData.get("platform") || ""),
       currency: String(formData.get("currency") || "USD"),
       balance: String(formData.get("balance") || ""),
+      mt5AccountNumber: String(formData.get("mt5AccountNumber") || ""),
     });
   }
 
@@ -70,6 +72,14 @@ export function TradingAccountForm({
           <input
             name="platform"
             defaultValue={account?.platform || ""}
+            className="h-11 w-full rounded-xl border border-slate-800 bg-[#111827] px-3 text-sm normal-case text-[#E5E7EB] outline-none focus:border-blue-600"
+          />
+        </label>
+        <label className="space-y-1 text-xs font-medium uppercase text-slate-400 md:col-span-2">
+          MT5 Account Number
+          <input
+            name="mt5AccountNumber"
+            defaultValue={account?.mt5AccountNumber || ""}
             className="h-11 w-full rounded-xl border border-slate-800 bg-[#111827] px-3 text-sm normal-case text-[#E5E7EB] outline-none focus:border-blue-600"
           />
         </label>

@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { Plus } from "lucide-react";
 import { useLanguage } from "@/lib/language-context";
 import {
-  DEFAULT_DASHBOARD_USER_ID,
   type ApiResult,
   type TagDto,
 } from "@/components/dashboard/types";
@@ -13,7 +12,6 @@ import {
 export function TradeTagsCard({
   tradeId,
   currentTags,
-  userId = DEFAULT_DASHBOARD_USER_ID,
 }: {
   tradeId: string;
   currentTags: Array<{ tagId: string; tag: Omit<TagDto, "createdAt"> & { createdAt: string | Date } }>;
@@ -28,11 +26,11 @@ export function TradeTagsCard({
   );
 
   useEffect(() => {
-    fetch(`/api/tags?userId=${encodeURIComponent(userId)}`)
+    fetch("/api/tags")
       .then((response) => response.json() as Promise<ApiResult<TagDto[]>>)
       .then((json) => setTags(json.data || []))
       .catch(() => setTags([]));
-  }, [userId]);
+  }, []);
 
   async function addTag(formData: FormData) {
     const tagId = String(formData.get("tagId") || "");
@@ -45,7 +43,6 @@ export function TradeTagsCard({
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        userId,
         tagIds: Array.from(new Set([...Array.from(currentTagIds), tagId])),
       }),
     });

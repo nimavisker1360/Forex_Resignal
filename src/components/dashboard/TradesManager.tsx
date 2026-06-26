@@ -2,13 +2,13 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { Plus, Trash2 } from "lucide-react";
+import { BarChart3, Brain, CircleDot, Plus, Trash2 } from "lucide-react";
 import { TradeFilters, type TradeFilterValues } from "@/components/dashboard/TradeFilters";
 import { TradeForm } from "@/components/dashboard/TradeForm";
+import { StatCard } from "@/components/dashboard/StatCard";
 import { TradeTable } from "@/components/dashboard/TradeTable";
 import { useLanguage } from "@/lib/language-context";
 import {
-  DEFAULT_DASHBOARD_USER_ID,
   type ApiResult,
   type TagDto,
   type TradeDto,
@@ -22,6 +22,9 @@ const emptyFilters: TradeFilterValues = {
   direction: "",
   status: "",
   reviewStatus: "",
+  source: "",
+  minAiScore: "",
+  maxAiScore: "",
   from: "",
   to: "",
 };
@@ -35,24 +38,26 @@ function filtersFromSearchParams(searchParams: URLSearchParams): TradeFilterValu
     direction: searchParams.get("direction") || "",
     status: searchParams.get("status") || "",
     reviewStatus: searchParams.get("reviewStatus") || "",
+    source: searchParams.get("source") || "",
+    minAiScore: searchParams.get("minAiScore") || "",
+    maxAiScore: searchParams.get("maxAiScore") || "",
     from: searchParams.get("from") || date,
     to: searchParams.get("to") || date,
   };
 }
 
 export function TradesManager({
-  userId,
   initialAccounts,
   initialTags,
   initialTrades,
+  aiAnalysisEnabled = false,
 }: {
   userId?: string;
   initialAccounts: TradingAccountDto[];
   initialTags: TagDto[];
   initialTrades: TradeDto[];
+  aiAnalysisEnabled?: boolean;
 }) {
-  // TODO: Replace temporary userId with the authenticated session user id.
-  const activeUserId = userId || DEFAULT_DASHBOARD_USER_ID;
   const searchParams = useSearchParams();
   const initialFilterValues = useMemo(
     () => filtersFromSearchParams(searchParams),
@@ -68,10 +73,26 @@ export function TradesManager({
   const [message, setMessage] = useState("");
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const { t } = useLanguage();
+  const stats = useMemo(() => {
+    const reviewedScores = trades
+      .map((trade) => trade.aiReviewScore)
+      .filter((score): score is number => typeof score === "number");
+    const averageScore =
+      reviewedScores.length > 0
+        ? Math.round(reviewedScores.reduce((sum, score) => sum + score, 0) / reviewedScores.length)
+        : null;
+
+    return {
+      total: trades.length,
+      open: trades.filter((trade) => trade.status === "OPEN").length,
+      closed: trades.filter((trade) => trade.status === "CLOSED").length,
+      notReviewed: trades.filter((trade) => trade.aiReviewStatus === "NOT_REVIEWED").length,
+      averageScore,
+    };
+  }, [trades]);
 
   const query = useMemo(() => {
     const params = new URLSearchParams();
-    params.set("userId", activeUserId);
     params.set("limit", "100");
 
     for (const [key, value] of Object.entries(filters)) {
@@ -81,7 +102,7 @@ export function TradesManager({
     }
 
     return params.toString();
-  }, [activeUserId, filters]);
+  }, [filters]);
 
   const loadTrades = useCallback(async () => {
     const response = await fetch(`/api/trades?${query}`);
@@ -111,7 +132,7 @@ export function TradesManager({
         {
           method: isEditing ? "PATCH" : "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...payload, userId: activeUserId }),
+          body: JSON.stringify(payload),
         }
       );
       const json = (await response.json()) as ApiResult<TradeDto>;
@@ -144,7 +165,7 @@ export function TradesManager({
     }
 
     const response = await fetch(
-      `/api/trades/${trade.id}?userId=${encodeURIComponent(activeUserId)}`,
+      `/api/trades/${trade.id}`,
       { method: "DELETE" }
     );
     const json = (await response.json()) as ApiResult<unknown>;
@@ -249,6 +270,8 @@ export function TradesManager({
             defaultStatus={defaultStatus}
             saveStatus={saveStatus}
             onSubmit={saveTrade}
+            aiAnalysisEnabled={aiAnalysisEnabled}
+            onReviewUpdated={loadTrades}
             onCancel={() => {
               setShowForm(false);
               setEditingTrade(null);
@@ -258,8 +281,23 @@ export function TradesManager({
         </div>
       ) : null}
 
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+        <StatCard label={t("dashboard.trades.totalTrades")} value={String(stats.total)} icon={<BarChart3 className="h-4 w-4" />} tone="blue" />
+        <StatCard label={t("dashboard.trades.openTrades")} value={String(stats.open)} icon={<CircleDot className="h-4 w-4" />} tone="green" />
+        <StatCard label={t("dashboard.trades.closedTrades")} value={String(stats.closed)} icon={<CircleDot className="h-4 w-4" />} />
+        <StatCard label={t("dashboard.reviewStatus.notReviewed")} value={String(stats.notReviewed)} icon={<Brain className="h-4 w-4" />} tone="red" />
+        <StatCard label={t("dashboard.trades.averageAiScore")} value={stats.averageScore === null ? "-" : `${stats.averageScore}/100`} icon={<Brain className="h-4 w-4" />} tone="blue" />
+      </div>
+
       <TradeTable
         trades={trades}
+        aiAnalysisEnabled={aiAnalysisEnabled}
+        onNewTrade={() => {
+          setEditingTrade(null);
+          setDefaultStatus("OPEN");
+          setSaveStatus("idle");
+          setShowForm(true);
+        }}
         onEdit={(trade) => {
           setEditingTrade(trade);
           setDefaultStatus(trade.status);
@@ -269,6 +307,12 @@ export function TradesManager({
         onClose={(trade) => {
           setEditingTrade(trade);
           setDefaultStatus("CLOSED");
+          setSaveStatus("idle");
+          setShowForm(true);
+        }}
+        onAIReview={(trade) => {
+          setEditingTrade(trade);
+          setDefaultStatus(trade.status);
           setSaveStatus("idle");
           setShowForm(true);
         }}

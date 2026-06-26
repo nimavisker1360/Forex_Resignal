@@ -1,5 +1,6 @@
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { accountSelect, serializeAccount } from "@/lib/dashboard-data";
 import { apiResponse, decimalValue } from "@/lib/journal/api-utils";
 import { getCurrentUserId, unauthorizedResponse } from "@/lib/server-auth";
 
@@ -15,10 +16,11 @@ export async function GET() {
 
     const accounts = await prisma.tradingAccount.findMany({
       where: { userId },
+      select: accountSelect,
       orderBy: { createdAt: "desc" },
     });
 
-    return apiResponse({ success: true, data: accounts });
+    return apiResponse({ success: true, data: accounts.map(serializeAccount) });
   } catch (error) {
     console.error("Trading accounts GET error:", error);
 
@@ -38,7 +40,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { name, broker, platform, currency, balance } = body;
+    const { name, broker, platform, currency, balance, mt5AccountNumber } = body;
 
     if (!name || !currency) {
       return apiResponse(
@@ -55,10 +57,15 @@ export async function POST(request: Request) {
         platform,
         currency,
         balance: decimalValue(balance),
+        mt5AccountNumber:
+          typeof mt5AccountNumber === "string" && mt5AccountNumber.trim()
+            ? mt5AccountNumber.trim()
+            : null,
       },
+      select: accountSelect,
     });
 
-    return apiResponse({ success: true, data: account }, 201);
+    return apiResponse({ success: true, data: serializeAccount(account) }, 201);
   } catch (error) {
     console.error("Trading accounts POST error:", error);
 

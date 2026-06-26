@@ -21,6 +21,7 @@ import {
 import { DashboardSignOutButton } from "@/components/dashboard/DashboardSignOutButton";
 import { DashboardThemeToggle, useDashboardTheme } from "@/components/dashboard/dashboard-theme";
 import { LanguageSwitcher } from "@/components/language-switcher";
+import type { DashboardTheme } from "@/lib/dashboard-theme";
 import { useLanguage } from "@/lib/language-context";
 import { cn } from "@/lib/utils";
 
@@ -41,10 +42,18 @@ const sidebarItems = [
   { labelKey: "dashboard.nav.settings", href: "/dashboard/settings", icon: Settings },
 ];
 
-export function DashboardShell({ children, showAdmin = false }: { children: ReactNode; showAdmin?: boolean }) {
+export function DashboardShell({
+  children,
+  showAdmin = false,
+  initialTheme = "dark",
+}: {
+  children: ReactNode;
+  showAdmin?: boolean;
+  initialTheme?: DashboardTheme;
+}) {
   const pathname = usePathname();
   const { language, t } = useLanguage();
-  const { theme, isDark, applyTheme } = useDashboardTheme();
+  const { theme, isDark, applyTheme } = useDashboardTheme(initialTheme);
   const translatedDownloadBotLabel = t("dashboard.shell.downloadMt5Bot");
   const downloadBotLabel =
     translatedDownloadBotLabel === "dashboard.shell.downloadMt5Bot"
@@ -173,7 +182,7 @@ export function DashboardShell({ children, showAdmin = false }: { children: Reac
                 <a
                   href={MT5_BOT_DOWNLOAD_URL}
                   className={cn(
-                    "inline-flex h-9 items-center gap-2 rounded-xl border px-3 text-xs font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400",
+                    "download-attention inline-flex h-9 items-center gap-2 rounded-xl border px-3 text-xs font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400",
                     isDark
                       ? "border-blue-500/40 bg-blue-600 text-white hover:bg-blue-500"
                       : "border-blue-600 bg-blue-600 text-white hover:bg-blue-700"

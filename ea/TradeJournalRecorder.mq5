@@ -3,22 +3,22 @@
 //| Records MT5 trade events and sends them to a Next.js journal API. |
 //+------------------------------------------------------------------+
 #property strict
-#property version   "1.04"
+#property version   "1.06"
 #property description "Trade Journal Recorder. Records trades only; never opens, closes, or modifies trades."
 
 input string          JOURNAL_API_BASE_URL = "https://forex-resignal.vercel.app";
-input string          JOURNAL_UPLOAD_SECRET = "test_journal_secret_123";
+input string          JOURNAL_UPLOAD_SECRET = "";
 input bool            JOURNAL_ENABLED = true;
 input bool            DEBUG_MODE = true;
 input bool            CAPTURE_SCREENSHOTS = true;
 input bool            OPEN_CHART_FOR_SCREENSHOT = true;
 input bool            CLOSE_TEMP_CHART_AFTER_SCREENSHOT = true;
 input ENUM_TIMEFRAMES JOURNAL_SCREENSHOT_TIMEFRAME = PERIOD_M5;
-input int             SCREENSHOT_WIDTH = 1280;
-input int             SCREENSHOT_HEIGHT = 720;
+input int             SCREENSHOT_WIDTH = 800;
+input int             SCREENSHOT_HEIGHT = 450;
 input int             SCREENSHOT_DELAY_MS = 1500;
 
-const string TJR_BUILD = "TradeJournalRecorder 1.04 local-time-screenshot-force-capture";
+const string TJR_BUILD = "TradeJournalRecorder 1.06 vercel-production";
 
 string g_lockName = "";
 bool   g_hasLock = false;
@@ -30,6 +30,8 @@ double g_cachedTakeProfits[];
 string g_cachedTradeTypes[];
 long   g_syncAttemptPositionIds[];
 datetime g_syncAttemptTimes[];
+string g_screenshotAttemptKeys[];
+datetime g_screenshotAttemptTimes[];
 
 //+------------------------------------------------------------------+
 //| Expert lifecycle                                                  |
@@ -38,6 +40,7 @@ int OnInit()
 {
    Print(TJR_BUILD, " initialized.");
    Print("API URL: ", NormalizeBaseUrl(JOURNAL_API_BASE_URL));
+   Print("Screenshots: ", CAPTURE_SCREENSHOTS ? "enabled" : "disabled", ", size: ", SCREENSHOT_WIDTH, "x", SCREENSHOT_HEIGHT);
    Print("This EA records trades only. It does not open, close, or modify trades.");
 
    if(!JOURNAL_ENABLED)
@@ -77,6 +80,8 @@ void OnTimer()
    {
       RefreshPositionLevelCache();
       SyncOpenPositions();
+      if(CAPTURE_SCREENSHOTS)
+         CaptureEntryScreenshotsForOpenPositions();
    }
 }
 
@@ -131,7 +136,7 @@ void OnTradeTransaction(
    string response = "";
    int statusCode = 0;
 
-   if(HttpPostJson("/api/journal/event", jsonBody, response, statusCode))
+   if(HttpPostJson("/api/mt5/journal", jsonBody, response, statusCode))
    {
       Print("Trade event payload sent. Status code: ", statusCode);
       DebugPrint("Event API response: " + response);
@@ -158,14 +163,11 @@ string BuildTradeEventJson(string eventType, ulong dealTicket, string fallbackSy
 
    ENUM_DEAL_TYPE dealType = (ENUM_DEAL_TYPE)HistoryDealGetInteger(dealTicket, DEAL_TYPE);
    long positionIdLong = HistoryDealGetInteger(dealTicket, DEAL_POSITION_ID);
-   long orderTicketLong = HistoryDealGetInteger(dealTicket, DEAL_ORDER);
    double lotSize = HistoryDealGetDouble(dealTicket, DEAL_VOLUME);
    double dealPrice = HistoryDealGetDouble(dealTicket, DEAL_PRICE);
    double profit = HistoryDealGetDouble(dealTicket, DEAL_PROFIT);
    double commission = HistoryDealGetDouble(dealTicket, DEAL_COMMISSION);
    double swap = HistoryDealGetDouble(dealTicket, DEAL_SWAP);
-   long magicNumber = HistoryDealGetInteger(dealTicket, DEAL_MAGIC);
-   string comment = HistoryDealGetString(dealTicket, DEAL_COMMENT);
    datetime eventTime = (datetime)HistoryDealGetInteger(dealTicket, DEAL_TIME);
    datetime openTime = eventTime;
 
@@ -185,36 +187,27 @@ string BuildTradeEventJson(string eventType, ulong dealTicket, string fallbackSy
 
    string accountNumber = (string)AccountInfoInteger(ACCOUNT_LOGIN);
    string broker = GetBrokerName();
-   string serverName = GetServerName();
    string positionId = positionIdLong > 0 ? (string)positionIdLong : "";
-   string orderTicket = orderTicketLong > 0 ? (string)orderTicketLong : "";
    string dealTicketText = (string)dealTicket;
-   string idempotencyKey = BuildIdempotencyKey(accountNumber, broker, serverName, positionId, dealTicketText, eventType);
-   string sourceType = magicNumber == 0 ? "manual" : "expert_advisor";
-   string entrySource = eventType == "pending_activated" ? "pending_order_activation" : "market_order";
+   string ticket = positionId != "" ? positionId : dealTicketText;
+   string journalEventType = "update";
+   if(eventType == "open" || eventType == "pending_activated")
+      journalEventType = "open";
+   else if(eventType == "close")
+      journalEventType = "close";
+   string side = tradeType == "sell" ? "SELL" : "BUY";
    int digits = DigitsForSymbol(symbol);
 
    string json = "{";
-   json += "\"uploadSecret\":" + JsonString(JOURNAL_UPLOAD_SECRET) + ",";
-   json += "\"account\":{";
+   json += "\"secret\":" + JsonString(JOURNAL_UPLOAD_SECRET) + ",";
+   json += "\"eventType\":" + JsonString(journalEventType) + ",";
    json += "\"accountNumber\":" + JsonString(accountNumber) + ",";
    json += "\"broker\":" + JsonString(broker) + ",";
-   json += "\"serverName\":" + JsonString(serverName) + ",";
-   json += "\"balance\":" + DoubleToJson(AccountInfoDouble(ACCOUNT_BALANCE), 2) + ",";
-   json += "\"equity\":" + DoubleToJson(AccountInfoDouble(ACCOUNT_EQUITY), 2) + ",";
-   json += "\"freeMargin\":" + DoubleToJson(AccountInfoDouble(ACCOUNT_MARGIN_FREE), 2) + ",";
-   json += "\"currency\":" + JsonString(GetAccountCurrency());
-   json += "},";
-   json += "\"event\":{";
-   json += "\"eventType\":" + JsonString(eventType) + ",";
-   json += "\"idempotencyKey\":" + JsonString(idempotencyKey) + ",";
-   json += "\"ticket\":" + JsonString(dealTicketText) + ",";
-   json += "\"positionId\":" + JsonString(positionId) + ",";
-   json += "\"orderTicket\":" + JsonString(orderTicket) + ",";
-   json += "\"dealTicket\":" + JsonString(dealTicketText) + ",";
+   json += "\"platform\":\"MT5\",";
+   json += "\"ticket\":" + JsonString(ticket) + ",";
    json += "\"symbol\":" + JsonString(symbol) + ",";
-   json += "\"tradeType\":" + JsonString(tradeType) + ",";
-   json += "\"lotSize\":" + DoubleToJson(lotSize, 2) + ",";
+   json += "\"side\":" + JsonString(side) + ",";
+   json += "\"lot\":" + DoubleToJson(lotSize, 2) + ",";
 
    if(entryPrice > 0.0)
       json += "\"entryPrice\":" + DoubleToJson(entryPrice, digits) + ",";
@@ -222,32 +215,31 @@ string BuildTradeEventJson(string eventType, ulong dealTicket, string fallbackSy
       json += "\"entryPrice\":null,";
 
    if(eventType == "close" || eventType == "partial_close")
-      json += "\"closePrice\":" + DoubleToJson(closePrice, digits) + ",";
+      json += "\"exitPrice\":" + DoubleToJson(closePrice, digits) + ",";
    else
-      json += "\"closePrice\":null,";
+      json += "\"exitPrice\":null,";
 
    json += "\"stopLoss\":" + NullablePriceToJson(stopLoss, digits) + ",";
    json += "\"takeProfit\":" + NullablePriceToJson(takeProfit, digits) + ",";
 
    if(eventType == "close" || eventType == "partial_close")
-      json += "\"profit\":" + DoubleToJson(profit, 2) + ",";
+      json += "\"profitLoss\":" + DoubleToJson(profit, 2) + ",";
    else
-      json += "\"profit\":null,";
+      json += "\"profitLoss\":null,";
 
    json += "\"commission\":" + DoubleToJson(commission, 2) + ",";
    json += "\"swap\":" + DoubleToJson(swap, 2) + ",";
-   json += "\"magicNumber\":" + (string)magicNumber + ",";
-   json += "\"comment\":" + JsonString(comment) + ",";
-   json += "\"sourceType\":" + JsonString(sourceType) + ",";
-   json += "\"entrySource\":" + JsonString(entrySource) + ",";
    json += "\"timeframe\":" + JsonString(TimeframeToString(JOURNAL_SCREENSHOT_TIMEFRAME)) + ",";
    json += "\"spread\":" + (string)GetSpread(symbol) + ",";
-   json += "\"atr\":null,";
-   json += "\"rsi\":null,";
-   json += "\"session\":" + JsonString(GetSession(eventTime)) + ",";
-   json += "\"openTime\":" + JsonString(TimeToTraderLocalIso8601(openTime)) + ",";
-   json += "\"eventTime\":" + JsonString(TimeToTraderLocalIso8601(eventTime));
-   json += "}}";
+   json += "\"sessionTime\":" + JsonString(GetSession(eventTime)) + ",";
+   json += "\"mood\":null,";
+   json += "\"openedAt\":" + JsonString(TimeToTraderLocalIso8601(openTime)) + ",";
+   json += "\"closedAt\":";
+   if(journalEventType == "close")
+      json += JsonString(TimeToTraderLocalIso8601(eventTime));
+   else
+      json += "null";
+   json += "}";
 
    return json;
 }
@@ -255,7 +247,6 @@ string BuildTradeEventJson(string eventType, ulong dealTicket, string fallbackSy
 string BuildOpenPositionSyncJson()
 {
    long positionIdLong = PositionGetInteger(POSITION_IDENTIFIER);
-   ulong positionTicket = (ulong)PositionGetInteger(POSITION_TICKET);
    string symbol = PositionGetString(POSITION_SYMBOL);
 
    if(positionIdLong <= 0 || symbol == "")
@@ -265,59 +256,39 @@ string BuildOpenPositionSyncJson()
    double entryPrice = PositionGetDouble(POSITION_PRICE_OPEN);
    double stopLoss = PositionGetDouble(POSITION_SL);
    double takeProfit = PositionGetDouble(POSITION_TP);
-   long magicNumber = PositionGetInteger(POSITION_MAGIC);
-   string comment = PositionGetString(POSITION_COMMENT);
    datetime eventTime = (datetime)PositionGetInteger(POSITION_TIME);
    string tradeType = PositionGetInteger(POSITION_TYPE) == POSITION_TYPE_BUY ? "buy" : "sell";
    string accountNumber = (string)AccountInfoInteger(ACCOUNT_LOGIN);
    string broker = GetBrokerName();
-   string serverName = GetServerName();
    string positionId = (string)positionIdLong;
-   string ticket = (string)positionTicket;
-   string idempotencyKey = BuildIdempotencyKey(accountNumber, broker, serverName, positionId, ticket, "sync_recovered");
-   string sourceType = magicNumber == 0 ? "manual" : "expert_advisor";
+   string ticket = positionId;
+   string side = tradeType == "sell" ? "SELL" : "BUY";
    int digits = DigitsForSymbol(symbol);
 
    string json = "{";
-   json += "\"uploadSecret\":" + JsonString(JOURNAL_UPLOAD_SECRET) + ",";
-   json += "\"account\":{";
+   json += "\"secret\":" + JsonString(JOURNAL_UPLOAD_SECRET) + ",";
+   json += "\"eventType\":\"update\",";
    json += "\"accountNumber\":" + JsonString(accountNumber) + ",";
    json += "\"broker\":" + JsonString(broker) + ",";
-   json += "\"serverName\":" + JsonString(serverName) + ",";
-   json += "\"balance\":" + DoubleToJson(AccountInfoDouble(ACCOUNT_BALANCE), 2) + ",";
-   json += "\"equity\":" + DoubleToJson(AccountInfoDouble(ACCOUNT_EQUITY), 2) + ",";
-   json += "\"freeMargin\":" + DoubleToJson(AccountInfoDouble(ACCOUNT_MARGIN_FREE), 2) + ",";
-   json += "\"currency\":" + JsonString(GetAccountCurrency());
-   json += "},";
-   json += "\"event\":{";
-   json += "\"eventType\":\"sync_recovered\",";
-   json += "\"idempotencyKey\":" + JsonString(idempotencyKey) + ",";
+   json += "\"platform\":\"MT5\",";
    json += "\"ticket\":" + JsonString(ticket) + ",";
-   json += "\"positionId\":" + JsonString(positionId) + ",";
-   json += "\"orderTicket\":null,";
-   json += "\"dealTicket\":" + JsonString(ticket) + ",";
    json += "\"symbol\":" + JsonString(symbol) + ",";
-   json += "\"tradeType\":" + JsonString(tradeType) + ",";
-   json += "\"lotSize\":" + DoubleToJson(lotSize, 2) + ",";
+   json += "\"side\":" + JsonString(side) + ",";
+   json += "\"lot\":" + DoubleToJson(lotSize, 2) + ",";
    json += "\"entryPrice\":" + DoubleToJson(entryPrice, digits) + ",";
-   json += "\"closePrice\":null,";
+   json += "\"exitPrice\":null,";
    json += "\"stopLoss\":" + NullablePriceToJson(stopLoss, digits) + ",";
    json += "\"takeProfit\":" + NullablePriceToJson(takeProfit, digits) + ",";
-   json += "\"profit\":null,";
+   json += "\"profitLoss\":null,";
    json += "\"commission\":0,";
    json += "\"swap\":0,";
-   json += "\"magicNumber\":" + (string)magicNumber + ",";
-   json += "\"comment\":" + JsonString(comment) + ",";
-   json += "\"sourceType\":" + JsonString(sourceType) + ",";
-   json += "\"entrySource\":\"market_order\",";
    json += "\"timeframe\":" + JsonString(TimeframeToString((ENUM_TIMEFRAMES)ChartPeriod(ChartID()))) + ",";
    json += "\"spread\":" + (string)GetSpread(symbol) + ",";
-   json += "\"atr\":null,";
-   json += "\"rsi\":null,";
-   json += "\"session\":" + JsonString(GetSession(eventTime)) + ",";
-   json += "\"openTime\":" + JsonString(TimeToTraderLocalIso8601(eventTime)) + ",";
-   json += "\"eventTime\":" + JsonString(TimeToTraderLocalIso8601(eventTime));
-   json += "}}";
+   json += "\"sessionTime\":" + JsonString(GetSession(eventTime)) + ",";
+   json += "\"mood\":null,";
+   json += "\"openedAt\":" + JsonString(TimeToTraderLocalIso8601(eventTime)) + ",";
+   json += "\"closedAt\":null";
+   json += "}";
 
    return json;
 }
@@ -465,6 +436,109 @@ void ProcessScreenshotForDeal(string eventType, ulong dealTicket, string fallbac
       DeleteTradeLevels(chartId, symbol);
 
    CleanupTemporaryChart(chartId, isTemporary);
+}
+
+void ProcessScreenshotForOpenPosition(ulong positionTicket, long positionIdLong)
+{
+   if(positionTicket == 0 || positionIdLong <= 0)
+      return;
+
+   string attemptKey = "entry:" + (string)positionIdLong;
+   if(!CanAttemptScreenshot(attemptKey, 10))
+      return;
+
+   SetLastScreenshotAttemptTime(attemptKey, TimeCurrent());
+
+   if(!PositionSelectByTicket(positionTicket))
+   {
+      Print("Entry screenshot sync skipped: position is no longer open. Ticket: ", (string)positionTicket);
+      return;
+   }
+
+   string symbol = PositionGetString(POSITION_SYMBOL);
+   if(symbol == "")
+   {
+      Print("Entry screenshot sync skipped: missing symbol. Position: ", (string)positionIdLong);
+      return;
+   }
+
+   Print("Entry screenshot sync started. Symbol: ", symbol, ", position: ", (string)positionIdLong);
+
+   bool isTemporary = false;
+   long chartId = EnsureChartForSymbol(symbol, JOURNAL_SCREENSHOT_TIMEFRAME, isTemporary);
+   if(chartId <= 0)
+   {
+      Print("Entry screenshot sync error: could not open/find chart for ", symbol);
+      return;
+   }
+
+   ChartNavigate(chartId, CHART_END, 0);
+   ChartRedraw(chartId);
+
+   double entryPrice = PositionGetDouble(POSITION_PRICE_OPEN);
+   double stopLoss = PositionGetDouble(POSITION_SL);
+   double takeProfit = PositionGetDouble(POSITION_TP);
+   double lotSize = PositionGetDouble(POSITION_VOLUME);
+   string tradeType = PositionGetInteger(POSITION_TYPE) == POSITION_TYPE_SELL ? "sell" : "buy";
+   datetime eventTime = (datetime)PositionGetInteger(POSITION_TIME);
+
+   DrawTradeLevels(chartId, symbol, tradeType, lotSize, entryPrice, stopLoss, takeProfit, 0.0, eventTime);
+
+   datetime capturedAt = TimeCurrent();
+   string positionId = (string)positionIdLong;
+   string dealTicket = "sync-" + positionId;
+   string filename = BuildScreenshotFilename(symbol, positionId, dealTicket, "entry", capturedAt);
+
+   if(!CaptureChartScreenshot(chartId, filename))
+   {
+      Print("Entry screenshot sync error: ChartScreenShot failed for ", symbol);
+      CleanupTemporaryChart(chartId, isTemporary);
+      return;
+   }
+
+   string imageBase64 = "";
+   if(!ReadFileToBase64(filename, imageBase64))
+   {
+      Print("Entry screenshot sync error: could not read PNG for ", symbol);
+      CleanupTemporaryChart(chartId, isTemporary);
+      return;
+   }
+
+   if(SendScreenshotToApi(positionId, dealTicket, "entry", TimeToTraderLocalIso8601(capturedAt), "captured_from_sync", imageBase64))
+   {
+      Print("Entry screenshot sync uploaded. Position: ", positionId);
+      SetLastScreenshotAttemptTime(attemptKey, TimeCurrent() + 86400 * 365);
+   }
+   else
+   {
+      Print("Entry screenshot sync upload failed. Position: ", positionId);
+   }
+
+   CleanupTemporaryChart(chartId, isTemporary);
+}
+
+void CaptureEntryScreenshotsForOpenPositions()
+{
+   static datetime lastScanLog = 0;
+   datetime now = TimeCurrent();
+   if(now - lastScanLog >= 10)
+   {
+      DebugPrint("Entry screenshot timer scan. Open positions: " + (string)PositionsTotal());
+      lastScanLog = now;
+   }
+
+   for(int i = PositionsTotal() - 1; i >= 0; i--)
+   {
+      ulong ticket = PositionGetTicket(i);
+      if(ticket == 0 || !PositionSelectByTicket(ticket))
+         continue;
+
+      long positionId = PositionGetInteger(POSITION_IDENTIFIER);
+      if(positionId <= 0)
+         continue;
+
+      ProcessScreenshotForOpenPosition(ticket, positionId);
+   }
 }
 
 long FindChartBySymbolAndTimeframe(string symbol, ENUM_TIMEFRAMES tf)
@@ -722,7 +796,7 @@ bool SendScreenshotToApi(
    string jsonBody = BuildScreenshotJson(positionId, dealTicket, type, capturedAt, status, imageBase64);
    string response = "";
    int statusCode = 0;
-   bool ok = HttpPostJson("/api/journal/screenshot", jsonBody, response, statusCode);
+   bool ok = HttpPostJson("/api/mt5/journal/screenshot", jsonBody, response, statusCode);
 
    if(ok)
       DebugPrint("Screenshot API response: " + response);
@@ -988,6 +1062,51 @@ void SetLastSyncAttemptTime(long positionId, datetime value)
    g_syncAttemptTimes[index] = value;
 }
 
+int FindScreenshotAttemptIndex(string key)
+{
+   for(int i = 0; i < ArraySize(g_screenshotAttemptKeys); i++)
+   {
+      if(g_screenshotAttemptKeys[i] == key)
+         return i;
+   }
+
+   return -1;
+}
+
+datetime GetLastScreenshotAttemptTime(string key)
+{
+   int index = FindScreenshotAttemptIndex(key);
+   if(index < 0)
+      return 0;
+
+   return g_screenshotAttemptTimes[index];
+}
+
+void SetLastScreenshotAttemptTime(string key, datetime value)
+{
+   int index = FindScreenshotAttemptIndex(key);
+   if(index < 0)
+   {
+      index = ArraySize(g_screenshotAttemptKeys);
+      ArrayResize(g_screenshotAttemptKeys, index + 1);
+      ArrayResize(g_screenshotAttemptTimes, index + 1);
+   }
+
+   g_screenshotAttemptKeys[index] = key;
+   g_screenshotAttemptTimes[index] = value;
+}
+
+bool CanAttemptScreenshot(string key, int cooldownSeconds)
+{
+   datetime lastAttempt = GetLastScreenshotAttemptTime(key);
+   datetime now = TimeCurrent();
+
+   if(lastAttempt <= 0)
+      return true;
+
+   return now - lastAttempt >= cooldownSeconds;
+}
+
 void SyncOpenPositions()
 {
    datetime now = TimeCurrent();
@@ -1014,10 +1133,12 @@ void SyncOpenPositions()
       int statusCode = 0;
       SetLastSyncAttemptTime(positionId, now);
 
-      if(HttpPostJson("/api/journal/event", jsonBody, response, statusCode))
+      if(HttpPostJson("/api/mt5/journal", jsonBody, response, statusCode))
       {
          Print("Open position sync sent. Position: ", (string)positionId, ", status code: ", statusCode);
          DebugPrint("Open position sync response: " + response);
+         if(CAPTURE_SCREENSHOTS)
+            ProcessScreenshotForOpenPosition(ticket, positionId);
       }
       else
       {
@@ -1367,7 +1488,13 @@ string BuildEndpointUrl(string endpoint)
    if(StringFind(endpoint, "http://") == 0 || StringFind(endpoint, "https://") == 0)
       return endpoint;
 
-   return NormalizeBaseUrl(JOURNAL_API_BASE_URL) + endpoint;
+   string baseUrl = NormalizeBaseUrl(JOURNAL_API_BASE_URL);
+   string journalEndpoint = "/api/mt5/journal";
+
+   if(StringEndsWith(baseUrl, journalEndpoint))
+      baseUrl = StringSubstr(baseUrl, 0, StringLen(baseUrl) - StringLen(journalEndpoint));
+
+   return baseUrl + endpoint;
 }
 
 string NormalizeBaseUrl(string value)
@@ -1385,6 +1512,20 @@ string StringTrimCopy(string value)
    StringTrimLeft(value);
    StringTrimRight(value);
    return value;
+}
+
+bool StringEndsWith(string value, string suffix)
+{
+   int valueLength = StringLen(value);
+   int suffixLength = StringLen(suffix);
+
+   if(suffixLength <= 0)
+      return true;
+
+   if(valueLength < suffixLength)
+      return false;
+
+   return StringSubstr(value, valueLength - suffixLength, suffixLength) == suffix;
 }
 
 string SanitizeFilePart(string value)

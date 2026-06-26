@@ -18,6 +18,7 @@ import { DashboardSignOutButton } from "@/components/dashboard/DashboardSignOutB
 import { DashboardThemeToggle, useDashboardTheme } from "@/components/dashboard/dashboard-theme";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { Button } from "@/components/ui/button";
+import type { DashboardTheme } from "@/lib/dashboard-theme";
 import { useLanguage } from "@/lib/language-context";
 import { cn } from "@/lib/utils";
 
@@ -40,9 +41,17 @@ const pageTitles: Record<string, string> = {
   "/admin/settings": "Settings",
 };
 
-export function AdminShell({ children, adminEmail }: { children: ReactNode; adminEmail: string }) {
+export function AdminShell({
+  children,
+  adminEmail,
+  initialTheme = "dark",
+}: {
+  children: ReactNode;
+  adminEmail: string;
+  initialTheme?: DashboardTheme;
+}) {
   const pathname = usePathname();
-  const { theme, isDark, applyTheme } = useDashboardTheme();
+  const { theme, isDark, applyTheme } = useDashboardTheme(initialTheme);
   const { language } = useLanguage();
   const pageTitle =
     pageTitles[pathname] ||

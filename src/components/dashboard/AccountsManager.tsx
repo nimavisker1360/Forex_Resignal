@@ -2,24 +2,28 @@
 
 import { useCallback, useState } from "react";
 import { Edit, Plus, Trash2 } from "lucide-react";
+import { AccountJournalConnectionPanel } from "@/components/dashboard/AccountJournalConnectionPanel";
+import { Mt5QuickConnectPanel } from "@/components/dashboard/Mt5QuickConnectPanel";
 import { TradingAccountForm } from "@/components/dashboard/TradingAccountForm";
 import { useLanguage } from "@/lib/language-context";
 import {
-  DEFAULT_DASHBOARD_USER_ID,
   formatMoney,
   type ApiResult,
   type TradingAccountDto,
 } from "@/components/dashboard/types";
 
 export function AccountsManager({
-  userId,
   initialAccounts,
+  journalAccess,
 }: {
   userId?: string;
   initialAccounts: TradingAccountDto[];
+  journalAccess: {
+    canUseJournal: boolean;
+    status: string;
+    message: string | null;
+  };
 }) {
-  // TODO: Replace temporary userId with the authenticated session user id.
-  const activeUserId = userId || DEFAULT_DASHBOARD_USER_ID;
   const [accounts, setAccounts] = useState<TradingAccountDto[]>(initialAccounts);
   const [editingAccount, setEditingAccount] = useState<TradingAccountDto | null>(null);
   const [showForm, setShowForm] = useState(false);
@@ -27,12 +31,10 @@ export function AccountsManager({
   const { t } = useLanguage();
 
   const loadAccounts = useCallback(async () => {
-    const response = await fetch(
-      `/api/trading-accounts?userId=${encodeURIComponent(activeUserId)}`
-    );
+    const response = await fetch("/api/trading-accounts");
     const json = (await response.json()) as ApiResult<TradingAccountDto[]>;
     setAccounts(json.data || []);
-  }, [activeUserId]);
+  }, []);
 
   async function saveAccount(payload: Record<string, string | undefined>) {
     const isEditing = Boolean(editingAccount);
@@ -43,7 +45,7 @@ export function AccountsManager({
       {
         method: isEditing ? "PATCH" : "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...payload, userId: activeUserId }),
+        body: JSON.stringify(payload),
       }
     );
     const json = (await response.json()) as ApiResult<TradingAccountDto>;
@@ -61,7 +63,7 @@ export function AccountsManager({
 
   async function deleteAccount(account: TradingAccountDto) {
     const response = await fetch(
-      `/api/trading-accounts/${account.id}?userId=${encodeURIComponent(activeUserId)}`,
+      `/api/trading-accounts/${account.id}`,
       { method: "DELETE" }
     );
     const json = (await response.json()) as ApiResult<unknown>;
@@ -101,6 +103,8 @@ export function AccountsManager({
           {message}
         </div>
       ) : null}
+
+      <Mt5QuickConnectPanel onCreated={loadAccounts} />
 
       {showForm ? (
         <div className="rounded-xl border border-slate-800 bg-[#0F172A] p-5 shadow-sm">
@@ -167,6 +171,10 @@ export function AccountsManager({
                 <div className="mt-1 font-semibold text-white">{account.currency}</div>
               </div>
             </div>
+            <AccountJournalConnectionPanel
+              account={account}
+              journalAccess={journalAccess}
+            />
           </div>
         ))}
       </div>

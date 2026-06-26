@@ -10,6 +10,7 @@
     "lint": "next lint",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy",
     "db:studio": "prisma studio",
     "seed:phase1": "node scripts/seed-phase-1-demo.js",
     "seed:plans": "node scripts/seed-plans.js"

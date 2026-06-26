@@ -8,15 +8,65 @@ import {
 
 export const dynamic = "force-dynamic";
 
-async function importCalendarWhenEmpty() {
-  const eventCount = await prisma.economicEvent.count();
+let lastAutoImportAttemptAt = 0;
+const AUTO_IMPORT_RETRY_MS = 15 * 60 * 1000;
 
-  if (eventCount > 0) {
+async function importCalendarEvents() {
+  const { events } = await fetchWeeklyEconomicCalendar();
+  await saveEconomicEventsToDatabase(events);
+}
+
+async function importCalendarWhenCoverageIsMissing(from: Date, to: Date) {
+  const eventsInRange = await prisma.economicEvent.count({
+    where: {
+      eventTime: {
+        gte: from,
+        lte: to,
+      },
+    },
+  });
+
+  if (eventsInRange > 0) {
     return;
   }
 
-  const { events } = await fetchWeeklyEconomicCalendar();
-  await saveEconomicEventsToDatabase(events);
+  const coverage = await prisma.economicEvent.aggregate({
+    _count: {
+      id: true,
+    },
+    _min: {
+      eventTime: true,
+    },
+    _max: {
+      eventTime: true,
+    },
+  });
+
+  const hasNoEvents = coverage._count.id === 0;
+  const startsBeforeCoverage =
+    coverage._min.eventTime !== null && from.getTime() < coverage._min.eventTime.getTime();
+  const endsAfterCoverage =
+    coverage._max.eventTime !== null && to.getTime() > coverage._max.eventTime.getTime();
+
+  if (!hasNoEvents && !startsBeforeCoverage && !endsAfterCoverage) {
+    return;
+  }
+
+  const now = Date.now();
+  if (!hasNoEvents && now - lastAutoImportAttemptAt < AUTO_IMPORT_RETRY_MS) {
+    return;
+  }
+
+  lastAutoImportAttemptAt = now;
+  try {
+    await importCalendarEvents();
+  } catch (error) {
+    if (hasNoEvents) {
+      throw error;
+    }
+
+    console.warn("Economic calendar auto-import failed while refreshing coverage:", error);
+  }
 }
 
 function startOfToday() {
@@ -88,7 +138,7 @@ export async function GET(request: Request) {
     const currency = searchParams.get("currency");
     const impact = normalizeImpactFilter(searchParams.get("impact"));
 
-    await importCalendarWhenEmpty();
+    await importCalendarWhenCoverageIsMissing(from, to);
 
     const events = await prisma.economicEvent.findMany({
       where: {

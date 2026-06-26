@@ -347,13 +347,22 @@
       "none": "None",
       "yes": "Yes",
       "partial": "Partial",
-      "no": "No"
+      "no": "No",
+      "manual": "Manual"
+    },
+    "reviewStatus": {
+      "notReviewed": "Not Reviewed",
+      "reviewed": "Reviewed",
+      "failed": "Failed"
     },
     "actions": {
       "edit": "Edit",
       "delete": "Delete",
       "cancel": "Cancel",
       "reset": "Reset",
+      "review": "Review",
+      "reviewTrade": "Review Trade",
+      "connectMt5": "Connect MT5",
       "editTrade": "Edit trade",
       "closeTrade": "Close trade",
       "deleteTrade": "Delete trade"
@@ -380,8 +389,12 @@
       "rr": "R:R",
       "status": "Status",
       "actions": "Actions",
+      "playbook": "Playbook",
+      "reviewStatus": "Review Status",
+      "planCompliance": "Plan Compliance",
+      "aiScore": "AI Score",
       "noTrades": "No trades found",
-      "noTradesHint": "Create your first trade or clear the active filters."
+      "noTradesHint": "Connect MT5 or add your first manual trade."
     },
     "filters": {
       "title": "Trade Filters",
@@ -389,7 +402,11 @@
       "from": "From",
       "to": "To",
       "apply": "Filter",
-      "clear": "Clear filters"
+      "clear": "Clear filters",
+      "review": "Review",
+      "source": "Source",
+      "minAi": "Min AI",
+      "maxAi": "Max AI"
     },
     "accounts": {
       "title": "Trading Accounts",
@@ -412,7 +429,7 @@
     },
     "trades": {
       "title": "Trades",
-      "subtitle": "Manual trade entries across accounts with tags and review fields.",
+      "subtitle": "Track manual and MT5-synced trades across accounts with AI review, tags, and performance insights.",
       "loadFailed": "Failed to load trades",
       "saveFailed": "Error saving changes",
       "deleteFailed": "Failed to delete trade",
@@ -425,6 +442,10 @@
       "createAccountFirst": "Create a trading account before adding trades.",
       "deleteAll": "Delete All",
       "newTrade": "New Trade",
+      "totalTrades": "Total Trades",
+      "openTrades": "Open Trades",
+      "closedTrades": "Closed Trades",
+      "averageAiScore": "Average AI Score",
       "tagName": "Tag Name",
       "color": "Color",
       "addTag": "Add Tag",
@@ -435,6 +456,7 @@
       "brokerData": "Broker Data",
       "syncedFromMt5": "Synced from MT5",
       "manual": "Manual",
+      "manualTrade": "Manual Trade",
       "source": "Source",
       "mt5Ticket": "MT5 Ticket",
       "entryPrice": "Entry Price",
@@ -449,6 +471,8 @@
       "rr": "R/R",
       "openedAt": "Opened At",
       "closedAt": "Closed At",
+      "lastUpdated": "Last Updated",
+      "syncedFromMt5Description": "Broker data fields are synced from MT5. Edit journal notes, tags, and review fields carefully without changing synced broker data.",
       "journalReview": "Journal Review",
       "setup": "Setup",
       "session": "Session",
@@ -463,6 +487,29 @@
       "saving": "Saving...",
       "saved": "Saved",
       "error": "Error saving changes"
+    },
+    "aiReview": {
+      "title": "AI Trade Review",
+      "description": "AI review is educational and based only on your journal data. It is not financial advice.",
+      "upgrade": "Upgrade to use AI Review",
+      "view": "View AI Review",
+      "retry": "Retry AI Review",
+      "generate": "Generate AI Review",
+      "regenerate": "Regenerate Review",
+      "upgradeRegenerate": "Upgrade to regenerate",
+      "failed": "AI review failed",
+      "score": "AI Score",
+      "confidence": "Confidence",
+      "summary": "Summary",
+      "strengths": "Strengths",
+      "weaknesses": "Weaknesses",
+      "mistakes": "Mistakes",
+      "riskReview": "Risk Review",
+      "psychologyReview": "Psychology Review",
+      "playbookReview": "Playbook Review",
+      "improvementPlan": "Improvement Plan",
+      "empty": "No AI review has been generated for this trade yet.",
+      "noItems": "No items provided."
     },
     "settings": {
       "title": "Settings",

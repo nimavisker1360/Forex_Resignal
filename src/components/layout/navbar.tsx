@@ -32,7 +32,7 @@ export function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  if (pathname?.startsWith("/dashboard") || pathname?.startsWith("/journal")) {
+  if (pathname !== "/") {
     return null;
   }
 

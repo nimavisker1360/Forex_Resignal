@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { DEFAULT_DASHBOARD_USER_ID } from "@/components/dashboard/types";
 import { useLanguage } from "@/lib/language-context";
 
 export function PsychologyReviewCard({
@@ -11,7 +10,6 @@ export function PsychologyReviewCard({
   emotion,
   mistake,
   notes,
-  userId = DEFAULT_DASHBOARD_USER_ID,
 }: {
   tradeId: string;
   setup?: string | null;
@@ -56,7 +54,6 @@ export function PsychologyReviewCard({
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        userId,
         setup: String(formData.get("entryReason") || ""),
         emotion: String(formData.get("emotionBefore") || ""),
         mistake: String(formData.get("mistakeTag") || ""),

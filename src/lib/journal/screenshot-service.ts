@@ -101,6 +101,10 @@ function getBlobToken() {
   );
 }
 
+function isVercelRuntime() {
+  return process.env.VERCEL === "1" || Boolean(process.env.VERCEL_ENV);
+}
+
 export function decodeBase64Png(imageBase64: string) {
   const normalized = imageBase64
     .replace(/^data:image\/png;base64,/i, "")
@@ -210,6 +214,12 @@ export async function uploadJournalScreenshot(
   }
 
   if (!imageUrl) {
+    if (isVercelRuntime()) {
+      throw new Error(
+        "BLOB_READ_WRITE_TOKEN is required for screenshot uploads on Vercel"
+      );
+    }
+
     storage = "local";
     imageUrl = await saveScreenshotLocally(input, imageBuffer);
   }

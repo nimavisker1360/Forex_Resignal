@@ -2,6 +2,7 @@
 
 import type { FormEvent, ReactNode } from "react";
 import { CheckCircle2, Lock, Loader2, XCircle } from "lucide-react";
+import { TradeAIReviewPanel } from "@/components/dashboard/TradeAIReviewPanel";
 import type {
   TagDto,
   TradeDto,
@@ -42,6 +43,23 @@ function fieldValue(formData: FormData, name: string) {
 function tradeValue(trade: TradeDto | null | undefined, name: keyof TradeDto) {
   const value = trade?.[name];
   return value === null || value === undefined ? "" : String(value);
+}
+
+function formatDateTime(value: string | null | undefined) {
+  if (!value) {
+    return "-";
+  }
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+
+  return new Intl.DateTimeFormat("en-US", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(date);
 }
 
 function Section({
@@ -112,13 +130,87 @@ function SaveState({ status }: { status: SaveStatus }) {
   );
 }
 
+function SyncStatusBox({
+  trade,
+  normalizedSource,
+  brokerLocked,
+  labels,
+}: {
+  trade?: TradeDto | null;
+  normalizedSource: string;
+  brokerLocked: boolean;
+  labels: {
+    source: string;
+    mt5Ticket: string;
+    account: string;
+    broker: string;
+    platform: string;
+    lastUpdated: string;
+    openedAt: string;
+    closedAt: string;
+    syncedFromMt5Title: string;
+    syncedFromMt5Description: string;
+    manualTrade: string;
+  };
+}) {
+  if (!trade) {
+    return null;
+  }
+
+  const fields = brokerLocked
+    ? [
+        [labels.source, normalizedSource],
+        [labels.mt5Ticket, trade.mt5Ticket || "-"],
+        [labels.account, trade.account?.name || "-"],
+        [labels.broker, trade.account?.broker || "-"],
+        [labels.platform, trade.account?.platform || "-"],
+        [labels.lastUpdated, formatDateTime(trade.updatedAt)],
+        [labels.openedAt, formatDateTime(trade.openedAt)],
+        [labels.closedAt, formatDateTime(trade.closedAt)],
+      ]
+    : [
+        [labels.source, labels.manualTrade],
+        [labels.account, trade.account?.name || "-"],
+        [labels.lastUpdated, formatDateTime(trade.updatedAt)],
+      ];
+
+  return (
+    <div
+      className={
+        brokerLocked
+          ? "rounded-lg border border-blue-500/30 bg-blue-500/10 p-3"
+          : "rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3"
+      }
+    >
+      <div className="text-sm font-semibold text-white">
+        {brokerLocked ? labels.syncedFromMt5Title : labels.manualTrade}
+      </div>
+      {brokerLocked ? (
+        <p className="mt-1 text-xs text-blue-100/80">
+          {labels.syncedFromMt5Description}
+        </p>
+      ) : null}
+      <div className="mt-3 grid gap-2 md:grid-cols-4">
+        {fields.map(([label, value]) => (
+          <div key={label} className="rounded-lg border border-slate-800 bg-[#111827] p-2">
+            <div className="text-[11px] font-semibold uppercase text-slate-500">{label}</div>
+            <div className="mt-1 truncate text-xs text-slate-100">{value}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export function TradeForm({
   trade,
   accounts,
   tags,
   defaultStatus,
   saveStatus = "idle",
+  aiAnalysisEnabled = false,
   onSubmit,
+  onReviewUpdated,
   onCancel,
 }: {
   trade?: TradeDto | null;
@@ -126,7 +218,9 @@ export function TradeForm({
   tags: TagDto[];
   defaultStatus?: "OPEN" | "CLOSED" | "CANCELLED";
   saveStatus?: SaveStatus;
+  aiAnalysisEnabled?: boolean;
   onSubmit: (payload: TradePayload) => Promise<boolean>;
+  onReviewUpdated?: () => Promise<void> | void;
   onCancel?: () => void;
 }) {
   const normalizedSource = normalizeTradeSource(trade?.source, trade?.setup);
@@ -210,6 +304,25 @@ export function TradeForm({
           )
         }
       >
+        <SyncStatusBox
+          trade={trade}
+          normalizedSource={normalizedSource}
+          brokerLocked={brokerLocked}
+          labels={{
+            source: t("dashboard.form.source"),
+            mt5Ticket: t("dashboard.form.mt5Ticket"),
+            account: t("dashboard.table.account"),
+            broker: t("dashboard.accounts.broker"),
+            platform: t("dashboard.accounts.platform"),
+            lastUpdated: t("dashboard.form.lastUpdated"),
+            openedAt: t("dashboard.form.openedAt"),
+            closedAt: t("dashboard.form.closedAt"),
+            syncedFromMt5Title: t("dashboard.form.syncedFromMt5"),
+            syncedFromMt5Description: t("dashboard.form.syncedFromMt5Description"),
+            manualTrade: t("dashboard.form.manualTrade"),
+          }}
+        />
+
         <div className="grid gap-3 md:grid-cols-3">
           <Field label={t("dashboard.form.source")}>
             <input value={normalizedSource} disabled className={inputClass} />
@@ -355,6 +468,14 @@ export function TradeForm({
           </div>
         </div>
       </Section>
+
+      {trade ? (
+        <TradeAIReviewPanel
+          trade={trade}
+          aiAnalysisEnabled={aiAnalysisEnabled}
+          onReviewUpdated={onReviewUpdated}
+        />
+      ) : null}
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <SaveState status={saveStatus} />

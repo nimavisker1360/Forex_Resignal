@@ -7,7 +7,7 @@ import type {
   TradingAccountDto,
 } from "@/components/dashboard/types";
 
-const accountSelect = {
+export const accountSelect = {
   id: true,
   userId: true,
   name: true,
@@ -15,6 +15,11 @@ const accountSelect = {
   platform: true,
   currency: true,
   balance: true,
+  journalEnabled: true,
+  journalSecretHash: true,
+  mt5AccountNumber: true,
+  lastConnectedAt: true,
+  lastSyncAt: true,
   createdAt: true,
   updatedAt: true,
 } satisfies Prisma.TradingAccountSelect;
@@ -51,6 +56,26 @@ export const tradeListInclude = {
       requiredCompliancePercent: true,
     },
   },
+  aiReviews: {
+    select: {
+      id: true,
+      score: true,
+      summary: true,
+      strengths: true,
+      weaknesses: true,
+      mistakes: true,
+      riskReview: true,
+      psychologyReview: true,
+      playbookReview: true,
+      improvementPlan: true,
+      tags: true,
+      confidence: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+    take: 1,
+    orderBy: { updatedAt: "desc" },
+  },
 } satisfies Prisma.TradeInclude;
 
 type AccountRecord = Prisma.TradingAccountGetPayload<{ select: typeof accountSelect }>;
@@ -67,8 +92,20 @@ function serializeDecimal(value: unknown) {
 
 export function serializeAccount(account: AccountRecord): TradingAccountDto {
   return {
-    ...account,
+    id: account.id,
+    userId: account.userId,
+    name: account.name,
+    broker: account.broker,
+    platform: account.platform,
+    currency: account.currency,
     balance: serializeDecimal(account.balance),
+    journalEnabled: account.journalEnabled,
+    mt5AccountNumber: account.mt5AccountNumber,
+    lastConnectedAt: account.lastConnectedAt
+      ? serializeDate(account.lastConnectedAt)
+      : null,
+    lastSyncAt: account.lastSyncAt ? serializeDate(account.lastSyncAt) : null,
+    hasJournalSecret: Boolean(account.journalSecretHash),
     createdAt: serializeDate(account.createdAt),
     updatedAt: serializeDate(account.updatedAt),
   };
@@ -101,6 +138,8 @@ export function serializeTrade(trade: TradeListRecord): TradeDto {
     rr: serializeDecimal(trade.rr),
     source: trade.source,
     mt5Ticket: trade.mt5Ticket,
+    aiReviewStatus: trade.aiReviewStatus,
+    aiReviewScore: trade.aiReviewScore,
     setup: trade.setup,
     session: trade.session,
     emotion: trade.emotion,
@@ -116,6 +155,24 @@ export function serializeTrade(trade: TradeListRecord): TradeDto {
       tagId: item.tagId,
       tag: serializeTag(item.tag),
     })),
+    aiReview: trade.aiReviews[0]
+      ? {
+          id: trade.aiReviews[0].id,
+          score: trade.aiReviews[0].score,
+          summary: trade.aiReviews[0].summary,
+          strengths: trade.aiReviews[0].strengths,
+          weaknesses: trade.aiReviews[0].weaknesses,
+          mistakes: trade.aiReviews[0].mistakes,
+          riskReview: trade.aiReviews[0].riskReview,
+          psychologyReview: trade.aiReviews[0].psychologyReview,
+          playbookReview: trade.aiReviews[0].playbookReview,
+          improvementPlan: trade.aiReviews[0].improvementPlan,
+          tags: trade.aiReviews[0].tags,
+          confidence: trade.aiReviews[0].confidence,
+          createdAt: serializeDate(trade.aiReviews[0].createdAt),
+          updatedAt: serializeDate(trade.aiReviews[0].updatedAt),
+        }
+      : null,
     strategyReview: trade.strategyReview
       ? {
           id: trade.strategyReview.id,

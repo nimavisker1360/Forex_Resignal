@@ -3,26 +3,45 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Moon, Sun } from "lucide-react";
 import { useLanguage } from "@/lib/language-context";
+import {
+  DASHBOARD_THEME_COOKIE_KEY,
+  DASHBOARD_THEME_STORAGE_KEY,
+  type DashboardTheme,
+  parseDashboardTheme,
+} from "@/lib/dashboard-theme";
 import { cn } from "@/lib/utils";
 
-export type DashboardTheme = "dark" | "light";
+function getStoredTheme() {
+  if (typeof window === "undefined") {
+    return null;
+  }
 
-const THEME_STORAGE_KEY = "signalmax-dashboard-theme";
+  try {
+    const storedTheme = window.localStorage.getItem(DASHBOARD_THEME_STORAGE_KEY);
+    return storedTheme === "light" || storedTheme === "dark" ? storedTheme : null;
+  } catch {
+    return null;
+  }
+}
 
-export function useDashboardTheme() {
-  const [theme, setTheme] = useState<DashboardTheme>("dark");
+export function useDashboardTheme(initialTheme: DashboardTheme = "dark") {
+  const [theme, setTheme] = useState<DashboardTheme>(() => parseDashboardTheme(initialTheme));
 
   const applyTheme = useCallback((nextTheme: DashboardTheme) => {
     setTheme(nextTheme);
-    window.localStorage.setItem(THEME_STORAGE_KEY, nextTheme);
+    try {
+      window.localStorage.setItem(DASHBOARD_THEME_STORAGE_KEY, nextTheme);
+    } catch {
+      // Storage can be unavailable in restricted browser contexts.
+    }
+    document.cookie = `${DASHBOARD_THEME_COOKIE_KEY}=${nextTheme}; path=/; max-age=31536000; SameSite=Lax`;
     document.documentElement.dataset.dashboardTheme = nextTheme;
     document.documentElement.classList.toggle("dark", nextTheme === "dark");
   }, []);
 
   useEffect(() => {
-    const savedTheme = window.localStorage.getItem(THEME_STORAGE_KEY);
-    applyTheme(savedTheme === "light" ? "light" : "dark");
-  }, [applyTheme]);
+    applyTheme(getStoredTheme() ?? initialTheme);
+  }, [applyTheme, initialTheme]);
 
   return {
     theme,

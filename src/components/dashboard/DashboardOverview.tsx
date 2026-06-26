@@ -17,7 +17,6 @@ import { TradeDirectionBadge } from "@/components/dashboard/TradeDirectionBadge"
 import { TradeTable } from "@/components/dashboard/TradeTable";
 import { TradeReadinessGuide } from "@/components/dashboard/TradeReadinessGuide";
 import {
-  DEFAULT_DASHBOARD_USER_ID,
   type ApiResult,
   type DashboardOverviewData,
   type DashboardOverviewStats,
@@ -174,8 +173,6 @@ export function DashboardOverview({
   initialTrades: TradeDto[];
   initialStats: DashboardOverviewStats;
 }) {
-  // TODO: Replace temporary userId with the authenticated session user id.
-  const activeUserId = userId || DEFAULT_DASHBOARD_USER_ID;
   const [accounts, setAccounts] = useState(initialAccounts);
   const [trades, setTrades] = useState(initialTrades);
   const [stats, setStats] = useState(initialStats);
@@ -481,7 +478,7 @@ export function DashboardOverview({
               {t("dashboard.overview.recentTrades")}
             </h2>
             <p className="text-sm text-slate-500 dark:text-slate-400">
-              {t("dashboard.overview.latestEntries").replace("{userId}", activeUserId)}
+              {t("dashboard.overview.latestEntries").replace("{userId}", "your account")}
             </p>
           </div>
           <PnlText value={stats.totalPnl} />

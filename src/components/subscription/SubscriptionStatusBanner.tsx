@@ -14,6 +14,7 @@ type SubscriptionStatusBannerProps = {
   buttonText?: string;
   buttonTextFa?: string;
   className?: string;
+  dismissible?: boolean;
 };
 
 export function SubscriptionStatusBanner({
@@ -24,6 +25,7 @@ export function SubscriptionStatusBanner({
   buttonText = "Upgrade",
   buttonTextFa,
   className,
+  dismissible = true,
 }: SubscriptionStatusBannerProps) {
   const { language } = useLanguage();
   const isWarning = tone === "warning";
@@ -36,7 +38,7 @@ export function SubscriptionStatusBanner({
     setDismissed(window.sessionStorage.getItem(dismissKey) === "1");
   }, [dismissKey]);
 
-  if (dismissed) {
+  if (dismissible && dismissed) {
     return null;
   }
 
@@ -73,18 +75,20 @@ export function SubscriptionStatusBanner({
           >
             {localizedButtonText}
           </Link>
-          <button
-            type="button"
-            onClick={() => {
-              window.sessionStorage.setItem(dismissKey, "1");
-              setDismissed(true);
-            }}
-            className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-current/20 opacity-80 hover:opacity-100"
-            aria-label="Dismiss trial banner"
-            title="Dismiss"
-          >
-            <X className="h-4 w-4" />
-          </button>
+          {dismissible ? (
+            <button
+              type="button"
+              onClick={() => {
+                window.sessionStorage.setItem(dismissKey, "1");
+                setDismissed(true);
+              }}
+              className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-current/20 opacity-80 hover:opacity-100"
+              aria-label="Dismiss trial banner"
+              title="Dismiss"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          ) : null}
         </div>
       </div>
     </div>

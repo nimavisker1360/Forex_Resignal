@@ -5,6 +5,10 @@ import "tw-animate-css";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { ToastProvider } from "@/components/ui/toast-provider";
+import {
+  DASHBOARD_THEME_COOKIE_KEY,
+  DASHBOARD_THEME_STORAGE_KEY,
+} from "@/lib/dashboard-theme";
 import { LanguageProvider, type Language } from "@/lib/language-context";
 
 export const metadata: Metadata = {
@@ -14,6 +18,27 @@ export const metadata: Metadata = {
 };
 
 const LANGUAGE_COOKIE_KEY = "signal_forex_language";
+
+const dashboardThemeScript = `
+(function () {
+  try {
+    var path = window.location.pathname;
+    var isDashboardRoute = /^\\/(dashboard|journal|admin|economic-calendar)(\\/|$)/.test(path);
+    if (!isDashboardRoute) return;
+
+    var storedTheme = window.localStorage.getItem("${DASHBOARD_THEME_STORAGE_KEY}");
+    var cookieMatch = document.cookie.match(/(?:^|; )${DASHBOARD_THEME_COOKIE_KEY}=(light|dark)(?:;|$)/);
+    var theme = storedTheme === "light" || storedTheme === "dark"
+      ? storedTheme
+      : cookieMatch
+        ? cookieMatch[1]
+        : "dark";
+    var root = document.documentElement;
+    root.dataset.dashboardTheme = theme;
+    root.classList.toggle("dark", theme === "dark");
+  } catch (error) {}
+})();
+`;
 
 function parseLanguage(value: string | undefined): Language {
   return value === "fa" ? "fa" : "en";
@@ -35,8 +60,10 @@ export default async function RootLayout({
       className="bg-black"
       dir={initialDirection}
       lang={initialLanguage}
+      suppressHydrationWarning
     >
       <head>
+        <script dangerouslySetInnerHTML={{ __html: dashboardThemeScript }} />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
           rel="preconnect"

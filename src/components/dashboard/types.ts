@@ -1,5 +1,3 @@
-export const DEFAULT_DASHBOARD_USER_ID = "demo-user";
-
 export type ApiResult<T> = {
   success: boolean;
   data?: T;
@@ -14,6 +12,11 @@ export type TradingAccountDto = {
   platform: string | null;
   currency: string;
   balance: string | number | null;
+  journalEnabled: boolean;
+  mt5AccountNumber: string | null;
+  lastConnectedAt: string | null;
+  lastSyncAt: string | null;
+  hasJournalSecret?: boolean;
   createdAt: string;
   updatedAt: string;
 };
@@ -41,6 +44,23 @@ export type TradeScreenshotDto = {
   createdAt: string;
 };
 
+export type TradeAIReviewDto = {
+  id: string;
+  score: number;
+  summary: string;
+  strengths: string[];
+  weaknesses: string[];
+  mistakes: string[];
+  riskReview: string;
+  psychologyReview: string;
+  playbookReview: string;
+  improvementPlan: string[];
+  tags: string[];
+  confidence: number;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
 export type TradeDto = {
   id: string;
   userId: string;
@@ -60,6 +80,8 @@ export type TradeDto = {
   rr: string | number | null;
   source: string;
   mt5Ticket: string | null;
+  aiReviewStatus: "NOT_REVIEWED" | "REVIEWED" | "FAILED" | string;
+  aiReviewScore: number | null;
   setup: string | null;
   session: string | null;
   emotion: string | null;
@@ -72,6 +94,7 @@ export type TradeDto = {
   account?: TradingAccountDto | null;
   screenshots?: TradeScreenshotDto[];
   tags?: TradeTagDto[];
+  aiReview?: TradeAIReviewDto | null;
   strategyReview?: {
     id: string;
     strategyId: string | null;

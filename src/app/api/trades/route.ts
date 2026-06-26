@@ -92,6 +92,9 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const status = searchParams.get("status");
     const reviewStatus = searchParams.get("reviewStatus");
+    const source = searchParams.get("source");
+    const minAiScore = parsePositiveInt(searchParams.get("minAiScore"), 0);
+    const maxAiScore = parsePositiveInt(searchParams.get("maxAiScore"), 0);
     const direction = searchParams.get("direction");
     const dateFrom = parseDate(searchParams.get("from") ?? searchParams.get("dateFrom"));
     const rawDateTo = searchParams.get("to") ?? searchParams.get("dateTo");
@@ -135,19 +138,33 @@ export async function GET(request: Request) {
 
     if (reviewStatus) {
       if (reviewStatus === "not-reviewed") {
-        where.OR = [
-          { strategyReview: null },
-          { strategyReview: { followedPlan: "NOT_REVIEWED" } },
-        ];
+        where.aiReviewStatus = "NOT_REVIEWED";
       } else if (reviewStatus === "reviewed") {
-        where.strategyReview = {
-          is: {
-            followedPlan: { not: "NOT_REVIEWED" },
-          },
-        };
+        where.aiReviewStatus = "REVIEWED";
+      } else if (reviewStatus === "failed") {
+        where.aiReviewStatus = "FAILED";
       } else {
         return apiResponse({ success: false, message: "Invalid review status" }, 400);
       }
+    }
+
+    if (source) {
+      const normalizedSource = source.trim().toUpperCase();
+
+      if (normalizedSource === "MANUAL") {
+        where.source = "MANUAL";
+      } else if (normalizedSource === "MT5") {
+        where.source = { in: ["MT5", "MT5_EA", "EA_IMPORT"] };
+      } else {
+        return apiResponse({ success: false, message: "Invalid source filter" }, 400);
+      }
+    }
+
+    if (minAiScore || maxAiScore) {
+      where.aiReviewScore = {
+        ...(minAiScore ? { gte: Math.min(minAiScore, 100) } : {}),
+        ...(maxAiScore ? { lte: Math.min(maxAiScore, 100) } : {}),
+      };
     }
 
     if (dateFrom === null || dateTo === null) {

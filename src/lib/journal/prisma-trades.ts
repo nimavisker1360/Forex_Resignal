@@ -61,7 +61,6 @@ type BuildUpdateResult =
       errors: string[];
     };
 
-const DEFAULT_USER_ID = "demo-user";
 const MT5_SETUP_PREFIX = "MT5:";
 
 function readEnv(name: string) {
@@ -140,12 +139,6 @@ export async function resolveJournalIngestionUserId() {
     if (userIdFromAdminEmail) {
       return userIdFromAdminEmail;
     }
-  }
-
-  const defaultUser = await findUserIdById(DEFAULT_USER_ID);
-
-  if (defaultUser) {
-    return defaultUser;
   }
 
   const firstUser = await prisma.user.findFirst({
@@ -735,7 +728,7 @@ export function buildManualTradeCreateData(
 
   return {
     data: {
-      userId: String(body.userId || DEFAULT_USER_ID),
+      userId: String(body.userId || ""),
       accountId: optionalString(body.accountId) || undefined,
       symbol: symbol.toUpperCase(),
       direction,

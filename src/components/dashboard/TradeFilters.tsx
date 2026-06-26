@@ -12,6 +12,9 @@ export type TradeFilterValues = {
   direction: string;
   status: string;
   reviewStatus: string;
+  source: string;
+  minAiScore: string;
+  maxAiScore: string;
   from: string;
   to: string;
 };
@@ -40,6 +43,9 @@ export function TradeFilters({
       direction: String(formData.get("direction") || ""),
       status: String(formData.get("status") || ""),
       reviewStatus: String(formData.get("reviewStatus") || ""),
+      source: String(formData.get("source") || ""),
+      minAiScore: String(formData.get("minAiScore") || ""),
+      maxAiScore: String(formData.get("maxAiScore") || ""),
       from: String(formData.get("from") || ""),
       to: String(formData.get("to") || ""),
     });
@@ -54,7 +60,7 @@ export function TradeFilters({
         </div>
         {action}
       </div>
-      <form key={JSON.stringify(values)} onSubmit={handleSubmit} className="grid gap-3 md:grid-cols-8">
+      <form key={JSON.stringify(values)} onSubmit={handleSubmit} className="grid gap-3 md:grid-cols-10">
         <label className="space-y-1 text-xs font-medium uppercase text-slate-400">
           {t("dashboard.table.account")}
           <select
@@ -105,16 +111,51 @@ export function TradeFilters({
           </select>
         </label>
         <label className="space-y-1 text-xs font-medium uppercase text-slate-400">
-          Review
+          {t("dashboard.filters.review")}
           <select
             name="reviewStatus"
             defaultValue={values.reviewStatus}
             className="h-11 w-full rounded-xl border border-slate-800 bg-[#111827] px-3 text-sm normal-case text-[#E5E7EB] outline-none focus:border-blue-600"
           >
             <option value="">{t("dashboard.common.all")}</option>
-            <option value="not-reviewed">Not Reviewed</option>
-            <option value="reviewed">Reviewed</option>
+            <option value="not-reviewed">{t("dashboard.reviewStatus.notReviewed")}</option>
+            <option value="reviewed">{t("dashboard.reviewStatus.reviewed")}</option>
+            <option value="failed">{t("dashboard.reviewStatus.failed")}</option>
           </select>
+        </label>
+        <label className="space-y-1 text-xs font-medium uppercase text-slate-400">
+          {t("dashboard.filters.source")}
+          <select
+            name="source"
+            defaultValue={values.source}
+            className="h-11 w-full rounded-xl border border-slate-800 bg-[#111827] px-3 text-sm normal-case text-[#E5E7EB] outline-none focus:border-blue-600"
+          >
+            <option value="">{t("dashboard.common.all")}</option>
+            <option value="MANUAL">{t("dashboard.common.manual")}</option>
+            <option value="MT5">MT5</option>
+          </select>
+        </label>
+        <label className="space-y-1 text-xs font-medium uppercase text-slate-400">
+          {t("dashboard.filters.minAi")}
+          <input
+            name="minAiScore"
+            type="number"
+            min="0"
+            max="100"
+            defaultValue={values.minAiScore}
+            className="h-11 w-full rounded-xl border border-slate-800 bg-[#111827] px-3 text-sm normal-case text-[#E5E7EB] outline-none focus:border-blue-600"
+          />
+        </label>
+        <label className="space-y-1 text-xs font-medium uppercase text-slate-400">
+          {t("dashboard.filters.maxAi")}
+          <input
+            name="maxAiScore"
+            type="number"
+            min="0"
+            max="100"
+            defaultValue={values.maxAiScore}
+            className="h-11 w-full rounded-xl border border-slate-800 bg-[#111827] px-3 text-sm normal-case text-[#E5E7EB] outline-none focus:border-blue-600"
+          />
         </label>
         <label className="space-y-1 text-xs font-medium uppercase text-slate-400">
           {t("dashboard.filters.from")}

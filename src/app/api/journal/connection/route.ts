@@ -3,6 +3,7 @@ import {
   getActiveJournalConnection,
   regenerateJournalConnection,
 } from "@/lib/journal/connections";
+import { getConfiguredSiteUrl } from "@/lib/deployment-url";
 import { requireUser, authErrorResponse } from "@/lib/server-auth";
 
 export const dynamic = "force-dynamic";
@@ -35,8 +36,7 @@ export async function GET() {
     return NextResponse.json({
       success: true,
       connection: serializeConnection(connection),
-      apiBaseUrl:
-        process.env.JOURNAL_API_BASE_URL?.trim() || "http://127.0.0.1:3000",
+      apiBaseUrl: getConfiguredSiteUrl(),
     });
   } catch (error) {
     const authResponse = authErrorResponse(error);
@@ -63,8 +63,7 @@ export async function POST() {
       success: true,
       connection: serializeConnection(connection),
       token,
-      apiBaseUrl:
-        process.env.JOURNAL_API_BASE_URL?.trim() || "http://127.0.0.1:3000",
+      apiBaseUrl: getConfiguredSiteUrl(),
     });
   } catch (error) {
     const authResponse = authErrorResponse(error);
@@ -81,4 +80,3 @@ export async function POST() {
     );
   }
 }
-

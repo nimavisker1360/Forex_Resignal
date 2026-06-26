@@ -21,13 +21,14 @@ import {
 import { DashboardSignOutButton } from "@/components/dashboard/DashboardSignOutButton";
 import { DashboardThemeToggle, useDashboardTheme } from "@/components/dashboard/dashboard-theme";
 import { LanguageSwitcher } from "@/components/language-switcher";
+import type { DashboardTheme } from "@/lib/dashboard-theme";
 import { useLanguage } from "@/lib/language-context";
 import { cn } from "@/lib/utils";
 
 const sidebarItems = [
   { labelKey: "dashboard.nav.dashboard", href: "/dashboard", icon: Gauge },
   { labelKey: "dashboard.nav.accounts", href: "/dashboard/accounts", icon: BriefcaseBusiness },
-  { labelKey: "dashboard.nav.trades", href: "/journal", icon: ListChecks },
+  { labelKey: "dashboard.nav.trades", href: "/dashboard/trades", icon: ListChecks },
   { labelKey: "dashboard.nav.calendar", href: "/journal/calendar", icon: CalendarDays },
   { labelKey: "dashboard.nav.economicCalendar", href: "/economic-calendar", icon: CalendarDays },
   { labelKey: "dashboard.nav.analytics", href: "/journal/analytics", icon: BarChart3 },
@@ -45,12 +46,14 @@ const advancedSidebarItems = [
 
 export function JournalShell({
   children,
+  initialTheme = "dark",
 }: {
   children: ReactNode;
+  initialTheme?: DashboardTheme;
 }) {
   const pathname = usePathname();
   const { language, t } = useLanguage();
-  const { theme, isDark, applyTheme } = useDashboardTheme();
+  const { theme, isDark, applyTheme } = useDashboardTheme(initialTheme);
 
   return (
     <section

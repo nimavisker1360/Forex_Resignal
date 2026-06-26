@@ -135,13 +135,6 @@ function dateRange(filter: DateFilter) {
   }
 }
 
-function formatApiDate(date: Date) {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-}
-
 function formatEventTime(value: string, language: "en" | "fa") {
   return new Intl.DateTimeFormat(language === "fa" ? "fa-IR" : "en-US", {
     month: "short",
@@ -224,8 +217,8 @@ export default function EconomicCalendarPage() {
   const query = useMemo(() => {
     const range = dateRange(dateFilter);
     const params = new URLSearchParams({
-      from: formatApiDate(range.from),
-      to: formatApiDate(range.to),
+      from: range.from.toISOString(),
+      to: range.to.toISOString(),
     });
 
     if (currency !== "All") {

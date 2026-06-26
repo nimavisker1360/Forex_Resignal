@@ -266,7 +266,7 @@ export function normalizePlaybookPayload(
   return {
     errors,
     data: {
-      userId: optionalString(body.userId) || "demo-user",
+      userId: optionalString(body.userId) || "",
       name,
       description: optionalString(body.description),
       marketType,

@@ -1,5 +1,6 @@
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { accountSelect, serializeAccount } from "@/lib/dashboard-data";
 import { apiResponse, decimalValue } from "@/lib/journal/api-utils";
 import { getCurrentUserId, unauthorizedResponse } from "@/lib/server-auth";
 
@@ -28,6 +29,11 @@ export async function PATCH(request: Request, context: RouteContext) {
       }
     }
 
+    if (body.mt5AccountNumber !== undefined) {
+      const accountNumber = String(body.mt5AccountNumber || "").trim();
+      data.mt5AccountNumber = accountNumber || null;
+    }
+
     if (body.balance !== undefined) {
       data.balance = decimalValue(body.balance) ?? null;
     }
@@ -35,9 +41,10 @@ export async function PATCH(request: Request, context: RouteContext) {
     const account = await prisma.tradingAccount.update({
       where: { id, userId },
       data,
+      select: accountSelect,
     });
 
-    return apiResponse({ success: true, data: account });
+    return apiResponse({ success: true, data: serializeAccount(account) });
   } catch (error) {
     console.error("Trading account PATCH error:", error);
 

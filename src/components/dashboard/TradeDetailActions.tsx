@@ -2,13 +2,11 @@
 
 import { useRouter } from "next/navigation";
 import { Edit, Lock, Trash2 } from "lucide-react";
-import { DEFAULT_DASHBOARD_USER_ID } from "@/components/dashboard/types";
 import { useLanguage } from "@/lib/language-context";
 
 export function TradeDetailActions({
   tradeId,
   status,
-  userId = DEFAULT_DASHBOARD_USER_ID,
 }: {
   tradeId: string;
   status: string;
@@ -22,7 +20,6 @@ export function TradeDetailActions({
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        userId,
         status: "CLOSED",
         closedAt: new Date().toISOString(),
       }),
@@ -35,17 +32,17 @@ export function TradeDetailActions({
       return;
     }
 
-    await fetch(`/api/trades/${tradeId}?userId=${encodeURIComponent(userId)}`, {
+    await fetch(`/api/trades/${tradeId}`, {
       method: "DELETE",
     });
-    router.push(`/dashboard/trades?userId=${encodeURIComponent(userId)}`);
+    router.push("/dashboard/trades");
   }
 
   return (
     <div className="flex flex-wrap gap-2">
       <button
         type="button"
-        onClick={() => router.push(`/dashboard/trades?userId=${encodeURIComponent(userId)}`)}
+        onClick={() => router.push("/dashboard/trades")}
         className="inline-flex h-10 items-center gap-2 rounded-xl border border-slate-800 px-3 text-sm font-semibold text-slate-300 hover:bg-slate-800"
       >
         <Edit className="h-4 w-4" />

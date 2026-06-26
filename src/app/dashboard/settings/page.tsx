@@ -1,14 +1,8 @@
 import { redirect } from "next/navigation";
 import { ShieldCheck } from "lucide-react";
 import { DashboardText } from "@/components/dashboard/DashboardText";
-import { JournalConnectionSettings } from "@/components/dashboard/JournalConnectionSettings";
 import { SettingsProfileForm } from "@/components/dashboard/SettingsProfileForm";
-import { getActiveJournalConnection } from "@/lib/journal/connections";
 import { getSession } from "@/lib/server-auth";
-
-function serializeDate(value: Date | null) {
-  return value ? value.toISOString() : null;
-}
 
 export default async function SettingsPage() {
   const session = await getSession();
@@ -16,8 +10,6 @@ export default async function SettingsPage() {
   if (!session) {
     redirect("/login");
   }
-
-  const connection = await getActiveJournalConnection(session.user.id);
 
   return (
     <div className="space-y-6">
@@ -36,23 +28,6 @@ export default async function SettingsPage() {
           email: session.user.email,
           image: session.user.image,
         }}
-      />
-
-      <JournalConnectionSettings
-        initialConnection={
-          connection
-            ? {
-                ...connection,
-                connectedAt: connection.connectedAt.toISOString(),
-                lastUsedAt: serializeDate(connection.lastUsedAt),
-                createdAt: connection.createdAt.toISOString(),
-                updatedAt: connection.updatedAt.toISOString(),
-              }
-            : null
-        }
-        apiBaseUrl={
-          process.env.JOURNAL_API_BASE_URL?.trim() || "http://127.0.0.1:3000"
-        }
       />
 
       <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-[#0F172A]">

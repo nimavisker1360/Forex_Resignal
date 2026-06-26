@@ -24,6 +24,7 @@ export class SubscriptionAccessError extends Error {
 const ACTIVE_STATUSES = ["ACTIVE", "TRIAL", "FREE", "MANUAL"];
 const PAID_STATUSES = ["ACTIVE", "MANUAL"];
 const FAR_FUTURE_DAYS = 365 * 100;
+const DEFAULT_TRIAL_DAYS = 10;
 
 function addDays(date: Date, days: number) {
   const next = new Date(date);
@@ -34,6 +35,36 @@ function addDays(date: Date, days: number) {
 function daysRemaining(expiresAt: Date) {
   const diff = expiresAt.getTime() - Date.now();
   return Math.max(Math.ceil(diff / 86_400_000), 0);
+}
+
+function positiveInteger(value: unknown, fallback: number) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : fallback;
+}
+
+function calendarDayNumber(date: Date) {
+  return Math.floor(
+    Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) / 86_400_000
+  );
+}
+
+function calendarDaysElapsedSince(startedAt: Date, now = new Date()) {
+  return Math.max(calendarDayNumber(now) - calendarDayNumber(startedAt), 0);
+}
+
+function trialDurationDays(subscription: { plan?: { durationDays?: number | null } | null }) {
+  return positiveInteger(subscription.plan?.durationDays, DEFAULT_TRIAL_DAYS);
+}
+
+function trialDaysRemaining(subscription: {
+  startedAt: Date;
+  expiresAt: Date;
+  plan?: { durationDays?: number | null } | null;
+}) {
+  const duration = trialDurationDays(subscription);
+  const calendarRemaining = duration - calendarDaysElapsedSince(subscription.startedAt);
+
+  return Math.max(Math.min(calendarRemaining, daysRemaining(subscription.expiresAt)), 0);
 }
 
 export function subscriptionAccessResponse(error: unknown) {
@@ -101,14 +132,16 @@ export async function ensureUserTrial(userId: string) {
   }
 
   const now = new Date();
+  const startedAt = now;
+  const durationDays = positiveInteger(trialPlan.durationDays, DEFAULT_TRIAL_DAYS);
 
   return db.subscription.create({
     data: {
       userId,
       planId: trialPlan.id,
       status: "TRIAL",
-      startedAt: now,
-      expiresAt: addDays(now, 10),
+      startedAt,
+      expiresAt: addDays(startedAt, durationDays),
     },
     include: { plan: true },
   });
@@ -203,10 +236,25 @@ export async function getActiveSubscription(userId: string) {
 export async function ensureSubscriptionForUser(userId: string) {
   await expireOldSubscriptions(userId);
 
-  const active = await getActiveSubscription(userId);
+  const db = prisma as any;
+  const paid = await getActivePaidSubscription(userId);
 
-  if (active) {
-    return active;
+  if (paid) {
+    return paid;
+  }
+
+  const activeTrial = await db.subscription.findFirst({
+    where: {
+      userId,
+      status: "TRIAL",
+      expiresAt: { gt: new Date() },
+    },
+    include: { plan: true },
+    orderBy: { expiresAt: "desc" },
+  });
+
+  if (activeTrial) {
+    return activeTrial;
   }
 
   const trial = await ensureUserTrial(userId);
@@ -363,34 +411,39 @@ export async function requireFeatureAccess(userId: string, featureName: FeatureN
 
 export async function getSubscriptionBannerState(userId: string) {
   const db = prisma as any;
-  const user = await db.user.findUnique({
-    where: { id: userId },
-    select: { id: true, email: true, role: true },
-  });
-
-  if (isAdminUser(user)) {
-    return null;
-  }
-
   const subscription = await ensureSubscriptionForUser(userId);
 
   if (!subscription?.plan) {
     return null;
   }
 
-  const remaining = daysRemaining(subscription.expiresAt);
+  const remaining =
+    subscription.status === "TRIAL"
+      ? trialDaysRemaining(subscription)
+      : daysRemaining(subscription.expiresAt);
+  const expiredTrial = await db.subscription.findFirst({
+    where: {
+      userId,
+      status: { in: ["EXPIRED", "CANCELED"] },
+      plan: { slug: "trial" },
+    },
+    select: { id: true },
+    orderBy: { expiresAt: "desc" },
+  });
 
   if (subscription.status === "TRIAL") {
+    const duration = trialDurationDays(subscription);
+
     return {
       tone: remaining <= 3 ? "warning" : "info",
       title:
         remaining <= 3
           ? `Your trial ends in ${remaining} days. Upgrade to Pro to keep full access.`
-          : `You are on a 10-day trial. ${remaining} days remaining.`,
+          : `You are on a ${duration}-day trial. ${remaining} days remaining.`,
       titleFa:
         remaining <= 3
           ? `دوره آزمایشی شما تا ${remaining} روز دیگر تمام می‌شود. برای حفظ دسترسی کامل به Pro ارتقا دهید.`
-          : `شما در دوره آزمایشی ۱۰ روزه هستید. ${remaining} روز باقی مانده است.`,
+          : `شما در دوره آزمایشی ${duration} روزه هستید. ${remaining} روز باقی مانده است.`,
       href: "/pricing",
       buttonText: "Upgrade",
       buttonTextFa: "ارتقا",
@@ -398,6 +451,17 @@ export async function getSubscriptionBannerState(userId: string) {
   }
 
   if (subscription.status === "FREE") {
+    if (expiredTrial) {
+      return {
+        tone: "warning",
+        title: "Your trial has expired. Upgrade to Pro to generate MT5 keys and keep journaling.",
+        titleFa: "دوره آزمایشی شما تمام شده است. برای ساخت کلید MT5 و ادامه ژورنال‌نویسی به Pro ارتقا دهید.",
+        href: "/pricing",
+        buttonText: "Upgrade",
+        buttonTextFa: "ارتقا",
+      };
+    }
+
     return {
       tone: "neutral",
       title: "You are on the Free plan. Upgrade to unlock unlimited journaling.",
