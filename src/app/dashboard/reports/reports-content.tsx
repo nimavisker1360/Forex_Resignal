@@ -208,6 +208,171 @@ const COPY = {
   },
 } as const;
 
+const REPORT_UI = {
+  en: {
+    filters: {
+      session: "Session",
+      result: "Result",
+      win: "Win",
+      loss: "Loss",
+      breakeven: "Breakeven",
+      aiReview: "AI Review",
+      humanReview: "Human Review",
+      done: "Done",
+      missing: "Missing",
+      screenshots: "Screenshots",
+      hasScreenshots: "Has screenshots",
+      noScreenshots: "No screenshots",
+      source: "Source",
+      manual: "Manual",
+      mt5: "MT5 Import",
+      minAi: "Min AI",
+      maxAi: "Max AI",
+    },
+    reportFiles: {
+      title: "Trade Report Files",
+      subtitle: "Each trade keeps its own AI, strategy, checklist, journal, and screenshot reports.",
+      empty: "No trades found for this report period.",
+      download: "Download",
+      openTrade: "Open Trade",
+      noSetup: "No setup label",
+      data: "Data",
+      strategy: "Strategy",
+      checklists: "Checklists",
+      journal: "Journal",
+      screenshots: "Screenshots",
+      missing: "missing",
+      saved: "saved",
+      execution: "Execution",
+      entry: "Entry",
+      exit: "Exit",
+      tradeReports: "Trade Reports",
+      plan: "Plan",
+      media: "Media",
+      noTradeNote: "No trade note saved.",
+      details: "Journal, strategy, and media details",
+      strategyChecklists: "Strategy and Checklists",
+      rating: "Rating",
+      exitReason: "Exit reason",
+      entryScreenshot: "Entry screenshot",
+      exitScreenshot: "Exit screenshot",
+      totalScreenshots: "Total screenshots",
+      none: "No items saved.",
+    },
+    performance: {
+      sessionTitle: "Session Performance",
+      sessionSubtitle: "Timing results grouped by actual trading session.",
+      strategyTitle: "Strategy / Playbook Performance",
+      strategySubtitle: "Only real selected strategies and playbooks are shown here.",
+      noStrategy: "No strategy or playbook performance yet. Assign a strategy during trade review.",
+      noSession: "No session performance yet.",
+      strategyHeader: "Strategy / Playbook",
+      sessionHeader: "Session",
+      profitFactor: "Profit Factor",
+      averagePnl: "Average PnL",
+    },
+    table: {
+      ai: "AI",
+      human: "Human",
+    },
+    status: {
+      OPEN: "Open",
+      CLOSED: "Closed",
+      TEST: "Test",
+      Done: "Done",
+      Missing: "Missing",
+      "Fully Reviewed": "Fully Reviewed",
+      "AI Reviewed / Human Missing": "AI Reviewed / Human Missing",
+      "AI Missing / Human Reviewed": "AI Missing / Human Reviewed",
+      "Not Reviewed": "Not Reviewed",
+      Good: "Good",
+      Partial: "Partial",
+      Low: "Low",
+    },
+  },
+  fa: {
+    filters: {
+      session: "سشن",
+      result: "نتیجه",
+      win: "برد",
+      loss: "باخت",
+      breakeven: "سر به سر",
+      aiReview: "بررسی AI",
+      humanReview: "بررسی دستی",
+      done: "انجام شده",
+      missing: "ثبت نشده",
+      screenshots: "اسکرین‌شات",
+      hasScreenshots: "دارای اسکرین‌شات",
+      noScreenshots: "بدون اسکرین‌شات",
+      source: "منبع",
+      manual: "دستی",
+      mt5: "ورود از MT5",
+      minAi: "حداقل امتیاز AI",
+      maxAi: "حداکثر امتیاز AI",
+    },
+    reportFiles: {
+      title: "فایل‌های گزارش هر معامله",
+      subtitle: "هر معامله گزارش‌های مربوط به خودش را جداگانه نگه می‌دارد.",
+      empty: "برای این بازه معامله‌ای پیدا نشد.",
+      download: "دانلود",
+      openTrade: "باز کردن معامله",
+      noSetup: "بدون برچسب ستاپ",
+      data: "کیفیت داده",
+      strategy: "استراتژی",
+      checklists: "چک‌لیست‌ها",
+      journal: "ژورنال",
+      screenshots: "اسکرین‌شات‌ها",
+      missing: "ثبت نشده",
+      saved: "ثبت شده",
+      execution: "اجرای معامله",
+      entry: "ورود",
+      exit: "خروج",
+      tradeReports: "گزارش‌های معامله",
+      plan: "پلن",
+      media: "رسانه",
+      noTradeNote: "یادداشت معامله ثبت نشده.",
+      details: "جزئیات ژورنال، استراتژی و رسانه",
+      strategyChecklists: "استراتژی و چک‌لیست‌ها",
+      rating: "امتیاز",
+      exitReason: "دلیل خروج",
+      entryScreenshot: "اسکرین‌شات ورود",
+      exitScreenshot: "اسکرین‌شات خروج",
+      totalScreenshots: "کل اسکرین‌شات‌ها",
+      none: "موردی ثبت نشده.",
+    },
+    performance: {
+      sessionTitle: "عملکرد بر اساس سشن",
+      sessionSubtitle: "نتایج زمانی بر اساس سشن واقعی معاملات.",
+      strategyTitle: "عملکرد استراتژی / پلی‌بوک",
+      strategySubtitle: "فقط استراتژی‌ها و پلی‌بوک‌های واقعی اینجا نمایش داده می‌شوند.",
+      noStrategy: "هنوز عملکرد استراتژی یا پلی‌بوک ثبت نشده است.",
+      noSession: "هنوز عملکرد سشن ثبت نشده است.",
+      strategyHeader: "استراتژی / پلی‌بوک",
+      sessionHeader: "سشن",
+      profitFactor: "فاکتور سود",
+      averagePnl: "میانگین سود/زیان",
+    },
+    table: {
+      ai: "AI",
+      human: "دستی",
+    },
+    status: {
+      OPEN: "باز",
+      CLOSED: "بسته",
+      TEST: "تست",
+      Done: "انجام شده",
+      Missing: "ثبت نشده",
+      "Fully Reviewed": "کاملا بررسی شده",
+      "AI Reviewed / Human Missing": "AI انجام شده / دستی ثبت نشده",
+      "AI Missing / Human Reviewed": "AI ثبت نشده / دستی انجام شده",
+      "Not Reviewed": "بررسی نشده",
+      Good: "خوب",
+      Partial: "نسبی",
+      Low: "ضعیف",
+    },
+  },
+} as const;
+
 function formatMoney(value: number | null | undefined) {
   return Number(value || 0).toLocaleString("en-US", {
     style: "currency",
@@ -218,7 +383,7 @@ function formatMoney(value: number | null | undefined) {
 
 function formatNumber(value: number | null | undefined, digits = 2) {
   if (value === null || value === undefined || !Number.isFinite(value)) {
-    return "N/A";
+    return "-";
   }
 
   return value.toLocaleString("en-US", {
@@ -232,6 +397,19 @@ function formatPercent(value: number | null | undefined) {
 
 function formatAiScore(value: number | null | undefined) {
   return value === null || value === undefined ? "-" : `${value}/100`;
+}
+
+function localizedDirection(direction: string, copy: typeof COPY[Language]) {
+  return direction === "BUY" ? copy.filters.buy : direction === "SELL" ? copy.filters.sell : direction;
+}
+
+function localizedStatus(value: string | null | undefined, language: Language) {
+  if (!value) {
+    return "-";
+  }
+
+  const statuses = REPORT_UI[language].status as Record<string, string>;
+  return statuses[value] || value;
 }
 
 function formatDate(value: string | null | undefined, language: Language) {
@@ -334,12 +512,21 @@ function EmptyLine({ label }: { label: string }) {
   );
 }
 
-function ReportFilters({ report, copy }: { report: JournalReport; copy: typeof COPY[Language] }) {
+function ReportFilters({
+  report,
+  copy,
+  language,
+}: {
+  report: JournalReport;
+  copy: typeof COPY[Language];
+  language: Language;
+}) {
   const filters = report.filters;
   const filterText = copy.filters as Record<string, string>;
+  const ui = REPORT_UI[language].filters;
 
   return (
-    <form className="grid gap-3 rounded-lg border border-slate-800 bg-[#0F172A] p-4 print:hidden md:grid-cols-7">
+    <form className="grid gap-3 rounded-lg border border-slate-800 bg-[#0F172A] p-4 print:hidden sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
       <label className="space-y-1 text-xs font-semibold uppercase text-slate-400 md:col-span-1">
         {copy.filters.period}
         <select name="dateRange" defaultValue={filters.dateRange} className="h-10 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 text-sm normal-case text-slate-100 outline-none focus:border-blue-500">
@@ -387,59 +574,59 @@ function ReportFilters({ report, copy }: { report: JournalReport; copy: typeof C
         <input name="strategy" defaultValue={filters.strategy} placeholder={copy.filters.strategyPlaceholder} className="h-10 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 text-sm text-slate-100 outline-none focus:border-blue-500" />
       </label>
       <label className="space-y-1 text-xs font-semibold uppercase text-slate-400">
-        {filterText.session || "Session"}
+        {filterText.session || ui.session}
         <input name="session" defaultValue={filters.session} placeholder="London" className="h-10 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 text-sm text-slate-100 outline-none focus:border-blue-500" />
       </label>
       <label className="space-y-1 text-xs font-semibold uppercase text-slate-400">
-        {filterText.result || "Result"}
+        {filterText.result || ui.result}
         <select name="result" defaultValue={filters.result} className="h-10 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 text-sm normal-case text-slate-100 outline-none focus:border-blue-500">
           <option value="">{copy.filters.all}</option>
-          <option value="WIN">{filterText.win || "Win"}</option>
-          <option value="LOSS">{filterText.loss || "Loss"}</option>
-          <option value="BREAKEVEN">{filterText.breakeven || "Breakeven"}</option>
+          <option value="WIN">{filterText.win || ui.win}</option>
+          <option value="LOSS">{filterText.loss || ui.loss}</option>
+          <option value="BREAKEVEN">{filterText.breakeven || ui.breakeven}</option>
         </select>
       </label>
       <label className="space-y-1 text-xs font-semibold uppercase text-slate-400">
-        {filterText.aiReview || "AI Review"}
+        {filterText.aiReview || ui.aiReview}
         <select name="aiReview" defaultValue={filters.aiReview} className="h-10 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 text-sm normal-case text-slate-100 outline-none focus:border-blue-500">
           <option value="">{copy.filters.all}</option>
-          <option value="DONE">{filterText.done || "Done"}</option>
-          <option value="MISSING">{filterText.missing || "Missing"}</option>
+          <option value="DONE">{filterText.done || ui.done}</option>
+          <option value="MISSING">{filterText.missing || ui.missing}</option>
         </select>
       </label>
       <label className="space-y-1 text-xs font-semibold uppercase text-slate-400">
-        {filterText.humanReview || "Human Review"}
+        {filterText.humanReview || ui.humanReview}
         <select name="humanReview" defaultValue={filters.humanReview} className="h-10 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 text-sm normal-case text-slate-100 outline-none focus:border-blue-500">
           <option value="">{copy.filters.all}</option>
-          <option value="DONE">{filterText.done || "Done"}</option>
-          <option value="MISSING">{filterText.missing || "Missing"}</option>
+          <option value="DONE">{filterText.done || ui.done}</option>
+          <option value="MISSING">{filterText.missing || ui.missing}</option>
         </select>
       </label>
       <label className="space-y-1 text-xs font-semibold uppercase text-slate-400">
-        {filterText.screenshots || "Screenshots"}
+        {filterText.screenshots || ui.screenshots}
         <select name="screenshots" defaultValue={filters.screenshots} className="h-10 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 text-sm normal-case text-slate-100 outline-none focus:border-blue-500">
           <option value="">{copy.filters.all}</option>
-          <option value="HAS">{filterText.hasScreenshots || "Has screenshots"}</option>
-          <option value="NONE">{filterText.noScreenshots || "No screenshots"}</option>
+          <option value="HAS">{filterText.hasScreenshots || ui.hasScreenshots}</option>
+          <option value="NONE">{filterText.noScreenshots || ui.noScreenshots}</option>
         </select>
       </label>
       <label className="space-y-1 text-xs font-semibold uppercase text-slate-400">
-        {filterText.source || "Source"}
+        {filterText.source || ui.source}
         <select name="source" defaultValue={filters.source} className="h-10 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 text-sm normal-case text-slate-100 outline-none focus:border-blue-500">
           <option value="">{copy.filters.all}</option>
-          <option value="MANUAL">{filterText.manual || "Manual"}</option>
-          <option value="MT5">{filterText.mt5 || "MT5 Import"}</option>
+          <option value="MANUAL">{filterText.manual || ui.manual}</option>
+          <option value="MT5">{filterText.mt5 || ui.mt5}</option>
         </select>
       </label>
       <label className="space-y-1 text-xs font-semibold uppercase text-slate-400">
-        {filterText.minAi || "Min AI"}
+        {filterText.minAi || ui.minAi}
         <input name="minAiScore" type="number" min="0" max="100" defaultValue={filters.minAiScore} className="h-10 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 text-sm text-slate-100 outline-none focus:border-blue-500" />
       </label>
       <label className="space-y-1 text-xs font-semibold uppercase text-slate-400">
-        {filterText.maxAi || "Max AI"}
+        {filterText.maxAi || ui.maxAi}
         <input name="maxAiScore" type="number" min="0" max="100" defaultValue={filters.maxAiScore} className="h-10 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 text-sm text-slate-100 outline-none focus:border-blue-500" />
       </label>
-      <div className="flex items-end gap-2 md:col-span-7">
+      <div className="flex items-end gap-2 sm:col-span-2 lg:col-span-4 xl:col-span-7">
         <button className="inline-flex h-10 items-center justify-center rounded-lg bg-blue-600 px-4 text-sm font-semibold text-white transition hover:bg-blue-500">
           {copy.filters.generate}
         </button>
@@ -487,21 +674,21 @@ function TopTable({ report, copy }: { report: JournalReport; copy: typeof COPY[L
     <div className="overflow-x-auto">
       <table className="min-w-full divide-y divide-slate-800 text-sm print:divide-slate-200">
         <thead>
-          <tr className="text-left text-xs uppercase text-slate-500">
-            <th className="py-2 pr-4">{copy.symbolPanel.symbol}</th>
-            <th className="py-2 pr-4">{copy.symbolPanel.trades}</th>
-            <th className="py-2 pr-4">{copy.symbolPanel.winRate}</th>
-            <th className="py-2 pr-4">{copy.symbolPanel.netPnl}</th>
+          <tr className="text-start text-xs uppercase text-slate-500">
+            <th className="py-2 pe-4">{copy.symbolPanel.symbol}</th>
+            <th className="py-2 pe-4">{copy.symbolPanel.trades}</th>
+            <th className="py-2 pe-4">{copy.symbolPanel.winRate}</th>
+            <th className="py-2 pe-4">{copy.symbolPanel.netPnl}</th>
             <th className="py-2">{copy.symbolPanel.weight}</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-slate-800 print:divide-slate-200">
           {rows.map((row) => (
             <tr key={row.symbol} className="text-slate-300 print:text-slate-700">
-              <td className="py-3 pr-4 font-semibold text-white print:text-slate-950">{row.symbol}</td>
-              <td className="py-3 pr-4">{row.totalTrades}</td>
-              <td className="py-3 pr-4">{formatPercent(row.winRate)}</td>
-              <td className={cn("py-3 pr-4 font-semibold", toneClass(pnlTone(row.netPnl)), "print:text-slate-950")}>
+              <td className="py-3 pe-4 font-semibold text-white print:text-slate-950">{row.symbol}</td>
+              <td className="py-3 pe-4">{row.totalTrades}</td>
+              <td className="py-3 pe-4">{formatPercent(row.winRate)}</td>
+              <td className={cn("py-3 pe-4 font-semibold", toneClass(pnlTone(row.netPnl)), "print:text-slate-950")}>
                 {formatMoney(row.netPnl)}
               </td>
               <td className="min-w-40 py-3">
@@ -515,32 +702,41 @@ function TopTable({ report, copy }: { report: JournalReport; copy: typeof COPY[L
   );
 }
 
-function PlaybookPerformanceTable({ report, copy }: { report: JournalReport; copy: typeof COPY[Language] }) {
+function PlaybookPerformanceTable({
+  report,
+  copy,
+  language,
+}: {
+  report: JournalReport;
+  copy: typeof COPY[Language];
+  language: Language;
+}) {
   const rows = report.analytics.byStrategy.slice(0, 8);
+  const ui = REPORT_UI[language].performance;
 
   if (rows.length === 0) {
-    return <EmptyLine label="No strategy or playbook performance yet. Assign a strategy during trade review." />;
+    return <EmptyLine label={ui.noStrategy} />;
   }
 
   return (
     <div className="overflow-x-auto">
       <table className="min-w-full divide-y divide-slate-800 text-sm print:divide-slate-200">
         <thead>
-          <tr className="text-left text-xs uppercase text-slate-500">
-            <th className="py-2 pr-4">Strategy / Playbook</th>
-            <th className="py-2 pr-4">{copy.symbolPanel.trades}</th>
-            <th className="py-2 pr-4">{copy.symbolPanel.winRate}</th>
-            <th className="py-2 pr-4">{copy.symbolPanel.netPnl}</th>
-            <th className="py-2">Profit Factor</th>
+          <tr className="text-start text-xs uppercase text-slate-500">
+            <th className="py-2 pe-4">{ui.strategyHeader}</th>
+            <th className="py-2 pe-4">{copy.symbolPanel.trades}</th>
+            <th className="py-2 pe-4">{copy.symbolPanel.winRate}</th>
+            <th className="py-2 pe-4">{copy.symbolPanel.netPnl}</th>
+            <th className="py-2">{ui.profitFactor}</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-slate-800 print:divide-slate-200">
           {rows.map((row) => (
             <tr key={row.strategy} className="text-slate-300 print:text-slate-700">
-              <td className="py-3 pr-4 font-semibold text-white print:text-slate-950">{row.strategy}</td>
-              <td className="py-3 pr-4">{row.totalTrades}</td>
-              <td className="py-3 pr-4">{formatPercent(row.winRate)}</td>
-              <td className={cn("py-3 pr-4 font-semibold", toneClass(pnlTone(row.netPnl)), "print:text-slate-950")}>
+              <td className="py-3 pe-4 font-semibold text-white print:text-slate-950">{row.strategy}</td>
+              <td className="py-3 pe-4">{row.totalTrades}</td>
+              <td className="py-3 pe-4">{formatPercent(row.winRate)}</td>
+              <td className={cn("py-3 pe-4 font-semibold", toneClass(pnlTone(row.netPnl)), "print:text-slate-950")}>
                 {formatMoney(row.netPnl)}
               </td>
               <td className="py-3">{formatNumber(row.profitFactor, 2)}</td>
@@ -552,32 +748,41 @@ function PlaybookPerformanceTable({ report, copy }: { report: JournalReport; cop
   );
 }
 
-function SessionPerformanceTable({ report, copy }: { report: JournalReport; copy: typeof COPY[Language] }) {
+function SessionPerformanceTable({
+  report,
+  copy,
+  language,
+}: {
+  report: JournalReport;
+  copy: typeof COPY[Language];
+  language: Language;
+}) {
   const rows = report.analytics.bySession.filter((row) => row.totalTrades > 0);
+  const ui = REPORT_UI[language].performance;
 
   if (rows.length === 0) {
-    return <EmptyLine label="No session performance yet." />;
+    return <EmptyLine label={ui.noSession} />;
   }
 
   return (
     <div className="overflow-x-auto">
       <table className="min-w-full divide-y divide-slate-800 text-sm print:divide-slate-200">
         <thead>
-          <tr className="text-left text-xs uppercase text-slate-500">
-            <th className="py-2 pr-4">Session</th>
-            <th className="py-2 pr-4">{copy.symbolPanel.trades}</th>
-            <th className="py-2 pr-4">{copy.symbolPanel.winRate}</th>
-            <th className="py-2 pr-4">{copy.symbolPanel.netPnl}</th>
-            <th className="py-2">Average PnL</th>
+          <tr className="text-start text-xs uppercase text-slate-500">
+            <th className="py-2 pe-4">{ui.sessionHeader}</th>
+            <th className="py-2 pe-4">{copy.symbolPanel.trades}</th>
+            <th className="py-2 pe-4">{copy.symbolPanel.winRate}</th>
+            <th className="py-2 pe-4">{copy.symbolPanel.netPnl}</th>
+            <th className="py-2">{ui.averagePnl}</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-slate-800 print:divide-slate-200">
           {rows.map((row) => (
             <tr key={row.session} className="text-slate-300 print:text-slate-700">
-              <td className="py-3 pr-4 font-semibold text-white print:text-slate-950">{row.session}</td>
-              <td className="py-3 pr-4">{row.totalTrades}</td>
-              <td className="py-3 pr-4">{formatPercent(row.winRate)}</td>
-              <td className={cn("py-3 pr-4 font-semibold", toneClass(pnlTone(row.netPnl)), "print:text-slate-950")}>
+              <td className="py-3 pe-4 font-semibold text-white print:text-slate-950">{row.session}</td>
+              <td className="py-3 pe-4">{row.totalTrades}</td>
+              <td className="py-3 pe-4">{formatPercent(row.winRate)}</td>
+              <td className={cn("py-3 pe-4 font-semibold", toneClass(pnlTone(row.netPnl)), "print:text-slate-950")}>
                 {formatMoney(row.netPnl)}
               </td>
               <td className="py-3">{formatMoney(row.averagePnl)}</td>
@@ -612,41 +817,40 @@ function RecentTradesTable({
     return <EmptyLine label={copy.trades.empty} />;
   }
 
-  const directionLabel = (direction: string) =>
-    direction === "BUY" ? copy.filters.buy : direction === "SELL" ? copy.filters.sell : direction;
+  const ui = REPORT_UI[language].table;
 
   return (
     <div className="overflow-x-auto">
       <table className="min-w-full divide-y divide-slate-800 text-sm print:divide-slate-200">
         <thead>
-          <tr className="text-left text-xs uppercase text-slate-500">
-            <th className="py-2 pr-4">{copy.trades.date}</th>
-            <th className="py-2 pr-4">{copy.trades.symbol}</th>
-            <th className="py-2 pr-4">{copy.trades.side}</th>
-            <th className="py-2 pr-4">{copy.trades.pnl}</th>
-            <th className="py-2 pr-4">RR</th>
-            <th className="py-2 pr-4">{copy.trades.playbook}</th>
-            <th className="py-2 pr-4">{copy.trades.planCompliance}</th>
-            <th className="py-2 pr-4">AI</th>
-            <th className="py-2 pr-4">Human</th>
+          <tr className="text-start text-xs uppercase text-slate-500">
+            <th className="py-2 pe-4">{copy.trades.date}</th>
+            <th className="py-2 pe-4">{copy.trades.symbol}</th>
+            <th className="py-2 pe-4">{copy.trades.side}</th>
+            <th className="py-2 pe-4">{copy.trades.pnl}</th>
+            <th className="py-2 pe-4">RR</th>
+            <th className="py-2 pe-4">{copy.trades.playbook}</th>
+            <th className="py-2 pe-4">{copy.trades.planCompliance}</th>
+            <th className="py-2 pe-4">{ui.ai}</th>
+            <th className="py-2 pe-4">{ui.human}</th>
             <th className="py-2">{copy.trades.reviewStatus}</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-slate-800 print:divide-slate-200">
           {rows.map((trade) => (
             <tr key={trade.id} className="text-slate-300 print:text-slate-700">
-              <td className="whitespace-nowrap py-3 pr-4">{formatDate(trade.openedAt, language)}</td>
-              <td className="py-3 pr-4 font-semibold text-white print:text-slate-950">{trade.symbol}</td>
-              <td className="py-3 pr-4">{directionLabel(trade.direction)}</td>
-              <td className={cn("py-3 pr-4 font-semibold", toneClass(pnlTone(trade.pnl)), "print:text-slate-950")}>
+              <td className="whitespace-nowrap py-3 pe-4">{formatDate(trade.openedAt, language)}</td>
+              <td className="py-3 pe-4 font-semibold text-white print:text-slate-950">{trade.symbol}</td>
+              <td className="py-3 pe-4">{localizedDirection(trade.direction, copy)}</td>
+              <td className={cn("py-3 pe-4 font-semibold", toneClass(pnlTone(trade.pnl)), "print:text-slate-950")}>
                 {formatMoney(trade.pnl)}
               </td>
-              <td className="py-3 pr-4">{formatNumber(trade.rr, 2)}</td>
-              <td className="py-3 pr-4">{trade.strategyName || trade.setup || "-"}</td>
-              <td className="py-3 pr-4">{planComplianceLabel(trade)}</td>
-              <td className="py-3 pr-4">{formatAiScore(trade.aiReviewScore)}</td>
-              <td className="py-3 pr-4">{trade.humanReviewLabel}</td>
-              <td className="py-3">{trade.combinedReviewStatus}</td>
+              <td className="py-3 pe-4">{formatNumber(trade.rr, 2)}</td>
+              <td className="py-3 pe-4">{trade.strategyName || trade.setup || "-"}</td>
+              <td className="py-3 pe-4">{planComplianceLabel(trade)}</td>
+              <td className="py-3 pe-4">{formatAiScore(trade.aiReviewScore)}</td>
+              <td className="py-3 pe-4">{localizedStatus(trade.humanReviewLabel, language)}</td>
+              <td className="py-3">{localizedStatus(trade.combinedReviewStatus, language)}</td>
             </tr>
           ))}
         </tbody>
@@ -1019,16 +1223,19 @@ function TradeReportFilesPanel({
   report: JournalReport;
   language: Language;
 }) {
+  const copy = COPY[language];
+  const ui = REPORT_UI[language].reportFiles;
+
   if (report.tradeReports.length === 0) {
     return (
-      <Panel title="Trade Report Files" subtitle="Each trade keeps its own related reports." icon={FileText}>
-        <EmptyLine label="No trades found for this report period." />
+      <Panel title={ui.title} subtitle={ui.subtitle} icon={FileText}>
+        <EmptyLine label={ui.empty} />
       </Panel>
     );
   }
 
   return (
-    <Panel title="Trade Report Files" subtitle="Each trade keeps its own AI, strategy, checklist, journal, and screenshot reports." icon={FileText}>
+    <Panel title={ui.title} subtitle={ui.subtitle} icon={FileText}>
       <div className="space-y-4">
         {report.tradeReports.map((tradeReport) => {
           const { trade, aiReview, strategyReview, checklists, journal, screenshots } = tradeReport;
@@ -1041,21 +1248,21 @@ function TradeReportFilesPanel({
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
                     <h3 className="text-lg font-semibold text-white print:text-slate-950">
-                      {trade.symbol} {trade.direction}
+                      {trade.symbol} {localizedDirection(trade.direction, copy)}
                     </h3>
                     <span className={cn("rounded-md px-2 py-1 text-xs font-semibold", trade.status === "CLOSED" ? "bg-emerald-500/10 text-emerald-200" : "bg-blue-500/10 text-blue-200", "print:bg-white print:text-slate-700")}>
-                      {trade.status}
+                      {localizedStatus(trade.status, language)}
                     </span>
                   </div>
                   <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-400 print:text-slate-600">
                     <span>{formatDate(trade.openedAt, language)}</span>
                     <span>{trade.accountNumber || trade.accountName}</span>
                     <span>RR {formatNumber(trade.rr, 2)}</span>
-                    <span>{trade.setup || trade.session || "No setup label"}</span>
+                    <span>{trade.setup || trade.session || ui.noSetup}</span>
                   </div>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
-                  <div className={cn("mr-1 text-base font-semibold", toneClass(pnlTone(trade.pnl)), "print:text-slate-950")}>
+                  <div className={cn("me-1 text-base font-semibold", toneClass(pnlTone(trade.pnl)), "print:text-slate-950")}>
                     {formatMoney(trade.pnl)}
                   </div>
                   <a
@@ -1064,24 +1271,24 @@ function TradeReportFilesPanel({
                     className="inline-flex h-9 items-center justify-center gap-2 rounded-md border border-blue-500/30 px-3 text-xs font-semibold text-blue-200 transition hover:bg-blue-500/10 print:hidden"
                   >
                     <Download className="h-3.5 w-3.5" />
-                    Download
+                    {ui.download}
                   </a>
                   <a
                     href={`/dashboard/trades/${trade.id}`}
                     className="inline-flex h-9 items-center justify-center rounded-md border border-slate-700 px-3 text-xs font-semibold text-slate-200 transition hover:bg-slate-800 print:hidden"
                   >
-                    Open Trade
+                    {ui.openTrade}
                   </a>
                 </div>
               </div>
 
               <div className="flex flex-wrap gap-2 px-4 pt-4">
-                <ReportBadge>AI {aiReview ? formatAiScore(aiReview.score) : "missing"}</ReportBadge>
-                <ReportBadge>Data {tradeReport.dataQuality.level}</ReportBadge>
-                <ReportBadge>Strategy {strategyReview ? `${strategyReview.compliancePercent}%` : "missing"}</ReportBadge>
-                <ReportBadge>Checklists {checklists.length}</ReportBadge>
-                <ReportBadge>Journal {journal ? "saved" : "missing"}</ReportBadge>
-                <ReportBadge>Screenshots {screenshots.length}</ReportBadge>
+                <ReportBadge>AI {aiReview ? formatAiScore(aiReview.score) : ui.missing}</ReportBadge>
+                <ReportBadge>{ui.data} {localizedStatus(tradeReport.dataQuality.level, language)}</ReportBadge>
+                <ReportBadge>{ui.strategy} {strategyReview ? `${strategyReview.compliancePercent}%` : ui.missing}</ReportBadge>
+                <ReportBadge>{ui.checklists} {checklists.length}</ReportBadge>
+                <ReportBadge>{ui.journal} {journal ? ui.saved : ui.missing}</ReportBadge>
+                <ReportBadge>{ui.screenshots} {screenshots.length}</ReportBadge>
               </div>
 
               <div className="space-y-4 p-4">
@@ -1104,7 +1311,7 @@ function TradeReportFilesPanel({
                             </div>
                           )}
                         </div>
-                        <div className="shrink-0 rounded-lg border border-violet-500/20 bg-slate-950/60 px-4 py-3 text-right print:border-slate-200 print:bg-white">
+                        <div className="shrink-0 rounded-lg border border-violet-500/20 bg-slate-950/60 px-4 py-3 text-end print:border-slate-200 print:bg-white">
                           <div className={cn("text-xl font-semibold", toneClass(aiReview.score >= 70 ? "profit" : aiReview.score >= 50 ? "amber" : "loss"), "print:text-slate-950")}>
                             {formatAiScore(aiReview.score)}
                           </div>
@@ -1170,27 +1377,27 @@ function TradeReportFilesPanel({
 
                   <aside className="space-y-3">
                     <div className="rounded-lg border border-slate-800 bg-[#0F172A] p-4 text-sm text-slate-300 print:border-slate-200 print:bg-slate-50 print:text-slate-700">
-                      <div className="font-semibold text-white print:text-slate-950">Execution</div>
+                      <div className="font-semibold text-white print:text-slate-950">{ui.execution}</div>
                       <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2">
-                        <dt className="text-slate-500">Entry</dt>
-                        <dd className="text-right">{trade.openedAt ? formatDate(trade.openedAt, language) : "-"}</dd>
-                        <dt className="text-slate-500">Exit</dt>
-                        <dd className="text-right">{trade.closedAt ? formatDate(trade.closedAt, language) : "-"}</dd>
+                        <dt className="text-slate-500">{ui.entry}</dt>
+                        <dd className="text-end">{trade.openedAt ? formatDate(trade.openedAt, language) : "-"}</dd>
+                        <dt className="text-slate-500">{ui.exit}</dt>
+                        <dd className="text-end">{trade.closedAt ? formatDate(trade.closedAt, language) : "-"}</dd>
                         <dt className="text-slate-500">PnL</dt>
-                        <dd className={cn("text-right font-semibold", toneClass(pnlTone(trade.pnl)), "print:text-slate-950")}>{formatMoney(trade.pnl)}</dd>
+                        <dd className={cn("text-end font-semibold", toneClass(pnlTone(trade.pnl)), "print:text-slate-950")}>{formatMoney(trade.pnl)}</dd>
                         <dt className="text-slate-500">RR</dt>
-                        <dd className="text-right">{formatNumber(trade.rr, 2)}</dd>
+                        <dd className="text-end">{formatNumber(trade.rr, 2)}</dd>
                       </dl>
                     </div>
 
                     <div className="rounded-lg border border-slate-800 bg-[#0F172A] p-4 text-sm text-slate-300 print:border-slate-200 print:bg-slate-50 print:text-slate-700">
-                      <div className="font-semibold text-white print:text-slate-950">Trade Reports</div>
+                      <div className="font-semibold text-white print:text-slate-950">{ui.tradeReports}</div>
                       <div className="mt-3 space-y-2">
-                        <p>Strategy: {strategyReview?.strategyName || trade.strategyName || "-"}</p>
-                        <p>Plan: {strategyReview?.followedPlan || trade.followedPlan || "-"}</p>
-                        <p>Checklists: {checklists.length > 0 ? checklists.map((item) => `${item.title} ${item.completionPercent}%`).join("; ") : "-"}</p>
-                        <p>Journal: {journal?.tradeNote || trade.notes || "No trade note saved."}</p>
-                        <p>Media: {screenshots.length} screenshot{screenshots.length === 1 ? "" : "s"}</p>
+                        <p>{ui.strategy}: {strategyReview?.strategyName || trade.strategyName || "-"}</p>
+                        <p>{ui.plan}: {strategyReview?.followedPlan || trade.followedPlan || "-"}</p>
+                        <p>{ui.checklists}: {checklists.length > 0 ? checklists.map((item) => `${item.title} ${item.completionPercent}%`).join("; ") : "-"}</p>
+                        <p>{ui.journal}: {journal?.tradeNote || trade.notes || ui.noTradeNote}</p>
+                        <p>{ui.media}: {screenshots.length}</p>
                       </div>
                     </div>
                   </aside>
@@ -1198,26 +1405,26 @@ function TradeReportFilesPanel({
 
                 <details className="rounded-lg border border-slate-800 bg-[#0F172A] p-4 text-sm text-slate-300 print:border-slate-200 print:bg-white print:text-slate-700">
                   <summary className="cursor-pointer font-semibold text-white print:text-slate-950">
-                    Journal, strategy, and media details
+                    {ui.details}
                   </summary>
                   <div className="mt-4 grid gap-4 lg:grid-cols-3">
                     <div>
-                      <div className="font-semibold text-white print:text-slate-950">Strategy and Checklists</div>
-                      <p className="mt-2">Strategy: {strategyReview?.strategyName || trade.strategyName || "-"}</p>
-                      <p>Plan: {strategyReview?.followedPlan || trade.followedPlan || "-"}</p>
-                      <p>Checklists: {checklists.length > 0 ? checklists.map((item) => `${item.title} ${item.completionPercent}%`).join("; ") : "-"}</p>
+                      <div className="font-semibold text-white print:text-slate-950">{ui.strategyChecklists}</div>
+                      <p className="mt-2">{ui.strategy}: {strategyReview?.strategyName || trade.strategyName || "-"}</p>
+                      <p>{ui.plan}: {strategyReview?.followedPlan || trade.followedPlan || "-"}</p>
+                      <p>{ui.checklists}: {checklists.length > 0 ? checklists.map((item) => `${item.title} ${item.completionPercent}%`).join("; ") : "-"}</p>
                     </div>
                     <div>
-                      <div className="font-semibold text-white print:text-slate-950">Journal</div>
-                      <p className="mt-2">Rating: {journal?.rating ?? "-"}</p>
-                      <p>Exit reason: {journal?.exitReason || trade.exitReason || "-"}</p>
-                      <p>{journal?.tradeNote || trade.notes || "No trade note saved."}</p>
+                      <div className="font-semibold text-white print:text-slate-950">{ui.journal}</div>
+                      <p className="mt-2">{ui.rating}: {journal?.rating ?? "-"}</p>
+                      <p>{ui.exitReason}: {journal?.exitReason || trade.exitReason || "-"}</p>
+                      <p>{journal?.tradeNote || trade.notes || ui.noTradeNote}</p>
                     </div>
                     <div>
-                      <div className="font-semibold text-white print:text-slate-950">Media</div>
-                      <p className="mt-2">Entry screenshot: {trade.entryScreenshotUrl ? "saved" : "-"}</p>
-                      <p>Exit screenshot: {trade.exitScreenshotUrl ? "saved" : "-"}</p>
-                      <p>Total screenshots: {screenshots.length}</p>
+                      <div className="font-semibold text-white print:text-slate-950">{ui.media}</div>
+                      <p className="mt-2">{ui.entryScreenshot}: {trade.entryScreenshotUrl ? ui.saved : "-"}</p>
+                      <p>{ui.exitScreenshot}: {trade.exitScreenshotUrl ? ui.saved : "-"}</p>
+                      <p>{ui.totalScreenshots}: {screenshots.length}</p>
                     </div>
                   </div>
                 </details>
@@ -1241,11 +1448,18 @@ export function ReportsContent({
 }) {
   const { language } = useLanguage();
   const copy = COPY[language];
+  const ui = REPORT_UI[language];
   const summary = report.summary;
   const showAccountAiSummary = false;
 
   return (
-    <div className="space-y-5 print:bg-white print:text-slate-950">
+    <div
+      dir={language === "fa" ? "rtl" : "ltr"}
+      className={cn(
+        "w-full min-w-0 space-y-5 print:bg-white print:text-slate-950",
+        language === "fa" ? "text-right" : "text-left"
+      )}
+    >
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
           <div className="inline-flex items-center gap-2 rounded-full border border-blue-500/30 bg-blue-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-blue-200 print:border-slate-300 print:bg-white print:text-slate-600">
@@ -1258,7 +1472,7 @@ export function ReportsContent({
         <ReportActions csvHref={csvHref} />
       </div>
 
-      <ReportFilters report={report} copy={copy} />
+      <ReportFilters report={report} copy={copy} language={language} />
 
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard label={copy.stats.netPnl} value={formatMoney(summary.totalPnl)} tone={pnlTone(summary.totalPnl)} />
@@ -1298,11 +1512,11 @@ export function ReportsContent({
       <TradeReportFilesPanel report={report} language={language} />
 
       <div className="grid gap-5 xl:grid-cols-3">
-        <Panel title="Session Performance" subtitle="Timing results grouped by actual trading session." icon={CalendarDays}>
-          <SessionPerformanceTable report={report} copy={copy} />
+        <Panel title={ui.performance.sessionTitle} subtitle={ui.performance.sessionSubtitle} icon={CalendarDays}>
+          <SessionPerformanceTable report={report} copy={copy} language={language} />
         </Panel>
-        <Panel title="Strategy / Playbook Performance" subtitle="Only real selected strategies and playbooks are shown here." icon={Target}>
-          <PlaybookPerformanceTable report={report} copy={copy} />
+        <Panel title={ui.performance.strategyTitle} subtitle={ui.performance.strategySubtitle} icon={Target}>
+          <PlaybookPerformanceTable report={report} copy={copy} language={language} />
         </Panel>
         <Panel title={copy.symbolPanel.title} subtitle={copy.symbolPanel.subtitle} icon={Target}>
           <TopTable report={report} copy={copy} />

@@ -54,6 +54,7 @@ export function DashboardShell({
   const pathname = usePathname();
   const { language, t } = useLanguage();
   const { theme, isDark, applyTheme } = useDashboardTheme(initialTheme);
+  const isRtl = language === "fa";
   const translatedDownloadBotLabel = t("dashboard.shell.downloadMt5Bot");
   const downloadBotLabel =
     translatedDownloadBotLabel === "dashboard.shell.downloadMt5Bot"
@@ -67,12 +68,13 @@ export function DashboardShell({
         isDark ? "dark bg-[#020617] text-[#E5E7EB]" : "bg-slate-50 text-slate-950"
       )}
       data-dashboard-theme={theme}
-      dir={language === "fa" ? "rtl" : "ltr"}
+      dir={isRtl ? "rtl" : "ltr"}
     >
       <div className="flex min-h-screen flex-col lg:flex-row">
         <aside
           className={cn(
-            "border-b lg:sticky lg:top-0 lg:h-screen lg:w-72 lg:border-b-0 lg:border-r",
+            "border-b lg:sticky lg:top-0 lg:h-screen lg:w-72 lg:border-b-0",
+            isRtl ? "lg:border-l" : "lg:border-r",
             isDark ? "border-slate-800 bg-[#0F172A]" : "border-slate-200 bg-white"
           )}
         >

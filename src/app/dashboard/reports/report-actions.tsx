@@ -20,7 +20,7 @@ export function ReportActions({ csvHref }: { csvHref: string }) {
   const localizedCsvHref = `${csvHref}${csvHref.includes("?") ? "&" : "?"}lang=${language}`;
 
   return (
-    <div className="flex flex-wrap gap-2 print:hidden">
+    <div className="flex flex-wrap gap-2 print:hidden" dir={language === "fa" ? "rtl" : "ltr"}>
       <button
         type="button"
         onClick={() => window.print()}
