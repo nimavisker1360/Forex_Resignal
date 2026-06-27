@@ -26,15 +26,25 @@ export type JournalReportFilters = {
   symbol: string;
   direction: "" | "BUY" | "SELL";
   strategy: string;
+  session: string;
+  result: "" | "WIN" | "LOSS" | "BREAKEVEN";
+  aiReview: "" | "DONE" | "MISSING";
+  humanReview: "" | "DONE" | "MISSING";
+  screenshots: "" | "HAS" | "NONE";
+  source: "" | "MANUAL" | "MT5";
+  minAiScore: string;
+  maxAiScore: string;
 };
 
 export type JournalReportTrade = {
   id: string;
   accountName: string;
   broker: string | null;
+  accountNumber: string | null;
   symbol: string;
   direction: "BUY" | "SELL";
   status: string;
+  source: string;
   pnl: number;
   rr: number | null;
   openedAt: string | null;
@@ -54,6 +64,15 @@ export type JournalReportTrade = {
   checklistCompletion: number | null;
   rating: number | null;
   exitReason: string | null;
+  aiReviewStatus: string;
+  aiReviewScore: number | null;
+  aiReviewLabel: "Done" | "Missing";
+  humanReviewLabel: "Done" | "Missing";
+  combinedReviewStatus:
+    | "Fully Reviewed"
+    | "AI Reviewed / Human Missing"
+    | "AI Missing / Human Reviewed"
+    | "Not Reviewed";
 };
 
 export type JournalReportDailyNote = {
@@ -94,6 +113,127 @@ export type JournalReportSummary = {
   worstTrade: JournalReportTrade | null;
 };
 
+export type JournalReportAITextFrequency = {
+  label: string;
+  count: number;
+};
+
+export type JournalReportAITradeHighlight = {
+  id: string;
+  symbol: string;
+  direction: "BUY" | "SELL";
+  openedAt: string | null;
+  pnl: number;
+  score: number;
+  summary: string;
+};
+
+export type JournalReportAIReviewSummary = {
+  reviewedTrades: number;
+  notReviewedTrades: number;
+  failedReviews: number;
+  reviewCoveragePercent: number;
+  averageScore: number | null;
+  averageConfidence: number | null;
+  latestReviewAt: string | null;
+  strongestTrades: JournalReportAITradeHighlight[];
+  weakestTrades: JournalReportAITradeHighlight[];
+  topStrengths: JournalReportAITextFrequency[];
+  topWeaknesses: JournalReportAITextFrequency[];
+  topMistakes: JournalReportAITextFrequency[];
+  topTags: JournalReportAITextFrequency[];
+  improvementPlan: JournalReportAITextFrequency[];
+};
+
+export type JournalReportAIScoreBreakdown = {
+  riskManagement: number;
+  executionQuality: number;
+  planCompliance: number;
+  documentationQuality: number;
+};
+
+export type JournalReportDataQuality = {
+  level: "Good" | "Partial" | "Low";
+  reason: string;
+  missing: string[];
+};
+
+export type JournalReportConfidence = {
+  label: "High" | "Medium" | "Low";
+  reason: string;
+};
+
+export type JournalReportTradeReport = {
+  trade: JournalReportTrade;
+  aiReview: {
+    score: number;
+    breakdown: JournalReportAIScoreBreakdown;
+    confidence: number;
+    confidenceLabel: JournalReportConfidence["label"];
+    confidenceReason: string;
+    summary: string;
+    fullSummary: string;
+    strengths: string[];
+    weaknesses: string[];
+    mistakes: string[];
+    riskReview: string;
+    psychologyReview: string;
+    playbookReview: string;
+    improvementPlan: string[];
+    tags: string[];
+    updatedAt: string;
+  } | null;
+  dataQuality: JournalReportDataQuality;
+  strategyReview: {
+    strategyName: string | null;
+    followedPlan: string;
+    compliancePercent: number;
+    requiredCompliancePercent: number;
+    totalRules: number;
+    followedRules: number;
+    violatedRules: number;
+    notes: string | null;
+    ruleReviews: Array<{
+      title: string;
+      section: string | null;
+      required: boolean;
+      status: string;
+      note: string | null;
+    }>;
+  } | null;
+  checklists: Array<{
+    title: string;
+    category: string | null;
+    completionPercent: number;
+    completedCount: number;
+    totalCount: number;
+    requiredCompletedCount: number;
+    requiredTotalCount: number;
+    answers: Array<{
+      title: string;
+      required: boolean;
+      checked: boolean;
+      note: string | null;
+    }>;
+  }>;
+  journal: {
+    rating: number | null;
+    exitReason: string | null;
+    tradeNote: string | null;
+    dailyJournal: string | null;
+    psychologyStatus: string | null;
+    mistakes: string[];
+    setups: string[];
+    emotions: string[];
+    customTags: string[];
+  } | null;
+  screenshots: Array<{
+    type: string;
+    url: string;
+    createdAt: string;
+  }>;
+};
+
 export type JournalReport = {
   success: true;
   generatedAt: string;
@@ -105,7 +245,9 @@ export type JournalReport = {
   };
   summary: JournalReportSummary;
   analytics: JournalAnalyticsResponse;
+  aiSummary: JournalReportAIReviewSummary;
   recentTrades: JournalReportTrade[];
+  tradeReports: JournalReportTradeReport[];
   dailyNotes: JournalReportDailyNote[];
   insights: {
     strengths: LocalizedReportText[];
@@ -140,8 +282,24 @@ const reportTradeInclude = {
       tag: true,
     },
   },
-  checklists: true,
-  strategyReview: true,
+  checklists: {
+    include: {
+      answers: {
+        orderBy: { sortOrder: "asc" },
+      },
+    },
+  },
+  strategyReview: {
+    include: {
+      ruleReviews: {
+        orderBy: { sortOrder: "asc" },
+      },
+    },
+  },
+  aiReviews: {
+    orderBy: { updatedAt: "desc" },
+    take: 1,
+  },
   journalMetadata: true,
 } satisfies Prisma.TradeInclude;
 
@@ -262,6 +420,30 @@ function normalizeDirection(value: string | undefined) {
     : null;
 }
 
+function normalizeOption<T extends string>(
+  value: string | undefined,
+  allowed: readonly T[]
+): "" | T | null {
+  const normalized = value?.trim().toUpperCase();
+
+  if (!normalized) {
+    return "";
+  }
+
+  return allowed.includes(normalized as T) ? (normalized as T) : null;
+}
+
+function parseNumberParam(value: string | undefined) {
+  const trimmed = value?.trim();
+
+  if (!trimmed) {
+    return undefined;
+  }
+
+  const parsed = Number(trimmed);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
 export function normalizeJournalReportFilters(
   params: ReportSearchParams
 ): { filters: JournalReportFilters; dateFrom?: Date; dateTo?: Date; errors: string[] } {
@@ -280,6 +462,29 @@ export function normalizeJournalReportFilters(
     firstParam(params, "dateTo") || firstParam(params, "to"),
     true
   );
+  const result = normalizeOption(firstParam(params, "result"), [
+    "WIN",
+    "LOSS",
+    "BREAKEVEN",
+  ] as const);
+  const aiReview = normalizeOption(firstParam(params, "aiReview"), [
+    "DONE",
+    "MISSING",
+  ] as const);
+  const humanReview = normalizeOption(firstParam(params, "humanReview"), [
+    "DONE",
+    "MISSING",
+  ] as const);
+  const screenshots = normalizeOption(firstParam(params, "screenshots"), [
+    "HAS",
+    "NONE",
+  ] as const);
+  const source = normalizeOption(firstParam(params, "source"), [
+    "MANUAL",
+    "MT5",
+  ] as const);
+  const minAiScore = parseNumberParam(firstParam(params, "minAiScore"));
+  const maxAiScore = parseNumberParam(firstParam(params, "maxAiScore"));
 
   if (!dateRange) {
     errors.push("dateRange must be all, today, thisWeek, thisMonth, thisYear, or custom");
@@ -297,6 +502,34 @@ export function normalizeJournalReportFilters(
     errors.push("dateTo must be a valid date");
   }
 
+  if (result === null) {
+    errors.push("result must be WIN, LOSS, or BREAKEVEN");
+  }
+
+  if (aiReview === null) {
+    errors.push("aiReview must be DONE or MISSING");
+  }
+
+  if (humanReview === null) {
+    errors.push("humanReview must be DONE or MISSING");
+  }
+
+  if (screenshots === null) {
+    errors.push("screenshots must be HAS or NONE");
+  }
+
+  if (source === null) {
+    errors.push("source must be MANUAL or MT5");
+  }
+
+  if (minAiScore === null) {
+    errors.push("minAiScore must be a valid number");
+  }
+
+  if (maxAiScore === null) {
+    errors.push("maxAiScore must be a valid number");
+  }
+
   const presetRange = rangeFromPreset(dateRange || "thisMonth");
   const dateFrom = customDateFrom || presetRange.dateFrom;
   const dateTo = customDateTo || presetRange.dateTo;
@@ -310,6 +543,14 @@ export function normalizeJournalReportFilters(
       symbol: firstParam(params, "symbol")?.trim() || "",
       direction: direction || "",
       strategy: firstParam(params, "strategy")?.trim() || "",
+      session: firstParam(params, "session")?.trim() || "",
+      result: result || "",
+      aiReview: aiReview || "",
+      humanReview: humanReview || "",
+      screenshots: screenshots || "",
+      source: source || "",
+      minAiScore: firstParam(params, "minAiScore")?.trim() || "",
+      maxAiScore: firstParam(params, "maxAiScore")?.trim() || "",
     },
     dateFrom,
     dateTo,
@@ -341,7 +582,6 @@ function buildTradeWhere(
     and.push({
       OR: [
         { setup: { contains: filters.strategy, mode: "insensitive" } },
-        { session: { contains: filters.strategy, mode: "insensitive" } },
         {
           strategyReview: {
             strategyNameSnapshot: {
@@ -354,6 +594,49 @@ function buildTradeWhere(
     });
   }
 
+  if (filters.session) {
+    and.push({ session: { contains: filters.session, mode: "insensitive" } });
+  }
+
+  if (filters.result) {
+    if (filters.result === "WIN") {
+      and.push({ profitLoss: { gt: 0 } });
+    } else if (filters.result === "LOSS") {
+      and.push({ profitLoss: { lt: 0 } });
+    } else {
+      and.push({ profitLoss: 0 });
+    }
+  }
+
+  if (filters.aiReview === "DONE") {
+    and.push({ aiReviewStatus: "REVIEWED" });
+  } else if (filters.aiReview === "MISSING") {
+    and.push({ aiReviewStatus: { not: "REVIEWED" } });
+  }
+
+  if (filters.screenshots === "HAS") {
+    and.push({ screenshots: { some: {} } });
+  } else if (filters.screenshots === "NONE") {
+    and.push({ screenshots: { none: {} } });
+  }
+
+  if (filters.source === "MANUAL") {
+    and.push({ source: "MANUAL" });
+  } else if (filters.source === "MT5") {
+    and.push({ source: { in: ["MT5", "MT5_EA", "EA_IMPORT"] } });
+  }
+
+  const minAiScore = parseNumberParam(filters.minAiScore);
+  const maxAiScore = parseNumberParam(filters.maxAiScore);
+
+  if (minAiScore !== undefined && minAiScore !== null) {
+    and.push({ aiReviewScore: { gte: Math.max(0, minAiScore) } });
+  }
+
+  if (maxAiScore !== undefined && maxAiScore !== null) {
+    and.push({ aiReviewScore: { lte: Math.min(100, maxAiScore) } });
+  }
+
   if (dateFrom || dateTo) {
     and.push({
       openedAt: {
@@ -364,6 +647,18 @@ function buildTradeWhere(
   }
 
   return { AND: and } satisfies Prisma.TradeWhereInput;
+}
+
+function matchesPostQueryFilters(trade: ReportTrade, filters: JournalReportFilters) {
+  if (filters.humanReview === "DONE" && !hasHumanReview(trade)) {
+    return false;
+  }
+
+  if (filters.humanReview === "MISSING" && hasHumanReview(trade)) {
+    return false;
+  }
+
+  return true;
 }
 
 function screenshotUrl(trade: ReportTrade, type: string) {
@@ -388,14 +683,169 @@ function averageChecklistCompletion(trade: ReportTrade) {
   );
 }
 
+function hasHumanReview(trade: ReportTrade) {
+  const strategyDone =
+    Boolean(trade.strategyReview) &&
+    trade.strategyReview?.followedPlan !== "NOT_REVIEWED";
+  const checklistDone = trade.checklists.some(
+    (checklist) => checklist.completionPercent > 0 || checklist.completedCount > 0
+  );
+  const metadata = trade.journalMetadata;
+  const journalDone = Boolean(
+    metadata &&
+      (metadata.rating !== null ||
+        metadata.tradeNote ||
+        metadata.dailyJournal ||
+        metadata.exitReason ||
+        metadata.psychologyStatus)
+  );
+
+  return strategyDone || checklistDone || journalDone;
+}
+
+function combinedReviewStatus(trade: ReportTrade): JournalReportTrade["combinedReviewStatus"] {
+  const aiDone = trade.aiReviewStatus === "REVIEWED";
+  const humanDone = hasHumanReview(trade);
+
+  if (aiDone && humanDone) {
+    return "Fully Reviewed";
+  }
+
+  if (aiDone) {
+    return "AI Reviewed / Human Missing";
+  }
+
+  if (humanDone) {
+    return "AI Missing / Human Reviewed";
+  }
+
+  return "Not Reviewed";
+}
+
+function buildDataQuality(trade: ReportTrade): JournalReportDataQuality {
+  const missing: string[] = [];
+
+  if (!trade.strategyReview?.strategyNameSnapshot) {
+    missing.push("strategy/playbook");
+  }
+
+  if (trade.checklists.length === 0) {
+    missing.push("checklist");
+  }
+
+  if (trade.screenshots.length === 0) {
+    missing.push("screenshots");
+  }
+
+  if (!trade.journalMetadata) {
+    missing.push("journal");
+  }
+
+  if (missing.length === 0) {
+    return {
+      level: "Good",
+      reason: "Strategy, checklist, screenshots, and journal data are available.",
+      missing,
+    };
+  }
+
+  if (missing.length <= 2) {
+    return {
+      level: "Partial",
+      reason: `Missing ${missing.join(", ")}.`,
+      missing,
+    };
+  }
+
+  return {
+    level: "Low",
+    reason: `Mostly execution/import data. Missing ${missing.join(", ")}.`,
+    missing,
+  };
+}
+
+function buildConfidence(
+  trade: ReportTrade,
+  reviewConfidence?: number | null
+): JournalReportConfidence {
+  const quality = buildDataQuality(trade);
+
+  if (quality.level === "Good" && toNumber(reviewConfidence) >= 0.7) {
+    return {
+      label: "High",
+      reason: "Complete trade data with strategy, checklist, screenshots, and journal.",
+    };
+  }
+
+  if (quality.level === "Low") {
+    return {
+      label: "Low",
+      reason: quality.reason,
+    };
+  }
+
+  return {
+    label: "Medium",
+    reason: quality.reason,
+  };
+}
+
+function deriveAiScoreBreakdown(
+  score: number,
+  trade: ReportTrade
+): JournalReportAIScoreBreakdown {
+  const riskBase = trade.stopLoss && trade.takeProfit ? 30 : trade.stopLoss || trade.takeProfit ? 22 : 14;
+  const executionBase = trade.status === "CLOSED" && trade.profitLoss !== null ? 30 : 18;
+  const planBase = trade.strategyReview?.followedPlan && trade.strategyReview.followedPlan !== "NOT_REVIEWED"
+    ? Math.max(8, Math.round((trade.strategyReview.compliancePercent / 100) * 20))
+    : trade.setup
+      ? 10
+      : 5;
+  const documentationBase =
+    (trade.journalMetadata ? 7 : 0) +
+    (trade.checklists.length > 0 ? 6 : 0) +
+    (trade.screenshots.length > 0 ? 5 : 0) +
+    (trade.notes ? 2 : 0);
+  const baseTotal = riskBase + executionBase + planBase + documentationBase;
+  const multiplier = baseTotal > 0 ? score / baseTotal : 0;
+  const riskManagement = Math.min(30, Math.round(riskBase * multiplier));
+  const executionQuality = Math.min(30, Math.round(executionBase * multiplier));
+  const planCompliance = Math.min(20, Math.round(planBase * multiplier));
+  const used = riskManagement + executionQuality + planCompliance;
+  const documentationQuality = Math.max(0, Math.min(20, score - used));
+
+  return {
+    riskManagement,
+    executionQuality,
+    planCompliance,
+    documentationQuality,
+  };
+}
+
+function shortAiSummary(trade: ReportTrade, reviewSummary: string) {
+  const sentence = reviewSummary.split(/[.!?]\s/)[0]?.trim();
+
+  if (sentence && sentence.length <= 140) {
+    return sentence.endsWith(".") ? sentence : `${sentence}.`;
+  }
+
+  const pnl = toNumber(trade.profitLoss);
+  const outcome = pnl > 0 ? "Profitable trade" : pnl < 0 ? "Losing trade" : "Breakeven trade";
+  const quality = buildDataQuality(trade);
+
+  return `${outcome}; data quality is ${quality.level.toLowerCase()}.`;
+}
+
 function serializeTrade(trade: ReportTrade): JournalReportTrade {
   return {
     id: trade.id,
     accountName: trade.account.name,
     broker: trade.account.broker,
+    accountNumber: trade.account.mt5AccountNumber,
     symbol: trade.symbol,
     direction: trade.direction,
     status: trade.status,
+    source: trade.source,
     pnl: round(trade.profitLoss),
     rr: nullableNumber(trade.rr),
     openedAt: toIso(trade.openedAt),
@@ -420,6 +870,214 @@ function serializeTrade(trade: ReportTrade): JournalReportTrade {
     checklistCompletion: averageChecklistCompletion(trade),
     rating: trade.journalMetadata?.rating || null,
     exitReason: trade.journalMetadata?.exitReason || null,
+    aiReviewStatus: trade.aiReviewStatus,
+    aiReviewScore: trade.aiReviewScore,
+    aiReviewLabel: trade.aiReviewStatus === "REVIEWED" ? "Done" : "Missing",
+    humanReviewLabel: hasHumanReview(trade) ? "Done" : "Missing",
+    combinedReviewStatus: combinedReviewStatus(trade),
+  };
+}
+
+function latestAiReview(trade: ReportTrade) {
+  return trade.aiReviews[0] || null;
+}
+
+function countText(items: string[], take = 5): JournalReportAITextFrequency[] {
+  const map = new Map<string, JournalReportAITextFrequency>();
+
+  for (const item of items) {
+    const label = item.trim();
+
+    if (!label) {
+      continue;
+    }
+
+    const key = label.toLowerCase();
+    const existing = map.get(key);
+
+    if (existing) {
+      existing.count += 1;
+    } else {
+      map.set(key, { label, count: 1 });
+    }
+  }
+
+  return [...map.values()]
+    .sort((a, b) => b.count - a.count || a.label.localeCompare(b.label))
+    .slice(0, take);
+}
+
+function buildAITradeHighlight(trade: ReportTrade): JournalReportAITradeHighlight | null {
+  const review = latestAiReview(trade);
+
+  if (!review) {
+    return null;
+  }
+
+  return {
+    id: trade.id,
+    symbol: trade.symbol,
+    direction: trade.direction,
+    openedAt: toIso(trade.openedAt),
+    pnl: round(trade.profitLoss),
+    score: review.score,
+    summary: review.summary,
+  };
+}
+
+function buildAIReviewSummary(trades: ReportTrade[]): JournalReportAIReviewSummary {
+  const reviewedTrades = trades.filter((trade) => latestAiReview(trade));
+  const reviewCount = reviewedTrades.length;
+  const latestReviewAt = reviewedTrades
+    .map((trade) => latestAiReview(trade)?.updatedAt)
+    .filter((date): date is Date => Boolean(date))
+    .sort((a, b) => b.getTime() - a.getTime())[0];
+  const highlightedTrades = reviewedTrades
+    .map(buildAITradeHighlight)
+    .filter((trade): trade is JournalReportAITradeHighlight => Boolean(trade));
+
+  return {
+    reviewedTrades: reviewCount,
+    notReviewedTrades: trades.filter((trade) => trade.aiReviewStatus === "NOT_REVIEWED").length,
+    failedReviews: trades.filter((trade) => trade.aiReviewStatus === "FAILED").length,
+    reviewCoveragePercent:
+      trades.length > 0 ? round((reviewCount / trades.length) * 100, 1) : 0,
+    averageScore:
+      reviewCount > 0
+        ? round(
+            reviewedTrades.reduce(
+              (total, trade) => total + toNumber(latestAiReview(trade)?.score),
+              0
+            ) / reviewCount,
+            1
+          )
+        : null,
+    averageConfidence:
+      reviewCount > 0
+        ? round(
+            reviewedTrades.reduce(
+              (total, trade) => total + toNumber(latestAiReview(trade)?.confidence),
+              0
+            ) / reviewCount,
+            2
+          )
+        : null,
+    latestReviewAt: latestReviewAt ? latestReviewAt.toISOString() : null,
+    strongestTrades: [...highlightedTrades]
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 3),
+    weakestTrades: [...highlightedTrades]
+      .sort((a, b) => a.score - b.score)
+      .slice(0, 3),
+    topStrengths: countText(
+      reviewedTrades.flatMap((trade) => latestAiReview(trade)?.strengths || [])
+    ),
+    topWeaknesses: countText(
+      reviewedTrades.flatMap((trade) => latestAiReview(trade)?.weaknesses || [])
+    ),
+    topMistakes: countText(
+      reviewedTrades.flatMap((trade) => latestAiReview(trade)?.mistakes || [])
+    ),
+    topTags: countText(
+      reviewedTrades.flatMap((trade) => latestAiReview(trade)?.tags || [])
+    ),
+    improvementPlan: countText(
+      reviewedTrades.flatMap((trade) => latestAiReview(trade)?.improvementPlan || [])
+    ),
+  };
+}
+
+function jsonStringArray(value: unknown): string[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value
+    .map((item) => (typeof item === "string" ? item.trim() : String(item ?? "").trim()))
+    .filter(Boolean);
+}
+
+function serializeTradeReport(trade: ReportTrade): JournalReportTradeReport {
+  const review = latestAiReview(trade);
+  const strategyReview = trade.strategyReview;
+  const metadata = trade.journalMetadata;
+  const confidence = buildConfidence(trade, review?.confidence);
+
+  return {
+    trade: serializeTrade(trade),
+    aiReview: review
+      ? {
+          score: review.score,
+          breakdown: deriveAiScoreBreakdown(review.score, trade),
+          confidence: review.confidence,
+          confidenceLabel: confidence.label,
+          confidenceReason: confidence.reason,
+          summary: shortAiSummary(trade, review.summary),
+          fullSummary: review.summary,
+          strengths: review.strengths,
+          weaknesses: review.weaknesses,
+          mistakes: review.mistakes,
+          riskReview: review.riskReview,
+          psychologyReview: review.psychologyReview,
+          playbookReview: review.playbookReview,
+          improvementPlan: review.improvementPlan,
+          tags: review.tags,
+          updatedAt: review.updatedAt.toISOString(),
+        }
+      : null,
+    dataQuality: buildDataQuality(trade),
+    strategyReview: strategyReview
+      ? {
+          strategyName: strategyReview.strategyNameSnapshot,
+          followedPlan: strategyReview.followedPlan,
+          compliancePercent: round(strategyReview.compliancePercent, 1),
+          requiredCompliancePercent: round(strategyReview.requiredCompliancePercent, 1),
+          totalRules: strategyReview.totalRules,
+          followedRules: strategyReview.followedRules,
+          violatedRules: strategyReview.violatedRules,
+          notes: strategyReview.notes,
+          ruleReviews: strategyReview.ruleReviews.map((rule) => ({
+            title: rule.ruleTitleSnapshot,
+            section: rule.ruleSectionSnapshot,
+            required: rule.isRequiredSnapshot,
+            status: rule.status,
+            note: rule.note,
+          })),
+        }
+      : null,
+    checklists: trade.checklists.map((checklist) => ({
+      title: checklist.titleSnapshot,
+      category: checklist.categorySnapshot,
+      completionPercent: round(checklist.completionPercent, 1),
+      completedCount: checklist.completedCount,
+      totalCount: checklist.totalCount,
+      requiredCompletedCount: checklist.requiredCompletedCount,
+      requiredTotalCount: checklist.requiredTotalCount,
+      answers: checklist.answers.map((answer) => ({
+        title: answer.titleSnapshot,
+        required: answer.isRequiredSnapshot,
+        checked: answer.checked,
+        note: answer.note,
+      })),
+    })),
+    journal: metadata
+      ? {
+          rating: metadata.rating,
+          exitReason: metadata.exitReason,
+          tradeNote: metadata.tradeNote,
+          dailyJournal: metadata.dailyJournal,
+          psychologyStatus: metadata.psychologyStatus,
+          mistakes: jsonStringArray(metadata.mistakes),
+          setups: jsonStringArray(metadata.setups),
+          emotions: jsonStringArray(metadata.emotions),
+          customTags: jsonStringArray(metadata.customTags),
+        }
+      : null,
+    screenshots: trade.screenshots.map((screenshot) => ({
+      type: screenshot.type,
+      url: screenshot.url,
+      createdAt: screenshot.createdAt.toISOString(),
+    })),
   };
 }
 
@@ -485,10 +1143,16 @@ function buildInsights(
   const bestSymbol = analytics.bySymbol[0];
   const worstSymbol = [...analytics.bySymbol].sort((a, b) => a.netPnl - b.netPnl)[0];
   const bestStrategy = analytics.byStrategy[0];
+  const bestSession = analytics.bySession
+    .filter((row) => row.totalTrades > 0)
+    .sort((a, b) => b.netPnl - a.netPnl)[0];
   const worstMistake = analytics.byMistake[0];
   const weakestHour = [...analytics.byHour]
     .filter((row) => row.totalTrades > 0)
     .sort((a, b) => a.netPnl - b.netPnl)[0];
+  const missingAiReviews = trades.filter((trade) => trade.aiReviewStatus === "MISSING").length;
+  const missingHumanReviews = trades.filter((trade) => trade.humanReviewLabel === "Missing").length;
+  const missingStrategyReviews = trades.filter((trade) => !trade.strategyName).length;
   const averageComplianceRows = trades.filter(
     (trade) => trade.compliancePercent !== null
   );
@@ -509,11 +1173,11 @@ function buildInsights(
   const strengths = [
     summary.totalPnl > 0
       ? {
-          en: `Net PnL is positive at ${summary.totalPnl.toLocaleString("en-US")}.`,
+          en: `${summary.closedTrades} closed trades produced ${summary.totalPnl.toLocaleString("en-US")} net PnL with ${summary.winRate}% win rate.`,
           fa: `سود/زیان خالص در این بازه مثبت است: ${summary.totalPnl.toLocaleString("en-US")}.`,
         }
       : {
-          en: "The report establishes a clear baseline for the selected period.",
+          en: `${summary.closedTrades} closed trades are included; current net PnL is ${summary.totalPnl.toLocaleString("en-US")} with ${summary.winRate}% win rate.`,
           fa: "این گزارش یک خط پایه شفاف برای بازه انتخاب‌شده ایجاد می‌کند.",
         },
     bestSymbol
@@ -525,13 +1189,13 @@ function buildInsights(
           en: "No symbol edge is visible yet.",
           fa: "هنوز مزیت مشخصی در هیچ نمادی دیده نمی‌شود.",
         },
-    bestStrategy
+    bestSession
       ? {
-          en: `${bestStrategy.strategy} is the strongest setup with ${bestStrategy.winRate}% win rate.`,
-          fa: `${bestStrategy.strategy} قوی‌ترین ستاپ بوده و نرخ برد آن ${bestStrategy.winRate}% است.`,
+          en: `${bestSession.session} is the strongest session with ${bestSession.netPnl.toLocaleString("en-US")} net PnL across ${bestSession.totalTrades} trades.`,
+          fa: `${bestSession.session} قوی‌ترین سشن بوده و سود/زیان خالص آن ${bestSession.netPnl.toLocaleString("en-US")} است.`,
         }
       : {
-          en: "Strategy data is not complete enough yet.",
+          en: "Session data is not complete enough yet.",
           fa: "داده‌های استراتژی هنوز برای نتیجه‌گیری کامل کافی نیست.",
         },
   ];
@@ -543,7 +1207,7 @@ function buildInsights(
           fa: `فاکتور سود ${summary.profitFactor} است؛ زیان‌ها از سودها سنگین‌تر هستند.`,
         }
       : {
-          en: "Keep monitoring profit factor as trade count grows.",
+          en: `Profit factor is ${summary.profitFactor ?? "not available"}; keep monitoring it as trade count grows.`,
           fa: "با بیشتر شدن تعداد معاملات، فاکتور سود را همچنان زیر نظر بگیر.",
         },
     worstSymbol
@@ -561,7 +1225,7 @@ function buildInsights(
           fa: `${worstMistake.label} پرهزینه‌ترین اشتباه تکراری بوده است.`,
         }
       : {
-          en: "Mistake tagging is incomplete, so behavior risk is harder to read.",
+          en: `${missingAiReviews} trades miss AI review, ${missingHumanReviews} miss human review, and ${missingStrategyReviews} miss strategy/playbook data.`,
           fa: "تگ‌گذاری اشتباهات کامل نیست، بنابراین خواندن ریسک رفتاری سخت‌تر است.",
         },
   ];
@@ -573,7 +1237,9 @@ function buildInsights(
           fa: `قبل از افزایش حجم، پایبندی به پلی‌بوک را از ${averageCompliance}% به بالای 80% برسان.`,
         }
       : {
-          en: "Keep position sizing stable and protect the behaviors that are already working.",
+          en: bestStrategy
+            ? `Keep testing ${bestStrategy.strategy}; it has ${bestStrategy.totalTrades} reviewed trades and ${bestStrategy.winRate}% win rate.`
+            : "Assign a real strategy/playbook to reviewed trades so this report can separate setup edge from session timing.",
           fa: "حجم معاملات را ثابت نگه دار و رفتارهایی را که نتیجه داده‌اند حفظ کن.",
         },
     weakestHour
@@ -623,7 +1289,7 @@ function escapeCsv(value: unknown) {
 }
 
 export function journalReportToCsv(report: JournalReport, language: "en" | "fa" = "en") {
-  const headers =
+  const baseHeaders =
     language === "fa"
       ? [
           "زمان ورود",
@@ -667,6 +1333,15 @@ export function journalReportToCsv(report: JournalReport, language: "en" | "fa" 
           "Rating",
           "Exit Reason",
         ];
+  const headers = [
+    ...baseHeaders,
+    "Source",
+    "AI Review Status",
+    "AI Score",
+    "Human Review Status",
+    "Combined Review Status",
+    "Screenshots",
+  ];
   const rows = report.recentTrades.map((trade) => [
     trade.openedAt,
     trade.closedAt,
@@ -687,6 +1362,12 @@ export function journalReportToCsv(report: JournalReport, language: "en" | "fa" 
     trade.checklistCompletion,
     trade.rating,
     trade.exitReason,
+    trade.source,
+    trade.aiReviewStatus,
+    trade.aiReviewScore,
+    trade.humanReviewLabel,
+    trade.combinedReviewStatus,
+    trade.screenshotsCount,
   ]);
 
   return [headers, ...rows]
@@ -716,17 +1397,12 @@ export async function buildJournalReport(
         }
       : {}),
   };
-  const [trades, analyticsTrades, metadataTrades, accounts, dailyNotes] =
+  const [trades, metadataTrades, accounts, dailyNotes] =
     await Promise.all([
       prisma.trade.findMany({
         where,
         include: reportTradeInclude,
         orderBy: [{ openedAt: "desc" }, { createdAt: "desc" }],
-      }),
-      prisma.trade.findMany({
-        where,
-        include: analyticsTradeInclude,
-        orderBy: [{ closedAt: "asc" }, { openedAt: "asc" }, { createdAt: "asc" }],
       }),
       prisma.trade.findMany({
         where: { userId },
@@ -756,10 +1432,13 @@ export async function buildJournalReport(
         take: 14,
       }),
     ]);
-  const serializedTrades = trades.map(serializeTrade);
+  const reportTrades = trades.filter((trade) => matchesPostQueryFilters(trade, filters));
+  const serializedTrades = reportTrades.map(serializeTrade);
   const metadata = buildAnalyticsMetadata(metadataTrades);
-  const analytics = buildTradeAnalytics(analyticsTrades, metadata);
+  const analytics = buildTradeAnalytics(reportTrades, metadata);
   const summary = summarizeTrades(serializedTrades);
+  const aiSummary = buildAIReviewSummary(reportTrades);
+  const tradeReports = reportTrades.map(serializeTradeReport);
   const serializedDailyNotes = dailyNotes.map(serializeDailyNote);
 
   return {
@@ -773,7 +1452,9 @@ export async function buildJournalReport(
     },
     summary,
     analytics,
+    aiSummary,
     recentTrades: serializedTrades,
+    tradeReports,
     dailyNotes: serializedDailyNotes,
     insights: buildInsights(summary, analytics, serializedTrades, serializedDailyNotes),
   };

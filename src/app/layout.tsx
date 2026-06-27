@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { cookies } from "next/headers";
 import "./globals.css";
 import "tw-animate-css";
 import { Navbar } from "@/components/layout/navbar";
@@ -9,15 +8,13 @@ import {
   DASHBOARD_THEME_COOKIE_KEY,
   DASHBOARD_THEME_STORAGE_KEY,
 } from "@/lib/dashboard-theme";
-import { LanguageProvider, type Language } from "@/lib/language-context";
+import { LanguageProvider } from "@/lib/language-context";
 
 export const metadata: Metadata = {
   title: "Signal Forex - Structured Forex Signals",
   description:
     "Structured forex signals with clear entry, exit, risk levels, and transparent tracking",
 };
-
-const LANGUAGE_COOKIE_KEY = "signal_forex_language";
 
 const dashboardThemeScript = `
 (function () {
@@ -40,25 +37,17 @@ const dashboardThemeScript = `
 })();
 `;
 
-function parseLanguage(value: string | undefined): Language {
-  return value === "fa" ? "fa" : "en";
-}
-
 export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const cookieStore = await cookies();
-  const initialLanguage = parseLanguage(
-    cookieStore.get(LANGUAGE_COOKIE_KEY)?.value
-  );
-  const initialDirection = initialLanguage === "fa" ? "rtl" : "ltr";
+  const initialLanguage = "en";
 
   return (
     <html
       className="bg-black"
-      dir={initialDirection}
+      dir="ltr"
       lang={initialLanguage}
       suppressHydrationWarning
     >

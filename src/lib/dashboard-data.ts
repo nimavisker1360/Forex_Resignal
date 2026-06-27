@@ -1,7 +1,8 @@
-import type { Prisma } from "@prisma/client";
+import { TradeStatus, type Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import type {
   DashboardOverviewData,
+  PropFirmChallengeDto,
   TagDto,
   TradeDto,
   TradingAccountDto,
@@ -31,6 +32,22 @@ const tagSelect = {
   color: true,
   createdAt: true,
 } satisfies Prisma.TagSelect;
+
+export const propFirmChallengeSelect = {
+  id: true,
+  userId: true,
+  accountId: true,
+  name: true,
+  startingBalance: true,
+  profitTarget: true,
+  maxDailyLoss: true,
+  maxTotalLoss: true,
+  status: true,
+  startedAt: true,
+  endedAt: true,
+  createdAt: true,
+  updatedAt: true,
+} satisfies Prisma.PropFirmChallengeSelect;
 
 export const tradeListInclude = {
   account: {
@@ -80,6 +97,9 @@ export const tradeListInclude = {
 
 type AccountRecord = Prisma.TradingAccountGetPayload<{ select: typeof accountSelect }>;
 type TagRecord = Prisma.TagGetPayload<{ select: typeof tagSelect }>;
+type PropFirmChallengeRecord = Prisma.PropFirmChallengeGetPayload<{
+  select: typeof propFirmChallengeSelect;
+}>;
 type TradeListRecord = Prisma.TradeGetPayload<{ include: typeof tradeListInclude }>;
 
 function serializeDate(value: Date | string) {
@@ -108,6 +128,162 @@ export function serializeAccount(account: AccountRecord): TradingAccountDto {
     hasJournalSecret: Boolean(account.journalSecretHash),
     createdAt: serializeDate(account.createdAt),
     updatedAt: serializeDate(account.updatedAt),
+  };
+}
+
+function getChallengeStatus(input: {
+  profit: number;
+  profitTarget: number | null;
+  todayPnl: number;
+  maxDailyLoss: number | null;
+  currentBalance: number;
+  startingBalance: number;
+  maxTotalLoss: number | null;
+}): PropFirmChallengeDto["computedStatus"] {
+  if (input.profitTarget !== null && input.profitTarget > 0 && input.profit >= input.profitTarget) {
+    return "Passed";
+  }
+
+  if (input.maxDailyLoss !== null && input.maxDailyLoss > 0 && input.todayPnl < -input.maxDailyLoss) {
+    return "Failed - Daily Loss";
+  }
+
+  if (
+    input.maxTotalLoss !== null &&
+    input.maxTotalLoss > 0 &&
+    input.currentBalance <= input.startingBalance - input.maxTotalLoss
+  ) {
+    return "Failed - Max Loss";
+  }
+
+  return "Active";
+}
+
+function startOfToday() {
+  const date = new Date();
+  date.setHours(0, 0, 0, 0);
+  return date;
+}
+
+export async function getPropFirmChallengesForUser(userId: string) {
+  const [accounts, challenges] = await prisma.$transaction([
+    prisma.tradingAccount.findMany({
+      where: { userId },
+      select: accountSelect,
+      orderBy: { createdAt: "desc" },
+    }),
+    prisma.propFirmChallenge.findMany({
+      where: { userId },
+      select: propFirmChallengeSelect,
+      orderBy: { createdAt: "desc" },
+    }),
+  ]);
+
+  const accountMap = new Map(accounts.map((account) => [account.id, account]));
+  const todayStart = startOfToday();
+  const now = new Date();
+
+  const hydratedChallenges = await Promise.all(
+    challenges.map(async (challenge) => {
+      const startingBalance = Number(challenge.startingBalance);
+      const profitTarget = challenge.profitTarget === null ? null : Number(challenge.profitTarget);
+      const maxDailyLoss = challenge.maxDailyLoss === null ? null : Number(challenge.maxDailyLoss);
+      const maxTotalLoss = challenge.maxTotalLoss === null ? null : Number(challenge.maxTotalLoss);
+      const accountId = challenge.accountId;
+      const startedAt = challenge.startedAt ?? challenge.createdAt;
+
+      const [challengePnl, todayPnl] = accountId
+        ? await prisma.$transaction([
+            prisma.trade.aggregate({
+              where: {
+                userId,
+                accountId,
+                status: TradeStatus.CLOSED,
+                closedAt: {
+                  gte: startedAt,
+                  lte: now,
+                },
+              },
+              _sum: { profitLoss: true },
+            }),
+            prisma.trade.aggregate({
+              where: {
+                userId,
+                accountId,
+                status: TradeStatus.CLOSED,
+                closedAt: {
+                  gte: todayStart,
+                  lte: now,
+                },
+              },
+              _sum: { profitLoss: true },
+            }),
+          ])
+        : [null, null];
+
+      const closedPnl = Number(challengePnl?._sum.profitLoss ?? 0);
+      const todayClosedPnl = Number(todayPnl?._sum.profitLoss ?? 0);
+      const currentBalance = startingBalance + closedPnl;
+      const profit = currentBalance - startingBalance;
+      const progress = profitTarget && profitTarget > 0 ? (profit / profitTarget) * 100 : 0;
+      const computedStatus = getChallengeStatus({
+        profit,
+        profitTarget,
+        todayPnl: todayClosedPnl,
+        maxDailyLoss,
+        currentBalance,
+        startingBalance,
+        maxTotalLoss,
+      });
+
+      return serializePropFirmChallenge(
+        challenge,
+        accountId ? accountMap.get(accountId) ?? null : null,
+        {
+          currentBalance,
+          progress,
+          todayPnl: todayClosedPnl,
+          computedStatus,
+        }
+      );
+    })
+  );
+
+  return {
+    accounts: accounts.map(serializeAccount),
+    challenges: hydratedChallenges,
+  };
+}
+
+function serializePropFirmChallenge(
+  challenge: PropFirmChallengeRecord,
+  account: AccountRecord | null,
+  metrics: {
+    currentBalance: number;
+    progress: number;
+    todayPnl: number;
+    computedStatus: PropFirmChallengeDto["computedStatus"];
+  }
+): PropFirmChallengeDto {
+  return {
+    id: challenge.id,
+    userId: challenge.userId,
+    accountId: challenge.accountId,
+    name: challenge.name,
+    startingBalance: serializeDecimal(challenge.startingBalance) ?? "0",
+    currentBalance: metrics.currentBalance,
+    profitTarget: serializeDecimal(challenge.profitTarget),
+    maxDailyLoss: serializeDecimal(challenge.maxDailyLoss),
+    maxTotalLoss: serializeDecimal(challenge.maxTotalLoss),
+    progress: metrics.progress,
+    todayPnl: metrics.todayPnl,
+    computedStatus: metrics.computedStatus,
+    status: challenge.status,
+    startedAt: challenge.startedAt ? serializeDate(challenge.startedAt) : null,
+    endedAt: challenge.endedAt ? serializeDate(challenge.endedAt) : null,
+    createdAt: serializeDate(challenge.createdAt),
+    updatedAt: serializeDate(challenge.updatedAt),
+    account: account ? serializeAccount(account) : null,
   };
 }
 

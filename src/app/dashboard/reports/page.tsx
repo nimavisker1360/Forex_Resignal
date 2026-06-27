@@ -32,6 +32,14 @@ function reportQuery(filters: JournalReport["filters"], format?: string) {
   appendParam(params, "symbol", filters.symbol);
   appendParam(params, "direction", filters.direction);
   appendParam(params, "strategy", filters.strategy);
+  appendParam(params, "session", filters.session);
+  appendParam(params, "result", filters.result);
+  appendParam(params, "aiReview", filters.aiReview);
+  appendParam(params, "humanReview", filters.humanReview);
+  appendParam(params, "screenshots", filters.screenshots);
+  appendParam(params, "source", filters.source);
+  appendParam(params, "minAiScore", filters.minAiScore);
+  appendParam(params, "maxAiScore", filters.maxAiScore);
 
   if (format) {
     params.set("format", format);

@@ -21,6 +21,27 @@ export type TradingAccountDto = {
   updatedAt: string;
 };
 
+export type PropFirmChallengeDto = {
+  id: string;
+  userId: string;
+  accountId: string | null;
+  name: string;
+  startingBalance: string | number;
+  currentBalance: number;
+  profitTarget: string | number | null;
+  maxDailyLoss: string | number | null;
+  maxTotalLoss: string | number | null;
+  progress: number;
+  todayPnl: number;
+  computedStatus: "Active" | "Passed" | "Failed - Daily Loss" | "Failed - Max Loss";
+  status: string;
+  startedAt: string | null;
+  endedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+  account: TradingAccountDto | null;
+};
+
 export type TagDto = {
   id: string;
   userId: string;

@@ -263,18 +263,6 @@ function getStrategy(trade: NormalizedTrade) {
     return strategyName;
   }
 
-  const session = trade.session?.trim();
-
-  if (session) {
-    return session;
-  }
-
-  const setup = trade.setup?.trim();
-
-  if (setup && !setup.toUpperCase().startsWith("MT5:")) {
-    return setup;
-  }
-
   return null;
 }
 

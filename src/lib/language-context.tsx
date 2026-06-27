@@ -23,10 +23,6 @@ const LanguageContext = createContext<LanguageContextType | undefined>(
 const LANGUAGE_STORAGE_KEY = "signal-forex-language";
 const LANGUAGE_COOKIE_KEY = "signal_forex_language";
 
-function isLanguage(value: string | null | undefined): value is Language {
-  return value === "en" || value === "fa";
-}
-
 function applyDocumentLanguage(lang: Language, direction?: string) {
   document.documentElement.dir = direction || (lang === "fa" ? "rtl" : "ltr");
   document.documentElement.lang = lang;
@@ -52,16 +48,6 @@ export function LanguageProvider({
 }) {
   const [language, setLanguageState] = useState<Language>(initialLanguage);
   const [translations, setTranslations] = useState<Record<string, unknown>>({});
-
-  useEffect(() => {
-    const storedLanguage = window.localStorage.getItem(LANGUAGE_STORAGE_KEY);
-
-    if (isLanguage(storedLanguage)) {
-      setLanguageState(storedLanguage);
-      persistLanguage(storedLanguage);
-      applyDocumentLanguage(storedLanguage);
-    }
-  }, []);
 
   const setLanguage = useCallback((lang: Language) => {
     setLanguageState(lang);
