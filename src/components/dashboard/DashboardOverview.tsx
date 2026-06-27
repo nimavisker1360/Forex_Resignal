@@ -69,6 +69,8 @@ const dashboardModeText = {
     noTrades: "No recent trades yet.",
     review: "Review",
     waitingReview: "Waiting Review",
+    reviewNotice: (count: number) => `You have ${count} trades waiting for review.`,
+    reviewTrades: "Review Trades",
   },
   fa: {
     simple: "ساده",
@@ -79,6 +81,8 @@ const dashboardModeText = {
     noTrades: "هنوز معامله اخیری وجود ندارد.",
     review: "بررسی",
     waitingReview: "در انتظار بررسی",
+    reviewNotice: (count: number) => `${count} معامله در انتظار بررسی دارید.`,
+    reviewTrades: "بررسی معاملات",
   },
 } as const;
 
@@ -412,13 +416,13 @@ export function DashboardOverview({
       {!simpleMode && stats.notReviewedTrades > 0 ? (
         <div className="flex flex-col gap-3 rounded-xl border border-blue-500/30 bg-blue-500/10 p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
           <div className="text-sm font-medium text-blue-950 dark:text-blue-100">
-            You have {stats.notReviewedTrades} trades waiting for review.
+            {modeLabels.reviewNotice(stats.notReviewedTrades)}
           </div>
           <Link
             href="/dashboard/trades?reviewStatus=not-reviewed"
             className="inline-flex h-9 items-center justify-center rounded-lg bg-blue-600 px-3 text-sm font-semibold text-white hover:bg-blue-500"
           >
-            Review Trades
+            {modeLabels.reviewTrades}
           </Link>
         </div>
       ) : null}
