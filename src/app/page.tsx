@@ -234,7 +234,7 @@ export default function Home() {
                   className="h-14 rounded-full bg-[#11132c] px-8 text-base font-bold text-white shadow-[0_18px_35px_rgba(17,19,44,0.25)] hover:bg-[#25285a]"
                   asChild
                 >
-                  <Link href="/dashboard" className="flex items-center">
+                  <Link href="/dashboard-loading" className="flex items-center">
                     Get Started <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>

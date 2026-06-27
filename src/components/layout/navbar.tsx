@@ -20,6 +20,7 @@ export function Navbar() {
     "h-12 rounded-md border-0 bg-gradient-to-r from-violet-600 to-pink-500 px-7 text-base font-bold text-white shadow-[0_10px_25px_rgba(168,85,247,0.28)] hover:from-violet-500 hover:to-pink-500 hover:text-white";
   const navLinkClass =
     "inline-flex items-center gap-1 text-base font-semibold text-slate-900 transition hover:text-violet-600";
+  const dashboardLoadingHref = "/dashboard-loading";
 
   useEffect(() => {
     const handleScroll = () => {
@@ -77,14 +78,14 @@ export function Navbar() {
             <LanguageSwitcher />
             {session ? (
               <Button asChild className={ctaClass}>
-                <Link href="/dashboard" className="flex items-center gap-2">
+                <Link href={dashboardLoadingHref} className="flex items-center gap-2">
                   Dashboard <ArrowRight className="h-4 w-4" />
                 </Link>
               </Button>
             ) : (
               <>
                 <Button asChild className={ctaClass}>
-                  <Link href="/dashboard" className="flex items-center gap-2">
+                  <Link href={dashboardLoadingHref} className="flex items-center gap-2">
                     Get Started <ArrowRight className="h-4 w-4" />
                   </Link>
                 </Button>
@@ -156,7 +157,7 @@ export function Navbar() {
               {session ? (
                 <Button asChild className={`${ctaClass} w-full`}>
                   <Link
-                    href="/dashboard"
+                    href={dashboardLoadingHref}
                     className="flex items-center justify-center gap-2"
                     onClick={() => setIsMenuOpen(false)}
                   >
@@ -167,7 +168,7 @@ export function Navbar() {
                 <>
                   <Button asChild className={`${ctaClass} w-full`}>
                     <Link
-                      href="/dashboard"
+                      href={dashboardLoadingHref}
                       className="flex items-center justify-center gap-2"
                       onClick={() => setIsMenuOpen(false)}
                     >
