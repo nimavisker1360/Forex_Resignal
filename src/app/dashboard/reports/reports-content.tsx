@@ -7,6 +7,7 @@ import {
   BarChart3,
   Brain,
   CalendarDays,
+  ChevronDown,
   CheckCircle2,
   Download,
   FileText,
@@ -1176,6 +1177,49 @@ function reportFileName(tradeReport: JournalReport["tradeReports"][number]) {
   return `${date}-${trade.symbol}-${trade.direction}-${trade.id.slice(0, 8)}.txt`;
 }
 
+function tradeReportDateKey(tradeReport: JournalReport["tradeReports"][number]) {
+  return tradeReport.trade.openedAt?.slice(0, 10) || "undated";
+}
+
+function tradeReportCountLabel(count: number, language: Language) {
+  if (language === "fa") {
+    return `${count} گزارش`;
+  }
+
+  return `${count} ${count === 1 ? "report" : "reports"}`;
+}
+
+function groupTradeReportsByDate(
+  tradeReports: JournalReport["tradeReports"],
+  language: Language
+) {
+  const groups = new Map<
+    string,
+    {
+      key: string;
+      label: string;
+      reports: JournalReport["tradeReports"];
+      totalPnl: number;
+    }
+  >();
+
+  tradeReports.forEach((tradeReport) => {
+    const key = tradeReportDateKey(tradeReport);
+    const group = groups.get(key) || {
+      key,
+      label: key === "undated" ? (language === "fa" ? "بدون تاریخ" : "Undated") : formatDate(tradeReport.trade.openedAt, language),
+      reports: [],
+      totalPnl: 0,
+    };
+
+    group.reports.push(tradeReport);
+    group.totalPnl += Number(tradeReport.trade.pnl || 0);
+    groups.set(key, group);
+  });
+
+  return Array.from(groups.values());
+}
+
 function ReportBadge({ children }: { children: ReactNode }) {
   return (
     <span className="inline-flex h-7 items-center rounded-md border border-slate-700 bg-slate-900 px-2.5 text-xs font-semibold text-slate-200 print:border-slate-300 print:bg-white print:text-slate-700">
@@ -1225,6 +1269,7 @@ function TradeReportFilesPanel({
 }) {
   const copy = COPY[language];
   const ui = REPORT_UI[language].reportFiles;
+  const groupedTradeReports = groupTradeReportsByDate(report.tradeReports, language);
 
   if (report.tradeReports.length === 0) {
     return (
@@ -1237,13 +1282,40 @@ function TradeReportFilesPanel({
   return (
     <Panel title={ui.title} subtitle={ui.subtitle} icon={FileText}>
       <div className="space-y-4">
-        {report.tradeReports.map((tradeReport) => {
-          const { trade, aiReview, strategyReview, checklists, journal, screenshots } = tradeReport;
-          const text = buildTradeReportText(tradeReport);
-          const fileHref = `data:text/plain;charset=utf-8,${encodeURIComponent(text)}`;
+        {groupedTradeReports.map((group, groupIndex) => (
+          <details
+            key={group.key}
+            open={groupIndex === 0}
+            className="overflow-hidden rounded-lg border border-slate-800 bg-slate-950/30 print:border-slate-200 print:bg-white [&[open]>summary_.date-chevron]:rotate-180"
+          >
+            <summary className="flex cursor-pointer list-none flex-col gap-3 bg-[#111827] p-4 text-white marker:hidden print:bg-slate-50 print:text-slate-950 sm:flex-row sm:items-center sm:justify-between [&::-webkit-details-marker]:hidden">
+              <div className="flex min-w-0 items-center gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-500/10 text-blue-200 print:bg-slate-100 print:text-slate-700">
+                  <CalendarDays className="h-5 w-5" />
+                </div>
+                <div className="min-w-0">
+                  <h3 className="font-semibold">{group.label}</h3>
+                  <p className="mt-1 text-xs text-slate-400 print:text-slate-600">
+                    {tradeReportCountLabel(group.reports.length, language)}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className={cn("text-sm font-semibold", toneClass(pnlTone(group.totalPnl)), "print:text-slate-950")}>
+                  {formatMoney(group.totalPnl)}
+                </div>
+                <ChevronDown className="date-chevron h-4 w-4 text-slate-400 transition-transform print:hidden" />
+              </div>
+            </summary>
 
-          return (
-            <article key={trade.id} className="overflow-hidden rounded-lg border border-slate-800 bg-slate-950/40 print:border-slate-200 print:bg-white">
+            <div className="space-y-4 border-t border-slate-800 p-3 print:border-slate-200 sm:p-4">
+              {group.reports.map((tradeReport) => {
+                const { trade, aiReview, strategyReview, checklists, journal, screenshots } = tradeReport;
+                const text = buildTradeReportText(tradeReport);
+                const fileHref = `data:text/plain;charset=utf-8,${encodeURIComponent(text)}`;
+
+                return (
+                  <article key={trade.id} className="overflow-hidden rounded-lg border border-slate-800 bg-slate-950/40 print:border-slate-200 print:bg-white">
               <div className="flex flex-col gap-4 border-b border-slate-800 bg-[#111827] p-4 print:border-slate-200 print:bg-slate-50 lg:flex-row lg:items-start lg:justify-between">
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
@@ -1429,9 +1501,12 @@ function TradeReportFilesPanel({
                   </div>
                 </details>
               </div>
-            </article>
-          );
-        })}
+                  </article>
+                );
+              })}
+            </div>
+          </details>
+        ))}
       </div>
     </Panel>
   );
