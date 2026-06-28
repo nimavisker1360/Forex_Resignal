@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { CheckCircle2, Copy, CreditCard, LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { CheckCircle2, Copy, CreditCard, LogOut } from "lucide-react";
 import { toast } from "sonner";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { Button } from "@/components/ui/button";
@@ -29,6 +29,7 @@ type Payment = {
   txid?: string | null;
   status: string;
   plan?: Plan | null;
+  subscription?: unknown;
 };
 
 const networks = ["TRC20", "ERC20", "BEP20"] as const;
@@ -122,6 +123,7 @@ export function PremiumPaymentForm() {
   const [loadingPlans, setLoadingPlans] = useState(true);
   const [creatingPayment, setCreatingPayment] = useState(false);
   const [submittingTxid, setSubmittingTxid] = useState(false);
+  const [redirectingToDashboard, setRedirectingToDashboard] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
   const [error, setError] = useState("");
 
@@ -150,6 +152,72 @@ export function PremiumPaymentForm() {
     };
   }, []);
 
+  useEffect(() => {
+    if (!payment || redirectingToDashboard) {
+      return;
+    }
+
+    const currentPayment = payment;
+
+    if (currentPayment.status === "CONFIRMED" || currentPayment.subscription) {
+      setRedirectingToDashboard(true);
+      router.replace("/dashboard");
+      router.refresh();
+      return;
+    }
+
+    if (!["UNDER_REVIEW", "WAITING_TXID"].includes(currentPayment.status)) {
+      return;
+    }
+
+    let active = true;
+
+    async function checkPaymentStatus() {
+      try {
+        const response = await fetch("/api/payments/my", { cache: "no-store" });
+        const payload = await response.json();
+
+        if (!active || !response.ok) {
+          return;
+        }
+
+        const updatedPayment = (payload.payments || []).find(
+          (item: Payment) => item.id === currentPayment.id
+        ) as Payment | undefined;
+
+        if (!updatedPayment) {
+          return;
+        }
+
+        if (updatedPayment.status === "CONFIRMED" || updatedPayment.subscription) {
+          setPayment(updatedPayment);
+          setRedirectingToDashboard(true);
+          toast.success("Payment confirmed. Opening dashboard...");
+          router.replace("/dashboard");
+          router.refresh();
+          return;
+        }
+
+        if (
+          updatedPayment.status !== currentPayment.status ||
+          updatedPayment.txid !== currentPayment.txid
+        ) {
+          setPayment(updatedPayment);
+        }
+      } catch {
+        // Keep polling; a transient network error should not block automatic access.
+      }
+    }
+
+    const interval = window.setInterval(checkPaymentStatus, 2000);
+    void checkPaymentStatus();
+
+    return () => {
+      active = false;
+      window.clearInterval(interval);
+    };
+  }, [payment, redirectingToDashboard, router]);
+
   const selectedPlan = useMemo(
     () => plans.find((plan) => plan.id === planId) || null,
     [planId, plans]
@@ -157,9 +225,15 @@ export function PremiumPaymentForm() {
 
   async function handleSignOut() {
     setSigningOut(true);
-    await signOut();
-    router.push("/");
-    router.refresh();
+
+    try {
+      await signOut();
+      const redirectPath = `${window.location.pathname}${window.location.search}`;
+      window.location.assign(`/login?redirect=${encodeURIComponent(redirectPath)}`);
+    } catch {
+      setSigningOut(false);
+      toast.error("Failed to sign out.");
+    }
   }
 
   async function createPayment() {
@@ -400,15 +474,21 @@ export function PremiumPaymentForm() {
               <Button
                 type="button"
                 onClick={submitTxid}
-                disabled={submittingTxid || payment.status === "UNDER_REVIEW"}
+                disabled={
+                  submittingTxid ||
+                  redirectingToDashboard ||
+                  payment.status === "UNDER_REVIEW"
+                }
                 className={cn(
                   "w-full",
-                  payment.status === "UNDER_REVIEW"
+                  payment.status === "UNDER_REVIEW" || redirectingToDashboard
                     ? "bg-emerald-600 text-white"
                     : "bg-slate-950 text-white hover:bg-slate-800"
                 )}
               >
-                {payment.status === "UNDER_REVIEW"
+                {redirectingToDashboard
+                  ? "Payment confirmed. Opening dashboard..."
+                  : payment.status === "UNDER_REVIEW"
                   ? text.submitted
                   : submittingTxid
                     ? text.submitting
