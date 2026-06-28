@@ -3,12 +3,6 @@ import prisma from "@/lib/prisma";
 import { expireOldSubscriptions } from "@/lib/subscription";
 import { isAdminUser } from "@/lib/server-auth";
 
-const JOURNAL_ALLOWED_SUBSCRIPTION_STATUSES = [
-  SubscriptionStatus.ACTIVE,
-  SubscriptionStatus.TRIAL,
-  SubscriptionStatus.MANUAL,
-];
-
 export class JournalSubscriptionError extends Error {
   status = 403;
 
@@ -37,8 +31,22 @@ export async function assertUserCanUseJournal(userId: string) {
   const activeSubscription = await prisma.subscription.findFirst({
     where: {
       userId,
-      status: { in: JOURNAL_ALLOWED_SUBSCRIPTION_STATUSES },
       expiresAt: { gt: new Date() },
+      OR: [
+        {
+          status: SubscriptionStatus.TRIAL,
+          plan: { isTrial: true },
+        },
+        {
+          status: {
+            in: [SubscriptionStatus.ACTIVE, SubscriptionStatus.MANUAL],
+          },
+          plan: {
+            isFree: false,
+            isTrial: false,
+          },
+        },
+      ],
     },
     select: { id: true },
     orderBy: { expiresAt: "desc" },
@@ -76,8 +84,22 @@ export async function getJournalAccessState(userId: string) {
   const activeSubscription = await prisma.subscription.findFirst({
     where: {
       userId,
-      status: { in: JOURNAL_ALLOWED_SUBSCRIPTION_STATUSES },
       expiresAt: { gt: new Date() },
+      OR: [
+        {
+          status: SubscriptionStatus.TRIAL,
+          plan: { isTrial: true },
+        },
+        {
+          status: {
+            in: [SubscriptionStatus.ACTIVE, SubscriptionStatus.MANUAL],
+          },
+          plan: {
+            isFree: false,
+            isTrial: false,
+          },
+        },
+      ],
     },
     select: { id: true, status: true },
     orderBy: { expiresAt: "desc" },

@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { accountSelect, serializeAccount } from "@/lib/dashboard-data";
 import { apiResponse, decimalValue } from "@/lib/journal/api-utils";
 import { getCurrentUserId, unauthorizedResponse } from "@/lib/server-auth";
+import { requireActiveSubscription, subscriptionAccessResponse } from "@/lib/subscription";
 
 export const dynamic = "force-dynamic";
 
@@ -17,6 +18,8 @@ export async function PATCH(request: Request, context: RouteContext) {
     if (!userId) {
       return unauthorizedResponse();
     }
+
+    await requireActiveSubscription();
 
     const { id } = await context.params;
     const body = await request.json();
@@ -46,6 +49,12 @@ export async function PATCH(request: Request, context: RouteContext) {
 
     return apiResponse({ success: true, data: serializeAccount(account) });
   } catch (error) {
+    const accessResponse = subscriptionAccessResponse(error);
+
+    if (accessResponse) {
+      return accessResponse;
+    }
+
     console.error("Trading account PATCH error:", error);
 
     if (
@@ -73,6 +82,8 @@ export async function DELETE(request: Request, context: RouteContext) {
       return unauthorizedResponse();
     }
 
+    await requireActiveSubscription();
+
     const { id } = await context.params;
 
     await prisma.tradingAccount.delete({
@@ -81,6 +92,12 @@ export async function DELETE(request: Request, context: RouteContext) {
 
     return apiResponse({ success: true });
   } catch (error) {
+    const accessResponse = subscriptionAccessResponse(error);
+
+    if (accessResponse) {
+      return accessResponse;
+    }
+
     console.error("Trading account DELETE error:", error);
 
     if (

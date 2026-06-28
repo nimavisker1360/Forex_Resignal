@@ -8,11 +8,15 @@ import {
   CalendarDays,
   CircleDollarSign,
   ClipboardCheck,
+  Crown,
+  Hourglass,
   Percent,
+  ShieldCheck,
 } from "lucide-react";
 import { PnlText } from "@/components/dashboard/PnlText";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { useLanguage } from "@/lib/language-context";
+import type { SubscriptionDashboardState } from "@/lib/subscription";
 import { TradeDirectionBadge } from "@/components/dashboard/TradeDirectionBadge";
 import { TradeTable } from "@/components/dashboard/TradeTable";
 import { TradeReadinessGuide } from "@/components/dashboard/TradeReadinessGuide";
@@ -83,6 +87,55 @@ const dashboardModeText = {
     waitingReview: "در انتظار بررسی",
     reviewNotice: (count: number) => `${count} معامله در انتظار بررسی دارید.`,
     reviewTrades: "بررسی معاملات",
+  },
+} as const;
+
+const subscriptionCardText = {
+  en: {
+    trialLabel: "Trial access",
+    subscriptionLabel: "Subscription",
+    freeLabel: "Free plan",
+    activeLabel: "Active plan",
+    manualLabel: "Manual access",
+    daysLeft: "days left",
+    dayLeft: "day left",
+    expires: "Expires",
+    trialTitle: (planName: string) => `${planName} trial is active`,
+    paidTitle: (planName: string) => `${planName} plan is active`,
+    freeTitle: (planName: string) => `${planName} plan`,
+    trialDescription: (days: number) =>
+      days <= 3
+        ? "Your trial is close to ending. Upgrade before access pauses."
+        : "Use the remaining trial time to connect MT5 and review your workflow.",
+    paidDescription: (days: number) =>
+      days <= 7
+        ? "Renew soon to keep dashboard and MT5 journal access uninterrupted."
+        : "Your dashboard access is active and ready for journaling.",
+    freeDescription: "Upgrade when you are ready to unlock full journal access.",
+    manage: "Manage plan",
+  },
+  fa: {
+    trialLabel: "دسترسی آزمایشی",
+    subscriptionLabel: "اشتراک",
+    freeLabel: "پلن رایگان",
+    activeLabel: "پلن فعال",
+    manualLabel: "دسترسی دستی",
+    daysLeft: "روز باقی مانده",
+    dayLeft: "روز باقی مانده",
+    expires: "انقضا",
+    trialTitle: (planName: string) => `تریال ${planName} فعال است`,
+    paidTitle: (planName: string) => `پلن ${planName} فعال است`,
+    freeTitle: (planName: string) => `پلن ${planName}`,
+    trialDescription: (days: number) =>
+      days <= 3
+        ? "تریال شما رو به پایان است. قبل از توقف دسترسی، پلن را ارتقا دهید."
+        : "از زمان باقی مانده تریال برای اتصال MT5 و بررسی روند ژورنال استفاده کنید.",
+    paidDescription: (days: number) =>
+      days <= 7
+        ? "برای ادامه دسترسی داشبورد و ژورنال MT5، اشتراک را به زودی تمدید کنید."
+        : "دسترسی داشبورد شما فعال است و آماده ثبت ژورنال هستید.",
+    freeDescription: "برای فعال شدن دسترسی کامل ژورنال، پلن را ارتقا دهید.",
+    manage: "مدیریت پلن",
   },
 } as const;
 
@@ -166,13 +219,157 @@ function RecentTradeSummary({
   );
 }
 
+function formatSubscriptionDate(value: string, language: "en" | "fa") {
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+
+  return new Intl.DateTimeFormat(language === "fa" ? "fa-IR" : "en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  }).format(date);
+}
+
+function SubscriptionTimeCard({
+  subscription,
+  isRtl,
+}: {
+  subscription: SubscriptionDashboardState | null;
+  isRtl: boolean;
+}) {
+  const { language } = useLanguage();
+
+  if (!subscription) {
+    return null;
+  }
+
+  const labels = subscriptionCardText[language];
+  const isWarning = subscription.daysRemaining <= (subscription.isTrial ? 3 : 7);
+  const isExpired = subscription.daysRemaining <= 0;
+  const statusLabel = subscription.isTrial
+    ? labels.trialLabel
+    : subscription.isFree
+      ? labels.freeLabel
+      : subscription.status === "MANUAL"
+        ? labels.manualLabel
+        : labels.activeLabel;
+  const title = subscription.isTrial
+    ? labels.trialTitle(subscription.planName)
+    : subscription.isFree
+      ? labels.freeTitle(subscription.planName)
+      : labels.paidTitle(subscription.planName);
+  const description = subscription.isTrial
+    ? labels.trialDescription(subscription.daysRemaining)
+    : subscription.isFree
+      ? labels.freeDescription
+      : labels.paidDescription(subscription.daysRemaining);
+  const dayLabel = subscription.daysRemaining === 1 ? labels.dayLeft : labels.daysLeft;
+  const Icon = subscription.isTrial ? Hourglass : subscription.isFree ? ShieldCheck : Crown;
+
+  return (
+    <div
+      className={cn(
+        "relative overflow-hidden rounded-xl border p-4 shadow-sm",
+        isWarning || isExpired
+          ? "border-amber-300 bg-amber-50 text-amber-950 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-50"
+          : "border-blue-200 bg-white text-slate-950 dark:border-blue-500/30 dark:bg-[#0F172A] dark:text-white",
+        isRtl && "text-right"
+      )}
+    >
+      <div
+        className={cn(
+          "pointer-events-none absolute inset-y-0 w-40",
+          isRtl ? "left-0" : "right-0",
+          isWarning || isExpired
+            ? "bg-gradient-to-l from-amber-200/50 to-transparent dark:from-amber-400/10"
+            : "bg-gradient-to-l from-blue-200/50 to-transparent dark:from-blue-500/10"
+        )}
+      />
+      <div className="relative flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex min-w-0 items-start gap-3">
+          <div
+            className={cn(
+              "flex h-11 w-11 shrink-0 items-center justify-center rounded-xl",
+              isWarning || isExpired
+                ? "bg-amber-200 text-amber-800 dark:bg-amber-400/15 dark:text-amber-200"
+                : "bg-blue-50 text-blue-700 dark:bg-blue-500/15 dark:text-blue-200"
+            )}
+          >
+            <Icon className="h-5 w-5" />
+          </div>
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <span
+                className={cn(
+                  "rounded-full border px-2.5 py-1 text-xs font-semibold",
+                  isWarning || isExpired
+                    ? "border-amber-300 bg-amber-100 text-amber-900 dark:border-amber-400/30 dark:bg-amber-400/10 dark:text-amber-100"
+                    : "border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-400/30 dark:bg-blue-400/10 dark:text-blue-100"
+                )}
+              >
+                {statusLabel}
+              </span>
+              <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                {labels.expires}: {formatSubscriptionDate(subscription.expiresAt, language)}
+              </span>
+            </div>
+            <h3 className="mt-2 text-base font-semibold">{title}</h3>
+            <p className="mt-1 max-w-2xl text-sm text-slate-600 dark:text-slate-300">
+              {description}
+            </p>
+          </div>
+        </div>
+
+        <div className="w-full shrink-0 lg:w-72">
+          <div className={cn("flex items-end justify-between gap-3", isRtl && "flex-row-reverse")}>
+            <div>
+              <div className="text-3xl font-bold leading-none">
+                {subscription.daysRemaining}
+              </div>
+              <div className="mt-1 text-xs font-semibold text-slate-500 dark:text-slate-400">
+                {dayLabel}
+              </div>
+            </div>
+            <Link
+              href="/pricing"
+              className={cn(
+                "inline-flex h-9 items-center justify-center rounded-lg px-3 text-sm font-semibold text-white transition",
+                isWarning || isExpired ? "bg-amber-600 hover:bg-amber-500" : "bg-blue-600 hover:bg-blue-500"
+              )}
+            >
+              {labels.manage}
+            </Link>
+          </div>
+          <div className="mt-3 h-2 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800">
+            <div
+              className={cn(
+                "h-full rounded-full transition-all",
+                isWarning || isExpired ? "bg-amber-500" : "bg-blue-600"
+              )}
+              style={{ width: `${subscription.percentRemaining}%` }}
+            />
+          </div>
+          <div className={cn("mt-1 text-xs text-slate-500 dark:text-slate-400", isRtl ? "text-left" : "text-right")}>
+            {subscription.percentRemaining}%
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function DashboardOverview({
   userId,
+  subscription,
   initialAccounts,
   initialTrades,
   initialStats,
 }: {
   userId?: string;
+  subscription: SubscriptionDashboardState | null;
   initialAccounts: TradingAccountDto[];
   initialTrades: TradeDto[];
   initialStats: DashboardOverviewStats;
@@ -343,6 +540,8 @@ export function DashboardOverview({
           </p>
         </div>
       </div>
+
+      <SubscriptionTimeCard subscription={subscription} isRtl={isRtl} />
 
       <TradeReadinessGuide
         recentTrades={trades}

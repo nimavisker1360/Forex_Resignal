@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { accountSelect, serializeAccount } from "@/lib/dashboard-data";
 import { apiResponse, decimalValue } from "@/lib/journal/api-utils";
 import { getCurrentUserId, unauthorizedResponse } from "@/lib/server-auth";
+import { requireActiveSubscription, subscriptionAccessResponse } from "@/lib/subscription";
 
 export const dynamic = "force-dynamic";
 
@@ -14,6 +15,8 @@ export async function GET() {
       return unauthorizedResponse();
     }
 
+    await requireActiveSubscription();
+
     const accounts = await prisma.tradingAccount.findMany({
       where: { userId },
       select: accountSelect,
@@ -22,6 +25,12 @@ export async function GET() {
 
     return apiResponse({ success: true, data: accounts.map(serializeAccount) });
   } catch (error) {
+    const accessResponse = subscriptionAccessResponse(error);
+
+    if (accessResponse) {
+      return accessResponse;
+    }
+
     console.error("Trading accounts GET error:", error);
 
     return apiResponse(
@@ -38,6 +47,8 @@ export async function POST(request: Request) {
     if (!userId) {
       return unauthorizedResponse();
     }
+
+    await requireActiveSubscription();
 
     const body = await request.json();
     const { name, broker, platform, currency, balance, mt5AccountNumber } = body;
@@ -67,6 +78,12 @@ export async function POST(request: Request) {
 
     return apiResponse({ success: true, data: serializeAccount(account) }, 201);
   } catch (error) {
+    const accessResponse = subscriptionAccessResponse(error);
+
+    if (accessResponse) {
+      return accessResponse;
+    }
+
     console.error("Trading accounts POST error:", error);
 
     if (

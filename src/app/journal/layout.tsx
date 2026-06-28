@@ -5,7 +5,11 @@ import { JournalShell } from "@/components/dashboard/JournalShell";
 import { SubscriptionStatusBanner } from "@/components/subscription/SubscriptionStatusBanner";
 import { DASHBOARD_THEME_COOKIE_KEY, parseDashboardTheme } from "@/lib/dashboard-theme";
 import { getSession } from "@/lib/server-auth";
-import { getSubscriptionBannerState, requireActiveSubscription } from "@/lib/subscription";
+import {
+  getSubscriptionBannerState,
+  requireActiveSubscription,
+  SubscriptionAccessError,
+} from "@/lib/subscription";
 
 export default async function JournalLayout({ children }: { children: ReactNode }) {
   const session = await getSession();
@@ -14,7 +18,15 @@ export default async function JournalLayout({ children }: { children: ReactNode 
     redirect("/login");
   }
 
-  await requireActiveSubscription();
+  try {
+    await requireActiveSubscription();
+  } catch (error) {
+    if (error instanceof SubscriptionAccessError) {
+      redirect("/premium?reason=subscription-required");
+    }
+
+    throw error;
+  }
   const banner = await getSubscriptionBannerState(session.user.id);
   const cookieStore = await cookies();
   const initialTheme = parseDashboardTheme(cookieStore.get(DASHBOARD_THEME_COOKIE_KEY)?.value);

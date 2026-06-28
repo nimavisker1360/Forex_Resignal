@@ -21,10 +21,24 @@ export class SubscriptionAccessError extends Error {
   }
 }
 
-const ACTIVE_STATUSES = ["ACTIVE", "TRIAL", "FREE", "MANUAL"];
+const ACTIVE_STATUSES = ["ACTIVE", "TRIAL", "MANUAL"];
 const PAID_STATUSES = ["ACTIVE", "MANUAL"];
 const FAR_FUTURE_DAYS = 365 * 100;
 const DEFAULT_TRIAL_DAYS = 10;
+
+export type SubscriptionDashboardState = {
+  planName: string;
+  planSlug: string;
+  status: string;
+  daysRemaining: number;
+  totalDays: number;
+  percentRemaining: number;
+  startedAt: string;
+  expiresAt: string;
+  isTrial: boolean;
+  isPaid: boolean;
+  isFree: boolean;
+};
 
 function addDays(date: Date, days: number) {
   const next = new Date(date);
@@ -50,6 +64,10 @@ function calendarDayNumber(date: Date) {
 
 function calendarDaysElapsedSince(startedAt: Date, now = new Date()) {
   return Math.max(calendarDayNumber(now) - calendarDayNumber(startedAt), 0);
+}
+
+function calendarDaysBetween(startedAt: Date, expiresAt: Date) {
+  return Math.max(calendarDayNumber(expiresAt) - calendarDayNumber(startedAt), 1);
 }
 
 function trialDurationDays(subscription: { plan?: { durationDays?: number | null } | null }) {
@@ -102,6 +120,10 @@ async function getActivePaidSubscription(userId: string) {
       userId,
       status: { in: PAID_STATUSES },
       expiresAt: { gt: new Date() },
+      plan: {
+        isFree: false,
+        isTrial: false,
+      },
     },
     include: { plan: true },
     orderBy: { expiresAt: "desc" },
@@ -162,6 +184,7 @@ export async function getOrCreateFreeSubscription(userId: string) {
       userId,
       status: "TRIAL",
       expiresAt: { gt: new Date() },
+      plan: { isTrial: true },
     },
     include: { plan: true },
     orderBy: { expiresAt: "desc" },
@@ -220,8 +243,20 @@ export async function getActiveSubscription(userId: string) {
   const active = await db.subscription.findFirst({
     where: {
       userId,
-      status: { in: ACTIVE_STATUSES },
       expiresAt: { gt: new Date() },
+      OR: [
+        {
+          status: "TRIAL",
+          plan: { isTrial: true },
+        },
+        {
+          status: { in: PAID_STATUSES },
+          plan: {
+            isFree: false,
+            isTrial: false,
+          },
+        },
+      ],
     },
     include: { plan: true },
     orderBy: [
@@ -248,6 +283,7 @@ export async function ensureSubscriptionForUser(userId: string) {
       userId,
       status: "TRIAL",
       expiresAt: { gt: new Date() },
+      plan: { isTrial: true },
     },
     include: { plan: true },
     orderBy: { expiresAt: "desc" },
@@ -263,7 +299,7 @@ export async function ensureSubscriptionForUser(userId: string) {
     return trial;
   }
 
-  return getOrCreateFreeSubscription(userId);
+  return null;
 }
 
 export async function requireActiveSubscription() {
@@ -276,7 +312,10 @@ export async function requireActiveSubscription() {
   const subscription = await ensureSubscriptionForUser(user.id);
 
   if (!subscription) {
-    throw new SubscriptionAccessError("No active subscription plan is available", 403);
+    throw new SubscriptionAccessError(
+      "Your subscription is not active. Renew your plan to continue using the dashboard.",
+      403
+    );
   }
 
   return subscription;
@@ -487,4 +526,43 @@ export async function getSubscriptionBannerState(userId: string) {
   }
 
   return null;
+}
+
+export async function getSubscriptionDashboardState(
+  userId: string
+): Promise<SubscriptionDashboardState | null> {
+  const subscription = await ensureSubscriptionForUser(userId);
+
+  if (!subscription?.plan) {
+    return null;
+  }
+
+  const isTrial = subscription.status === "TRIAL" || Boolean(subscription.plan.isTrial);
+  const remaining = isTrial
+    ? trialDaysRemaining(subscription)
+    : daysRemaining(subscription.expiresAt);
+  const totalDays = isTrial
+    ? trialDurationDays(subscription)
+    : calendarDaysBetween(subscription.startedAt, subscription.expiresAt);
+  const percentRemaining = Math.max(
+    Math.min(Math.round((remaining / Math.max(totalDays, 1)) * 100), 100),
+    0
+  );
+
+  return {
+    planName: subscription.plan.name,
+    planSlug: subscription.plan.slug,
+    status: subscription.status,
+    daysRemaining: remaining,
+    totalDays,
+    percentRemaining,
+    startedAt: subscription.startedAt.toISOString(),
+    expiresAt: subscription.expiresAt.toISOString(),
+    isTrial,
+    isPaid:
+      (subscription.status === "ACTIVE" || subscription.status === "MANUAL") &&
+      !subscription.plan.isFree &&
+      !subscription.plan.isTrial,
+    isFree: Boolean(subscription.plan.isFree),
+  };
 }

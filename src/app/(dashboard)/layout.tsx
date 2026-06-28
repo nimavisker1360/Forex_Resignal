@@ -5,7 +5,11 @@ import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { SubscriptionStatusBanner } from "@/components/subscription/SubscriptionStatusBanner";
 import { DASHBOARD_THEME_COOKIE_KEY, parseDashboardTheme } from "@/lib/dashboard-theme";
 import { getCurrentUser, getSession, isAdminUser } from "@/lib/server-auth";
-import { getSubscriptionBannerState, requireActiveSubscription } from "@/lib/subscription";
+import {
+  getSubscriptionBannerState,
+  requireActiveSubscription,
+  SubscriptionAccessError,
+} from "@/lib/subscription";
 
 export default async function DashboardRouteGroupLayout({ children }: { children: ReactNode }) {
   const session = await getSession();
@@ -14,7 +18,15 @@ export default async function DashboardRouteGroupLayout({ children }: { children
     redirect("/login");
   }
 
-  await requireActiveSubscription();
+  try {
+    await requireActiveSubscription();
+  } catch (error) {
+    if (error instanceof SubscriptionAccessError) {
+      redirect("/premium?reason=subscription-required");
+    }
+
+    throw error;
+  }
   const user = await getCurrentUser();
   const banner = await getSubscriptionBannerState(session.user.id);
   const cookieStore = await cookies();

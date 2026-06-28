@@ -15,7 +15,9 @@ export async function POST(request: Request) {
   try {
     const admin = await requireAdmin();
     const body = (await request.json()) as Record<string, unknown>;
-    const userId = typeof body.userId === "string" ? body.userId.trim() : "";
+    const subscriptionId =
+      typeof body.subscriptionId === "string" ? body.subscriptionId.trim() : "";
+    let userId = typeof body.userId === "string" ? body.userId.trim() : "";
     const planId = typeof body.planId === "string" ? body.planId.trim() : "";
     const durationDays =
       body.durationDays === undefined || body.durationDays === null
@@ -24,8 +26,8 @@ export async function POST(request: Request) {
     const note =
       typeof body.note === "string" && body.note.trim() ? body.note.trim() : null;
 
-    if (!userId || !planId) {
-      return apiError("userId and planId are required", 400);
+    if ((!userId && !subscriptionId) || !planId) {
+      return apiError("userId or subscriptionId and planId are required", 400);
     }
 
     if (
@@ -36,6 +38,25 @@ export async function POST(request: Request) {
     }
 
     const db = prisma as any;
+    const targetSubscription = subscriptionId
+      ? await db.subscription.findUnique({
+          where: { id: subscriptionId },
+          select: {
+            id: true,
+            userId: true,
+            status: true,
+            startedAt: true,
+            expiresAt: true,
+          },
+        })
+      : null;
+
+    if (subscriptionId && !targetSubscription) {
+      return apiError("Subscription not found", 404);
+    }
+
+    userId = targetSubscription?.userId || userId;
+
     const [user, plan] = await Promise.all([
       db.user.findUnique({ where: { id: userId }, select: { id: true } }),
       db.plan.findFirst({ where: { id: planId, isActive: true } }),
@@ -47,6 +68,10 @@ export async function POST(request: Request) {
 
     if (!plan) {
       return apiError("Plan not found", 404);
+    }
+
+    if (plan.isFree || plan.isTrial) {
+      return apiError("Manual extensions must use an active paid plan", 400);
     }
 
     const effectiveDurationDays = durationDays ?? Number(plan.durationDays);
@@ -63,19 +88,24 @@ export async function POST(request: Request) {
           userId,
           status: { in: [...PAID_SUBSCRIPTION_STATUSES] },
           expiresAt: { gt: now },
+          ...(subscriptionId ? { id: { not: subscriptionId } } : {}),
         },
         orderBy: { expiresAt: "desc" },
       });
       const baseDate =
-        existingSubscription && existingSubscription.expiresAt > now
+        targetSubscription &&
+        ["ACTIVE", "TRIAL", "MANUAL"].includes(targetSubscription.status) &&
+        targetSubscription.expiresAt > now
+          ? targetSubscription.expiresAt
+          : existingSubscription && existingSubscription.expiresAt > now
           ? existingSubscription.expiresAt
           : now;
 
       await txDb.subscription.updateMany({
         where: {
           userId,
-          status: { in: ["TRIAL", "FREE"] },
-          expiresAt: { gt: now },
+          status: { in: ["ACTIVE", "TRIAL", "FREE", "MANUAL"] },
+          ...(subscriptionId ? { id: { not: subscriptionId } } : {}),
         },
         data: {
           status: "CANCELED",
@@ -89,6 +119,26 @@ export async function POST(request: Request) {
             userId,
             adminId: admin.id,
             note,
+          },
+        });
+      }
+
+      if (subscriptionId) {
+        return txDb.subscription.update({
+          where: { id: subscriptionId },
+          data: {
+            planId,
+            status: "MANUAL",
+            startedAt:
+              targetSubscription && targetSubscription.expiresAt > now
+                ? targetSubscription.startedAt
+                : now,
+            expiresAt: addDays(baseDate, effectiveDurationDays),
+            canceledAt: null,
+          },
+          include: {
+            plan: true,
+            payment: true,
           },
         });
       }

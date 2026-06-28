@@ -62,8 +62,12 @@ export default function AdminUserDetailPage({ params }: { params: Promise<{ id: 
     if (!userResponse.ok) throw new Error(payload.message || "Failed to load user");
     setData(payload);
     if (plansResponse.ok) {
-      setPlans(plansPayload.plans || []);
-      setManualPlanId((plansPayload.plans || []).find((plan: any) => !plan.isFree && !plan.isTrial)?.id || "");
+      const paidPlans = (plansPayload.plans || []).filter(
+        (plan: any) => plan.isActive && !plan.isFree && !plan.isTrial
+      );
+
+      setPlans(paidPlans);
+      setManualPlanId(paidPlans[0]?.id || "");
     }
   }, [id]);
 

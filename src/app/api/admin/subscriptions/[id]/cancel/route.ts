@@ -16,19 +16,28 @@ export async function POST(_request: Request, context: RouteContext) {
     const db = prisma as any;
     const existing = await db.subscription.findUnique({
       where: { id },
-      select: { id: true },
+      select: { id: true, userId: true },
     });
 
     if (!existing) {
       return apiError("Subscription not found", 404);
     }
 
-    const subscription = await db.subscription.update({
-      where: { id },
+    const now = new Date();
+
+    await db.subscription.updateMany({
+      where: {
+        userId: existing.userId,
+        status: { in: ["ACTIVE", "TRIAL", "FREE", "MANUAL"] },
+      },
       data: {
         status: "CANCELED",
-        canceledAt: new Date(),
+        canceledAt: now,
       },
+    });
+
+    const subscription = await db.subscription.findUnique({
+      where: { id },
       include: {
         plan: true,
         payment: true,

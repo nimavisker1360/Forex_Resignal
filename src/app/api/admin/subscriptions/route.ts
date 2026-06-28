@@ -56,7 +56,7 @@ export async function GET(request: Request) {
           plan: true,
           payment: true,
         },
-        orderBy: { expiresAt: "asc" },
+        orderBy: expiringSoon ? { expiresAt: "asc" } : { createdAt: "desc" },
         skip,
         take: limit,
       }),

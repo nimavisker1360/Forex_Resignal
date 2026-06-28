@@ -64,14 +64,14 @@ export default async function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <LanguageProvider initialLanguage={initialLanguage}>
-        <body className="min-h-screen flex flex-col overflow-x-hidden bg-black text-white">
+      <body className="min-h-screen flex flex-col overflow-x-hidden bg-black text-white">
+        <LanguageProvider initialLanguage={initialLanguage}>
           <Navbar />
           <main className="flex-1">{children}</main>
           <Footer />
           <ToastProvider />
-        </body>
-      </LanguageProvider>
+        </LanguageProvider>
+      </body>
     </html>
   );
 }

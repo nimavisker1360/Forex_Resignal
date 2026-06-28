@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { authErrorResponse } from "@/lib/server-auth";
 
 export const PAYMENT_NETWORKS = ["TRC20", "ERC20", "BEP20"] as const;
-export const ACTIVE_SUBSCRIPTION_STATUSES = ["ACTIVE", "TRIAL", "FREE", "MANUAL"] as const;
+export const ACTIVE_SUBSCRIPTION_STATUSES = ["ACTIVE", "TRIAL", "MANUAL"] as const;
 export const PAID_SUBSCRIPTION_STATUSES = ["ACTIVE", "MANUAL"] as const;
 
 export type PaymentNetworkValue = (typeof PAYMENT_NETWORKS)[number];
