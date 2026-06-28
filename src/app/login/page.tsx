@@ -17,6 +17,26 @@ function getSafeRedirectPath(value: string | null) {
   return value;
 }
 
+async function getPostLoginRedirectPath(defaultPath: string) {
+  try {
+    const response = await fetch("/api/user/profile", { cache: "no-store" });
+
+    if (!response.ok) {
+      return defaultPath;
+    }
+
+    const payload = await response.json();
+
+    if (payload.user?.isAdmin && defaultPath === "/dashboard") {
+      return "/admin/dashboard";
+    }
+  } catch {
+    return defaultPath;
+  }
+
+  return defaultPath;
+}
+
 function GoogleIcon() {
   return (
     <svg
@@ -71,7 +91,17 @@ function LoginForm() {
 
   useEffect(() => {
     if (session) {
-      router.replace(redirectPath);
+      let active = true;
+
+      getPostLoginRedirectPath(redirectPath).then((path) => {
+        if (active) {
+          router.replace(path);
+        }
+      });
+
+      return () => {
+        active = false;
+      };
     }
   }, [redirectPath, router, session]);
 
@@ -99,7 +129,9 @@ function LoginForm() {
         return;
       }
 
-      router.push(redirectPath);
+      const nextPath = await getPostLoginRedirectPath(redirectPath);
+      router.replace(nextPath);
+      router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed");
     } finally {

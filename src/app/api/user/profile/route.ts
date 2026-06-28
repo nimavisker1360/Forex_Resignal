@@ -1,12 +1,53 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { getSession } from "@/lib/server-auth";
+import { getSession, isAdminUser } from "@/lib/server-auth";
 
 const MAX_IMAGE_LENGTH = 900_000;
 const DATA_IMAGE_PATTERN = /^data:image\/(png|jpe?g|webp);base64,[a-z0-9+/=]+$/i;
 
 function cleanText(value: unknown) {
   return typeof value === "string" ? value.trim().replace(/\s+/g, " ") : "";
+}
+
+export async function GET() {
+  const session = await getSession();
+
+  if (!session) {
+    return NextResponse.json(
+      { success: false, message: "Unauthorized" },
+      { status: 401 }
+    );
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      image: true,
+      role: true,
+    },
+  });
+
+  if (!user) {
+    return NextResponse.json(
+      { success: false, message: "User not found" },
+      { status: 404 }
+    );
+  }
+
+  return NextResponse.json({
+    success: true,
+    user: {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      image: user.image,
+      role: user.role,
+      isAdmin: isAdminUser(user),
+    },
+  });
 }
 
 export async function PATCH(request: Request) {
