@@ -61,6 +61,7 @@ function LoginForm() {
     [searchParams]
   );
   const signUpHref = `/sign-up?redirect=${encodeURIComponent(redirectPath)}`;
+  const forgotPasswordHref = `/forgot-password?redirect=${encodeURIComponent(redirectPath)}`;
   const authError = searchParams.get("error");
   const errorCallbackURL = `/login?redirect=${encodeURIComponent(redirectPath)}`;
   const [email, setEmail] = useState("");
@@ -171,7 +172,7 @@ function LoginForm() {
               <label htmlFor="password" className="block text-sm font-semibold text-slate-700">
                 Password
               </label>
-              <Link href="#" className="text-xs font-medium text-blue-600 hover:text-blue-700 hover:underline">
+              <Link href={forgotPasswordHref} className="text-xs font-medium text-blue-600 hover:text-blue-700 hover:underline">
                 Forgot password?
               </Link>
             </div>

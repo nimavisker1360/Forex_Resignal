@@ -10,6 +10,7 @@ export function getConfiguredSiteUrl() {
   const configured =
     process.env.JOURNAL_API_BASE_URL?.trim() ||
     process.env.BETTER_AUTH_URL?.trim() ||
+    process.env.NEXT_PUBLIC_APP_URL?.trim() ||
     process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
     "";
 
