@@ -26,22 +26,29 @@ export default function AdminDashboardPage() {
   const load = useCallback(async () => {
     setLoading(true);
     setError("");
-    const response = await fetch("/api/admin/stats", { cache: "no-store" });
-    const payload = await response.json();
 
-    if (!response.ok) {
-      throw new Error(payload.message || "Failed to load admin dashboard");
+    try {
+      const response = await fetch("/api/admin/stats", { cache: "no-store" });
+      const payload = await response.json();
+
+      if (!response.ok) {
+        throw new Error(payload.message || "Failed to load admin dashboard");
+      }
+
+      setData(payload);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load admin dashboard");
+    } finally {
+      setLoading(false);
     }
-
-    setData(payload);
   }, []);
 
   useEffect(() => {
-    load().catch((err) => setError(err.message)).finally(() => setLoading(false));
+    load().catch(() => undefined);
   }, [load]);
 
   if (loading) return <LoadingState label="Loading dashboard" />;
-  if (error) return <ErrorState message={error} onRetry={() => load().catch((err) => setError(err.message))} />;
+  if (error) return <ErrorState message={error} onRetry={() => load().catch(() => undefined)} />;
 
   const stats = data?.stats || {};
   const cards = [

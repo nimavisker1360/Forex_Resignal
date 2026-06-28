@@ -31,15 +31,22 @@ export default function AdminPaymentDetailPage({ params }: { params: Promise<{ i
   const load = useCallback(async () => {
     setLoading(true);
     setError("");
-    const response = await fetch(`/api/admin/payments/${id}`, { cache: "no-store" });
-    const payload = await response.json();
 
-    if (!response.ok) throw new Error(payload.message || "Failed to load payment");
-    setPayment(payload.payment);
+    try {
+      const response = await fetch(`/api/admin/payments/${id}`, { cache: "no-store" });
+      const payload = await response.json();
+
+      if (!response.ok) throw new Error(payload.message || "Failed to load payment");
+      setPayment(payload.payment);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load payment");
+    } finally {
+      setLoading(false);
+    }
   }, [id]);
 
   useEffect(() => {
-    load().catch((err) => setError(err.message)).finally(() => setLoading(false));
+    load().catch(() => undefined);
   }, [load]);
 
   async function mutate(action: "confirm" | "reject") {
@@ -62,7 +69,7 @@ export default function AdminPaymentDetailPage({ params }: { params: Promise<{ i
   }
 
   if (loading) return <LoadingState label="Loading payment" />;
-  if (error) return <ErrorState message={error} onRetry={() => load().catch((err) => setError(err.message))} />;
+  if (error) return <ErrorState message={error} onRetry={() => load().catch(() => undefined)} />;
 
   const explorer = explorerUrl(payment.network, payment.txid);
 

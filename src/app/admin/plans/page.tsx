@@ -30,53 +30,103 @@ const blankPlan = {
   isActive: true,
 };
 
+function sortPlans(plans: any[]) {
+  return [...plans].sort((first, second) => {
+    if (Number(first.isTrial) !== Number(second.isTrial)) {
+      return Number(second.isTrial) - Number(first.isTrial);
+    }
+
+    if (Number(first.isFree) !== Number(second.isFree)) {
+      return Number(second.isFree) - Number(first.isFree);
+    }
+
+    return Number(first.priceUSDT || 0) - Number(second.priceUSDT || 0);
+  });
+}
+
 export default function AdminPlansPage() {
   const [plans, setPlans] = useState<any[]>([]);
   const [selected, setSelected] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [updatingPlanId, setUpdatingPlanId] = useState("");
   const [error, setError] = useState("");
 
   const load = useCallback(async () => {
     setLoading(true);
     setError("");
-    const response = await fetch("/api/admin/plans", { cache: "no-store" });
-    const payload = await response.json();
-    if (!response.ok) throw new Error(payload.message || "Failed to load plans");
-    setPlans(payload.plans || []);
+
+    try {
+      const response = await fetch("/api/admin/plans", { cache: "no-store" });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.message || "Failed to load plans");
+      setPlans(payload.plans || []);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load plans");
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   useEffect(() => {
-    load().catch((err) => setError(err.message)).finally(() => setLoading(false));
+    load().catch(() => undefined);
   }, [load]);
 
   async function save() {
+    if (!selected || saving) return;
+
     const creating = !selected.id;
-    const response = await fetch(creating ? "/api/admin/plans" : `/api/admin/plans/${selected.id}`, {
-      method: creating ? "POST" : "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(selected),
-    });
-    const payload = await response.json();
-    if (!response.ok) return toast.error(payload.message || "Failed to save plan");
-    toast.success("Plan saved");
-    setSelected(null);
-    await load();
+    setSaving(true);
+
+    try {
+      const response = await fetch(creating ? "/api/admin/plans" : `/api/admin/plans/${selected.id}`, {
+        method: creating ? "POST" : "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(selected),
+      });
+      const payload = await response.json();
+      if (!response.ok) return toast.error(payload.message || "Failed to save plan");
+
+      const savedPlan = payload.plan;
+      setPlans((current) =>
+        sortPlans(
+          creating
+            ? [savedPlan, ...current]
+            : current.map((plan) => (plan.id === savedPlan.id ? savedPlan : plan))
+        )
+      );
+      toast.success("Plan saved");
+      setSelected(null);
+    } finally {
+      setSaving(false);
+    }
   }
 
   async function togglePlan(plan: any) {
-    const response = await fetch(`/api/admin/plans/${plan.id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ isActive: !plan.isActive }),
-    });
-    const payload = await response.json();
-    if (!response.ok) return toast.error(payload.message || "Failed to update plan");
-    toast.success(plan.isActive ? "Plan deactivated" : "Plan activated");
-    await load();
+    if (updatingPlanId) return;
+
+    setUpdatingPlanId(plan.id);
+
+    try {
+      const response = await fetch(`/api/admin/plans/${plan.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isActive: !plan.isActive }),
+      });
+      const payload = await response.json();
+      if (!response.ok) return toast.error(payload.message || "Failed to update plan");
+
+      setPlans((current) =>
+        current.map((item) => (item.id === payload.plan.id ? payload.plan : item))
+      );
+      toast.success(plan.isActive ? "Plan deactivated" : "Plan activated");
+    } finally {
+      setUpdatingPlanId("");
+    }
   }
 
   if (loading) return <LoadingState label="Loading plans" />;
-  if (error) return <ErrorState message={error} onRetry={() => load().catch((err) => setError(err.message))} />;
+  if (error) return <ErrorState message={error} onRetry={() => load().catch(() => undefined)} />;
 
   return (
     <div className="space-y-4">
@@ -105,7 +155,7 @@ export default function AdminPlansPage() {
               </div>
               <div className="mt-4 flex gap-2">
                 <Button type="button" size="sm" onClick={() => setSelected({ ...plan })}>Edit Plan</Button>
-                <Button type="button" size="sm" variant="outline" className="border-slate-700 text-slate-100 hover:bg-slate-800" onClick={() => togglePlan(plan)}>{plan.isActive ? "Deactivate" : "Activate"}</Button>
+                <Button type="button" size="sm" variant="outline" className="border-slate-700 text-slate-100 hover:bg-slate-800" disabled={updatingPlanId === plan.id} onClick={() => togglePlan(plan)}>{updatingPlanId === plan.id ? "Saving..." : plan.isActive ? "Deactivate" : "Activate"}</Button>
               </div>
             </AdminCard>
           ))}
@@ -133,8 +183,8 @@ export default function AdminPlansPage() {
               <label className="flex items-center gap-2"><input type="checkbox" checked={Boolean(selected.isFree)} onChange={(event) => setSelected({ ...selected, isFree: event.target.checked })} /> isFree</label>
             </div>
             <div className="mt-5 flex justify-end gap-2">
-              <Button type="button" variant="outline" className="border-slate-700 text-slate-100 hover:bg-slate-800" onClick={() => setSelected(null)}>Cancel</Button>
-              <Button type="button" onClick={save}>Save</Button>
+              <Button type="button" variant="outline" className="border-slate-700 text-slate-100 hover:bg-slate-800" disabled={saving} onClick={() => setSelected(null)}>Cancel</Button>
+              <Button type="button" disabled={saving} onClick={save}>{saving ? "Saving..." : "Save"}</Button>
             </div>
           </AdminCard>
         </div>

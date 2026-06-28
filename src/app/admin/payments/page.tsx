@@ -32,19 +32,26 @@ export default function AdminPaymentsPage() {
   const load = useCallback(async () => {
     setLoading(true);
     setError("");
-    const params = new URLSearchParams({ page: String(page), limit: "20" });
-    if (status) params.set("status", status);
-    if (network) params.set("network", network);
-    if (search) params.set("search", search);
-    const response = await fetch(`/api/admin/payments?${params}`, { cache: "no-store" });
-    const payload = await response.json();
 
-    if (!response.ok) throw new Error(payload.message || "Failed to load payments");
-    setData(payload);
+    try {
+      const params = new URLSearchParams({ page: String(page), limit: "20" });
+      if (status) params.set("status", status);
+      if (network) params.set("network", network);
+      if (search) params.set("search", search);
+      const response = await fetch(`/api/admin/payments?${params}`, { cache: "no-store" });
+      const payload = await response.json();
+
+      if (!response.ok) throw new Error(payload.message || "Failed to load payments");
+      setData(payload);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load payments");
+    } finally {
+      setLoading(false);
+    }
   }, [network, page, search, status]);
 
   useEffect(() => {
-    load().catch((err) => setError(err.message)).finally(() => setLoading(false));
+    load().catch(() => undefined);
   }, [load]);
 
   async function mutate(id: string, action: "confirm" | "reject") {
@@ -67,7 +74,7 @@ export default function AdminPaymentsPage() {
   }
 
   if (loading && !data) return <LoadingState label="Loading payments" />;
-  if (error) return <ErrorState message={error} onRetry={() => load().catch((err) => setError(err.message))} />;
+  if (error) return <ErrorState message={error} onRetry={() => load().catch(() => undefined)} />;
 
   const pagination = data?.pagination || { page: 1, totalPages: 1, total: 0 };
 

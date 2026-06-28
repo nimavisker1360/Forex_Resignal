@@ -52,27 +52,34 @@ export default function AdminUserDetailPage({ params }: { params: Promise<{ id: 
   const load = useCallback(async () => {
     setLoading(true);
     setError("");
-    const [userResponse, plansResponse] = await Promise.all([
-      fetch(`/api/admin/users/${id}`, { cache: "no-store" }),
-      fetch("/api/admin/plans", { cache: "no-store" }),
-    ]);
-    const payload = await userResponse.json();
-    const plansPayload = await plansResponse.json();
 
-    if (!userResponse.ok) throw new Error(payload.message || "Failed to load user");
-    setData(payload);
-    if (plansResponse.ok) {
-      const paidPlans = (plansPayload.plans || []).filter(
-        (plan: any) => plan.isActive && !plan.isFree && !plan.isTrial
-      );
+    try {
+      const [userResponse, plansResponse] = await Promise.all([
+        fetch(`/api/admin/users/${id}`, { cache: "no-store" }),
+        fetch("/api/admin/plans", { cache: "no-store" }),
+      ]);
+      const payload = await userResponse.json();
+      const plansPayload = await plansResponse.json();
 
-      setPlans(paidPlans);
-      setManualPlanId(paidPlans[0]?.id || "");
+      if (!userResponse.ok) throw new Error(payload.message || "Failed to load user");
+      setData(payload);
+      if (plansResponse.ok) {
+        const paidPlans = (plansPayload.plans || []).filter(
+          (plan: any) => plan.isActive && !plan.isFree && !plan.isTrial
+        );
+
+        setPlans(paidPlans);
+        setManualPlanId((current) => current || paidPlans[0]?.id || "");
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load user");
+    } finally {
+      setLoading(false);
     }
   }, [id]);
 
   useEffect(() => {
-    load().catch((err) => setError(err.message)).finally(() => setLoading(false));
+    load().catch(() => undefined);
   }, [load]);
 
   async function addNote() {
@@ -124,7 +131,7 @@ export default function AdminUserDetailPage({ params }: { params: Promise<{ id: 
   }
 
   if (loading) return <LoadingState label="Loading user" />;
-  if (error) return <ErrorState message={error} onRetry={() => load().catch((err) => setError(err.message))} />;
+  if (error) return <ErrorState message={error} onRetry={() => load().catch(() => undefined)} />;
 
   const user = data.user;
   const currentSubscription = data.subscriptions?.[0];

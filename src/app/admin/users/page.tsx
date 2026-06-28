@@ -32,22 +32,29 @@ export default function AdminUsersPage() {
   const load = useCallback(async () => {
     setLoading(true);
     setError("");
-    const params = new URLSearchParams({ page: String(page), limit: "20", sortBy });
-    if (search) params.set("search", search);
-    if (filter) params.set("filter", filter);
-    const response = await fetch(`/api/admin/users?${params}`, { cache: "no-store" });
-    const payload = await response.json();
 
-    if (!response.ok) throw new Error(payload.message || "Failed to load users");
-    setData(payload);
+    try {
+      const params = new URLSearchParams({ page: String(page), limit: "20", sortBy });
+      if (search) params.set("search", search);
+      if (filter) params.set("filter", filter);
+      const response = await fetch(`/api/admin/users?${params}`, { cache: "no-store" });
+      const payload = await response.json();
+
+      if (!response.ok) throw new Error(payload.message || "Failed to load users");
+      setData(payload);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load users");
+    } finally {
+      setLoading(false);
+    }
   }, [filter, page, search, sortBy]);
 
   useEffect(() => {
-    load().catch((err) => setError(err.message)).finally(() => setLoading(false));
+    load().catch(() => undefined);
   }, [load]);
 
   if (loading && !data) return <LoadingState label="Loading users" />;
-  if (error) return <ErrorState message={error} onRetry={() => load().catch((err) => setError(err.message))} />;
+  if (error) return <ErrorState message={error} onRetry={() => load().catch(() => undefined)} />;
 
   const pagination = data?.pagination || { page: 1, totalPages: 1, total: 0 };
 

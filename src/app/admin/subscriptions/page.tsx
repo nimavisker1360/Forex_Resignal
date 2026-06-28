@@ -116,25 +116,32 @@ export default function AdminSubscriptionsPage() {
   const load = useCallback(async () => {
     setLoading(true);
     setError("");
-    const params = new URLSearchParams({ page: String(page), limit: "20" });
-    if (status) params.set("status", status);
-    if (plan) params.set("plan", plan);
-    if (search) params.set("search", search);
-    if (expiringSoon) params.set("expiringSoon", "true");
-    const [subscriptionsResponse, plansResponse] = await Promise.all([
-      fetch(`/api/admin/subscriptions?${params}`, { cache: "no-store" }),
-      fetch("/api/admin/plans", { cache: "no-store" }),
-    ]);
-    const payload = await subscriptionsResponse.json();
-    const plansPayload = await plansResponse.json();
 
-    if (!subscriptionsResponse.ok) throw new Error(payload.message || "Failed to load subscriptions");
-    setData(payload);
-    if (plansResponse.ok) setPlans(plansPayload.plans || []);
+    try {
+      const params = new URLSearchParams({ page: String(page), limit: "20" });
+      if (status) params.set("status", status);
+      if (plan) params.set("plan", plan);
+      if (search) params.set("search", search);
+      if (expiringSoon) params.set("expiringSoon", "true");
+      const [subscriptionsResponse, plansResponse] = await Promise.all([
+        fetch(`/api/admin/subscriptions?${params}`, { cache: "no-store" }),
+        fetch("/api/admin/plans", { cache: "no-store" }),
+      ]);
+      const payload = await subscriptionsResponse.json();
+      const plansPayload = await plansResponse.json();
+
+      if (!subscriptionsResponse.ok) throw new Error(payload.message || "Failed to load subscriptions");
+      setData(payload);
+      if (plansResponse.ok) setPlans(plansPayload.plans || []);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load subscriptions");
+    } finally {
+      setLoading(false);
+    }
   }, [expiringSoon, page, plan, search, status]);
 
   useEffect(() => {
-    load().catch((err) => setError(err.message)).finally(() => setLoading(false));
+    load().catch(() => undefined);
   }, [load]);
 
   const subscriptionGroups = useMemo(
@@ -199,7 +206,7 @@ export default function AdminSubscriptionsPage() {
   }
 
   if (loading && !data) return <LoadingState label="Loading subscriptions" />;
-  if (error) return <ErrorState message={error} onRetry={() => load().catch((err) => setError(err.message))} />;
+  if (error) return <ErrorState message={error} onRetry={() => load().catch(() => undefined)} />;
 
   const pagination = data?.pagination || { page: 1, totalPages: 1, total: 0 };
 

@@ -20,18 +20,25 @@ export default function AdminSettingsPage() {
   const load = useCallback(async () => {
     setLoading(true);
     setError("");
-    const response = await fetch("/api/admin/settings", { cache: "no-store" });
-    const payload = await response.json();
-    if (!response.ok) throw new Error(payload.message || "Failed to load settings");
-    setSettings(payload.settings);
+
+    try {
+      const response = await fetch("/api/admin/settings", { cache: "no-store" });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.message || "Failed to load settings");
+      setSettings(payload.settings);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load settings");
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   useEffect(() => {
-    load().catch((err) => setError(err.message)).finally(() => setLoading(false));
+    load().catch(() => undefined);
   }, [load]);
 
   if (loading) return <LoadingState label="Loading settings" />;
-  if (error) return <ErrorState message={error} onRetry={() => load().catch((err) => setError(err.message))} />;
+  if (error) return <ErrorState message={error} onRetry={() => load().catch(() => undefined)} />;
 
   return (
     <div className="grid gap-6 xl:grid-cols-2">
