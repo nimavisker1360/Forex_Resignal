@@ -427,6 +427,7 @@ export async function getDashboardOverviewData(userId: string): Promise<Dashboar
     trades: trades.map(serializeTrade),
     stats: {
       totalTrades,
+      closedTrades,
       totalPnl: Number(totalPnl._sum.profitLoss ?? 0),
       winRate: calculateWinRate(closedTrades, winningTrades),
       openTrades,

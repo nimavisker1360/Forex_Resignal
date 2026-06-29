@@ -141,6 +141,7 @@ export type TradesListData = {
 
 export type DashboardOverviewStats = {
   totalTrades: number;
+  closedTrades: number;
   totalPnl: number;
   winRate: number;
   openTrades: number;

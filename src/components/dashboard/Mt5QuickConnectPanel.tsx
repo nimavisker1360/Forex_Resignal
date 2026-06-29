@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Check, Copy, KeyRound, RefreshCw } from "lucide-react";
 import { PRODUCTION_SITE_URL } from "@/lib/deployment-url";
+import { useLanguage } from "@/lib/language-context";
 import { cn } from "@/lib/utils";
 
 type QuickConnectResponse = {
@@ -17,6 +18,30 @@ export function Mt5QuickConnectPanel({
 }: {
   onCreated: () => Promise<void>;
 }) {
+  const { language } = useLanguage();
+  const text = language === "fa"
+    ? {
+        title: "اتصال سریع MT5",
+        description:
+          "ابتدا یک کلید بسازید، آن را در EA وارد کنید، سپس اولین معامله MT5 این اتصال را به‌صورت خودکار به شماره واقعی حساب وصل می‌کند.",
+        generateKey: "ساخت کلید MT5",
+        generating: "در حال ساخت...",
+        generateFailed: "ساخت کلید MT5 ناموفق بود",
+        secretReady: "این secret را همین حالا در MT5 وارد کنید. دوباره نمایش داده نمی‌شود.",
+        copyApiUrl: "کپی آدرس API",
+        copySecret: "کپی secret",
+      }
+    : {
+        title: "MT5 Quick Connect",
+        description:
+          "Generate a key first, put it in the EA, and the first MT5 trade will attach this connection to the real account number automatically.",
+        generateKey: "Generate MT5 Key",
+        generating: "Generating...",
+        generateFailed: "Failed to generate MT5 key",
+        secretReady: "Use this secret in MT5 now. It will not be shown again.",
+        copyApiUrl: "Copy API URL",
+        copySecret: "Copy secret",
+      };
   const [apiUrl, setApiUrl] = useState(PRODUCTION_SITE_URL);
   const [secret, setSecret] = useState("");
   const [status, setStatus] = useState<"idle" | "saving" | "success" | "error">("idle");
@@ -34,17 +59,17 @@ export function Mt5QuickConnectPanel({
       const data = (await response.json()) as QuickConnectResponse;
 
       if (!response.ok || !data.ok || !data.secret) {
-        throw new Error(data.error || "Failed to generate MT5 key");
+        throw new Error(data.error || text.generateFailed);
       }
 
       setApiUrl((data.apiUrl || apiUrl).replace(/\/api\/mt5\/journal$/, ""));
       setSecret(data.secret);
       setStatus("success");
-      setMessage("Use this secret in MT5 now. It will not be shown again.");
+      setMessage(text.secretReady);
       await onCreated();
     } catch (error) {
       setStatus("error");
-      setMessage(error instanceof Error ? error.message : "Failed to generate MT5 key");
+      setMessage(error instanceof Error ? error.message : text.generateFailed);
     }
   }
 
@@ -67,10 +92,10 @@ export function Mt5QuickConnectPanel({
           </div>
           <div>
             <h3 className="text-base font-semibold text-slate-950 dark:text-white">
-              MT5 Quick Connect
+              {text.title}
             </h3>
             <p className="mt-1 max-w-2xl text-sm text-slate-600 dark:text-slate-300">
-              Generate a key first, put it in the EA, and the first MT5 trade will attach this connection to the real account number automatically.
+              {text.description}
             </p>
           </div>
         </div>
@@ -82,7 +107,7 @@ export function Mt5QuickConnectPanel({
           className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-[#2563EB] px-4 text-sm font-semibold text-white hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-60"
         >
           <RefreshCw className={cn("h-4 w-4", status === "saving" && "animate-spin")} />
-          Generate MT5 Key
+          {text.generateKey}
         </button>
       </div>
 
@@ -101,8 +126,8 @@ export function Mt5QuickConnectPanel({
               type="button"
               onClick={() => copyValue(apiUrl, "api")}
               className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
-              aria-label="Copy API URL"
-              title="Copy API URL"
+              aria-label={text.copyApiUrl}
+              title={text.copyApiUrl}
             >
               {copied === "api" ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
             </button>
@@ -124,8 +149,8 @@ export function Mt5QuickConnectPanel({
               onClick={() => copyValue(secret, "secret")}
               disabled={!secret}
               className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
-              aria-label="Copy secret"
-              title="Copy secret"
+              aria-label={text.copySecret}
+              title={text.copySecret}
             >
               {copied === "secret" ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
             </button>
@@ -142,7 +167,7 @@ export function Mt5QuickConnectPanel({
           status === "idle" && "text-slate-500 dark:text-slate-400"
         )}
       >
-        {status === "saving" ? "Generating..." : message}
+        {status === "saving" ? text.generating : message}
       </div>
     </section>
   );

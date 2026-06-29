@@ -1,25 +1,43 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
 import {
   AlertTriangle,
   BookOpenCheck,
   Brain,
   CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
   Gauge,
   ListChecks,
   ShieldCheck,
+  X,
 } from "lucide-react";
 import { useLanguage } from "@/lib/language-context";
 import { cn } from "@/lib/utils";
-import type { TradeDto } from "@/components/dashboard/types";
 
-type ScenarioId = "trend" | "range" | "news" | "wait";
+export type ScenarioId = "trend" | "range" | "news" | "wait";
+type DecisionId = "ready" | "caution" | "wait";
+
 type GuideState = {
   mindset: Record<string, boolean>;
   checklist: Record<string, boolean>;
   scenario: ScenarioId;
+};
+
+export type ReadinessSummary = {
+  decision: DecisionId;
+  decisionLabel: string;
+  decisionHint: string;
+  decisionToneClass: string;
+  readinessScore: number;
+  mindsetCompleted: number;
+  mindsetTotal: number;
+  checklistCompleted: number;
+  checklistTotal: number;
+  selectedPlaybook: string;
+  selectedPlaybookDescription: string;
+  mainReason: string;
 };
 
 const defaultState: GuideState = {
@@ -40,174 +58,161 @@ const defaultState: GuideState = {
   scenario: "trend",
 };
 
+const enCopy = {
+  title: "Pre-Trade Check",
+  subtitle: "Complete the three checks before accepting risk today.",
+  close: "Close",
+  previous: "Back",
+  next: "Next",
+  finish: "Finish",
+  step: "Step",
+  finalDecision: "Final decision",
+  score: "Readiness",
+  ready: "Trade allowed",
+  caution: "Trade with reduced size",
+  wait: "Wait, do not enter yet",
+  readyHint: "Mindset and entry checks are aligned.",
+  cautionHint: "Some checks need attention before full risk.",
+  waitHint: "A required step is missing or risk is elevated.",
+  missingMindset: "Mindset check is incomplete.",
+  missingEntry: "Entry, stop loss, and news checks must be complete.",
+  waitingPlaybook: "Today's playbook is set to wait.",
+  newsRisk: "High-impact news is nearby.",
+  aligned: "Core checks are aligned for today's plan.",
+  mindsetTitle: "Mindset",
+  mindsetSubtitle: "Check your state before looking for entry.",
+  playbookTitle: "Today's Playbook",
+  playbookSubtitle: "Choose one market scenario for now.",
+  checklistTitle: "Entry Checklist",
+  checklistSubtitle: "Required items before accepting a signal or trade.",
+  mindsetItems: {
+    calm: "I am calm, not rushing.",
+    noRevenge: "I am not trying to recover a loss.",
+    focused: "I can follow the plan without distraction.",
+    riskAccepted: "I accept the risk before entry.",
+  },
+  scenarios: {
+    trend: {
+      title: "Trend setup",
+      description: "Trade only with the main direction after confirmation.",
+    },
+    range: {
+      title: "Range setup",
+      description: "Trade only from clear support or resistance.",
+    },
+    news: {
+      title: "News risk",
+      description: "Avoid fresh entries or reduce size around major events.",
+    },
+    wait: {
+      title: "No clear setup",
+      description: "Stand aside until the plan becomes obvious.",
+    },
+  },
+  checklistItems: {
+    direction: "Market direction is clear.",
+    entry: "Entry price is defined.",
+    stopLoss: "Stop loss is defined.",
+    takeProfit: "Take profit is defined.",
+    rr: "Risk/reward is acceptable.",
+    newsChecked: "News risk has been checked.",
+  },
+};
+
+const faCopy = {
+  title: "چک پیش از معامله",
+  subtitle: "قبل از پذیرش ریسک امروز، این سه مرحله را کامل کنید.",
+  close: "بستن",
+  previous: "قبلی",
+  next: "بعدی",
+  finish: "پایان",
+  step: "مرحله",
+  finalDecision: "تصمیم نهایی",
+  score: "آمادگی",
+  ready: "معامله مجاز است",
+  caution: "با حجم کمتر معامله کن",
+  wait: "صبر کن، هنوز وارد نشو",
+  readyHint: "ذهنیت و چک‌های ورود با برنامه هماهنگ هستند.",
+  cautionHint: "قبل از ریسک کامل، چند مورد نیاز به توجه دارد.",
+  waitHint: "یک مرحله ضروری ناقص است یا ریسک بالاست.",
+  missingMindset: "چک ذهنیت کامل نشده است.",
+  missingEntry: "ورود، حد ضرر و بررسی خبر باید کامل باشند.",
+  waitingPlaybook: "پلی‌بوک امروز روی حالت صبر تنظیم شده است.",
+  newsRisk: "خبر پراثر نزدیک است.",
+  aligned: "چک‌های اصلی با برنامه امروز هماهنگ هستند.",
+  mindsetTitle: "ذهنیت",
+  mindsetSubtitle: "قبل از جست‌وجوی ورود، وضعیت ذهنی خود را بررسی کنید.",
+  playbookTitle: "پلی‌بوک امروز",
+  playbookSubtitle: "فعلاً فقط یک سناریوی بازار را انتخاب کنید.",
+  checklistTitle: "چک‌لیست ورود",
+  checklistSubtitle: "موارد ضروری قبل از قبول سیگنال یا معامله.",
+  mindsetItems: {
+    calm: "آرام هستم و عجله ندارم.",
+    noRevenge: "برای جبران ضرر وارد معامله نمی‌شوم.",
+    focused: "می‌توانم بدون حواس‌پرتی طبق برنامه عمل کنم.",
+    riskAccepted: "قبل از ورود، ریسک معامله را پذیرفته‌ام.",
+  },
+  scenarios: {
+    trend: {
+      title: "ستاپ روندی",
+      description: "فقط هم‌جهت با روند اصلی و بعد از تایید معامله کن.",
+    },
+    range: {
+      title: "ستاپ رنج",
+      description: "فقط از حمایت یا مقاومت واضح معامله کن.",
+    },
+    news: {
+      title: "ریسک خبر",
+      description: "اطراف رویدادهای مهم، ورود جدید نزن یا حجم را کم کن.",
+    },
+    wait: {
+      title: "ستاپ واضح نیست",
+      description: "تا زمانی که برنامه واضح نشده، بیرون بازار بمان.",
+    },
+  },
+  checklistItems: {
+    direction: "جهت بازار مشخص است.",
+    entry: "قیمت ورود مشخص است.",
+    stopLoss: "حد ضرر مشخص است.",
+    takeProfit: "حد سود مشخص است.",
+    rr: "ریسک به ریوارد قابل قبول است.",
+    newsChecked: "ریسک خبر بررسی شده است.",
+  },
+};
+
 const copy = {
-  en: {
-    title: "Today Trade Guide",
-    subtitle: "One simple flow: mindset, playbook, checklist, then the final decision.",
-    finalDecision: "Final decision",
-    score: "Readiness",
-    ready: "Trade allowed",
-    caution: "Trade with reduced size",
-    wait: "Wait, do not enter yet",
-    readyHint: "Mindset and entry checks are aligned.",
-    cautionHint: "Some checks need attention before full risk.",
-    waitHint: "A required step is missing or risk is elevated.",
-    mindsetTitle: "1. Mindset",
-    mindsetSubtitle: "Check your state before looking for entry.",
-    playbookTitle: "2. Today's Playbook",
-    playbookSubtitle: "Choose only one market scenario for now.",
-    checklistTitle: "3. Entry Checklist",
-    checklistSubtitle: "Required items before accepting a signal or trade.",
-    currentRisk: "Current dashboard risk",
-    openTrades: "open trades",
-    reviewsWaiting: "reviews waiting",
-    highImpactNews: "high-impact news",
-    noHighImpactNews: "no high-impact news",
-    loadingNews: "checking news risk",
-    actionsTitle: "Next action",
-    dailyJournal: "Open Daily Journal",
-    playbooks: "Manage Playbooks",
-    checklists: "Manage Checklists",
-    reviewTrades: "Review Trades",
-    recentPlan: "Latest plan",
-    noRecentPlan: "No recent trade plan yet",
-    reviewed: "Reviewed",
-    notReviewed: "Not reviewed",
-    mindsetItems: {
-      calm: "I am calm, not rushing.",
-      noRevenge: "I am not trying to recover a loss.",
-      focused: "I can follow the plan without distraction.",
-      riskAccepted: "I accept the risk before entry.",
-    },
-    scenarios: {
-      trend: {
-        title: "Trend setup",
-        description: "Trade only with the main direction after confirmation.",
-      },
-      range: {
-        title: "Range setup",
-        description: "Trade only from clear support or resistance.",
-      },
-      news: {
-        title: "News risk",
-        description: "Avoid fresh entries or reduce size around major events.",
-      },
-      wait: {
-        title: "No clear setup",
-        description: "Stand aside until the plan becomes obvious.",
-      },
-    },
-    checklistItems: {
-      direction: "Market direction is clear.",
-      entry: "Entry price is defined.",
-      stopLoss: "Stop loss is defined.",
-      takeProfit: "Take profit is defined.",
-      rr: "Risk/reward is acceptable.",
-      newsChecked: "News risk has been checked.",
-    },
-  },
-  fa: {
-    title: "راهنمای معامله امروز",
-    subtitle: "یک مسیر ساده: ذهنیت، پلی‌بوک، چک‌لیست، بعد تصمیم نهایی.",
-    finalDecision: "تصمیم نهایی",
-    score: "آمادگی",
-    ready: "ورود مجاز است",
-    caution: "با حجم کمتر معامله کن",
-    wait: "صبر کن، هنوز وارد نشو",
-    readyHint: "ذهنیت و چک‌های ورود با پلن هماهنگ هستند.",
-    cautionHint: "چند مورد قبل از ریسک کامل نیاز به توجه دارد.",
-    waitHint: "یک مرحله ضروری ناقص است یا ریسک بالا است.",
-    mindsetTitle: "۱. وضعیت ذهنی",
-    mindsetSubtitle: "قبل از ورود، حالت ذهنی خودت را چک کن.",
-    playbookTitle: "۲. پلی‌بوک امروز",
-    playbookSubtitle: "فعلاً فقط یک سناریوی بازار را انتخاب کن.",
-    checklistTitle: "۳. چک‌لیست ورود",
-    checklistSubtitle: "موارد ضروری قبل از قبول سیگنال یا معامله.",
-    currentRisk: "ریسک فعلی داشبورد",
-    openTrades: "معامله باز",
-    reviewsWaiting: "بررسی در انتظار",
-    highImpactNews: "خبر پراثر",
-    noHighImpactNews: "بدون خبر پراثر",
-    loadingNews: "در حال بررسی ریسک خبر",
-    actionsTitle: "اقدام بعدی",
-    dailyJournal: "ژورنال روزانه",
-    playbooks: "مدیریت پلی‌بوک",
-    checklists: "مدیریت چک‌لیست",
-    reviewTrades: "بررسی معاملات",
-    recentPlan: "آخرین پلن",
-    noRecentPlan: "هنوز پلن معامله‌ای ثبت نشده",
-    reviewed: "بررسی شده",
-    notReviewed: "بررسی نشده",
-    mindsetItems: {
-      calm: "آرام هستم و عجله ندارم.",
-      noRevenge: "برای جبران ضرر وارد نمی‌شوم.",
-      focused: "می‌توانم بدون حواس‌پرتی طبق پلن عمل کنم.",
-      riskAccepted: "ریسک معامله را قبل از ورود پذیرفته‌ام.",
-    },
-    scenarios: {
-      trend: {
-        title: "سناریوی روندی",
-        description: "فقط هم‌جهت روند اصلی و بعد از تایید وارد شو.",
-      },
-      range: {
-        title: "سناریوی رنج",
-        description: "فقط از حمایت یا مقاومت واضح معامله کن.",
-      },
-      news: {
-        title: "ریسک خبری",
-        description: "اطراف خبر مهم، ورود جدید نزن یا حجم را کم کن.",
-      },
-      wait: {
-        title: "ستاپ واضح نیست",
-        description: "تا وقتی پلن واضح نشده، بیرون بازار بمان.",
-      },
-    },
-    checklistItems: {
-      direction: "جهت بازار مشخص است.",
-      entry: "نقطه ورود مشخص است.",
-      stopLoss: "حد ضرر مشخص است.",
-      takeProfit: "حد سود مشخص است.",
-      rr: "ریسک به ریوارد مناسب است.",
-      newsChecked: "ریسک خبر بررسی شده است.",
-    },
-  },
+  en: enCopy,
+  fa: faCopy,
 } as const;
 
 const mindsetIds = ["calm", "noRevenge", "focused", "riskAccepted"] as const;
 const checklistIds = ["direction", "entry", "stopLoss", "takeProfit", "rr", "newsChecked"] as const;
 const scenarioIds = ["trend", "range", "news", "wait"] as const;
 
+function countComplete(values: Record<string, boolean>) {
+  return Object.values(values).filter(Boolean).length;
+}
+
 function percentComplete(values: Record<string, boolean>) {
   const entries = Object.values(values);
-  const checked = entries.filter(Boolean).length;
-  return entries.length > 0 ? Math.round((checked / entries.length) * 100) : 0;
+  return entries.length > 0 ? Math.round((countComplete(values) / entries.length) * 100) : 0;
 }
 
-function isTradeReviewed(trade: TradeDto) {
-  return Boolean(trade.strategyReview && trade.strategyReview.followedPlan !== "NOT_REVIEWED");
+function todayStorageKey() {
+  return `trade-readiness-guide:${new Date().toISOString().slice(0, 10)}`;
 }
 
-export function TradeReadinessGuide({
-  recentTrades,
-  openTrades,
-  notReviewedTrades,
+export function useTradeReadinessGuideState({
   highImpactEventCount,
-  eventsLoaded,
 }: {
-  recentTrades: TradeDto[];
-  openTrades: number;
-  notReviewedTrades: number;
   highImpactEventCount: number;
-  eventsLoaded: boolean;
 }) {
   const { language } = useLanguage();
   const text = copy[language];
-  const isRtl = language === "fa";
   const [state, setState] = useState<GuideState>(defaultState);
 
   useEffect(() => {
-    const today = new Date().toISOString().slice(0, 10);
-    const saved = window.localStorage.getItem(`trade-readiness-guide:${today}`);
+    const saved = window.localStorage.getItem(todayStorageKey());
 
     if (!saved) {
       return;
@@ -221,59 +226,64 @@ export function TradeReadinessGuide({
         scenario: parsed.scenario || defaultState.scenario,
       });
     } catch {
-      window.localStorage.removeItem(`trade-readiness-guide:${today}`);
+      window.localStorage.removeItem(todayStorageKey());
     }
   }, []);
 
   useEffect(() => {
-    const today = new Date().toISOString().slice(0, 10);
-    window.localStorage.setItem(`trade-readiness-guide:${today}`, JSON.stringify(state));
+    window.localStorage.setItem(todayStorageKey(), JSON.stringify(state));
   }, [state]);
 
-  const latestTrade = recentTrades[0];
-  const mindsetScore = percentComplete(state.mindset);
-  const checklistScore = percentComplete(state.checklist);
-  const missingRequired = !state.checklist.entry || !state.checklist.stopLoss || !state.checklist.newsChecked;
-  const scenarioScore = state.scenario === "wait" ? 35 : state.scenario === "news" ? 60 : 85;
-  const newsPenalty = highImpactEventCount > 0 && state.scenario !== "news" ? 10 : 0;
-  const readinessScore = Math.max(
-    0,
-    Math.min(
-      100,
-      Math.round(mindsetScore * 0.4 + checklistScore * 0.35 + scenarioScore * 0.25 - newsPenalty)
-    )
-  );
-  const decision = useMemo(() => {
-    if (state.scenario === "wait" || missingRequired || mindsetScore < 50) {
-      return "wait";
-    }
-
-    if (readinessScore >= 80 && highImpactEventCount === 0) {
-      return "ready";
-    }
-
-    return "caution";
-  }, [highImpactEventCount, mindsetScore, missingRequired, readinessScore, state.scenario]);
-
-  const decisionClass =
-    decision === "ready"
-      ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-200"
-      : decision === "caution"
-        ? "border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-200"
-        : "border-red-500/30 bg-red-500/10 text-red-700 dark:text-red-200";
-  const decisionIcon =
-    decision === "ready" ? (
-      <CheckCircle2 className="h-5 w-5" />
-    ) : decision === "caution" ? (
-      <AlertTriangle className="h-5 w-5" />
-    ) : (
-      <ShieldCheck className="h-5 w-5" />
+  const summary = useMemo<ReadinessSummary>(() => {
+    const mindsetScore = percentComplete(state.mindset);
+    const checklistScore = percentComplete(state.checklist);
+    const missingRequired = !state.checklist.entry || !state.checklist.stopLoss || !state.checklist.newsChecked;
+    const scenarioScore = state.scenario === "wait" ? 35 : state.scenario === "news" ? 60 : 85;
+    const newsPenalty = highImpactEventCount > 0 && state.scenario !== "news" ? 10 : 0;
+    const readinessScore = Math.max(
+      0,
+      Math.min(
+        100,
+        Math.round(mindsetScore * 0.4 + checklistScore * 0.35 + scenarioScore * 0.25 - newsPenalty)
+      )
     );
-  const newsRiskLabel = !eventsLoaded
-    ? text.loadingNews
-    : highImpactEventCount > 0
-      ? text.highImpactNews
-      : text.noHighImpactNews;
+    const decision: DecisionId =
+      state.scenario === "wait" || missingRequired || mindsetScore < 50
+        ? "wait"
+        : readinessScore >= 80 && highImpactEventCount === 0
+          ? "ready"
+          : "caution";
+    const mainReason =
+      mindsetScore < 50
+        ? text.missingMindset
+        : missingRequired
+          ? text.missingEntry
+          : state.scenario === "wait"
+            ? text.waitingPlaybook
+            : highImpactEventCount > 0 && state.scenario !== "news"
+              ? text.newsRisk
+              : text.aligned;
+
+    return {
+      decision,
+      decisionLabel: decision === "ready" ? text.ready : decision === "caution" ? text.caution : text.wait,
+      decisionHint: decision === "ready" ? text.readyHint : decision === "caution" ? text.cautionHint : text.waitHint,
+      decisionToneClass:
+        decision === "ready"
+          ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-200"
+          : decision === "caution"
+            ? "border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-200"
+            : "border-red-500/30 bg-red-500/10 text-red-700 dark:text-red-200",
+      readinessScore,
+      mindsetCompleted: countComplete(state.mindset),
+      mindsetTotal: mindsetIds.length,
+      checklistCompleted: countComplete(state.checklist),
+      checklistTotal: checklistIds.length,
+      selectedPlaybook: text.scenarios[state.scenario].title,
+      selectedPlaybookDescription: text.scenarios[state.scenario].description,
+      mainReason,
+    };
+  }, [highImpactEventCount, state, text]);
 
   function toggleMindset(id: (typeof mindsetIds)[number]) {
     setState((current) => ({
@@ -289,225 +299,246 @@ export function TradeReadinessGuide({
     }));
   }
 
+  function setScenario(id: ScenarioId) {
+    setState((current) => ({ ...current, scenario: id }));
+  }
+
+  return {
+    state,
+    summary,
+    text,
+    mindsetIds,
+    checklistIds,
+    scenarioIds,
+    toggleMindset,
+    toggleChecklist,
+    setScenario,
+  };
+}
+
+function DecisionIcon({ decision }: { decision: DecisionId }) {
+  if (decision === "ready") {
+    return <CheckCircle2 className="h-5 w-5" />;
+  }
+
+  if (decision === "caution") {
+    return <AlertTriangle className="h-5 w-5" />;
+  }
+
+  return <ShieldCheck className="h-5 w-5" />;
+}
+
+export function TradeReadinessGuide({
+  open,
+  onClose,
+  guide,
+}: {
+  open: boolean;
+  onClose: () => void;
+  guide: ReturnType<typeof useTradeReadinessGuideState>;
+}) {
+  const { language } = useLanguage();
+  const isRtl = language === "fa";
+  const [step, setStep] = useState(0);
+  const { state, summary, text } = guide;
+
+  useEffect(() => {
+    if (open) {
+      setStep(0);
+    }
+  }, [open]);
+
+  if (!open) {
+    return null;
+  }
+
+  const steps = [
+    { title: text.mindsetTitle, subtitle: text.mindsetSubtitle, icon: Brain },
+    { title: text.playbookTitle, subtitle: text.playbookSubtitle, icon: BookOpenCheck },
+    { title: text.checklistTitle, subtitle: text.checklistSubtitle, icon: ListChecks },
+  ];
+  const ActiveIcon = steps[step].icon;
+
   return (
-    <section
-      className={cn(
-        "rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-[#0F172A] sm:p-5",
-        isRtl && "text-right"
-      )}
-    >
-      <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
-        <div className="min-w-0">
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-            <div>
-              <div className="flex items-center gap-2">
-                <Gauge className="h-5 w-5 text-blue-500" />
-                <h2 className="text-xl font-semibold text-slate-950 dark:text-white">
-                  {text.title}
-                </h2>
-              </div>
-              <p className="mt-1 text-sm leading-6 text-slate-500 dark:text-slate-400">
-                {text.subtitle}
-              </p>
+    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-slate-950/70 px-4 py-6 backdrop-blur-sm sm:py-10">
+      <section
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="pre-trade-check-title"
+        className={cn(
+          "w-full max-w-4xl rounded-xl border border-slate-200 bg-white shadow-2xl dark:border-slate-800 dark:bg-[#0F172A]",
+          isRtl && "text-right"
+        )}
+      >
+        <header className="flex items-start justify-between gap-4 border-b border-slate-200 p-5 dark:border-slate-800">
+          <div>
+            <div className="flex items-center gap-2 text-sm font-semibold text-blue-600 dark:text-blue-300">
+              <Gauge className="h-4 w-4" />
+              {text.title}
             </div>
-            <div className={cn("rounded-xl border px-4 py-3", decisionClass)}>
+            <h2 id="pre-trade-check-title" className="mt-2 text-xl font-semibold text-slate-950 dark:text-white">
+              {steps[step].title}
+            </h2>
+            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{steps[step].subtitle}</p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50 dark:border-slate-800 dark:text-slate-300 dark:hover:bg-slate-800"
+            aria-label={text.close}
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </header>
+
+        <div className="grid gap-5 p-5 lg:grid-cols-[1fr_280px]">
+          <div className="min-w-0">
+            <div className="mb-5 grid grid-cols-3 gap-2">
+              {steps.map((item, index) => {
+                const Icon = item.icon;
+
+                return (
+                  <button
+                    key={item.title}
+                    type="button"
+                    onClick={() => setStep(index)}
+                    className={cn(
+                      "flex min-h-16 flex-col items-center justify-center rounded-lg border px-2 text-center text-xs font-semibold transition",
+                      step === index
+                        ? "border-blue-500 bg-blue-500/10 text-blue-700 dark:text-blue-200"
+                        : "border-slate-200 bg-slate-50 text-slate-500 hover:bg-slate-100 dark:border-slate-800 dark:bg-[#111827] dark:text-slate-400 dark:hover:bg-slate-800"
+                    )}
+                  >
+                    <Icon className="mb-1 h-4 w-4" />
+                    {text.step} {index + 1}
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-[#111827]">
+              <div className="mb-4 flex items-center gap-2">
+                <ActiveIcon className="h-5 w-5 text-blue-500" />
+                <h3 className="text-base font-semibold text-slate-950 dark:text-white">{steps[step].title}</h3>
+              </div>
+
+              {step === 0 ? (
+                <div className="grid gap-2">
+                  {mindsetIds.map((id) => (
+                    <label
+                      key={id}
+                      className="flex cursor-pointer items-start gap-3 rounded-lg border border-slate-200 bg-white p-3 text-sm text-slate-700 dark:border-slate-800 dark:bg-[#0F172A] dark:text-slate-200"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={state.mindset[id]}
+                        onChange={() => guide.toggleMindset(id)}
+                        className="mt-1 h-4 w-4 rounded border-slate-300 accent-blue-600"
+                      />
+                      <span>{text.mindsetItems[id]}</span>
+                    </label>
+                  ))}
+                </div>
+              ) : null}
+
+              {step === 1 ? (
+                <div className="grid gap-2">
+                  {scenarioIds.map((id) => (
+                    <button
+                      key={id}
+                      type="button"
+                      aria-pressed={state.scenario === id}
+                      onClick={() => guide.setScenario(id)}
+                      className={cn(
+                        "rounded-lg border p-3 text-left transition dark:text-slate-200",
+                        isRtl && "text-right",
+                        state.scenario === id
+                          ? "border-blue-500 bg-blue-500/10 text-blue-800 dark:text-blue-100"
+                          : "border-slate-200 bg-white text-slate-700 hover:bg-slate-100 dark:border-slate-800 dark:bg-[#0F172A] dark:hover:bg-slate-800"
+                      )}
+                    >
+                      <span className="block text-sm font-semibold">{text.scenarios[id].title}</span>
+                      <span className="mt-1 block text-xs leading-5 text-slate-500 dark:text-slate-400">
+                        {text.scenarios[id].description}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+
+              {step === 2 ? (
+                <div className="grid gap-2">
+                  {checklistIds.map((id) => (
+                    <label
+                      key={id}
+                      className="flex cursor-pointer items-start gap-3 rounded-lg border border-slate-200 bg-white p-3 text-sm text-slate-700 dark:border-slate-800 dark:bg-[#0F172A] dark:text-slate-200"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={state.checklist[id]}
+                        onChange={() => guide.toggleChecklist(id)}
+                        className="mt-1 h-4 w-4 rounded border-slate-300 accent-blue-600"
+                      />
+                      <span>{text.checklistItems[id]}</span>
+                    </label>
+                  ))}
+                </div>
+              ) : null}
+            </div>
+          </div>
+
+          <aside className="space-y-3">
+            <div className={cn("rounded-xl border p-4", summary.decisionToneClass)}>
               <div className="flex items-center gap-2 text-sm font-semibold">
-                {decisionIcon}
+                <DecisionIcon decision={summary.decision} />
                 {text.finalDecision}
               </div>
-              <div className="mt-1 text-lg font-bold">
-                {decision === "ready" ? text.ready : decision === "caution" ? text.caution : text.wait}
-              </div>
-              <div className="mt-1 text-xs">
-                {decision === "ready" ? text.readyHint : decision === "caution" ? text.cautionHint : text.waitHint}
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-5 grid gap-4 lg:grid-cols-3">
-            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-[#111827]">
-              <div className="flex items-center gap-2">
-                <Brain className="h-4 w-4 text-blue-500" />
-                <h3 className="text-sm font-semibold text-slate-950 dark:text-white">
-                  {text.mindsetTitle}
-                </h3>
-              </div>
-              <p className="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">
-                {text.mindsetSubtitle}
-              </p>
-              <div className="mt-3 space-y-2">
-                {mindsetIds.map((id) => (
-                  <label
-                    key={id}
-                    className="flex cursor-pointer items-start gap-2 rounded-lg border border-slate-200 bg-white p-2.5 text-sm text-slate-700 dark:border-slate-800 dark:bg-[#0F172A] dark:text-slate-200"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={state.mindset[id]}
-                      onChange={() => toggleMindset(id)}
-                      className="mt-1 h-4 w-4 rounded border-slate-300 accent-blue-600"
-                    />
-                    <span>{text.mindsetItems[id]}</span>
-                  </label>
-                ))}
-              </div>
+              <div className="mt-2 text-lg font-bold">{summary.decisionLabel}</div>
+              <p className="mt-1 text-xs leading-5">{summary.mainReason}</p>
             </div>
 
             <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-[#111827]">
-              <div className="flex items-center gap-2">
-                <BookOpenCheck className="h-4 w-4 text-blue-500" />
-                <h3 className="text-sm font-semibold text-slate-950 dark:text-white">
-                  {text.playbookTitle}
-                </h3>
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-sm font-semibold text-slate-950 dark:text-white">{text.score}</span>
+                <span className="text-2xl font-bold text-slate-950 dark:text-white">{summary.readinessScore}%</span>
               </div>
-              <p className="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">
-                {text.playbookSubtitle}
-              </p>
-              <div className="mt-3 grid gap-2">
-                {scenarioIds.map((id) => (
-                  <button
-                    key={id}
-                    type="button"
-                    aria-pressed={state.scenario === id}
-                    onClick={() => setState((current) => ({ ...current, scenario: id }))}
-                    className={cn(
-                      "rounded-lg border p-3 text-left transition dark:text-slate-200",
-                      isRtl && "text-right",
-                      state.scenario === id
-                        ? "border-blue-500 bg-blue-500/10 text-blue-800 dark:text-blue-100"
-                        : "border-slate-200 bg-white text-slate-700 hover:bg-slate-100 dark:border-slate-800 dark:bg-[#0F172A] dark:hover:bg-slate-800"
-                    )}
-                  >
-                    <span className="block text-sm font-semibold">{text.scenarios[id].title}</span>
-                    <span className="mt-1 block text-xs leading-5 text-slate-500 dark:text-slate-400">
-                      {text.scenarios[id].description}
-                    </span>
-                  </button>
-                ))}
+              <div className="mt-3 h-2 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-900">
+                <div
+                  className={cn(
+                    "h-full rounded-full",
+                    summary.decision === "ready"
+                      ? "bg-emerald-500"
+                      : summary.decision === "caution"
+                        ? "bg-amber-500"
+                        : "bg-red-500"
+                  )}
+                  style={{ width: `${summary.readinessScore}%` }}
+                />
               </div>
             </div>
-
-            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-[#111827]">
-              <div className="flex items-center gap-2">
-                <ListChecks className="h-4 w-4 text-blue-500" />
-                <h3 className="text-sm font-semibold text-slate-950 dark:text-white">
-                  {text.checklistTitle}
-                </h3>
-              </div>
-              <p className="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">
-                {text.checklistSubtitle}
-              </p>
-              <div className="mt-3 space-y-2">
-                {checklistIds.map((id) => (
-                  <label
-                    key={id}
-                    className="flex cursor-pointer items-start gap-2 rounded-lg border border-slate-200 bg-white p-2.5 text-sm text-slate-700 dark:border-slate-800 dark:bg-[#0F172A] dark:text-slate-200"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={state.checklist[id]}
-                      onChange={() => toggleChecklist(id)}
-                      className="mt-1 h-4 w-4 rounded border-slate-300 accent-blue-600"
-                    />
-                    <span>{text.checklistItems[id]}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-          </div>
+          </aside>
         </div>
 
-        <aside className="space-y-3">
-          <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-[#111827]">
-            <div className="flex items-center justify-between gap-3">
-              <span className="text-sm font-semibold text-slate-950 dark:text-white">{text.score}</span>
-              <span className="text-2xl font-bold text-slate-950 dark:text-white">{readinessScore}%</span>
-            </div>
-            <div className="mt-3 h-2 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-900">
-              <div
-                className={cn(
-                  "h-full rounded-full",
-                  decision === "ready" ? "bg-emerald-500" : decision === "caution" ? "bg-amber-500" : "bg-red-500"
-                )}
-                style={{ width: `${readinessScore}%` }}
-              />
-            </div>
-          </div>
-
-          <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm dark:border-slate-800 dark:bg-[#111827]">
-            <div className="font-semibold text-slate-950 dark:text-white">{text.currentRisk}</div>
-            <div className="mt-3 grid gap-2 text-slate-600 dark:text-slate-300">
-              <div className="flex justify-between gap-3">
-                <span>{text.openTrades}</span>
-                <strong>{openTrades}</strong>
-              </div>
-              <div className="flex justify-between gap-3">
-                <span>{text.reviewsWaiting}</span>
-                <strong>{notReviewedTrades}</strong>
-              </div>
-              <div className="flex justify-between gap-3">
-                <span>{newsRiskLabel}</span>
-                <strong>{eventsLoaded ? highImpactEventCount : "..."}</strong>
-              </div>
-            </div>
-          </div>
-
-          <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm dark:border-slate-800 dark:bg-[#111827]">
-            <div className="font-semibold text-slate-950 dark:text-white">{text.recentPlan}</div>
-            {latestTrade ? (
-              <Link
-                href={`/journal/${latestTrade.id}`}
-                className="mt-3 block rounded-lg border border-slate-200 bg-white p-3 hover:bg-slate-100 dark:border-slate-800 dark:bg-[#0F172A] dark:hover:bg-slate-800"
-              >
-                <div className="flex items-center justify-between gap-3">
-                  <span className="font-semibold text-slate-950 dark:text-white">
-                    {latestTrade.symbol} / {latestTrade.direction}
-                  </span>
-                  <span
-                    className={cn(
-                      "rounded-lg border px-2 py-1 text-xs font-semibold",
-                      isTradeReviewed(latestTrade)
-                        ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-200"
-                        : "border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-200"
-                    )}
-                  >
-                    {isTradeReviewed(latestTrade) ? text.reviewed : text.notReviewed}
-                  </span>
-                </div>
-                <div className="mt-2 text-xs leading-5 text-slate-500 dark:text-slate-400">
-                  {latestTrade.strategyReview?.strategyNameSnapshot || latestTrade.setup || text.noRecentPlan}
-                </div>
-              </Link>
-            ) : (
-              <div className="mt-3 rounded-lg border border-dashed border-slate-200 p-3 text-slate-500 dark:border-slate-800 dark:text-slate-400">
-                {text.noRecentPlan}
-              </div>
-            )}
-          </div>
-
-          <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-[#111827]">
-            <div className="text-sm font-semibold text-slate-950 dark:text-white">{text.actionsTitle}</div>
-            <div className="mt-3 grid gap-2">
-              <Link className="rounded-lg bg-blue-600 px-3 py-2 text-center text-sm font-semibold text-white hover:bg-blue-500" href="/dashboard/daily-journal">
-                {text.dailyJournal}
-              </Link>
-              {notReviewedTrades > 0 ? (
-                <Link className="rounded-lg border border-slate-200 px-3 py-2 text-center text-sm font-semibold text-slate-700 hover:bg-white dark:border-slate-800 dark:text-slate-200 dark:hover:bg-[#0F172A]" href="/dashboard/trades?reviewStatus=not-reviewed">
-                  {text.reviewTrades}
-                </Link>
-              ) : null}
-              <div className="grid grid-cols-2 gap-2">
-                <Link className="rounded-lg border border-slate-200 px-3 py-2 text-center text-sm font-semibold text-slate-700 hover:bg-white dark:border-slate-800 dark:text-slate-200 dark:hover:bg-[#0F172A]" href="/journal/playbooks">
-                  {text.playbooks}
-                </Link>
-                <Link className="rounded-lg border border-slate-200 px-3 py-2 text-center text-sm font-semibold text-slate-700 hover:bg-white dark:border-slate-800 dark:text-slate-200 dark:hover:bg-[#0F172A]" href="/journal/checklists">
-                  {text.checklists}
-                </Link>
-              </div>
-            </div>
-          </div>
-        </aside>
-      </div>
-    </section>
+        <footer className="flex items-center justify-between gap-3 border-t border-slate-200 p-5 dark:border-slate-800">
+          <button
+            type="button"
+            onClick={() => setStep((current) => Math.max(current - 1, 0))}
+            disabled={step === 0}
+            className="inline-flex h-10 items-center gap-2 rounded-lg border border-slate-200 px-3 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-800 dark:text-slate-200 dark:hover:bg-slate-800"
+          >
+            <ChevronLeft className="h-4 w-4" />
+            {text.previous}
+          </button>
+          <button
+            type="button"
+            onClick={() => (step === 2 ? onClose() : setStep((current) => Math.min(current + 1, 2)))}
+            className="inline-flex h-10 items-center gap-2 rounded-lg bg-blue-600 px-4 text-sm font-semibold text-white hover:bg-blue-500"
+          >
+            {step === 2 ? text.finish : text.next}
+            {step === 2 ? null : <ChevronRight className="h-4 w-4" />}
+          </button>
+        </footer>
+      </section>
+    </div>
   );
 }

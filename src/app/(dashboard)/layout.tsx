@@ -7,6 +7,7 @@ import { DASHBOARD_THEME_COOKIE_KEY, parseDashboardTheme } from "@/lib/dashboard
 import { getCurrentUser, getSession, isAdminUser } from "@/lib/server-auth";
 import {
   getSubscriptionBannerState,
+  getSubscriptionDashboardState,
   requireActiveSubscription,
   SubscriptionAccessError,
 } from "@/lib/subscription";
@@ -28,13 +29,17 @@ export default async function DashboardRouteGroupLayout({ children }: { children
     throw error;
   }
   const user = await getCurrentUser();
-  const banner = await getSubscriptionBannerState(session.user.id);
+  const [banner, subscription] = await Promise.all([
+    getSubscriptionBannerState(session.user.id),
+    getSubscriptionDashboardState(session.user.id),
+  ]);
   const cookieStore = await cookies();
   const initialTheme = parseDashboardTheme(cookieStore.get(DASHBOARD_THEME_COOKIE_KEY)?.value);
+  const showLargeSubscriptionWarning = Boolean(banner && subscription && subscription.daysRemaining < 7);
 
   return (
-    <DashboardShell showAdmin={isAdminUser(user)} initialTheme={initialTheme}>
-      {banner && (
+    <DashboardShell showAdmin={isAdminUser(user)} initialTheme={initialTheme} subscription={subscription}>
+      {showLargeSubscriptionWarning && banner && (
         <SubscriptionStatusBanner
           title={banner.title}
           titleFa={banner.titleFa}
