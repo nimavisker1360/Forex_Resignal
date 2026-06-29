@@ -7,6 +7,8 @@ import React, {
   useState,
   useEffect,
 } from "react";
+import enTranslations from "../../public/locales/en/common.json";
+import faTranslations from "../../public/locales/fa/common.json";
 
 export type Language = "en" | "fa";
 
@@ -21,7 +23,12 @@ const LanguageContext = createContext<LanguageContextType | undefined>(
 );
 
 const LANGUAGE_STORAGE_KEY = "signal-forex-language";
-const LANGUAGE_COOKIE_KEY = "signal_forex_language";
+export const LANGUAGE_COOKIE_KEY = "signal_forex_language";
+
+const bundledTranslations: Record<Language, Record<string, unknown>> = {
+  en: asTranslationRecord(enTranslations),
+  fa: asTranslationRecord(faTranslations),
+};
 
 function applyDocumentLanguage(lang: Language, direction?: string) {
   document.documentElement.dir = direction || (lang === "fa" ? "rtl" : "ltr");
@@ -47,10 +54,13 @@ export function LanguageProvider({
   initialLanguage?: Language;
 }) {
   const [language, setLanguageState] = useState<Language>(initialLanguage);
-  const [translations, setTranslations] = useState<Record<string, unknown>>({});
+  const [translations, setTranslations] = useState<Record<string, unknown>>(
+    bundledTranslations[initialLanguage]
+  );
 
   const setLanguage = useCallback((lang: Language) => {
     setLanguageState(lang);
+    setTranslations(bundledTranslations[lang]);
     persistLanguage(lang);
     applyDocumentLanguage(lang);
   }, []);
@@ -73,24 +83,35 @@ export function LanguageProvider({
       .catch((error) => console.error("Failed to load translations:", error));
   }, [language]);
 
-  // Translation function that handles nested keys
-  const t = (key: string): string => {
+  const translateFrom = (
+    source: Record<string, unknown>,
+    key: string
+  ): string | null => {
     if (typeof key !== "string" || key.length === 0) {
       return "";
     }
 
     const keys = key.split(".");
-    let result: unknown = translations;
+    let result: unknown = source;
 
     for (const k of keys) {
       if (result && typeof result === "object" && k in result) {
         result = (result as Record<string, unknown>)[k];
       } else {
-        return key; // Return the key if translation is not found
+        return null;
       }
     }
 
-    return typeof result === "string" ? result : key;
+    return typeof result === "string" ? result : null;
+  };
+
+  // Translation function that handles nested keys.
+  const t = (key: string): string => {
+    return (
+      translateFrom(translations, key) ??
+      translateFrom(bundledTranslations.en, key) ??
+      key
+    );
   };
 
   return (

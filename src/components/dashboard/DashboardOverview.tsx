@@ -1,18 +1,15 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
 import {
   Activity,
   AlertTriangle,
   ArrowRight,
-  BarChart3,
   BookOpenCheck,
-  BriefcaseBusiness,
   CheckCircle2,
   CircleDollarSign,
   ClipboardCheck,
-  FileText,
   Gauge,
   ListChecks,
   Percent,
@@ -23,7 +20,6 @@ import {
 import { PnlText } from "@/components/dashboard/PnlText";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { TradeDirectionBadge } from "@/components/dashboard/TradeDirectionBadge";
-import { TradeTable } from "@/components/dashboard/TradeTable";
 import {
   TradeReadinessGuide,
   type ReadinessSummary,
@@ -59,7 +55,6 @@ type DailyJournalPayload = {
 const enText = {
   simple: "Simple",
   pro: "Pro",
-  modeHint: "Simple mode keeps the dashboard focused on decision and next action.",
   tradingStatusTitle: "Today Trading Status",
   tradingStatusSubtitle: "Use this as the first decision point before managing trades.",
   finalDecision: "Final decision",
@@ -647,159 +642,6 @@ function MarketRiskCard({
   );
 }
 
-function AccountRiskBreakdown({
-  accounts,
-  trades,
-  labels,
-  language,
-}: {
-  accounts: TradingAccountDto[];
-  trades: TradeDto[];
-  labels: typeof enText;
-  language: "en" | "fa";
-}) {
-  const openByAccount = useMemo(() => {
-    const counts = new Map<string, number>();
-
-    trades.forEach((trade) => {
-      if (trade.status === "OPEN") {
-        counts.set(trade.accountId, (counts.get(trade.accountId) || 0) + 1);
-      }
-    });
-
-    return counts;
-  }, [trades]);
-
-  return (
-    <SectionCard title={labels.accountRisk}>
-      <div className="mt-4 grid gap-3 lg:grid-cols-3">
-        {accounts.slice(0, 3).map((account) => (
-          <div key={account.id} className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-[#111827]">
-            <div className="flex items-center gap-2">
-              <BriefcaseBusiness className="h-4 w-4 text-blue-500" />
-              <h3 className="truncate text-sm font-semibold text-slate-950 dark:text-white">{account.name}</h3>
-            </div>
-            <div className="mt-3 text-xs text-slate-500 dark:text-slate-400">{labels.balance}</div>
-            <div className="text-lg font-semibold text-slate-950 dark:text-white">
-              {formatMoney(account.balance, account.currency)}
-            </div>
-            <div className="mt-3 text-xs font-medium text-slate-500 dark:text-slate-400">
-              {openByAccount.get(account.id) || 0} {labels.openInFeed}
-            </div>
-          </div>
-        ))}
-        {accounts.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 p-6 text-sm text-slate-500 dark:border-slate-800 dark:bg-[#111827] dark:text-slate-400">
-            {language === "fa" ? "هنوز حسابی متصل نشده است." : "No accounts connected yet."}
-          </div>
-        ) : null}
-      </div>
-    </SectionCard>
-  );
-}
-
-function EconomicEventsDetails({
-  events,
-  labels,
-  language,
-}: {
-  events: EconomicEventDto[];
-  labels: typeof enText;
-  language: "en" | "fa";
-}) {
-  return (
-    <SectionCard title={labels.economicDetails}>
-      <div className="mt-3 space-y-2">
-        {events.map((event) => (
-          <div
-            key={event.id}
-            className="flex flex-col gap-1 rounded-lg border border-red-500/20 bg-red-500/5 px-3 py-2 text-sm md:flex-row md:items-center md:justify-between"
-          >
-            <span className="font-medium text-slate-900 dark:text-slate-100">
-              {event.currency} - {event.name}
-            </span>
-            <span className="text-xs font-semibold text-red-500 dark:text-red-300">
-              {formatEventTime(event.eventTime, language)}
-            </span>
-          </div>
-        ))}
-      </div>
-    </SectionCard>
-  );
-}
-
-function AnalyticsPreview({
-  closedTrades,
-  readinessScore,
-  labels,
-  language,
-}: {
-  closedTrades: number;
-  readinessScore: number;
-  labels: typeof enText;
-  language: "en" | "fa";
-}) {
-  if (closedTrades < 10) {
-    return (
-      <SectionCard
-        title={labels.analyticsPreview}
-        action={
-          <Link
-            href="/journal/analytics"
-            className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-slate-200 px-3 text-sm font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:text-slate-300 dark:hover:bg-slate-800"
-          >
-            <BarChart3 className="h-4 w-4" />
-            {labels.openAnalytics}
-          </Link>
-        }
-      >
-        <div className="mt-3 flex flex-col gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-600 dark:border-slate-800 dark:bg-[#111827] dark:text-slate-300 sm:flex-row sm:items-center sm:justify-between">
-          <span>
-            {language === "fa"
-              ? "تحلیل‌ها بعد از ۱۰ معامله بسته‌شده کاربردی‌تر می‌شوند."
-              : "Analytics gets more useful after 10 closed trades."}
-          </span>
-          <strong className="text-slate-950 dark:text-white">
-            {language === "fa" ? `${closedTrades}/10 معامله بسته‌شده` : `${closedTrades}/10 closed trades`}
-          </strong>
-        </div>
-      </SectionCard>
-    );
-  }
-
-  return (
-    <SectionCard
-      title={labels.analyticsPreview}
-      action={
-        <Link
-          href="/journal/analytics"
-          className="inline-flex h-9 items-center justify-center gap-2 rounded-lg bg-blue-600 px-3 text-sm font-semibold text-white hover:bg-blue-500"
-        >
-          <BarChart3 className="h-4 w-4" />
-          {labels.openAnalytics}
-        </Link>
-      }
-    >
-      <div className="mt-4 grid gap-3 md:grid-cols-3">
-        <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-[#111827]">
-          <div className="text-xs font-semibold uppercase text-slate-500 dark:text-slate-400">
-            {language === "fa" ? "معاملات بسته‌شده" : "Closed Trades"}
-          </div>
-          <div className="mt-2 text-2xl font-semibold text-slate-950 dark:text-white">{closedTrades}</div>
-        </div>
-        <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-[#111827]">
-          <div className="text-xs font-semibold uppercase text-slate-500 dark:text-slate-400">{labels.readiness}</div>
-          <div className="mt-2 text-2xl font-semibold text-slate-950 dark:text-white">{readinessScore}%</div>
-        </div>
-        <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-500 dark:border-slate-800 dark:bg-[#111827] dark:text-slate-400">
-          <FileText className="mb-2 h-4 w-4 text-blue-500" />
-          {labels.analyticsHint}
-        </div>
-      </div>
-    </SectionCard>
-  );
-}
-
 export function DashboardOverview({
   userId,
   initialAccounts,
@@ -818,14 +660,12 @@ export function DashboardOverview({
   const [eventsLoaded, setEventsLoaded] = useState(false);
   const [journalCompleted, setJournalCompleted] = useState(false);
   const [journalLoaded, setJournalLoaded] = useState(false);
-  const [simpleMode, setSimpleMode] = useState(true);
   const [guideOpen, setGuideOpen] = useState(false);
   const isRefreshingRef = useRef(false);
   const { language, t } = useLanguage();
   const labels = textByLanguage[language];
   const isRtl = language === "fa";
   const guide = useTradeReadinessGuideState({ highImpactEventCount: highImpactEvents.length });
-  const closedTradeCount = stats.closedTrades ?? trades.filter((trade) => trade.status === "CLOSED").length;
   const isFirstTimeUser = accounts.length === 0 && stats.totalTrades === 0;
 
   useEffect(() => {
@@ -833,15 +673,6 @@ export function DashboardOverview({
     setTrades(initialTrades);
     setStats(initialStats);
   }, [initialAccounts, initialStats, initialTrades]);
-
-  useEffect(() => {
-    const savedMode = window.localStorage.getItem("dashboard-mode");
-    setSimpleMode(savedMode !== "pro");
-  }, []);
-
-  useEffect(() => {
-    window.localStorage.setItem("dashboard-mode", simpleMode ? "simple" : "pro");
-  }, [simpleMode]);
 
   const refreshTrades = useCallback(async (signal?: AbortSignal) => {
     if (!userId || isRefreshingRef.current) {
@@ -988,43 +819,6 @@ export function DashboardOverview({
             {t("dashboard.overview.subtitle")}
           </p>
         </div>
-        <div className="flex flex-col gap-2 sm:items-end">
-          <div className="inline-flex rounded-xl border border-slate-200 bg-white p-1 shadow-sm dark:border-slate-800 dark:bg-[#0F172A]">
-            <button
-              type="button"
-              onClick={() => setSimpleMode(true)}
-              className={cn(
-                "h-9 rounded-lg px-4 text-sm font-semibold transition",
-                simpleMode
-                  ? "bg-blue-600 text-white"
-                  : "text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
-              )}
-            >
-              {labels.simple}
-            </button>
-            <button
-              type="button"
-              onClick={() => setSimpleMode(false)}
-              className={cn(
-                "h-9 rounded-lg px-4 text-sm font-semibold transition",
-                !simpleMode
-                  ? "bg-blue-600 text-white"
-                  : "text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
-              )}
-            >
-              {labels.pro}
-            </button>
-          </div>
-          <p className="max-w-sm text-xs text-slate-500 dark:text-slate-400">
-            {simpleMode
-              ? language === "fa"
-                ? "حالت ساده فقط تصمیم امروز، اقدام بعدی و عملکرد کلیدی را نشان می‌دهد."
-                : "Simple mode shows only today’s decision, next action, and key performance."
-              : language === "fa"
-                ? "حالت حرفه‌ای ریسک بازار، پیش‌نمایش تحلیل‌ها، ریسک حساب و جزئیات معاملات را اضافه می‌کند."
-                : "Pro mode adds market risk, analytics preview, account risk, and detailed trade data."}
-          </p>
-        </div>
       </div>
 
       <TodayTradingStatus
@@ -1079,31 +873,6 @@ export function DashboardOverview({
       <RecentTradeSummary trades={trades} labels={labels} isRtl={isRtl} language={language} />
 
       <MarketRiskCard events={highImpactEvents} loaded={eventsLoaded} labels={labels} language={language} />
-
-      {!simpleMode ? (
-        <>
-          {eventsLoaded && highImpactEvents.length > 0 ? (
-            <EconomicEventsDetails events={highImpactEvents} labels={labels} language={language} />
-          ) : null}
-
-          {accounts.length > 0 ? (
-            <AccountRiskBreakdown accounts={accounts} trades={trades} labels={labels} language={language} />
-          ) : null}
-
-          <AnalyticsPreview
-            closedTrades={closedTradeCount}
-            readinessScore={guide.summary.readinessScore}
-            labels={labels}
-            language={language}
-          />
-
-          <SectionCard title={t("dashboard.overview.recentTrades")}>
-            <div className="mt-4">
-              <TradeTable trades={trades} />
-            </div>
-          </SectionCard>
-        </>
-      ) : null}
 
       <TradeReadinessGuide open={guideOpen} onClose={() => setGuideOpen(false)} guide={guide} />
     </div>

@@ -35,11 +35,10 @@ export default async function DashboardLayout({ children }: { children: ReactNod
   ]);
   const cookieStore = await cookies();
   const initialTheme = parseDashboardTheme(cookieStore.get(DASHBOARD_THEME_COOKIE_KEY)?.value);
-  const showLargeSubscriptionWarning = Boolean(banner && subscription && subscription.daysRemaining < 7);
 
   return (
     <DashboardShell showAdmin={isAdminUser(user)} initialTheme={initialTheme} subscription={subscription}>
-      {showLargeSubscriptionWarning && banner && (
+      {banner && (
         <SubscriptionStatusBanner
           title={banner.title}
           titleFa={banner.titleFa}

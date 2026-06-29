@@ -8,7 +8,6 @@ import {
   BookOpenCheck,
   BriefcaseBusiness,
   CalendarDays,
-  Crown,
   Download,
   ExternalLink,
   FileText,
@@ -28,57 +27,6 @@ import type { SubscriptionDashboardState } from "@/lib/subscription";
 import { cn } from "@/lib/utils";
 
 const MT5_BOT_DOWNLOAD_URL = "/api/downloads/trade-journal-recorder";
-
-function formatPlanName(planName: string, language: "en" | "fa") {
-  if (language !== "fa") {
-    return planName;
-  }
-
-  const normalized = planName.toLowerCase();
-
-  if (normalized.includes("pro") && normalized.includes("monthly")) {
-    return "پرو ماهانه";
-  }
-
-  if (normalized.includes("pro") && normalized.includes("year")) {
-    return "پرو سالانه";
-  }
-
-  if (normalized.includes("trial")) {
-    return "آزمایشی";
-  }
-
-  if (normalized.includes("free")) {
-    return "رایگان";
-  }
-
-  return planName.replace(/pro/gi, "پرو");
-}
-
-function formatSubscriptionStatus(
-  subscription: SubscriptionDashboardState,
-  language: "en" | "fa"
-) {
-  if (language === "fa") {
-    if (subscription.isTrial) return "آزمایشی";
-    if (subscription.isFree) return "رایگان";
-    if (subscription.status === "MANUAL") return "دسترسی دستی";
-    return "فعال";
-  }
-
-  if (subscription.isTrial) return "Trial";
-  if (subscription.isFree) return "Free";
-  if (subscription.status === "MANUAL") return "Manual";
-  return "Active";
-}
-
-function formatDaysLeft(days: number, language: "en" | "fa") {
-  if (language === "fa") {
-    return `${days} روز باقی‌مانده`;
-  }
-
-  return `${days} ${days === 1 ? "day" : "days"} left`;
-}
 
 const sidebarItems = [
   { labelKey: "dashboard.nav.dashboard", href: "/dashboard", icon: Gauge },
@@ -100,7 +48,7 @@ export function DashboardShell({
   children,
   showAdmin = false,
   initialTheme = "dark",
-  subscription,
+  subscription: _subscription,
 }: {
   children: ReactNode;
   showAdmin?: boolean;
@@ -118,19 +66,7 @@ export function DashboardShell({
       : translatedDownloadBotLabel === "dashboard.shell.downloadMt5Bot"
       ? "Download MT5 Package"
       : translatedDownloadBotLabel;
-  const subscriptionLabel = subscription
-    ? `${subscription.planName} ${subscription.status === "TRIAL" ? "Trial" : "Active"} · ${subscription.daysRemaining} ${
-        subscription.daysRemaining === 1 ? "day" : "days"
-      } left`
-    : null;
-  const localizedSubscriptionLabel = subscription
-    ? `${formatPlanName(subscription.planName, language)} ${formatSubscriptionStatus(
-        subscription,
-        language
-      )} · ${formatDaysLeft(subscription.daysRemaining, language)}`
-    : null;
-  void subscriptionLabel;
-  const subscriptionExpiringSoon = Boolean(subscription && subscription.daysRemaining < 7);
+  void _subscription;
 
   return (
     <section
@@ -254,24 +190,6 @@ export function DashboardShell({
               </div>
 
               <div className="flex shrink-0 items-center gap-3">
-                {localizedSubscriptionLabel ? (
-                  <Link
-                    href="/pricing"
-                    className={cn(
-                      "hidden h-10 items-center gap-2 rounded-xl border px-4 text-sm font-bold shadow-sm transition sm:inline-flex",
-                      subscriptionExpiringSoon
-                        ? isDark
-                          ? "border-amber-500/40 bg-amber-500/10 text-amber-100 hover:bg-amber-500/15"
-                          : "border-amber-300 bg-amber-50 text-amber-900 hover:bg-amber-100"
-                        : isDark
-                          ? "border-blue-400/30 bg-blue-500/10 text-blue-100 hover:bg-blue-500/15"
-                          : "border-blue-200 bg-blue-50 text-slate-700 hover:bg-blue-100"
-                    )}
-                  >
-                    <Crown className={cn("h-4 w-4", isDark ? "text-blue-200" : "text-blue-700")} />
-                    {localizedSubscriptionLabel}
-                  </Link>
-                ) : null}
                 <a
                   href={MT5_BOT_DOWNLOAD_URL}
                   className={cn(

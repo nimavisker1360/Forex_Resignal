@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { cookies } from "next/headers";
 import "./globals.css";
 import "tw-animate-css";
 import { Navbar } from "@/components/layout/navbar";
@@ -8,7 +9,11 @@ import {
   DASHBOARD_THEME_COOKIE_KEY,
   DASHBOARD_THEME_STORAGE_KEY,
 } from "@/lib/dashboard-theme";
-import { LanguageProvider } from "@/lib/language-context";
+import {
+  LANGUAGE_COOKIE_KEY,
+  LanguageProvider,
+  type Language,
+} from "@/lib/language-context";
 
 export const metadata: Metadata = {
   title: "Signal Forex - Structured Forex Signals",
@@ -42,12 +47,14 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const initialLanguage = "en";
+  const cookieStore = await cookies();
+  const languageCookie = cookieStore.get(LANGUAGE_COOKIE_KEY)?.value;
+  const initialLanguage: Language = languageCookie === "fa" ? "fa" : "en";
 
   return (
     <html
       className="bg-black"
-      dir="ltr"
+      dir={initialLanguage === "fa" ? "rtl" : "ltr"}
       lang={initialLanguage}
       suppressHydrationWarning
     >

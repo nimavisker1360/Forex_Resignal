@@ -511,14 +511,18 @@ export async function getSubscriptionBannerState(userId: string) {
     };
   }
 
-  if (
-    (subscription.status === "ACTIVE" || subscription.status === "MANUAL") &&
-    remaining <= 7
-  ) {
+  if (subscription.status === "ACTIVE" || subscription.status === "MANUAL") {
+    const planName = subscription.plan.name || "Pro";
+    const expiringSoon = remaining <= 7;
+
     return {
-      tone: "warning",
-      title: `Your subscription expires in ${remaining} days. Renew now.`,
-      titleFa: `اشتراک شما تا ${remaining} روز دیگر منقضی می‌شود. همین حالا تمدید کنید.`,
+      tone: expiringSoon ? "warning" : "info",
+      title: expiringSoon
+        ? `Your ${planName} plan expires in ${remaining} days. Renew now.`
+        : `You are on the ${planName} plan. ${remaining} days remaining.`,
+      titleFa: expiringSoon
+        ? `پلن ${planName} شما تا ${remaining} روز دیگر منقضی می‌شود. همین حالا تمدید کنید.`
+        : `شما روی پلن ${planName} هستید. ${remaining} روز باقی مانده است.`,
       href: "/pricing",
       buttonText: "Renew",
       buttonTextFa: "تمدید",
