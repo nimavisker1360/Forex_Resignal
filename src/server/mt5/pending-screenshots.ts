@@ -36,10 +36,14 @@ export async function upsertTradeScreenshot(
     url: string;
   }
 ) {
+  const type = input.type.trim().toUpperCase() as ScreenshotType;
   const existing = await db.tradeScreenshot.findFirst({
     where: {
       tradeId: input.tradeId,
-      type: input.type,
+      type: {
+        equals: type,
+        mode: "insensitive",
+      },
     },
     select: {
       id: true,
@@ -55,6 +59,7 @@ export async function upsertTradeScreenshot(
         id: existing.id,
       },
       data: {
+        type,
         url: input.url,
       },
     });
@@ -64,7 +69,7 @@ export async function upsertTradeScreenshot(
     data: {
       tradeId: input.tradeId,
       userId: input.userId,
-      type: input.type,
+      type,
       url: input.url,
     },
   });

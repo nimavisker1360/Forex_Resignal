@@ -46,7 +46,10 @@ export async function POST(request: Request) {
     const trade = await prisma.trade.findFirst({
       where: {
         accountId: verified.account.id,
-        mt5Ticket: parsed.data.positionId,
+        OR: [
+          { mt5Ticket: parsed.data.positionId },
+          { setup: `MT5:${parsed.data.positionId}` },
+        ],
       },
       select: {
         id: true,
@@ -54,7 +57,7 @@ export async function POST(request: Request) {
       },
     });
 
-    const upload = await uploadJournalScreenshot(parsed.data, verified.userId);
+    const upload = await uploadJournalScreenshot(parsed.data);
     const type = toScreenshotType(parsed.data.type);
 
     if (!trade) {

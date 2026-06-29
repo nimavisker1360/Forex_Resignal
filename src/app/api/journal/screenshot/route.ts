@@ -62,11 +62,24 @@ export async function POST(request: Request) {
     const { uploadJournalScreenshot } = await import(
       "@/lib/journal/screenshot-service"
     );
-    const { imageUrl } = await uploadJournalScreenshot(parsed.data, connection.userId);
+    const { saveMt5ScreenshotToPrismaTrade } = await import(
+      "@/lib/journal/prisma-trades"
+    );
+    const { imageUrl } = await uploadJournalScreenshot(parsed.data);
+    const tradeUpdated = await saveMt5ScreenshotToPrismaTrade({
+      accountNumber: parsed.data.accountNumber,
+      broker: parsed.data.broker,
+      serverName: parsed.data.serverName,
+      positionId: parsed.data.positionId,
+      type: parsed.data.type,
+      imageUrl,
+      userId: connection.userId,
+    });
 
     return NextResponse.json({
       success: true,
       imageUrl,
+      tradeUpdated,
       legacyConnection: connection.legacy,
     });
   } catch (error) {

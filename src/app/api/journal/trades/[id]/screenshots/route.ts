@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { journalTradeInclude, serializeJournalTrade } from "@/lib/journal/prisma-trades";
 import { getCurrentUserId, unauthorizedResponse } from "@/lib/server-auth";
 import { requireFeatureAccess, subscriptionAccessResponse } from "@/lib/subscription";
+import { upsertTradeScreenshot } from "@/server/mt5/pending-screenshots";
 
 export const dynamic = "force-dynamic";
 
@@ -73,14 +74,22 @@ export async function POST(request: Request, context: RouteContext) {
       );
     }
 
-    const screenshot = await prisma.tradeScreenshot.create({
-      data: {
-        tradeId: trade.id,
-        userId: trade.userId,
-        type,
-        url: screenshotUrl,
-      },
-    });
+    const screenshot =
+      type === "ENTRY" || type === "EXIT"
+        ? await upsertTradeScreenshot(prisma as any, {
+            tradeId: trade.id,
+            userId: trade.userId,
+            type,
+            url: screenshotUrl,
+          })
+        : await prisma.tradeScreenshot.create({
+            data: {
+              tradeId: trade.id,
+              userId: trade.userId,
+              type,
+              url: screenshotUrl,
+            },
+          });
     const updatedTrade = await prisma.trade.findFirst({
       where: { id, userId },
       include: journalTradeInclude,

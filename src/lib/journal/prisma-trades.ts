@@ -39,6 +39,37 @@ type JournalTradeWithRelations = Prisma.TradeGetPayload<{
   include: typeof journalTradeInclude;
 }>;
 
+function normalizeScreenshotType(type: string) {
+  return type.trim().toUpperCase();
+}
+
+function latestTradeScreenshots(
+  screenshots: JournalTradeWithRelations["screenshots"]
+) {
+  const byType = new Map<string, (typeof screenshots)[number]>();
+  const additionalScreenshots: typeof screenshots = [];
+
+  for (const screenshot of screenshots) {
+    const type = normalizeScreenshotType(screenshot.type);
+
+    if (type !== "ENTRY" && type !== "EXIT") {
+      additionalScreenshots.push(screenshot);
+      continue;
+    }
+
+    const existing = byType.get(type);
+
+    if (!existing || screenshot.createdAt > existing.createdAt) {
+      byType.set(type, {
+        ...screenshot,
+        type,
+      });
+    }
+  }
+
+  return [...byType.values(), ...additionalScreenshots];
+}
+
 type BuildCreateResult =
   | {
       data: Omit<Prisma.TradeUncheckedCreateInput, "accountId"> & {
@@ -279,13 +310,15 @@ function parseOptionalDate(value: unknown, fieldName: string, errors: string[]) 
 }
 
 export function serializeJournalTrade(trade: JournalTradeWithRelations) {
+  const screenshots = latestTradeScreenshots(trade.screenshots);
   const screenshotUrl = (type: string) =>
-    trade.screenshots.find(
+    screenshots.find(
       (screenshot) => screenshot.type.toLowerCase() === type.toLowerCase()
     )?.url || null;
 
   return {
     ...trade,
+    screenshots,
     tradingAccount: trade.account,
     side: trade.direction,
     entryTime: trade.openedAt,
@@ -561,11 +594,41 @@ export async function saveMt5ScreenshotToPrismaTrade(input: {
     return false;
   }
 
+  const type = normalizeScreenshotType(input.type);
+  const existing = await prisma.tradeScreenshot.findFirst({
+    where: {
+      tradeId: trade.id,
+      type: {
+        equals: type,
+        mode: "insensitive",
+      },
+    },
+    select: {
+      id: true,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
+  if (existing) {
+    await prisma.tradeScreenshot.update({
+      where: {
+        id: existing.id,
+      },
+      data: {
+        type,
+        url: input.imageUrl,
+      },
+    });
+    return true;
+  }
+
   await prisma.tradeScreenshot.create({
     data: {
       userId,
       tradeId: trade.id,
-      type: input.type,
+      type,
       url: input.imageUrl,
     },
   });

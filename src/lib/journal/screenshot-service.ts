@@ -1,7 +1,6 @@
 import { mkdir, writeFile } from "fs/promises";
 import path from "path";
 import { put } from "@vercel/blob";
-import { saveMt5ScreenshotToPrismaTrade } from "@/lib/journal/prisma-trades";
 
 const DEFAULT_SCREENSHOT_TIMEFRAME = "M5";
 const DEFAULT_SCREENSHOT_BARS = 120;
@@ -28,7 +27,6 @@ export type JournalScreenshotUploadInput = {
 export type JournalScreenshotUploadResult = {
   imageUrl: string;
   storage: "vercel_blob" | "local";
-  tradeUpdated: boolean;
 };
 
 function readEnv(name: string, fallback = "") {
@@ -181,25 +179,8 @@ async function saveScreenshotLocally(
   return `/${relativePath.replace(/\\/g, "/")}`;
 }
 
-async function saveScreenshotUrlToTrade(
-  input: JournalScreenshotUploadInput,
-  imageUrl: string,
-  userId?: string
-) {
-  return saveMt5ScreenshotToPrismaTrade({
-    accountNumber: input.accountNumber,
-    broker: input.broker,
-    serverName: input.serverName,
-    positionId: input.positionId,
-    type: input.type,
-    imageUrl,
-    userId,
-  });
-}
-
 export async function uploadJournalScreenshot(
-  input: JournalScreenshotUploadInput,
-  userId?: string
+  input: JournalScreenshotUploadInput
 ): Promise<JournalScreenshotUploadResult> {
   const imageBuffer = decodeBase64Png(input.imageBase64);
   let imageUrl: string | null = null;
@@ -224,7 +205,5 @@ export async function uploadJournalScreenshot(
     imageUrl = await saveScreenshotLocally(input, imageBuffer);
   }
 
-  const tradeUpdated = await saveScreenshotUrlToTrade(input, imageUrl, userId);
-
-  return { imageUrl, storage, tradeUpdated };
+  return { imageUrl, storage };
 }
