@@ -185,16 +185,18 @@ export function JournalShell({
         <div className="flex min-w-0 flex-1 flex-col">
           <header
             className={cn(
-              "sticky top-0 z-20 border-b backdrop-blur",
-              isDark ? "border-slate-800 bg-[#020617]/90" : "border-slate-200 bg-white/90"
+              "sticky top-0 z-20 border-b shadow-sm backdrop-blur",
+              isDark
+                ? "border-slate-800 bg-[#020617]/90"
+                : "border-blue-100 bg-gradient-to-r from-blue-50/95 via-white/95 to-cyan-50/95"
             )}
           >
             <div className="mx-auto flex h-16 w-full max-w-[1400px] items-center justify-between gap-4 px-6">
-              <div>
-                <div className={cn("text-sm font-semibold", isDark ? "text-white" : "text-slate-950")}>
+              <div className="min-w-0">
+                <div className={cn("text-base font-extrabold", isDark ? "text-white" : "text-slate-950")}>
                   {t("dashboard.shell.workspace")}
                 </div>
-                <div className={cn("text-xs", isDark ? "text-slate-400" : "text-slate-500")}>
+                <div className={cn("truncate text-sm font-medium", isDark ? "text-slate-400" : "text-slate-600")}>
                   {t("journal.shell.subtitle")}
                 </div>
               </div>

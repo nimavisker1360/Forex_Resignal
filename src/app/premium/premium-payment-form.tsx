@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { CheckCircle2, Copy, CreditCard, LogOut } from "lucide-react";
+import { CheckCircle2, Copy, CreditCard, LayoutDashboard, LogOut } from "lucide-react";
 import { toast } from "sonner";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { Button } from "@/components/ui/button";
@@ -115,6 +116,7 @@ export function PremiumPaymentForm() {
   const router = useRouter();
   const { language } = useLanguage();
   const text = localizedCopy[language];
+  const backToDashboardLabel = language === "fa" ? "بازگشت به داشبورد" : "Back to dashboard";
   const [plans, setPlans] = useState<Plan[]>([]);
   const [planId, setPlanId] = useState("");
   const [network, setNetwork] = useState<(typeof networks)[number]>("TRC20");
@@ -316,6 +318,17 @@ export function PremiumPaymentForm() {
             <p className="text-xs text-slate-500">{text.headerSubtitle}</p>
           </div>
           <div className="flex items-center gap-3">
+            <Button
+              asChild
+              type="button"
+              variant="outline"
+              className="border-blue-200 bg-blue-50 text-blue-700 hover:border-blue-300 hover:bg-blue-100 hover:text-blue-800"
+            >
+              <Link href="/dashboard" className="gap-2">
+                <LayoutDashboard className="h-4 w-4" />
+                <span>{backToDashboardLabel}</span>
+              </Link>
+            </Button>
             <LanguageSwitcher />
             <Button
               type="button"

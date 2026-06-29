@@ -236,16 +236,18 @@ export function DashboardShell({
         <div className="flex min-w-0 flex-1 flex-col">
           <header
             className={cn(
-              "sticky top-0 z-20 border-b backdrop-blur",
-              isDark ? "border-slate-800 bg-[#020617]/90" : "border-slate-200 bg-white/90"
+              "sticky top-0 z-20 border-b shadow-sm backdrop-blur",
+              isDark
+                ? "border-slate-800 bg-[#020617]/90"
+                : "border-blue-100 bg-gradient-to-r from-blue-50/95 via-white/95 to-cyan-50/95"
             )}
           >
             <div className="mx-auto flex h-16 w-full max-w-[1400px] items-center justify-between gap-4 px-6">
               <div className="min-w-0">
-                <div className={cn("text-sm font-semibold", isDark ? "text-white" : "text-slate-950")}>
+                <div className={cn("text-base font-extrabold", isDark ? "text-white" : "text-slate-950")}>
                   {t("dashboard.shell.workspace")}
                 </div>
-                <div className={cn("truncate text-xs", isDark ? "text-slate-400" : "text-slate-500")}>
+                <div className={cn("truncate text-sm font-medium", isDark ? "text-slate-400" : "text-slate-600")}>
                   {t("dashboard.shell.subtitle")}
                 </div>
               </div>
@@ -255,17 +257,17 @@ export function DashboardShell({
                   <Link
                     href="/pricing"
                     className={cn(
-                      "hidden h-9 items-center gap-2 rounded-xl border px-3 text-xs font-semibold transition sm:inline-flex",
+                      "hidden h-10 items-center gap-2 rounded-xl border px-4 text-sm font-bold shadow-sm transition sm:inline-flex",
                       subscriptionExpiringSoon
                         ? isDark
                           ? "border-amber-500/40 bg-amber-500/10 text-amber-100 hover:bg-amber-500/15"
                           : "border-amber-300 bg-amber-50 text-amber-900 hover:bg-amber-100"
                         : isDark
-                          ? "border-slate-800 bg-[#0F172A] text-slate-200 hover:bg-slate-800"
-                          : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                          ? "border-blue-400/30 bg-blue-500/10 text-blue-100 hover:bg-blue-500/15"
+                          : "border-blue-200 bg-blue-50 text-slate-700 hover:bg-blue-100"
                     )}
                   >
-                    <Crown className="h-4 w-4" />
+                    <Crown className={cn("h-4 w-4", isDark ? "text-blue-200" : "text-blue-700")} />
                     {localizedSubscriptionLabel}
                   </Link>
                 ) : null}
