@@ -428,7 +428,7 @@ export default function EconomicCalendarPage() {
                       {formatEventTime(event.eventTime, language)}
                     </td>
                     <td className="px-4 py-3">
-                      <span className="rounded-lg border border-blue-500/30 bg-blue-500/10 px-2 py-1 text-xs font-semibold text-blue-300">
+                      <span className="inline-flex rounded-lg border border-blue-600/70 bg-blue-100 px-2.5 py-1 text-xs font-extrabold text-blue-800 shadow-sm dark:border-blue-400/60 dark:bg-blue-500/20 dark:text-blue-100">
                         {event.currency}
                       </span>
                     </td>
