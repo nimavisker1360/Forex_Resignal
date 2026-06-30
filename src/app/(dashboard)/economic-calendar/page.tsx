@@ -56,6 +56,7 @@ const text = {
     emptyHint: "Run the calendar import endpoint or widen the filters.",
     columns: {
       time: "Time",
+      country: "Country",
       currency: "Currency",
       impact: "Impact",
       event: "Event",
@@ -98,6 +99,7 @@ const text = {
     emptyHint: "ایمپورت تقویم را اجرا کنید یا فیلترها را گسترده‌تر کنید.",
     columns: {
       time: "زمان",
+      country: "کشور",
       currency: "ارز",
       impact: "اثر",
       event: "رویداد",
@@ -142,6 +144,23 @@ function formatEventTime(value: string, language: "en" | "fa") {
     hour: "2-digit",
     minute: "2-digit",
   }).format(new Date(value));
+}
+
+const countryByCurrency: Record<string, { name: Record<"en" | "fa", string>; flagCode: string }> = {
+  USD: { name: { en: "United States", fa: "آمریکا" }, flagCode: "us" },
+  EUR: { name: { en: "Euro Area", fa: "منطقه یورو" }, flagCode: "eu" },
+  GBP: { name: { en: "United Kingdom", fa: "بریتانیا" }, flagCode: "gb" },
+  JPY: { name: { en: "Japan", fa: "ژاپن" }, flagCode: "jp" },
+  CAD: { name: { en: "Canada", fa: "کانادا" }, flagCode: "ca" },
+  AUD: { name: { en: "Australia", fa: "استرالیا" }, flagCode: "au" },
+  NZD: { name: { en: "New Zealand", fa: "نیوزیلند" }, flagCode: "nz" },
+  CHF: { name: { en: "Switzerland", fa: "سوئیس" }, flagCode: "ch" },
+  CNY: { name: { en: "China", fa: "چین" }, flagCode: "cn" },
+};
+
+function countryForCurrency(currency: string, language: "en" | "fa") {
+  const country = countryByCurrency[currency.toUpperCase()];
+  return country ? { name: country.name[language], flagCode: country.flagCode } : { name: currency.toUpperCase(), flagCode: "" };
 }
 
 function minutesUntil(value: string) {
@@ -408,10 +427,11 @@ export default function EconomicCalendarPage() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className={cn("w-full min-w-[900px] text-sm", language === "fa" ? "text-right" : "text-left")}>
+            <table className={cn("w-full min-w-[1020px] text-sm", language === "fa" ? "text-right" : "text-left")}>
               <thead className="bg-slate-50 text-xs uppercase text-slate-500 dark:bg-[#111827] dark:text-slate-400">
                 <tr>
                   <th className="px-4 py-3 font-semibold">{labels.columns.time}</th>
+                  <th className="px-4 py-3 font-semibold">{labels.columns.country}</th>
                   <th className="px-4 py-3 font-semibold">{labels.columns.currency}</th>
                   <th className="px-4 py-3 font-semibold">{labels.columns.impact}</th>
                   <th className="px-4 py-3 font-semibold">{labels.columns.event}</th>
@@ -422,30 +442,49 @@ export default function EconomicCalendarPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
-                {events.map((event) => (
-                  <tr key={event.id} className="hover:bg-slate-50 dark:hover:bg-slate-900/50">
-                    <td className="whitespace-nowrap px-4 py-3 text-slate-700 dark:text-slate-300">
-                      {formatEventTime(event.eventTime, language)}
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className="inline-flex rounded-lg border border-blue-600/70 bg-blue-100 px-2.5 py-1 text-xs font-extrabold text-blue-800 shadow-sm dark:border-blue-400/60 dark:bg-blue-500/20 dark:text-blue-100">
-                        {event.currency}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className={cn("rounded-lg border px-2 py-1 text-xs font-semibold", impactBadgeClass(event.impact))}>
-                        {displayImpact(event.impact, labels)}
-                      </span>
-                    </td>
-                    <td className="max-w-md px-4 py-3 font-medium text-slate-950 dark:text-white">
-                      {event.name}
-                    </td>
-                    <td className="px-4 py-3 text-slate-600 dark:text-slate-300">{event.actual || "-"}</td>
-                    <td className="px-4 py-3 text-slate-600 dark:text-slate-300">{event.forecast || "-"}</td>
-                    <td className="px-4 py-3 text-slate-600 dark:text-slate-300">{event.previous || "-"}</td>
-                    <td className="px-4 py-3 text-slate-600 dark:text-slate-300">{statusFor(event.eventTime, labels)}</td>
-                  </tr>
-                ))}
+                {events.map((event) => {
+                  const country = countryForCurrency(event.currency, language);
+
+                  return (
+                    <tr key={event.id} className="hover:bg-slate-50 dark:hover:bg-slate-900/50">
+                      <td className="whitespace-nowrap px-4 py-3 text-slate-700 dark:text-slate-300">
+                        {formatEventTime(event.eventTime, language)}
+                      </td>
+                      <td className="whitespace-nowrap px-4 py-3">
+                        <span className="inline-flex items-center gap-2 text-sm font-semibold text-slate-800 dark:text-slate-100">
+                          {country.flagCode ? (
+                            <img
+                              src={`https://flagcdn.com/24x18/${country.flagCode}.png`}
+                              srcSet={`https://flagcdn.com/48x36/${country.flagCode}.png 2x`}
+                              width={24}
+                              height={18}
+                              alt=""
+                              className="h-[18px] w-6 rounded-[2px] border border-slate-200 object-cover shadow-sm dark:border-slate-700"
+                            />
+                          ) : null}
+                          {country.name}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className="inline-flex rounded-lg border border-blue-600/70 bg-blue-100 px-2.5 py-1 text-xs font-extrabold text-blue-800 shadow-sm dark:border-blue-400/60 dark:bg-blue-500/20 dark:text-blue-100">
+                          {event.currency}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className={cn("rounded-lg border px-2 py-1 text-xs font-semibold", impactBadgeClass(event.impact))}>
+                          {displayImpact(event.impact, labels)}
+                        </span>
+                      </td>
+                      <td className="max-w-md px-4 py-3 font-medium text-slate-950 dark:text-white">
+                        {event.name}
+                      </td>
+                      <td className="px-4 py-3 text-slate-600 dark:text-slate-300">{event.actual || "-"}</td>
+                      <td className="px-4 py-3 text-slate-600 dark:text-slate-300">{event.forecast || "-"}</td>
+                      <td className="px-4 py-3 text-slate-600 dark:text-slate-300">{event.previous || "-"}</td>
+                      <td className="px-4 py-3 text-slate-600 dark:text-slate-300">{statusFor(event.eventTime, labels)}</td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

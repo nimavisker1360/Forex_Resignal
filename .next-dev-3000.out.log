@@ -1,0 +1,50 @@
+
+> signal-forex@0.1.0 dev
+> next dev -p 3000
+
+[32m✔[0m [33mConsole Ninja[0m extension is connected to [33mNext.js[0m, see [36mhttps://tinyurl.com/2vt8jxzw[0m
+   ▲ Next.js 15.3.9
+   - Local:        http://localhost:3000
+   - Network:      http://192.168.1.107:3000
+   - Environments: .env.local, .env
+
+ ✓ Starting...
+ ✓ Ready in 6.8s
+ ○ Compiling /economic-calendar ...
+ ✓ Compiled /economic-calendar in 5.7s (1674 modules)
+ GET /economic-calendar 307 in 7547ms
+ ✓ Compiled in 967ms (1674 modules)
+ GET /economic-calendar 307 in 676ms
+ ○ Compiling / ...
+ ✓ Compiled / in 2.6s (2303 modules)
+ GET / 200 in 3440ms
+ ○ Compiling /api/signals ...
+ ✓ Compiled /dashboard-loading in 2.9s (2311 modules)
+ GET /dashboard-loading 200 in 2074ms
+ GET /dashboard-loading 200 in 42ms
+ GET /api/signals?limit=3&page=1&includeTest=true 200 in 3849ms
+ ○ Compiling /dashboard ...
+ ✓ Compiled /dashboard in 1630ms (2365 modules)
+ GET /api/auth/get-session 200 in 10672ms
+ GET /dashboard 200 in 10928ms
+ GET /dashboard 200 in 9898ms
+ ○ Compiling /api/daily-journal ...
+ ✓ Compiled /api/daily-journal in 2.7s (2356 modules)
+ GET /api/economic-calendar?impact=High&from=2026-06-30T13%3A28%3A05.437Z&to=2026-07-01T13%3A28%3A05.437Z 200 in 13434ms
+ GET /api/daily-journal?date=2026-06-30 200 in 13665ms
+ GET /economic-calendar 200 in 4824ms
+ GET /dashboard 200 in 11912ms
+ ○ Compiling /api/dashboard/overview ...
+ ✓ Compiled /api/dashboard/overview in 1398ms (2373 modules)
+ GET /api/economic-calendar?from=2026-06-29T21%3A00%3A00.000Z&to=2026-06-30T20%3A59%3A59.999Z 200 in 7087ms
+ GET /api/dashboard/overview 200 in 8357ms
+ GET /economic-calendar 200 in 6964ms
+ GET /api/auth/get-session 200 in 196ms
+ GET /api/auth/get-session 200 in 202ms
+ ✓ Compiled in 1833ms (2050 modules)
+ ○ Compiling /api/economic-calendar ...
+ ✓ Compiled /api/economic-calendar in 536ms (1276 modules)
+ GET /economic-calendar 200 in 1840ms
+ GET /api/economic-calendar?from=2026-06-29T21%3A00%3A00.000Z&to=2026-06-30T20%3A59%3A59.999Z 200 in 1238ms
+ GET /api/auth/get-session 200 in 219ms
+ GET /api/economic-calendar?from=2026-06-29T21%3A00%3A00.000Z&to=2026-06-30T20%3A59%3A59.999Z 200 in 254ms
